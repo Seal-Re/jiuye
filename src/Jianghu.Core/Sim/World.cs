@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Jianghu.Actions;
 using Jianghu.Config;
+using Jianghu.Cultivation;
 using Jianghu.Decide;
 using Jianghu.Events;
 using Jianghu.Model;
@@ -26,14 +27,18 @@ namespace Jianghu.Sim
         private readonly Lifecycle _lifecycle;
         private readonly IRandom _domainRng; // reserved v1.1: 世界级随机事件（当前未消费；删除会改变 root.Split 流编号→改变黄金轨迹）
         public IRandom SpawnRng { get; }
+        // 修炼子流 root.Split(5)：仅 cultivation-on 构造（off=null，绝不消费 Split(5)，保 Split(1..4) 编号）。
+        // R1 前瞻：升 World 字段 + 进 Clone（CloneRng 深拷，null 安全），为 A.1 运行期消费续跑不发散。
+        private readonly IRandom? _cultRng;
         private readonly Dictionary<CharacterId, IBrain> _brains;
 
         public int AliveCount => _alive.Count;
         public int NodeCount => Nodes.Count;
 
-        public World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, Sect sect, Lifecycle lifecycle)
+        public World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, Sect sect, Lifecycle lifecycle,
+                     IRandom? cultRng = null)
         {
-            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; Sect = sect;
+            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; _cultRng = cultRng; Sect = sect;
             _actions = new ActionSystem(limits); _lifecycle = lifecycle;
             Chronicle = new Chronicle(); Relations = new Relations(); Nodes = new List<WorldNode>();
             Deceased = new List<Character>(); _alive = new Dictionary<long, Character>();
@@ -41,12 +46,12 @@ namespace Jianghu.Sim
         }
 
         // 私有全状态 ctor，仅 Clone 用（深拷贝已在 Clone 内构造好）
-        private World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, Sect sect, Lifecycle lifecycle,
+        private World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, IRandom? cultRng, Sect sect, Lifecycle lifecycle,
                       long clock, Chronicle chronicle, Relations relations, List<WorldNode> nodes,
                       List<Character> deceased, Dictionary<long, Character> alive,
                       Dictionary<CharacterId, IBrain> brains, Scheduler sched)
         {
-            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; Sect = sect;
+            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; _cultRng = cultRng; Sect = sect;
             _actions = new ActionSystem(limits); _lifecycle = lifecycle;
             Clock = clock; Chronicle = chronicle; Relations = relations; Nodes = nodes;
             Deceased = deceased; _alive = alive; _brains = brains; _sched = sched;
@@ -147,6 +152,30 @@ namespace Jianghu.Sim
             }
         }
 
+        /// <summary>cultivation-on 时是否已构造修炼子流（off=false）。</summary>
+        public bool CultivationEnabled => _cultRng != null;
+
+        // A.0 生成期灵根 tag 池（最小诚实集，对齐已知路线根 tag；内容补遗的全量灵根池属后续 spec）。
+        private static readonly string[] RootTagPool = { "sword_root", "body_root", "spirit_root", "yin_root" };
+
+        /// <summary>
+        /// 生成期定路接线（spec §10）：仅 cultivation-on。经 _cultRng 生成 Persona.Tags（灵根）→
+        /// PathAssigner.Assign 定路 + 选功法战技 → 挂 Character.Cultivation。off（_cultRng==null）→ 无操作。
+        /// PathEntered 事件留 Phase 3（Task 3.1 加 record + Chronicle case），本 task 仅挂 Cultivation。
+        /// </summary>
+        internal void TryAssignCultivation(Character ch, PathRegistry registry)
+        {
+            if (_cultRng == null) return; // off：不消费 _cultRng（已为 null）
+
+            // 灵根 tag（经修炼子流 _cultRng，与 genRng/v1.0 轨迹无交叉）。
+            string root = RootTagPool[_cultRng.NextInt(RootTagPool.Length)];
+            ch.Persona = ch.Persona with { Tags = new[] { root } };
+
+            var result = PathAssigner.Assign(ch.Persona.Tags, registry, _cultRng);
+            ch.Cultivation = result.State; // 散修时为 null
+            // Phase 3：此处产 PathEntered(Clock, ch.Id, result.PathId) 入 Chronicle。
+        }
+
         /// <summary>深拷贝快照（v1.0 用 Clone；JSON 序列化是 v1.1）。逝者/Sect/Nodes 在 v1.0 不再变更，浅拷贝引用安全。</summary>
         public World Clone()
         {
@@ -161,10 +190,13 @@ namespace Jianghu.Sim
             var deceased = new List<Character>(Deceased);
             var nodes = new List<WorldNode>(Nodes);
             var sched = new Scheduler(); sched.LoadFrom(_sched.Snapshot());
-            return new World(Limits, CloneRng(_domainRng), CloneRng(SpawnRng), Sect, _lifecycle.Clone(),
+            return new World(Limits, CloneRng(_domainRng), CloneRng(SpawnRng), CloneRngOrNull(_cultRng), Sect, _lifecycle.Clone(),
                              Clock, Chronicle.Clone(), Relations.Clone(), nodes, deceased, alive, brains, sched);
         }
 
         private static IRandom CloneRng(IRandom r) { var p = new Pcg32(0, 1); p.SetState(r.GetState()); return p; }
+
+        // R1：_cultRng off 时为 null（不深拷不消费）；on 时深拷续跑不发散。
+        private static IRandom? CloneRngOrNull(IRandom? r) => r == null ? null : CloneRng(r);
     }
 }
