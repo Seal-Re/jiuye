@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Jianghu.Cultivation;
 using Jianghu.Stats;
 
 namespace Jianghu.Model
@@ -15,6 +16,10 @@ namespace Jianghu.Model
         public long Lifespan { get; }
         public long NextActAt { get; set; }
         public bool Alive { get; set; } = true;
+
+        /// <summary>修炼运行态（spec §3，可空：散修/cultivation-off=null）。Clone 深拷（off=null 逐字节）。</summary>
+        public CultivationState? Cultivation { get; set; }
+
         private readonly MemoryStore _memory;
 
         public Character(CharacterId id, Persona persona, StatBlock stats, NodeId node, Goal goal,
@@ -34,7 +39,11 @@ namespace Jianghu.Model
         public void Remember(MemoryEntry e) => _memory.Remember(e);
         public IReadOnlyList<MemoryEntry> RecallMemory() => _memory.Recall();
 
-        public Character Clone() =>
-            new Character(Id, Persona, Stats.Clone(), Node, Goal, Age, Lifespan, NextActAt, Alive, _memory.Clone());
+        public Character Clone()
+        {
+            var clone = new Character(Id, Persona, Stats.Clone(), Node, Goal, Age, Lifespan, NextActAt, Alive, _memory.Clone());
+            clone.Cultivation = Cultivation?.Clone(); // 深拷（off=null → 仍 null，逐字节）
+            return clone;
+        }
     }
 }
