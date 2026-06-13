@@ -145,4 +145,26 @@ try:
 except Exception as e:
     print("w0e13z3dq fixed extract FAIL:", repr(e)[:300])
 
+# ---- 5. wszfghsqq synthesis: 地图+门派 worldview canonical ----
+try:
+    d = result_of(load("wszfghsqq"))
+    sy = d["synthesis"]
+    out = []
+    out.append("# v1.2-C/D 江湖地图 + 门派系统 — 修复后世界观设定（canonical）\n")
+    out.append("> 来源：地图门派 fleet (wszfghsqq, 3 设计 + 2 批判性提问员 + 1 集成, opus)。批判员实读源码，与修炼批判独立印证同一真相(Σ运行期≠80 / RuleBrain.Travel 非拓扑须改 / DeterminismTests 只比 Chronicle 须建全状态快照 / RngStreamIds: cult=5/drama=6/map=7/faction=8)。日期 2026-06-13。")
+    out.append("> 三份 raw 草案已降级 alternatives，以本收敛版为准。\n")
+    out.append("---\n")
+    out.append(sy.get("worldviewSetting", "(missing)"))
+    out.append("\n\n---\n\n## 对 v1.0/v1.2 的改动点（specImpact，合并期应用）\n")
+    for s in sy.get("specImpact", []): out.append(f"- {s}")
+    out.append("\n## walking-skeleton 拆刀（C 地图先 → D 门派）\n")
+    for s in sy.get("scopeWalkingSkeleton", []): out.append(f"- {s}")
+    out.append("\n## 已修复批判问题（resolvedProblems）\n")
+    for s in sy.get("resolvedProblems", []): out.append(f"- {s}")
+    out.append("\n## 仍开放（remainingOpen）\n")
+    for s in sy.get("remainingOpen", []): out.append(f"- {s}")
+    write(r"docs\superpowers\specs\2026-06-13-v1.2-C-江湖地图与门派系统-design.md", "\n".join(out))
+except Exception as e:
+    print("wszfghsqq synthesis extract FAIL:", repr(e)[:300])
+
 print("DONE")
