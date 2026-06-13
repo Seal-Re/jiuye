@@ -22,6 +22,10 @@ namespace Jianghu.Config
         public int TrainGainMax { get; init; } = 3;
         public long ActionIntervalBase { get; init; } = 10;
 
+        // 修炼（§6/§8；纯加，默认值不影响 v1.0 cultivation-off 轨迹）
+        public int PowerCap { get; init; } = 1_000_000;     // PowerEngine.final 上钳
+        public int SituationalP0Base { get; init; } = 400;  // 情境 adj clamp ±P0/4 基准（Task 1.6 用）
+
         public static LimitsConfig Default { get; } = new();
 
         /// <summary>加载期可行域非空断言（§5.3）。</summary>
