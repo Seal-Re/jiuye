@@ -6,7 +6,7 @@ namespace Jianghu.Random
     public sealed class Pcg32 : IRandom
     {
         private ulong _state;
-        private readonly ulong _inc;
+        private ulong _inc;
         private const ulong Mult = 6364136223846793005UL;
 
         public Pcg32(ulong seed, ulong stream)
@@ -51,7 +51,7 @@ namespace Jianghu.Random
         }
 
         public ulong[] GetState() => new[] { _state, _inc };
-        public void SetState(ulong[] state) => _state = state[0];
+        public void SetState(ulong[] state) { _state = state[0]; _inc = state[1]; }
 
         public IRandom Split(ulong streamId)
         {

@@ -14,15 +14,17 @@ public class Pcg32Tests
     }
 
     [Fact]
-    public void GetState_SetState_round_trips()
+    public void GetState_SetState_restores_full_stream()
     {
-        var r = new Pcg32(1, 1);
+        var r = new Pcg32(1, 7);
         for (int i = 0; i < 5; i++) r.NextUInt();
         ulong[] snap = r.GetState();
-        uint a = r.NextUInt();
-        var r2 = new Pcg32(999, 999);
+        uint[] expect = new uint[5];
+        for (int i = 0; i < 5; i++) expect[i] = r.NextUInt();
+
+        var r2 = new Pcg32(999, 999);          // 不同 inc，确保恢复的是完整状态
         r2.SetState(snap);
-        Assert.Equal(a, r2.NextUInt());
+        for (int i = 0; i < 5; i++) Assert.Equal(expect[i], r2.NextUInt()); // 整段逐值一致
     }
 
     [Fact]
