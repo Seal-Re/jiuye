@@ -56,6 +56,15 @@ namespace Jianghu.Cultivation
         /// daoHeart/innerDemon/comprehension=0（A.2 预留，A.0 不读写 R3）。
         /// </summary>
         public static CultivationState NewForPath(string pathId, IReadOnlyList<ResourceDef> resources)
+            => NewForPath(pathId, resources, Array.Empty<string>(), Array.Empty<string>());
+
+        /// <summary>
+        /// 初路初始化（带所选功法/战技）：生成期 <see cref="PathAssigner"/> 定路后填 ChosenArtIds/ChosenSkillIds。
+        /// 资源 key→Initial 钳 [Min,Cap]，Flags 空，RealmIndex=0，daoHeart/innerDemon/comprehension=0（R3 预留）。
+        /// </summary>
+        public static CultivationState NewForPath(
+            string pathId, IReadOnlyList<ResourceDef> resources,
+            IReadOnlyList<string> chosenArtIds, IReadOnlyList<string> chosenSkillIds)
         {
             var res = new Dictionary<string, int>();
             var caps = new Dictionary<string, (int Min, int Cap)>();
@@ -66,7 +75,7 @@ namespace Jianghu.Cultivation
             }
             return new CultivationState(
                 pathId, 0,
-                Array.Empty<string>(), Array.Empty<string>(),
+                chosenArtIds, chosenSkillIds,
                 res, new Dictionary<string, int>(), caps,
                 0, 0, 0);
         }

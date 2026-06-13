@@ -59,8 +59,34 @@ namespace Jianghu.Cultivation
         IReadOnlyList<string> RealmNames,
         IReadOnlyList<int> RealmThresholds);
 
-    /// <summary>入门闸（纯查询谓词，读 Persona.Tags）。</summary>
-    public sealed record EntryGateDef(string Pred);
+    /// <summary>
+    /// 入门闸（纯查询谓词，读 Persona.Tags）。<see cref="Pred"/> = 小谓词 DSL：
+    /// '&amp;' 连接多个原子（全 AND），原子形如 <c>tag:X</c>（角色 Tags 须含 X）。空谓词=恒真。
+    /// </summary>
+    public sealed record EntryGateDef(string Pred)
+    {
+        /// <summary>纯查询：角色 tags 是否满足本闸谓词（spec §10，定路前筛路）。不消费随机。</summary>
+        public bool CanEnter(IReadOnlyList<string> tags)
+        {
+            foreach (var raw in Pred.Split('&'))
+            {
+                var atom = raw.Trim();
+                if (atom.Length == 0) continue;
+                if (!atom.StartsWith("tag:", System.StringComparison.Ordinal))
+                    throw new System.ArgumentException($"未知 EntryGate 谓词原子: {atom}");
+                var want = atom.Substring("tag:".Length);
+                if (!Has(tags, want)) return false;
+            }
+            return true;
+        }
+
+        private static bool Has(IReadOnlyList<string> tags, string want)
+        {
+            foreach (var t in tags)
+                if (t == want) return true;
+            return false;
+        }
+    }
 
     /// <summary>选功法/战技规则（战技抽取 [Min,Max]）。</summary>
     public sealed record SelectionRuleDef(int SkillPickMin, int SkillPickMax);
