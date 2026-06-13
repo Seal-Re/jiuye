@@ -1,0 +1,158 @@
+using System.Collections.Generic;
+using System.Threading;
+using Jianghu.Actions;
+using Jianghu.Config;
+using Jianghu.Decide;
+using Jianghu.Events;
+using Jianghu.Model;
+using Jianghu.Random;
+using Jianghu.Stats;
+
+namespace Jianghu.Sim
+{
+    public sealed class World : IWorldMutator
+    {
+        public long Clock { get; private set; }
+        public LimitsConfig Limits { get; }
+        public Chronicle Chronicle { get; }
+        public Relations Relations { get; }
+        public List<WorldNode> Nodes { get; }
+        public Sect Sect { get; }
+        public List<Character> Deceased { get; }
+
+        private readonly Dictionary<long, Character> _alive;
+        private readonly Scheduler _sched;
+        private readonly ActionSystem _actions;
+        private readonly Lifecycle _lifecycle;
+        private readonly IRandom _domainRng;
+        public IRandom SpawnRng { get; }
+        private readonly Dictionary<CharacterId, IBrain> _brains;
+
+        public int AliveCount => _alive.Count;
+        public int NodeCount => Nodes.Count;
+
+        public World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, Sect sect, Lifecycle lifecycle)
+        {
+            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; Sect = sect;
+            _actions = new ActionSystem(limits); _lifecycle = lifecycle;
+            Chronicle = new Chronicle(); Relations = new Relations(); Nodes = new List<WorldNode>();
+            Deceased = new List<Character>(); _alive = new Dictionary<long, Character>();
+            _sched = new Scheduler(); _brains = new Dictionary<CharacterId, IBrain>();
+        }
+
+        // 私有全状态 ctor，仅 Clone 用（深拷贝已在 Clone 内构造好）
+        private World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, Sect sect, Lifecycle lifecycle,
+                      long clock, Chronicle chronicle, Relations relations, List<WorldNode> nodes,
+                      List<Character> deceased, Dictionary<long, Character> alive,
+                      Dictionary<CharacterId, IBrain> brains, Scheduler sched)
+        {
+            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; Sect = sect;
+            _actions = new ActionSystem(limits); _lifecycle = lifecycle;
+            Clock = clock; Chronicle = chronicle; Relations = relations; Nodes = nodes;
+            Deceased = deceased; _alive = alive; _brains = brains; _sched = sched;
+        }
+
+        public void Add(Character c, IBrain brain)
+        {
+            _alive[c.Id.Value] = c; _brains[c.Id] = brain;
+            c.NextActAt = Clock + _lifecycle.ActionInterval(c, Limits);
+            _sched.Push(c.Id, c.NextActAt);
+            Chronicle.Append(new CharacterBorn(Clock, c.Id), NameOf);
+        }
+
+        public string NameOf(CharacterId id)
+        {
+            if (_alive.TryGetValue(id.Value, out var c)) return c.Persona.Name;
+            foreach (var d in Deceased) if (d.Id.Value == id.Value) return d.Persona.Name + "(故)";
+            return "无名";
+        }
+
+        public IReadOnlyList<Character> AtNode(NodeId node)
+        {
+            var list = new List<Character>();
+            foreach (var c in _alive.Values) if (c.Node.Value == node.Value) list.Add(c);
+            list.Sort((a, b) => a.Id.Value.CompareTo(b.Id.Value)); // 确定性顺序
+            return list;
+        }
+
+        public void ApplyStat(Character c, StatKind k, int delta) => c.Stats.Apply(k, delta, Limits);
+        public int AdjustRelation(CharacterId f, CharacterId t, int d) => Relations.Adjust(f, t, d);
+        public void Move(Character c, NodeId to) => c.Node = to;
+
+        /// <summary>事件驱动推进：处理至多 budget 个到期决策（§7.1）。</summary>
+        public void Advance(int budget)
+        {
+            int processed = 0;
+            while (!_sched.IsEmpty && processed < budget)
+            {
+                var item = _sched.PopMin();
+                if (!_alive.TryGetValue(item.Id.Value, out var actor) || !actor.Alive) continue;
+                Clock = item.At > Clock ? item.At : Clock;
+
+                var ctx = BuildContext(actor);
+                var choice = _brains[actor.Id].DecideAsync(ctx, CancellationToken.None).GetAwaiter().GetResult();
+                var events = _actions.Execute(this, actor, choice);
+                foreach (var e in events) { Project(actor, e); Chronicle.Append(e, NameOf); }
+
+                _lifecycle.Tick(actor, this, out var died);
+                if (died != null) { Chronicle.Append(died, NameOf); RemoveDead(actor); continue; }
+
+                actor.NextActAt = Clock + _lifecycle.ActionInterval(actor, Limits);
+                _sched.Push(actor.Id, actor.NextActAt);
+                processed++;
+            }
+            _lifecycle.MaybeSpawn(this);
+        }
+
+        private void RemoveDead(Character c)
+        {
+            _alive.Remove(c.Id.Value);
+            c.Alive = false; Deceased.Add(c);
+        }
+
+        public DecisionContext BuildContext(Character a)
+        {
+            var nearby = new List<NearbyActor>();
+            foreach (var other in AtNode(a.Node))
+            {
+                if (other.Id.Value == a.Id.Value) continue;
+                int power = other.Stats.Get(StatKind.Force) * 2 + other.Stats.Get(StatKind.Internal) + other.Stats.Get(StatKind.Constitution);
+                nearby.Add(new NearbyActor(other.Id, power, Relations.Affinity(a.Id, other.Id)));
+            }
+            return new DecisionContext(a.Id, a.Stats, a.Goal, a.Node, nearby, _actions.Types, a.RecallMemory());
+        }
+
+        private void Project(Character actor, DomainEvent e)
+        {
+            switch (e)
+            {
+                case DuelResolved d:
+                    actor.Remember(new MemoryEntry(d.Tick, "spar", d.Winner, d.Loser, d.Winner.Value == actor.Id.Value ? 2 : -2));
+                    break;
+                case CharacterTrained t:
+                    actor.Remember(new MemoryEntry(t.Tick, "train", t.Id, null, 1));
+                    break;
+            }
+        }
+
+        /// <summary>深拷贝快照（v1.0 用 Clone；JSON 序列化是 v1.1）。逝者/Sect/Nodes 在 v1.0 不再变更，浅拷贝引用安全。</summary>
+        public World Clone()
+        {
+            var alive = new Dictionary<long, Character>();
+            var brains = new Dictionary<CharacterId, IBrain>();
+            foreach (var kv in _alive)
+            {
+                var cc = kv.Value.Clone();
+                alive[kv.Key] = cc;
+                brains[cc.Id] = (_brains[kv.Value.Id] is RuleBrain rb) ? rb.Clone() : _brains[kv.Value.Id];
+            }
+            var deceased = new List<Character>(Deceased);
+            var nodes = new List<WorldNode>(Nodes);
+            var sched = new Scheduler(); sched.LoadFrom(_sched.Snapshot());
+            return new World(Limits, CloneRng(_domainRng), CloneRng(SpawnRng), Sect, _lifecycle.Clone(),
+                             Clock, Chronicle.Clone(), Relations.Clone(), nodes, deceased, alive, brains, sched);
+        }
+
+        private static IRandom CloneRng(IRandom r) { var p = new Pcg32(0, 1); p.SetState(r.GetState()); return p; }
+    }
+}

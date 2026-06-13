@@ -26,5 +26,12 @@ namespace Jianghu.Events
             }
             _lines.Add(text);
         }
+
+        public Chronicle Clone()
+        {
+            var c = new Chronicle();
+            c._lines.AddRange(_lines);
+            return c;
+        }
     }
 }
