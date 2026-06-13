@@ -124,4 +124,25 @@ try:
 except Exception as e:
     print("per-path extract FAIL:", repr(e)[:300])
 
+# ---- 4. w0e13z3dq fixed: 修炼大小境界+全流程 FINAL 收敛 ----
+try:
+    d = result_of(load("w0e13z3dq"))
+    fx = d["fixed"]
+    out = []
+    out.append("# v1.2-A2 修炼大小境界双层 + 完整修炼全流程 — FINAL 收敛设定集（唯一真相源）\n")
+    out.append("> 来源：补设定(4 设计) → 批判性提问员(5) → 修复集成 fleet (w0e13z3dq, opus)。批判员实读 v1.0 源码，纠正多处真错(Σ=80 运行期伪不变量 / Lifespan 不可变 / RNG 流号 / 延寿量级压制人口)。日期 2026-06-13。")
+    out.append("> 前 4 份 raw 设定(A2/C/A.2/A.0)已作废，以本收敛版为准。\n")
+    out.append("---\n")
+    out.append(fx.get("completeSetting", "(missing)"))
+    out.append("\n\n---\n\n## 对 v1.2-A spec 的修订点（specRevisions，世界观合并期应用）\n")
+    for s in fx.get("specRevisions", []): out.append(f"- {s}")
+    out.append("\n## 已修复的批判问题（resolvedProblems）\n")
+    for s in fx.get("resolvedProblems", []): out.append(f"- {s}")
+    out.append("\n## 仍开放（remainingOpen → 雕琢轮 / 标定期）\n")
+    for s in fx.get("remainingOpen", []): out.append(f"- {s}")
+    out.append(f"\n## 体量裁决（bodySizeVerdict）\n{fx.get('bodySizeVerdict','')}")
+    write(r"docs\superpowers\specs\2026-06-13-v1.2-A2-修炼大小境界与全流程-FINAL-design.md", "\n".join(out))
+except Exception as e:
+    print("w0e13z3dq fixed extract FAIL:", repr(e)[:300])
+
 print("DONE")
