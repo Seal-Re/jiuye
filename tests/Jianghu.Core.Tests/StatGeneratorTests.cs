@@ -26,15 +26,22 @@ public class StatGeneratorTests
     public void Distribution_is_central_tendency_not_uniform()
     {
         var c = LimitsConfig.Default;
-        var r = new Pcg32(7, 1);
         int near = 0, extreme = 0;
-        for (int i = 0; i < 5000; i++)
+        foreach (ulong seed in new ulong[] { 7, 1, 2, 42, 123, 999 })
         {
-            int force = StatGenerator.Generate(r, c).Get(StatKind.Force);
-            if (force >= 16 && force <= 24) near++;       // |x-20|<=4
-            if (force <= 8 || force >= 28) extreme++;      // 远端
+            var r = new Pcg32(seed, 1);
+            for (int i = 0; i < 3000; i++)
+            {
+                var s = StatGenerator.Generate(r, c);
+                for (int k = 0; k < 4; k++)            // 全 4 维
+                {
+                    int x = s.Get((StatKind)k);
+                    if (x >= 16 && x <= 24) near++;
+                    if (x <= 8 || x >= 28) extreme++;
+                }
+            }
         }
-        Assert.True(near > extreme * 3, $"near={near} extreme={extreme} 不够中庸");
+        Assert.True(near > extreme * 5, $"near={near} extreme={extreme} 不够中庸"); // 收紧到 5x
     }
 
     [Fact]

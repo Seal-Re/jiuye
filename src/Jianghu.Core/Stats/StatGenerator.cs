@@ -4,48 +4,49 @@ using Jianghu.Random;
 
 namespace Jianghu.Stats
 {
-    /// <summary>偏中庸、定和+封顶、无拒绝采样（§5.2）。</summary>
+    /// <summary>偏中庸、定和+封顶、无拒绝、纯整数采样（§5.2；§4.1 禁浮点确定性路径，保证跨运行时复现）。</summary>
     public static class StatGenerator
     {
         public static StatBlock Generate(IRandom rng, LimitsConfig c)
         {
             int n = c.StatCount;
-            // 1) 集中度采样：每维取 Concentration 个 [0,1) 均值 → 趋向 0.5（中心极限→中庸）
-            double[] w = new double[n];
-            double total = 0;
+            // 1) 整数集中度权重：每维累加 Concentration 个 NextUInt（趋中由均值集中产生）
+            ulong[] w = new ulong[n];
+            ulong total = 0;
             for (int i = 0; i < n; i++)
             {
-                double acc = 0;
-                for (int j = 0; j < c.Concentration; j++)
-                    acc += rng.NextUInt() / 4294967296.0; // [0,1)
-                w[i] = acc / c.Concentration;             // 趋中
-                total += w[i];
+                ulong acc = 0;
+                for (int j = 0; j < c.Concentration; j++) acc += rng.NextUInt();
+                w[i] = acc;
+                total += acc;
             }
-            // 2) 分配可分配预算 = Sum - n*Min 到各维，按权重；最大余数法整数化到精确和
+            if (total == 0) { for (int i = 0; i < n; i++) w[i] = 1; total = (ulong)n; } // 退化保护（全 0 draws）
+
+            // 2) 整数最大余数法：budget 按权重精确分配到精确和
             int budget = c.StatSum - n * c.StatMin;
-            double[] raw = new double[n];
-            int[] floor = new int[n];
+            int[] floorv = new int[n];
+            ulong[] rem = new ulong[n];
             int assigned = 0;
             for (int i = 0; i < n; i++)
             {
-                raw[i] = budget * (w[i] / total);
-                floor[i] = (int)Math.Floor(raw[i]);
-                assigned += floor[i];
+                ulong num = (ulong)budget * w[i];
+                floorv[i] = (int)(num / total);
+                rem[i] = num % total;
+                assigned += floorv[i];
             }
-            int remainder = budget - assigned;
-            var order = new int[n];
+            int remainder = budget - assigned;            // ∈ [0, n)
+            int[] order = new int[n];
             for (int i = 0; i < n; i++) order[i] = i;
             Array.Sort(order, (a, b) =>
             {
-                double fa = raw[a] - Math.Floor(raw[a]);
-                double fb = raw[b] - Math.Floor(raw[b]);
-                int cmp = fb.CompareTo(fa);
-                return cmp != 0 ? cmp : a.CompareTo(b);
+                int cmp = rem[b].CompareTo(rem[a]);         // 余数大者优先
+                return cmp != 0 ? cmp : a.CompareTo(b);     // 平手按索引（确定性）
             });
             int[] v = new int[n];
-            for (int i = 0; i < n; i++) v[i] = c.StatMin + floor[i];
+            for (int i = 0; i < n; i++) v[i] = c.StatMin + floorv[i];
             for (int i = 0; i < remainder; i++) v[order[i]]++;
-            // 3) 封顶修正：越 cap 的溢出回流到未满维（保持总和）
+
+            // 3) 封顶修正：越 cap 的溢出回流到未满维（保持总和，纯整数）
             ClampToCapKeepingSum(v, c);
             return new StatBlock(v);
         }
