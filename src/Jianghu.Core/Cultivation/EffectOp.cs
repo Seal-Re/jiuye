@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Jianghu.Cultivation
 {
     /// <summary>
@@ -28,4 +30,84 @@ namespace Jianghu.Cultivation
     /// <see cref="Amount"/> = 整数量；<see cref="Note"/> = flavor，不参与结算。
     /// </summary>
     public sealed record EffectOp(EffectOpKind Kind, string? Key, int Amount, string? Note);
+
+    /// <summary>
+    /// 有限算子集解释器（spec §7），确定性纯整数。
+    /// 装配期 <see cref="ApplyPassive"/> 落 state；<see cref="TryPayCost"/> 全或无扣资源；
+    /// 战斗期 OnUse 算子 <see cref="ComputeOnUseDelta"/> 产整数 delta（完整战斗结算 Phase 3 接）。
+    /// </summary>
+    public static class EffectInterpreter
+    {
+        /// <summary>
+        /// 装配期施加被动算子，落到 state：
+        /// AddResourceCap 抬 cap / AddResource 经 chokepoint 钳 / SetFlag 置值 /
+        /// GrantPassive 置 1 / AddTermWeightStep 累加权重台阶（落 Flags）。
+        /// 战斗期算子（AddFlatDR/AddPenInteger/ScalarMul/AddSituationalAdj）不在装配期生效。
+        /// </summary>
+        public static void ApplyPassive(EffectOp op, CultivationState st)
+        {
+            switch (op.Kind)
+            {
+                case EffectOpKind.AddResourceCap:
+                    st.RaiseCap(op.Key!, op.Amount);
+                    break;
+                case EffectOpKind.AddResource:
+                    st.ApplyResource(op.Key!, op.Amount);
+                    break;
+                case EffectOpKind.SetFlag:
+                    st.Flags[op.Key!] = op.Amount;
+                    break;
+                case EffectOpKind.GrantPassive:
+                    st.Flags[op.Key!] = 1;
+                    break;
+                case EffectOpKind.AddTermWeightStep:
+                    st.Flags.TryGetValue(op.Key!, out int cur);
+                    st.Flags[op.Key!] = cur + op.Amount;
+                    break;
+                // 战斗期算子非装配期施加：装配阶段 no-op。
+                case EffectOpKind.AddFlatDR:
+                case EffectOpKind.AddPenInteger:
+                case EffectOpKind.ScalarMul:
+                case EffectOpKind.AddSituationalAdj:
+                case EffectOpKind.Cost:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 全或无扣资源：先验所有 key 余量足够，再统一扣；任一不足返 false 且不扣任何资源。
+        /// </summary>
+        public static bool TryPayCost(IReadOnlyDictionary<string, int> cost, CultivationState st)
+        {
+            foreach (var kv in cost)
+            {
+                if (!st.Resources.TryGetValue(kv.Key, out int have) || have < kv.Value)
+                    return false;
+            }
+            foreach (var kv in cost)
+            {
+                st.ApplyResource(kv.Key, -kv.Value);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 战斗期 OnUse 算子骨架：产整数 delta（AddPenInteger/AddFlatDR=固定量；
+        /// ScalarMul=整数乘子百分量；AddSituationalAdj=情境 %）。
+        /// 完整战斗结算（经 attacker/defender/ctx 与 IWorldMutator）Phase 3 接。
+        /// </summary>
+        public static int ComputeOnUseDelta(EffectOp op)
+        {
+            switch (op.Kind)
+            {
+                case EffectOpKind.AddPenInteger:
+                case EffectOpKind.AddFlatDR:
+                case EffectOpKind.ScalarMul:
+                case EffectOpKind.AddSituationalAdj:
+                    return op.Amount;
+                default:
+                    return 0;
+            }
+        }
+    }
 }

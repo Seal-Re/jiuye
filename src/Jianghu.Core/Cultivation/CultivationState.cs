@@ -78,6 +78,13 @@ namespace Jianghu.Cultivation
             Resources[key] = Clamp(Resources[key] + delta, min, cap);
         }
 
+        /// <summary>抬某资源上限 [Min,Cap] 的 Cap（装配期 AddResourceCap 算子用）；现值不动，后续 ApplyResource 据新 Cap 钳。</summary>
+        public void RaiseCap(string key, int delta)
+        {
+            var (min, cap) = _caps[key];
+            _caps[key] = (min, cap + delta);
+        }
+
         /// <summary>逐项深拷（新 Dictionary，独立）。</summary>
         public CultivationState Clone()
         {
