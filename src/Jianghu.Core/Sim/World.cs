@@ -75,6 +75,14 @@ namespace Jianghu.Sim
             return list;
         }
 
+        /// <summary>只读快照：当世角色（按 Id 排序），供展示层渲染人设卡。</summary>
+        public IReadOnlyList<Character> AliveCharacters()
+        {
+            var list = new List<Character>(_alive.Values);
+            list.Sort((a, b) => a.Id.Value.CompareTo(b.Id.Value));
+            return list;
+        }
+
         public void ApplyStat(Character c, StatKind k, int delta) => c.Stats.Apply(k, delta, Limits);
         public int AdjustRelation(CharacterId f, CharacterId t, int d) => Relations.Adjust(f, t, d);
         public void Move(Character c, NodeId to) => c.Node = to;
