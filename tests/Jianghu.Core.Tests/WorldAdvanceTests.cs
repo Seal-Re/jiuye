@@ -22,4 +22,12 @@ public class WorldAdvanceTests
         Assert.InRange(w.AliveCount, 1, LimitsConfig.Default.PopulationHigh + 5);
         Assert.True(w.Chronicle.Count > 50);
     }
+
+    [Fact]
+    public void Advance_processes_at_most_budget_decisions() // R-NF3
+    {
+        var w = WorldFactory.CreateInitial(seed: 4, LimitsConfig.Default, initialCount: 30);
+        for (int i = 0; i < 20; i++)
+            Assert.True(w.Advance(budget: 5) <= 5, "单步处理数不得超过 budget");
+    }
 }

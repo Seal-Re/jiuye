@@ -24,7 +24,7 @@ namespace Jianghu.Sim
         private readonly Scheduler _sched;
         private readonly ActionSystem _actions;
         private readonly Lifecycle _lifecycle;
-        private readonly IRandom _domainRng;
+        private readonly IRandom _domainRng; // reserved v1.1: 世界级随机事件（当前未消费；删除会改变 root.Split 流编号→改变黄金轨迹）
         public IRandom SpawnRng { get; }
         private readonly Dictionary<CharacterId, IBrain> _brains;
 
@@ -88,7 +88,7 @@ namespace Jianghu.Sim
         public void Move(Character c, NodeId to) => c.Node = to;
 
         /// <summary>事件驱动推进：处理至多 budget 个到期决策（§7.1）。</summary>
-        public void Advance(int budget)
+        public int Advance(int budget)
         {
             int processed = 0;
             while (!_sched.IsEmpty && processed < budget)
@@ -110,6 +110,7 @@ namespace Jianghu.Sim
                 processed++;
             }
             _lifecycle.MaybeSpawn(this);
+            return processed;
         }
 
         private void RemoveDead(Character c)

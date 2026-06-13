@@ -34,4 +34,15 @@ public class RuleBrainTests
         for (int i = 0; i < 8; i++) seen.Add((await brain.DecideAsync(ctx, CancellationToken.None)).Type);
         Assert.True(seen.Count >= 2, "重复衰减应打破单一动作");
     }
+
+    [Fact]
+    public async System.Threading.Tasks.Task No_neighbor_still_varies_actions()
+    {
+        var brain = new RuleBrain(new Pcg32(2, 1), ArchetypeKind.Martial);
+        var ctx = Ctx(GoalKind.Advance, ArchetypeKind.Martial, new List<NearbyActor>(),
+            new List<ActionType> { ActionType.Train, ActionType.Travel, ActionType.Spar });
+        var seen = new HashSet<ActionType>();
+        for (int i = 0; i < 12; i++) seen.Add((await brain.DecideAsync(ctx, CancellationToken.None)).Type);
+        Assert.True(seen.Count >= 2, "独行者也应在 Train/Travel 间交替，不单一刷屏");
+    }
 }

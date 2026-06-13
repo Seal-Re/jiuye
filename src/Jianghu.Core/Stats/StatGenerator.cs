@@ -56,10 +56,13 @@ namespace Jianghu.Stats
             int overflow = 0;
             for (int i = 0; i < v.Length; i++)
                 if (v[i] > c.StatCap) { overflow += v[i] - c.StatCap; v[i] = c.StatCap; }
-            int guard = 0;
-            while (overflow > 0 && guard++ < 10000)
+            while (overflow > 0)
+            {
+                bool placed = false;
                 for (int i = 0; i < v.Length && overflow > 0; i++)
-                    if (v[i] < c.StatCap) { v[i]++; overflow--; }
+                    if (v[i] < c.StatCap) { v[i]++; overflow--; placed = true; }
+                if (!placed) throw new System.InvalidOperationException("回流容量不足：LimitsConfig 可行域越界，无法保持定和");
+            }
         }
     }
 }

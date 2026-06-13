@@ -27,7 +27,7 @@ namespace Jianghu.Decide
             {
                 var (u, choice) = Evaluate(act, ctx);
                 if (u == long.MinValue) continue;            // 非法（如无邻可切磋）
-                if (act == _last) u -= (long)_streak * 400;   // 重复衰减（线性整数）
+                if (act == _last) u -= (long)_streak * _streak * 300;   // 重复衰减（二次整数，更快打破单一动作）
                 u += _rng.NextInt(50);                        // 确定性打破平手
                 if (u > bestU) { bestU = u; bestChoice = choice; bestType = act; }
             }
