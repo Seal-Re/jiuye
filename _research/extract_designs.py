@@ -167,4 +167,24 @@ try:
 except Exception as e:
     print("wszfghsqq synthesis extract FAIL:", repr(e)[:300])
 
+# ---- 6. w9gs3jife synthesis: 破单调/奇遇/闭关/道心 增补 ----
+try:
+    d = result_of(load("w9gs3jife"))
+    sy = d["synthesis"]
+    out = []
+    out.append("# v1.2-A3 破单调·奇遇微决策·闭关时序·12路道心 — FINAL 增补设定\n")
+    out.append("> 来源：修炼雕琢 fleet (w9gs3jife, 3 雕琢 + 2 批判性提问员 + 1 集成, opus)。日期 2026-06-13。")
+    out.append("> 三档时间尺度破单调(日课微决策/QBN奇遇storylet/突破劫) + 闭关DES单点wake(不退Scheduler) + 12路道心(daoHeart/comprehension) + RNG裁决(修炼Split5优先,戏剧顺延Split6)。建在 A2-FINAL 之上,复用其 CultivationState。\n")
+    out.append("---\n")
+    out.append(sy.get("refinedSystem", "(missing)"))
+    out.append("\n\n## specImpact（合并期应用）\n")
+    for s in sy.get("specImpact", []): out.append(f"- {s}")
+    out.append("\n## resolvedProblems\n")
+    for s in sy.get("resolvedProblems", []): out.append(f"- {s}")
+    out.append("\n## remainingOpen\n")
+    for s in sy.get("remainingOpen", []): out.append(f"- {s}")
+    write(r"docs\superpowers\specs\2026-06-13-v1.2-A3-破单调奇遇闭关道心-FINAL-design.md", "\n".join(out))
+except Exception as e:
+    print("w9gs3jife extract FAIL:", repr(e)[:300])
+
 print("DONE")
