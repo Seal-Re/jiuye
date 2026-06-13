@@ -23,5 +23,18 @@ namespace Jianghu.Model
             foreach (var kv in _aff) r._aff[kv.Key] = kv.Value;
             return r;
         }
+
+        /// <summary>只读边快照，按 (from,to) 升序（确定性，供全状态快照对账）。</summary>
+        public IReadOnlyList<(long From, long To, int Value)> Edges()
+        {
+            var list = new List<(long, long, int)>(_aff.Count);
+            foreach (var kv in _aff) list.Add((kv.Key.Item1, kv.Key.Item2, kv.Value));
+            list.Sort((a, b) =>
+            {
+                int c = a.Item1.CompareTo(b.Item1);
+                return c != 0 ? c : a.Item2.CompareTo(b.Item2);
+            });
+            return list;
+        }
     }
 }

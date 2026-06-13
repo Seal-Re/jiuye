@@ -83,6 +83,9 @@ namespace Jianghu.Sim
             return list;
         }
 
+        /// <summary>只读调度堆快照，供全状态快照对账（堆数组顺序确定，已含续跑等价信息）。</summary>
+        public IReadOnlyList<ScheduleItem> SchedulerSnapshot() => _sched.Snapshot();
+
         public void ApplyStat(Character c, StatKind k, int delta) => c.Stats.Apply(k, delta, Limits);
         public int AdjustRelation(CharacterId f, CharacterId t, int d) => Relations.Adjust(f, t, d);
         public void Move(Character c, NodeId to) => c.Node = to;
