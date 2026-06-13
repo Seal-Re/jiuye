@@ -1,0 +1,5 @@
+T:System.Random;改用注入的 IRandom（System.Random 跨运行时不确定）
+T:System.Console;Core 不做 IO
+T:System.DateTime;确定性禁用墙钟（改逻辑时钟）
+M:System.DateTime.get_Now;确定性禁用墙钟
+T:System.Threading.Thread;Core 不感知线程
