@@ -1,0 +1,15 @@
+# 抓取/调研 scratch 产物（大、可重生成，不入库）
+.playwright-mcp/
+_research/raw/
+_research/raw2/
+_paper_text.txt
+*.output
+
+# .NET 构建产物
+bin/
+obj/
+*.user
+
+# IDE
+.vs/
+.idea/
