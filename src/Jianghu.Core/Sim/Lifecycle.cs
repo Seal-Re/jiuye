@@ -39,6 +39,8 @@ namespace Jianghu.Sim
                 var brainBase = _spawnRng.Split((ulong)id ^ 0xABCDEFUL);
                 var (ch, brain) = WorldFactory.Spawn(id, genRng, brainBase, world.Limits, world.Clock);
                 world.Add(ch, brain);
+                // on：运行期涌现者也定路（消费 _cultRng，与初始 spawn 同路径）；off → 无操作（逐字节）。
+                world.TryAssignCultivation(ch);
             }
         }
 

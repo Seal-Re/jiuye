@@ -168,6 +168,16 @@ namespace Jianghu.Sim
         /// PathAssigner.Assign 定路 + 选功法战技 → 挂 Character.Cultivation。off（_cultRng==null）→ 无操作。
         /// PathEntered 事件留 Phase 3（Task 3.1 加 record + Chronicle case），本 task 仅挂 Cultivation。
         /// </summary>
+        /// <summary>
+        /// 运行期涌现者定路接线（Phase 3.5 修正 2）：Lifecycle.MaybeSpawn 补员后调用，
+        /// 用 World 自身 _registry 走与初始 spawn 同款定路。off（_cultRng/_registry==null）→ 无操作（逐字节）。
+        /// </summary>
+        internal void TryAssignCultivation(Character ch)
+        {
+            if (_cultRng == null || _registry == null) return; // off：不消费 _cultRng（已为 null）
+            TryAssignCultivation(ch, _registry);
+        }
+
         internal void TryAssignCultivation(Character ch, PathRegistry registry)
         {
             if (_cultRng == null) return; // off：不消费 _cultRng（已为 null）
