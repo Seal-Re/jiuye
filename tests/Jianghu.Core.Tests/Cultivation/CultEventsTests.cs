@@ -39,6 +39,20 @@ namespace Jianghu.Core.Tests.Cultivation
         }
 
         [Fact]
+        public void RealmBreakthrough_WithRealmDesc_RendersDaXiaoJingjieUT()
+        {
+            // A1.5（auditor T1）：realmDesc 非 null → 「跻身 X 之境」大小境界·UT 渲染；直接文本断言。
+            var ch = new Chronicle();
+            ch.Append(new RealmBreakthrough(11, new CharacterId(2), 4), n => "乙", fi => "金丹（UT4）");
+            Assert.Contains("跻身 金丹（UT4） 之境", ch.Lines[0]);
+
+            // realmDesc==null → 回退裸整数「第 N 重」（off 路径无 RealmQuery 依赖，逐字节守）。
+            var bare = new Chronicle();
+            bare.Append(new RealmBreakthrough(11, new CharacterId(2), 4), n => "乙", null);
+            Assert.Contains("第 4 重", bare.Lines[0]);
+        }
+
+        [Fact]
         public void On_Generation_AppendsPathEnteredToChronicle()
         {
             var w = WorldFactory.CreateInitial(777, LimitsConfig.Default, 5,

@@ -47,8 +47,13 @@ namespace Jianghu.Cultivation
             Add(YinguoFazePath.Def);
         }
 
-        // Phase 5 逐路追加。
-        public void Add(CultivationPathDef def) => _paths.Add(def);
+        // Phase 5 逐路追加。每路入册即经 PathValidator 全量门控（auditor G1：兑现 §16 注释，
+        // 加路绕 standalone 测试也无法静默引入非法 def——校验不再依赖测试自觉）。
+        public void Add(CultivationPathDef def)
+        {
+            PathValidator.AssertValid(def);
+            _paths.Add(def);
+        }
 
         public IReadOnlyList<CultivationPathDef> Load() => _paths;
     }

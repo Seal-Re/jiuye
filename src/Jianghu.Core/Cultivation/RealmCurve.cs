@@ -62,6 +62,23 @@ namespace Jianghu.Cultivation
                         $"UnifiedTierOf 在 flatIndex {i} 降序（{curve.UnifiedTierOf[i - 1]}→{curve.UnifiedTierOf[i]}，UT 须非降，境界稿 §2）");
             }
 
+            // —— A.1（auditor T2）：SubLevelCount 必 == UnifiedTierOf 连续等值段长（大境界=同 UT 极大段，
+            //    投影前提，境界稿 §6）。原仅 test 强制，并入 Validate 使加路绕测试也拦非法 curve。——
+            int segIdx = 0, segMajor = 0;
+            while (segIdx < u)
+            {
+                int run = 1;
+                while (segIdx + run < u && curve.UnifiedTierOf[segIdx + run] == curve.UnifiedTierOf[segIdx]) run++;
+                if (segMajor >= sub || curve.SubLevelCount[segMajor] != run)
+                    throw new InvalidOperationException(
+                        $"SubLevelCount 与 UT 段长不符：大境界 {segMajor} UT 段长={run} vs " +
+                        $"SubLevelCount[{segMajor}]={(segMajor < sub ? curve.SubLevelCount[segMajor].ToString() : "越界")}（境界稿 §6）");
+                segIdx += run; segMajor++;
+            }
+            if (segMajor != sub)
+                throw new InvalidOperationException(
+                    $"UnifiedTierOf 段数={segMajor} ≠ SubLevelCount.Count={sub}（大境界数不符，境界稿 §6）");
+
             // —— A.1：武夫（CanAscend=false）顶段 = 陆地神仙 UT9 封顶 ——
             if (!curve.CanAscend && u > 0 && curve.UnifiedTierOf[u - 1] > 9)
                 throw new InvalidOperationException(
