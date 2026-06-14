@@ -45,6 +45,20 @@ namespace Jianghu.Core.Tests.Cultivation
         }
 
         [Fact]
+        public void On_AccumulatesCultivationPoints()
+        {
+            var w = WorldFactory.CreateInitial(2026, LimitsConfig.Default, 5,
+                cultivation: true, pathSource: FastBreakSource());
+            for (int i = 0; i < 15; i++) w.Advance(6);
+            // 行动累加的修为落在 CultivationState.CultivationPoints（显式计数器），非 Flags["@xiuwei"]。
+            Assert.Contains(w.AliveCharacters(), c => c.Cultivation != null && c.Cultivation.CultivationPoints > 0);
+            // Flags 不再被借用存修为计数（@xiuwei 已废）。
+            foreach (var c in w.AliveCharacters())
+                if (c.Cultivation != null)
+                    Assert.False(c.Cultivation.Flags.ContainsKey("@xiuwei"));
+        }
+
+        [Fact]
         public void RealmIndex_NeverExceedsMax()
         {
             var w = WorldFactory.CreateInitial(2026, LimitsConfig.Default, 5,

@@ -185,8 +185,6 @@ namespace Jianghu.Sim
 
         // A.0 每次行动累加的本路修为定额（确定性，不掷随机 → 无运行期 _cultRng 消费）。
         private const int CultivationGainPerAction = 1;
-        // 修为累加器 Flags 保留键（@ 前缀避免与功法 WeightStepKey 数据键冲突）。
-        private const string XiuweiFlag = "@xiuwei";
 
         /// <summary>
         /// on：角色行动后累加本路修为 → <see cref="RealmCurve.NextIndexIfReady"/> 判突破（A.0 确定性，
@@ -198,11 +196,11 @@ namespace Jianghu.Sim
             var st = actor.Cultivation;
             if (st == null || _registry == null) return;
 
-            int points = (st.Flags.TryGetValue(XiuweiFlag, out int v) ? v : 0) + CultivationGainPerAction;
-            st.Flags[XiuweiFlag] = points;
+            // 修为单调累加（显式计数器字段，非资源不经 ApplyResource）。
+            st.CultivationPoints += CultivationGainPerAction;
 
             var curve = _registry.ById(st.PathId).Curve;
-            int next = RealmCurve.NextIndexIfReady(st.RealmIndex, points, curve);
+            int next = RealmCurve.NextIndexIfReady(st.RealmIndex, st.CultivationPoints, curve);
             if (next != st.RealmIndex)
             {
                 st.RealmIndex = next;

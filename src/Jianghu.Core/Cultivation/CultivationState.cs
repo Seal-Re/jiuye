@@ -15,6 +15,9 @@ namespace Jianghu.Cultivation
         /// <summary>A.0 单层 flatIndex（A.1 投影双层，不存额外字段）。</summary>
         public int RealmIndex { get; set; }
 
+        /// <summary>本路修为累加器（单调计数器，非资源 → 不经 ApplyResource，无 [Min,Cap] 钳）。默认 0；运行期行动累加。</summary>
+        public int CultivationPoints { get; set; }
+
         public IReadOnlyList<string> ChosenArtIds { get; init; } = Array.Empty<string>();
         public IReadOnlyList<string> ChosenSkillIds { get; init; } = Array.Empty<string>();
 
@@ -33,7 +36,7 @@ namespace Jianghu.Cultivation
         public int Comprehension { get; init; } // A.2 才用，禁进 EffectivePower（R3）
 
         private CultivationState(
-            string pathId, int realmIndex,
+            string pathId, int realmIndex, int cultivationPoints,
             IReadOnlyList<string> chosenArtIds, IReadOnlyList<string> chosenSkillIds,
             Dictionary<string, int> resources, Dictionary<string, int> flags,
             Dictionary<string, (int Min, int Cap)> caps,
@@ -41,6 +44,7 @@ namespace Jianghu.Cultivation
         {
             PathId = pathId;
             RealmIndex = realmIndex;
+            CultivationPoints = cultivationPoints;
             ChosenArtIds = chosenArtIds;
             ChosenSkillIds = chosenSkillIds;
             Resources = resources;
@@ -74,7 +78,7 @@ namespace Jianghu.Cultivation
                 caps[r.Key] = (r.Min, r.Cap);
             }
             return new CultivationState(
-                pathId, 0,
+                pathId, 0, 0,
                 chosenArtIds, chosenSkillIds,
                 res, new Dictionary<string, int>(), caps,
                 0, 0, 0);
@@ -98,7 +102,7 @@ namespace Jianghu.Cultivation
         public CultivationState Clone()
         {
             return new CultivationState(
-                PathId, RealmIndex,
+                PathId, RealmIndex, CultivationPoints,
                 ChosenArtIds, ChosenSkillIds,
                 new Dictionary<string, int>(Resources),
                 new Dictionary<string, int>(Flags),
