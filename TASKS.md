@@ -23,17 +23,17 @@
 
 ## DOING（在制，≤2）
 
-_（空 — WIP=0，待用户定下一任务方向）_
+- [ ] **EPIC-A1-收尾：境界竖切剩余**（分支 feat/jianghu-v1.2-A1）— doing
+  - [ ] **A1.3 统一双轨命名** — 设计稿 ✅ written（`specs/...A1.3-统一双轨命名-design.md`），**待用户审** → 审过转 impl
+    - 设计要点：双轨参照(修士轨‖武夫轨) + 21路命名总表 + 规整(魔修UT错位bug/雷错字/体名实不符) + 小境界两层模型 + determinism安全
+    - impl 待办：safe rename §3标▲路(魔8名全改/雷2/体顶/法顶/阵顶/鬼2/毒蛊2/符2) + 跨路命名一致性测试(护栏魔bug) + off逐字节
+  - [ ] A1.5 三轴查询 API + Chronicle 大小境界渲染（含 MajorRealmNames 存储决策、命/体大境界名落定）
+  - [ ] A1.6 境界竖切 gate（INV-REALM-1/INV-UT-MONO/off逐字节/auditor）
 
 ---
 
 ## TODO（待办，按优先）
 
-- [ ] **EPIC-A1-收尾：境界竖切剩余** — 依赖：无（分支 feat/jianghu-v1.2-A1）
-  - [ ] A1.3 统一双轨命名替换（21路 RealmNames，改名不破determinism）
-  - [ ] A1.5 三轴查询 API + Chronicle 大小境界渲染
-  - [ ] A1.6 境界竖切 gate（INV-REALM-1/INV-UT-MONO/off逐字节/auditor）
-  - DoD：全量绿+0警告+IL浮点零+off逐字节worktree实证+auditor过
 - [ ] **EPIC-TIDY：仓库整理**
   - [ ] 清 `_research/raw3/`（抓取html）：.gitignore + git rm --cached
   - [ ] pixel `icon_gen.py` disk bug 修复 + 验证渲染
