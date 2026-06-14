@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Text;
+using Jianghu.Cultivation;
 using Jianghu.Model;
 
 namespace Jianghu.Sim
@@ -82,8 +85,58 @@ namespace Jianghu.Sim
                   .Append(m.Valence);
             }
 
-            // TODO(Phase 2)：Character.Cultivation 字段加入后，在此纳入 CultivationState 快照
-            // （PathId/RealmIndex/Resources(排序)/Flags(排序)/Chosen*）。A.0 v1.0 现态无此字段。
+            // CultivationState：on 修士非空（off / 散修 == null，此段恒为 "cult=_" 不变 → off 逐字节）。
+            // 确定性序列化：Resources/Flags 按 key 排序（不依赖字典枚举序/GetHashCode）；
+            // Chosen*/ChosenSkillIds 保留 PathAssigner 抽取序（确定性）。
+            // 纳入后快照续跑可抓 CultivationState 惰性漂移（不止靠 Chronicle）。
+            sb.Append(FieldSep);
+            AppendCultivation(sb, c.Cultivation);
+        }
+
+        private static void AppendCultivation(StringBuilder sb, CultivationState? st)
+        {
+            sb.Append("cult=");
+            if (st == null) { sb.Append('_'); return; } // off / 散修：空段，逐字节不变
+
+            sb.Append(st.PathId).Append(',')
+              .Append("realm").Append(st.RealmIndex).Append(',')
+              .Append("cp").Append(st.CultivationPoints);
+
+            sb.Append(",arts[");
+            AppendList(sb, st.ChosenArtIds);   // 抽取序（确定性，不排序）
+            sb.Append(']');
+
+            sb.Append(",skills[");
+            AppendList(sb, st.ChosenSkillIds); // 抽取序（确定性，不排序）
+            sb.Append(']');
+
+            sb.Append(",res[");
+            AppendSortedMap(sb, st.Resources); // key 排序（确定性）
+            sb.Append(']');
+
+            sb.Append(",flags[");
+            AppendSortedMap(sb, st.Flags);     // key 排序（确定性）
+            sb.Append(']');
+        }
+
+        private static void AppendList(StringBuilder sb, IReadOnlyList<string> items)
+        {
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (i > 0) sb.Append(ListSep);
+                sb.Append(items[i]);
+            }
+        }
+
+        private static void AppendSortedMap(StringBuilder sb, IReadOnlyDictionary<string, int> map)
+        {
+            var keys = new List<string>(map.Keys);
+            keys.Sort(StringComparer.Ordinal); // 确定性：Ordinal 升序，不依赖字典枚举/GetHashCode
+            for (int i = 0; i < keys.Count; i++)
+            {
+                if (i > 0) sb.Append(ListSep);
+                sb.Append(keys[i]).Append(':').Append(map[keys[i]]);
+            }
         }
     }
 }
