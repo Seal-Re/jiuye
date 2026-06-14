@@ -25,6 +25,7 @@ namespace Jianghu.Cultivation
             //    Phase 5 续填其余路。——
             Add(SwordImmortalPath.Def);
             Add(BodyHenglianPath.Def);
+            Add(FaXiuPath.Def);
         }
 
         // Phase 5 逐路追加。
