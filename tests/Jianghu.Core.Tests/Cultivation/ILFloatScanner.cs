@@ -48,6 +48,28 @@ public static class ILFloatScanner
         return offenders;
     }
 
+    /// <summary>
+    /// 返回 ScanNamespace 在 asmPath/nsPrefix 下**实际遍历**到的类型全名集（"Namespace.Type"）。
+    /// 与 <see cref="ScanNamespace"/> 共享同一 <see cref="NamespaceMatches"/> 谓词与 md.TypeDefinitions 遍历，
+    /// 故如实反映扫描覆盖面：覆盖守卫据此断言模块结算 + 唯一档 handler 在内，scanner 一旦窄化即红。
+    /// </summary>
+    public static HashSet<string> ScannedTypeFullNames(string asmPath, string nsPrefix)
+    {
+        var names = new HashSet<string>();
+        using var stream = File.OpenRead(asmPath);
+        using var pe = new PEReader(stream);
+        var md = pe.GetMetadataReader();
+
+        foreach (var typeHandle in md.TypeDefinitions)
+        {
+            var type = md.GetTypeDefinition(typeHandle);
+            string ns = md.GetString(type.Namespace);
+            if (!NamespaceMatches(ns, nsPrefix)) continue;
+            names.Add(ns + "." + md.GetString(type.Name));
+        }
+        return names;
+    }
+
     private static bool NamespaceMatches(string ns, string prefix)
         => ns == prefix || ns.StartsWith(prefix + ".", StringComparison.Ordinal);
 
