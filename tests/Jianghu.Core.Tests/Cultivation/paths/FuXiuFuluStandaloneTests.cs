@@ -43,13 +43,14 @@ public class FuXiuFuluStandaloneTests
         Assert.All(d.Power.Terms, t => Assert.NotEqual(0, t.Weight));
         Assert.DoesNotContain(d.Power.Terms, t => t.Src.Contains("daoHeart") || t.Src.Contains("innerDemon"));
 
-        // Curve 四列等长（M4）= 8。
-        Assert.Equal(8, d.Curve.RealmMultipliers.Count);
+        // Curve 四列等长（M4）= 10（A1.2 顶补渡劫 UT11/飞升 UT12 两大境界，四列各 +2 项，境界稿 §11.1）。
+        Assert.Equal(10, d.Curve.RealmMultipliers.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.UnifiedTierOf.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmNames.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmThresholds.Count);
-        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）；大境界数 8（UT0/UT2 各 2 长段）。
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.SubLevelCount.Sum());
+        Assert.Equal(8, d.Curve.SubLevelCount.Count);
 
         // SituationalTags = 属性/形态 tag（非对手 PathId）。
         Assert.Equal(new[] { "ranged", "fire", "thunder", "talisman" }, d.SituationalTags);
