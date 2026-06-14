@@ -53,9 +53,12 @@
 
 ## DOING（在制，≤2）
 
-- [ ] **EPIC-BALANCE：阶段5 平衡标定 INV-CROSS** 🔴 — doing（设计先行）
-  - [x] B5.0 设计稿 ✅ written（`specs/...B5-平衡标定INV-CROSS-design.md`）— **待用户审 D1-D5**（解析校准 mul=target×10/BaseSum + 辅助路UT重锚 + harness三件 + INV-CROSS gate）
-  - [ ] B5.x impl（设计审过后拆）
+- [ ] **EPIC-COMBAT-R2：阶段5 战斗系统重设计 R2 + 平衡** 🔴 — doing
+  - [x] B5.0 平衡标定设计稿（解析校准 mul=target×10/BaseSum）`336280d`
+  - [x] batch1 PowerMatrix dump harness — 实测 spread 27-140x，233绿
+  - [x] **R2 战斗设计稿** ✅（`specs/...B5-R2战斗系统重设计-design.md`）— 三层(通用维/公共武技/门派战斗方式)+相克复用SituationalResolver+3回合同时结算+pe量级锚+worked example自洽(修先手偏置)
+  - [ ] **R2 迭代设计（本会话拍，暂存 R2稿§14 待续）**：①功法门控防御(闪避需轻功/护体需内功,简版无真气资源) ②法宝=数值底+配套功法战斗效果(器修御宝流) ③**模块化EffectOp+稀有度**(普通/稀有/唯一,越好越复杂) — 🔖**恢复点=勘 EffectOp.cs/EffectOpKind enum → 设计模块库+稀有度+R2应用 → 折入§1-13主体 → writing-plans → impl**
+  - [ ] **B5.R2 impl**（设计折毕+审过后拆）：DuelEngine.ResolveR2 → 通用武技池 → 模块库(EffectOp战斗机制) → 接SparAction ON分支(off不动) → 相克数据行 → narrator → INV-CROSS gate(R2版) → 辅助路UT实测重锚(解A1.4)
   - 依赖：无（A.1已合）。解阻塞：A1.4(辅助路UT重锚并入此)
   - DoD：同UT≥2战斗路 1v1 胜率∈[40,60]% gate + 辅助路UT锚战斗当量 + 全量绿 + off逐字节 + auditor
 
