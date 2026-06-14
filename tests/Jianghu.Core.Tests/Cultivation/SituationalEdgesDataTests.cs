@@ -54,5 +54,37 @@ namespace Jianghu.Core.Tests.Cultivation
                 foreach (var pid in PathValidator.KnownPathIds)
                     Assert.DoesNotContain(pid, e.WhenPred);
         }
+
+        // 红线：element 轴元素环自洽——对每条 X 克 Y 边，不得存在反向 Y 克 X 边（canon counterWheel 四象环，无双向）。
+        [Fact]
+        public void Default_ElementWheel_IsAcyclicallyConsistent_NoReverseEdge()
+        {
+            // 提取每条 element 边的 (attacker tag, defender tag) 有向对。
+            var pairs = SituationalEdges.Default
+                .Where(e => e.Axis == "element")
+                .Select(e => (Atk: TagOf(e.WhenPred, "attacker.tag:"), Def: TagOf(e.WhenPred, "defender.tag:")))
+                .ToList();
+
+            Assert.NotEmpty(pairs); // canon 四象环至少 4 条
+            foreach (var (atk, def) in pairs)
+            {
+                bool hasReverse = pairs.Any(p => p.Atk == def && p.Def == atk);
+                Assert.False(hasReverse, $"element 环含反向边: {atk}克{def} 与 {def}克{atk} 同存（破环自洽）");
+            }
+        }
+
+        // 从 WhenPred（'&' 连接的 attacker.tag:X & defender.tag:Y）取 prefix 后的 tag 名。
+        // element 边契约保证 attacker.tag/defender.tag 两原子俱在；缺则数据违约，断言失败。
+        static string TagOf(string pred, string prefix)
+        {
+            foreach (var raw in pred.Split('&'))
+            {
+                var atom = raw.Trim();
+                if (atom.StartsWith(prefix, System.StringComparison.Ordinal))
+                    return atom.Substring(prefix.Length);
+            }
+            Assert.Fail($"element 边谓词缺 '{prefix}' 原子: {pred}");
+            return string.Empty; // 不可达（Assert.Fail 抛）
+        }
     }
 }

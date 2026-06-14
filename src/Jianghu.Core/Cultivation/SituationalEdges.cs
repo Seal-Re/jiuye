@@ -12,10 +12,12 @@ namespace Jianghu.Cultivation
         /// <summary>A.0 默认边表（SparAction 接此构造 SituationalResolver）。</summary>
         public static readonly IReadOnlyList<SituationalEdge> Default = new[]
         {
-            // —— element：元素相生克（火克冰 / 冰克雷 / 雷克火，三元环样例）——
-            new SituationalEdge("element", "attacker.tag:fire & defender.tag:ice", +15),
-            new SituationalEdge("element", "attacker.tag:ice & defender.tag:thunder", +15),
-            new SituationalEdge("element", "attacker.tag:thunder & defender.tag:fire", +15),
+            // —— element：元素相生克（canon counterWheel 四象环：火克木 / 木克雷 / 雷克冰 / 冰克火）。
+            //    环自洽：无任一反向边（X 克 Y ⇒ 不存在 Y 克 X）。零 PathId，系数统一 +15（攻方增益）。——
+            new SituationalEdge("element", "attacker.tag:fire & defender.tag:wood", +15),
+            new SituationalEdge("element", "attacker.tag:wood & defender.tag:thunder", +15),
+            new SituationalEdge("element", "attacker.tag:thunder & defender.tag:ice", +15),
+            new SituationalEdge("element", "attacker.tag:ice & defender.tag:fire", +15),
 
             // —— range：远程克近战 brute（攻方远程 & 守方近战蛮力 → 守方吃亏=攻方增益）——
             new SituationalEdge("range", "attacker.tag:ranged & defender.tag:melee_brute", +20),

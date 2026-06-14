@@ -15,7 +15,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
 {
     /// <summary>
     /// Task 4 续（法修）：法修 fa_xiu（physical 中远程·元素代表）端到端。
-    /// ①PathValidator 过 + canon/shape；②生成期带 spirit_root 定到 fa_xiu；③战力随 realm 升（平滑曲线）；
+    /// ①PathValidator 过 + canon/shape；②生成期带 fa_root 定到 fa_xiu；③战力随 realm 升（平滑曲线）；
     /// ④两法修切磋出 DuelResolved + 情境 adj 生效（ranged 法修放风筝 melee 守方,零 PathId 真隔离）；
     /// ⑤被动功法 EffectOp（AddResourceCap manaPool / AddResource spellBreadth）装配生效。
     /// 元素相生克边数据另由 SituationalEdges 测试守（element 轴 counterWheel）。
@@ -45,9 +45,9 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Equal(new[] { "ranged", "elemental", "fire" }, d.SituationalTags);
         }
 
-        // ② 生成期：唯法修一路注册 → 派生池仅 spirit_root → 人人带 spirit_root → 人人定到 fa_xiu。
+        // ② 生成期：唯法修一路注册 → 派生池仅 fa_root（唯一 entry tag 约定）→ 人人带 fa_root → 人人定到 fa_xiu。
         [Fact]
-        public void Generation_AssignsFaXiu_OnSpiritRoot()
+        public void Generation_AssignsFaXiu_OnFaRoot()
         {
             var src = new ListPathSource(new[] { FaXiuPath.Def });
             var w = WorldFactory.CreateInitial(2026, LimitsConfig.Default, 5,
@@ -56,7 +56,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             {
                 Assert.NotNull(c.Cultivation);
                 Assert.Equal("fa_xiu", c.Cultivation!.PathId);
-                Assert.Contains("spirit_root", c.Persona.Tags);
+                Assert.Contains("fa_root", c.Persona.Tags);
             }
         }
 
@@ -121,6 +121,33 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             var spar = new SparAction(w.Limits, reg);
             var duel = spar.Apply(w, atk, new SparChoice(new CharacterId(2))).OfType<DuelResolved>().Single();
             // 裸 pe 相等下，法修远程放风筝 +5% adj 增益攻方 → atk 胜（唯一区分源=情境 adj）。
+            Assert.Equal(1, duel.Winner.Value);
+            Assert.True(duel.Margin > 0);
+        }
+
+        // ④c 元素相克 adj 生效（零 PathId 真隔离）：法修主灵根 fire，canon 火克木 → 守方 wood 吃 +15% adj。
+        //    守方=wood mock 路（克隆法修 def 同 Power/Curve → 裸 pe 相等），仅改 pathId+tags=wood → 唯元素相克区分胜负。
+        //    反向不命中（wood 攻方 vs fire 守方 → 木克雷边不中，法修守方无 thunder tag）→ 守方 adj=0，真隔离。
+        [Fact]
+        public void FaXiu_ElementCounter_SituationalAdj_Decides()
+        {
+            var fa = FaXiuPath.Def; // 法修 fire 攻方（SituationalTags 含 fire）
+            // 守方 wood：克隆法修 def（同公式 → 裸 pe 与法修相等），仅改 pathId + SituationalTags=wood（被火克）。
+            var wood = fa with { PathId = "ti_xiu_hengshi", SituationalTags = new[] { "wood" } };
+            var reg = new PathRegistry(new ListPathSource(new[] { fa, wood }));
+            var w = new FakeWorld();
+            var atk = Make(1, 8, 22, 12, 15); // 法修 fire 攻方
+            var def = Make(2, 8, 22, 12, 15); // wood 守方（同四维同境界 → 裸 pe 相等）
+            atk.Cultivation = CultivationState.NewForPath(fa.PathId, fa.Resources);
+            def.Cultivation = CultivationState.NewForPath("ti_xiu_hengshi", wood.Resources);
+            // 同境界 realm4（mul=11）：放大后 pe 足够大，+15% adj 整数截断后仍可观测；裸 pe 仍相等，唯元素相克区分。
+            atk.Cultivation!.RealmIndex = 4;
+            def.Cultivation!.RealmIndex = 4;
+            w.All.Add(atk); w.All.Add(def);
+
+            var spar = new SparAction(w.Limits, reg);
+            var duel = spar.Apply(w, atk, new SparChoice(new CharacterId(2))).OfType<DuelResolved>().Single();
+            // 裸 pe 相等下，法修 fire 克 wood +15% adj 增益攻方 → atk 胜（唯一区分源=元素相克 adj）。
             Assert.Equal(1, duel.Winner.Value);
             Assert.True(duel.Margin > 0);
         }

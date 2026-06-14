@@ -186,7 +186,9 @@ namespace Jianghu.Cultivation.Paths
                 curve,
                 arts,
                 skills,
-                new EntryGateDef("tag:spirit_root"),
+                // 21 路唯一 entry tag 约定：每路 entry tag = 唯一 <pathkey>_root（fa_root），
+                // 避魂修 soul 抢 spirit_root（Phase5 碰撞）。派生池 RootTagPool() 随之含 fa_root → 法修仍可被定路。
+                new EntryGateDef("tag:fa_root"),
                 new SelectionRuleDef(2, 2), // 战技抽 2（深度设计'1心法+1~2法术+1符印+2战技,≥1主灵根系'）
                 null);
         }

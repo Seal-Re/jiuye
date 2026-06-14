@@ -56,28 +56,28 @@ namespace Jianghu.Core.Tests.Cultivation
         [Fact]
         public void On_UsesPerPathPlusSituational()
         {
-            // mock 双路（用 TestPaths）：attacker fire vs defender ice → 元素相生克 +15% adj。
+            // mock 双路（用 TestPaths）：attacker fire vs defender wood → canon 火克木 +15% adj。
             // 公式 stat:Force×4 + res:qi×3；realm0 mul=10。
-            // a: Force=20,qi=0 → BaseSum=80；pe=80*10/10=80；fire vs ice → adj +15 → eff=80*115/100=92。
-            // b: Force=10,qi=0 → BaseSum=40；pe=40；ice vs fire → 无边命中 → adj 0 → eff=40。
+            // a: Force=20,qi=0 → BaseSum=80；pe=80*10/10=80；fire vs wood → adj +15 → eff=80*115/100=92。
+            // b: Force=10,qi=0 → BaseSum=40；pe=40；wood vs fire → 无边命中 → adj 0 → eff=40。
             // winner=a，margin=|92-40|=52。
             var fire = TestPaths.ValidFull() with
             {
                 PathId = "fa_xiu",
                 SituationalTags = new[] { "fire" },
             };
-            var ice = TestPaths.ValidFull() with
+            var wood = TestPaths.ValidFull() with
             {
                 PathId = "ti_xiu_hengshi",
-                SituationalTags = new[] { "ice" },
+                SituationalTags = new[] { "wood" },
             };
-            var reg = new PathRegistry(new ListPathSource(new[] { fire, ice }));
+            var reg = new PathRegistry(new ListPathSource(new[] { fire, wood }));
 
             var w = new FakeWorld();
             var a = Make(1, 20, 0, 0, 0);
             var b = Make(2, 10, 0, 0, 0);
             a.Cultivation = CultivationState.NewForPath("fa_xiu", fire.Resources);
-            b.Cultivation = CultivationState.NewForPath("ti_xiu_hengshi", ice.Resources);
+            b.Cultivation = CultivationState.NewForPath("ti_xiu_hengshi", wood.Resources);
             w.All.Add(a); w.All.Add(b);
 
             var spar = new SparAction(w.Limits, reg);
@@ -92,22 +92,22 @@ namespace Jianghu.Core.Tests.Cultivation
         public void On_SituationalAdj_ClampedToQuarterP0()
         {
             // P0=400 → clamp ±100。即便巨额 adj 也被钳；此处只验 winner/margin 自洽（adj 命中单边边 +15 不触顶，
-            // 用对称双 fire-vs-ice 不成立；改测 clamp 由 SituationalTests 守，这里验 on 路 effective 用了 adj 而非裸 pe）。
+            // 用对称双 fire-vs-wood 不成立；改测 clamp 由 SituationalTests 守，这里验 on 路 effective 用了 adj 而非裸 pe）。
             var fire = TestPaths.ValidFull() with { PathId = "fa_xiu", SituationalTags = new[] { "fire" } };
-            var ice = TestPaths.ValidFull() with { PathId = "ti_xiu_hengshi", SituationalTags = new[] { "ice" } };
-            var reg = new PathRegistry(new ListPathSource(new[] { fire, ice }));
+            var wood = TestPaths.ValidFull() with { PathId = "ti_xiu_hengshi", SituationalTags = new[] { "wood" } };
+            var reg = new PathRegistry(new ListPathSource(new[] { fire, wood }));
 
             var w = new FakeWorld();
             var a = Make(1, 20, 0, 0, 0);
             var b = Make(2, 20, 0, 0, 0); // 同 Force → 裸 pe 相等（80 each）
             a.Cultivation = CultivationState.NewForPath("fa_xiu", fire.Resources);
-            b.Cultivation = CultivationState.NewForPath("ti_xiu_hengshi", ice.Resources);
+            b.Cultivation = CultivationState.NewForPath("ti_xiu_hengshi", wood.Resources);
             w.All.Add(a); w.All.Add(b);
 
             var spar = new SparAction(w.Limits, reg);
             var evs = spar.Apply(w, a, new SparChoice(new CharacterId(2)));
             var duel = evs.OfType<DuelResolved>().Single();
-            // 裸 pe 相等下，fire 攻方 +15% adj 应使 a 胜（情境生效证据）。
+            // 裸 pe 相等下，fire 攻方 canon 火克木 +15% adj 应使 a 胜（情境生效证据）。
             Assert.Equal(1, duel.Winner.Value);
             Assert.Equal(80 * 115 / 100 - 80, duel.Margin); // 92-80=12
         }
