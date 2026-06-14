@@ -22,5 +22,20 @@ namespace Jianghu.Core.Tests.Cultivation
             Assert.Equal(1, op.Amount2);
             Assert.Equal(EffectRarity.Rare, op.Rarity);
         }
+
+        [Fact]
+        public void RareCombatKinds_Exist()
+        {
+            var kinds = new[]
+            {
+                EffectOpKind.PenFromResource, EffectOpKind.AoePerTarget,
+                EffectOpKind.CounterMul, EffectOpKind.DrainResource, EffectOpKind.Backlash,
+                EffectOpKind.Dot, EffectOpKind.Control, EffectOpKind.ReflectDamage, EffectOpKind.Evade
+            };
+            foreach (var k in kinds)
+                Assert.True(System.Enum.IsDefined(typeof(EffectOpKind), k));
+            // SumOfSet 本轮撤(§15.1 复验补丁): 断言不存在
+            Assert.DoesNotContain("SumOfSet", System.Enum.GetNames(typeof(EffectOpKind)));
+        }
     }
 }

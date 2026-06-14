@@ -23,6 +23,17 @@ namespace Jianghu.Cultivation
         AddSituationalAdj, // 加情境修正（整数 %）
         // —— 资源消耗 ——
         Cost,              // 消耗资源（不足则拒）
+        // —— 稀有档战斗机制模块（L1 新语义，B5 模块化效果系统）——
+        PenFromResource,   // L1 资源转伤: delta += res(Key)*Amount/Amount2
+        AoePerTarget,      // L1 群攻×敌数(R2单挑退化×1)
+        CounterMul,        // L1 tag克制倍乘: defender带tag(Key)→ dmg*Amount/Amount2(联合上界×3/2)
+        DrainResource,     // L1 夺取: defender res(Key)-=Amount, attacker +=Amount(经chokepoint)
+        Backlash,          // L1 反噬: 条件(Key)满足→attacker自伤Amount
+        Dot,               // L1 持续伤: defender挂 Amount/tick × Amount2回合
+        Control,           // L1 控场: defender 下Amount回合 selectMove失效
+        ReflectDamage,     // L1 反伤(OnDefend): attacker受 incoming*Amount/Amount2(读扣血前/不递归)
+        Evade,             // L1 闪避(OnDefend): 减伤=clamp((身法-命中+Amount)*k,0,maxReduce)连续
+        // 注: SumOfSet 撤(§15.1), 真Σ用 PenFromResource on 标量聚合资源
     }
 
     /// <summary>战斗期算子的触发时机：OnUse 主动使用 / OnDefend 受击防御 / Passive 被动常驻。</summary>
