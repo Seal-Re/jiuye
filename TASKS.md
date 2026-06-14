@@ -58,8 +58,10 @@
   - [x] batch1 PowerMatrix dump harness — 实测 spread 27-140x，233绿
   - [x] **R2 战斗设计稿** ✅（`specs/...B5-R2战斗系统重设计-design.md`）— 三层(通用维/公共武技/门派战斗方式)+相克复用SituationalResolver+3回合同时结算+pe量级锚+worked example自洽(修先手偏置)
   - [x] **规则齐全审计**（4路并发审计21路 OnUse+Note+derived）— 裁决: **设计齐全但结构化近空白**(机器只读 Cost/AddResource/flag, 真机制全埋 Note, AddPenInteger.Amount 全占位); 自读 EffectOp.cs 证 ComputeOnUseDelta 只 return Amount; 归纳模块机制族(普通4/稀有9族/唯一签名11+)
-  - [ ] **R2 迭代设计 = 分层全量模块系统**（brainstorming 中）：①功法门控防御(闪避需轻功/护体需内功, 简版无真气) ②法宝=数值底+配套功法战斗效果(器修御宝流) ③模块化 EffectOp **三档**(普通/稀有参数化Kind复用 + 唯一Special-handler) + **trigger**(onUse/onDefend/passive) — **分层全量定义钉死: 所有招进统一模块框架 + 普通/稀有档全结构化即时参战(够当前版本21路全跑起来), 唯一档框架就位逐路增量**; 真·100%结构化 → EPIC-COMBAT-FULLSTRUCT(下方TODO)
-  - [ ] **B5.R2 impl**（设计折毕+审过后拆）：DuelEngine.ResolveR2 → 通用武技池 → 模块库(EffectOp战斗机制) → 接SparAction ON分支(off不动) → 相克数据行 → narrator → INV-CROSS gate(R2版) → 辅助路UT实测重锚(解A1.4)
+  - [x] **R2 迭代设计 = 分层全量模块系统**（设计稿 done）：`specs/...模块化效果系统-design.md`(`182b5a4`)+§15复验补丁(`db7a7c4`)。三档(普通4/稀有9参数化Kind/唯一Special)+trigger(OnUse/OnDefend/Passive)+功法门控防御(Evade连续)+法宝配套+Special逃逸口纪律+无RNG。网文校验(85%命中,补反伤/越级维度门控/克制两档)+gate-auditor两轮(揪7缺口+3风险+5新洞,8项全折§15)
+  - [x] **impl plan**（writing-plans done）：`plans/2026-06-14-模块化效果系统-impl.md` 6批TDD(批1框架全代码/批2 21路映射表/批3 Special handler/批4 DuelEngine/批5法宝/批6硬化gate冻结数字)
+  - [ ] **B5 impl 批1-6**（subagent-driven 待启）：批1框架(EffectOp扩字段+9 Kind+ModuleResolver+CombatContext chokepoint+Special registry+IL扫描)→批2普通稀有全路迁→批3 Special→批4 DuelEngine.ResolveR2(off不动)→批5法宝→批6硬gate(G1-M7+辅助路UT重锚解A1.4)
+  - DoD：§13硬化DoD全过(防MVP蒙混,每gate可测断言)+全量绿+off逐字节+ON路逐字节+IL浮点零+auditor终验+辅助路UT重锚(解A1.4)
   - 依赖：无（A.1已合）。解阻塞：A1.4(辅助路UT重锚并入此)
   - DoD：同UT≥2战斗路 1v1 胜率∈[40,60]% gate + 辅助路UT锚战斗当量 + 全量绿 + off逐字节 + auditor
 
