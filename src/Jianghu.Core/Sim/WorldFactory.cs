@@ -26,13 +26,13 @@ namespace Jianghu.Sim
 
             var sect = new Sect(1, "无名谷");
             var lifecycle = new Lifecycle(spawnRng.Split(99));
-            var w = new World(limits, domainRng, spawnRng, sect, lifecycle, cultRng);
+            // on：定路注册表（Phase 4/5 填 21 路；调用方可注入测试/外部源；off 不构造不用）。
+            // 升 World 字段 → SparAction 战斗期查对手路 def + 软情境（off=null 不参与，逐字节）。
+            var registry = cultivation ? new PathRegistry(pathSource ?? new CodePathSource()) : null;
+            var w = new World(limits, domainRng, spawnRng, sect, lifecycle, cultRng, registry);
             w.Nodes.Add(new WorldNode(new NodeId(0), "客栈"));
             w.Nodes.Add(new WorldNode(new NodeId(1), "山道"));
             w.Nodes.Add(new WorldNode(new NodeId(2), "市集"));
-
-            // on：定路注册表（Phase 4/5 填 21 路；调用方可注入测试/外部源；off 不构造不用）。
-            var registry = cultivation ? new PathRegistry(pathSource ?? new CodePathSource()) : null;
 
             for (int i = 0; i < initialCount; i++)
             {

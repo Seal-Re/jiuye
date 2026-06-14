@@ -30,29 +30,32 @@ namespace Jianghu.Sim
         // 修炼子流 root.Split(5)：仅 cultivation-on 构造（off=null，绝不消费 Split(5)，保 Split(1..4) 编号）。
         // R1 前瞻：升 World 字段 + 进 Clone（CloneRng 深拷，null 安全），为 A.1 运行期消费续跑不发散。
         private readonly IRandom? _cultRng;
+        // 路线注册表：仅 on 构造（off=null）。供 SparAction 战斗期按 PathId 查对手路 def + 软情境结算。
+        private readonly PathRegistry? _registry;
         private readonly Dictionary<CharacterId, IBrain> _brains;
 
         public int AliveCount => _alive.Count;
         public int NodeCount => Nodes.Count;
 
         public World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, Sect sect, Lifecycle lifecycle,
-                     IRandom? cultRng = null)
+                     IRandom? cultRng = null, PathRegistry? registry = null)
         {
-            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; _cultRng = cultRng; Sect = sect;
-            _actions = new ActionSystem(limits); _lifecycle = lifecycle;
+            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; _cultRng = cultRng; _registry = registry; Sect = sect;
+            _actions = new ActionSystem(limits, registry); _lifecycle = lifecycle;
             Chronicle = new Chronicle(); Relations = new Relations(); Nodes = new List<WorldNode>();
             Deceased = new List<Character>(); _alive = new Dictionary<long, Character>();
             _sched = new Scheduler(); _brains = new Dictionary<CharacterId, IBrain>();
         }
 
         // 私有全状态 ctor，仅 Clone 用（深拷贝已在 Clone 内构造好）
-        private World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, IRandom? cultRng, Sect sect, Lifecycle lifecycle,
+        private World(LimitsConfig limits, IRandom domainRng, IRandom spawnRng, IRandom? cultRng, PathRegistry? registry,
+                      Sect sect, Lifecycle lifecycle,
                       long clock, Chronicle chronicle, Relations relations, List<WorldNode> nodes,
                       List<Character> deceased, Dictionary<long, Character> alive,
                       Dictionary<CharacterId, IBrain> brains, Scheduler sched)
         {
-            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; _cultRng = cultRng; Sect = sect;
-            _actions = new ActionSystem(limits); _lifecycle = lifecycle;
+            Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; _cultRng = cultRng; _registry = registry; Sect = sect;
+            _actions = new ActionSystem(limits, registry); _lifecycle = lifecycle;
             Clock = clock; Chronicle = chronicle; Relations = relations; Nodes = nodes;
             Deceased = deceased; _alive = alive; _brains = brains; _sched = sched;
         }
@@ -192,7 +195,7 @@ namespace Jianghu.Sim
             var deceased = new List<Character>(Deceased);
             var nodes = new List<WorldNode>(Nodes);
             var sched = new Scheduler(); sched.LoadFrom(_sched.Snapshot());
-            return new World(Limits, CloneRng(_domainRng), CloneRng(SpawnRng), CloneRngOrNull(_cultRng), Sect, _lifecycle.Clone(),
+            return new World(Limits, CloneRng(_domainRng), CloneRng(SpawnRng), CloneRngOrNull(_cultRng), _registry, Sect, _lifecycle.Clone(),
                              Clock, Chronicle.Clone(), Relations.Clone(), nodes, deceased, alive, brains, sched);
         }
 

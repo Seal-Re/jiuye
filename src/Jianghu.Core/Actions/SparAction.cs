@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Jianghu.Config;
+using Jianghu.Cultivation;
 using Jianghu.Decide;
 using Jianghu.Events;
 using Jianghu.Model;
@@ -8,9 +10,26 @@ namespace Jianghu.Actions
 {
     public sealed class SparAction : IAction
     {
+        // off（registry==null）：构造无参 → 纯走旧公式（v1.0 逐字节，不碰 cultivation/resolver）。
+        // on：注入 limits + 路线注册表，按 actor.Cultivation 分流到 PowerEngine × 软情境 adj。
+        private readonly LimitsConfig? _limits;
+        private readonly PathRegistry? _registry;
+        private readonly SituationalResolver? _resolver;
+
+        public SparAction() { } // off 默认（v1.0 caller）：registry/resolver=null。
+
+        public SparAction(LimitsConfig limits, PathRegistry? registry)
+        {
+            _limits = limits;
+            _registry = registry;
+            // on：软情境结算器经全局零-PathId 边表构造（off=null 时不构造，不参与结算）。
+            _resolver = registry != null ? new SituationalResolver(SituationalEdges.Default) : null;
+        }
+
         public ActionType Type => ActionType.Spar;
         public ValidationResult CanExecute(IWorldView w, Character a, DecisionContext ctx) => ValidationResult.Valid;
 
+        // v1.0 旧公式（off 逐字节）：Force×2+Internal+Constitution。无 Cultivation/registry 时唯一路径。
         private static int Power(Character c) =>
             c.Stats.Get(StatKind.Force) * 2 + c.Stats.Get(StatKind.Internal) + c.Stats.Get(StatKind.Constitution);
 
@@ -21,7 +40,7 @@ namespace Jianghu.Actions
             foreach (var x in w.AtNode(a.Node)) if (x.Id.Value == c.Target.Value) { target = x; break; }
             if (target == null) return new DomainEvent[0];
 
-            int pa = Power(a), pb = Power(target);
+            int pa = EffectivePower(a, target), pb = EffectivePower(target, a);
             var winner = pa >= pb ? a : target;
             var loser = pa >= pb ? target : a;
             int margin = System.Math.Abs(pa - pb);
@@ -35,5 +54,34 @@ namespace Jianghu.Actions
                 new RelationChanged(w.Clock, loser.Id, winner.Id, margin > 20 ? -4 : +2, lToW),
             };
         }
+
+        // 分流：self 无 Cultivation 或 registry==null（off）→ 旧公式（逐字节）；
+        // 否则 per-path PowerEngine（含境界曲线）× 软情境 adj（clamp ±P0/4）。
+        private int EffectivePower(Character self, Character opponent)
+        {
+            if (self.Cultivation == null || _registry == null || _limits == null)
+                return Power(self);
+
+            var def = _registry.ById(self.Cultivation.PathId);
+            int pe = PowerEngine.Evaluate(self.Cultivation, self.Stats, def, _limits);
+
+            // 软情境上下文：双方 SituationalTags（缺路=空），self 作攻方 axis；env A.0 暂空（Phase 4.5 接）。
+            var defTags = OpponentTags(opponent);
+            var ctx = new SitContext(def.SituationalTags, defTags, def.AttackDimension, EmptyEnv);
+            int adj = _resolver!.AdjPct(ctx, _limits.SituationalP0Base);
+
+            return (int)((long)pe * (100 + adj) / 100);
+        }
+
+        // 对手 SituationalTags：经 registry 查其路；无路（散修/off）→ 空 tag。
+        private IReadOnlyList<string> OpponentTags(Character opponent)
+        {
+            if (opponent.Cultivation == null || _registry == null)
+                return System.Array.Empty<string>();
+            return _registry.ById(opponent.Cultivation.PathId).SituationalTags;
+        }
+
+        private static readonly IReadOnlyDictionary<string, string> EmptyEnv =
+            new Dictionary<string, string>();
     }
 }

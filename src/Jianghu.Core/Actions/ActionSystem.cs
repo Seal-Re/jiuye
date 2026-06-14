@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Jianghu.Config;
+using Jianghu.Cultivation;
 using Jianghu.Events;
 using Jianghu.Model;
 
@@ -9,13 +10,16 @@ namespace Jianghu.Actions
     public sealed class ActionSystem
     {
         private readonly Dictionary<ActionType, IAction> _actions;
-        public ActionSystem(LimitsConfig c)
+
+        // registry==null（off / v1.0 caller）→ SparAction 走旧公式（逐字节）；
+        // on 时 World 注入注册表 → SparAction 按 Cultivation 分流到 PowerEngine × 软情境。
+        public ActionSystem(LimitsConfig c, PathRegistry? registry = null)
         {
             _actions = new Dictionary<ActionType, IAction>
             {
                 { ActionType.Train, new TrainAction(c) },
                 { ActionType.Travel, new TravelAction() },
-                { ActionType.Spar, new SparAction() },
+                { ActionType.Spar, registry == null ? new SparAction() : new SparAction(c, registry) },
             };
         }
         public IReadOnlyList<ActionType> Types => new List<ActionType>(_actions.Keys);
