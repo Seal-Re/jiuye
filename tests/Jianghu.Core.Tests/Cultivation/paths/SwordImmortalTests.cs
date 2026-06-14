@@ -97,6 +97,30 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.True(duel.Margin > 0);
         }
 
+        // ④b 情境 adj 生效（零 PathId，真隔离）：剑修近战 melee 被远程对手放风筝（Bible §6.4 distance 轴 +5）。
+        //    攻方=ranged 对手，用与剑修同 Power/Curve 但不同 pathId+tags 的 mock 路 → 双方裸 pe 完全相等，
+        //    唯放风筝 adj 区分胜负 → 证软情境真生效（非靠公式天然差）。
+        [Fact]
+        public void Swordsman_KitedByRanged_SituationalAdj_Decides()
+        {
+            var sword = SwordImmortalPath.Def;
+            // 远程攻方：克隆剑修 def（同公式 → 裸 pe 与剑修相等），仅改 pathId + SituationalTags=ranged。
+            var ranged = sword with { PathId = "fa_xiu", SituationalTags = new[] { "ranged" } };
+            var reg = new PathRegistry(new ListPathSource(new[] { sword, ranged }));
+            var w = new FakeWorld();
+            var atk = Make(1, 22, 12, 8, 18); // ranged 攻方
+            var def = Make(2, 22, 12, 8, 18); // 剑修守方（同四维同境界 → 裸 pe 相等）
+            atk.Cultivation = CultivationState.NewForPath("fa_xiu", ranged.Resources);
+            def.Cultivation = CultivationState.NewForPath(sword.PathId, sword.Resources);
+            w.All.Add(atk); w.All.Add(def);
+
+            var spar = new SparAction(w.Limits, reg);
+            var duel = spar.Apply(w, atk, new SparChoice(new CharacterId(2))).OfType<DuelResolved>().Single();
+            // 裸 pe 相等下，远程放风筝 +5% adj 增益攻方 → atk 胜（唯一区分源=情境 adj）。
+            Assert.Equal(1, duel.Winner.Value);
+            Assert.True(duel.Margin > 0);
+        }
+
         // ⑤ 被动功法 EffectOp 装配生效：剑修心法「凝剑诀」AddResourceCap(swordWill,+3) → 装配后 cap 抬高。
         [Fact]
         public void PassiveArt_EffectOp_AppliesViaInterpreter()

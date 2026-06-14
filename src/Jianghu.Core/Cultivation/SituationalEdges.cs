@@ -20,6 +20,10 @@ namespace Jianghu.Cultivation
             // —— range：远程克近战 brute（攻方远程 & 守方近战蛮力 → 守方吃亏=攻方增益）——
             new SituationalEdge("range", "attacker.tag:ranged & defender.tag:melee_brute", +20),
 
+            // —— distance：放风筝（攻方远程 & 守方近战 → 远程增益，Bible §6.4「放风筝远程 +5」）。
+            //    剑修近战 melee 脆皮被放风筝即吃此亏（零 PathId，只认 melee tag）。——
+            new SituationalEdge("distance", "attacker.tag:ranged & defender.tag:melee", +5),
+
             // —— form：死物免精神（守方死物构装 & 攻方走精神攻击轴 → 几近无效）——
             new SituationalEdge("form", "defender.tag:undead_construct & attacker.axis:spirit_attack", -100),
 
