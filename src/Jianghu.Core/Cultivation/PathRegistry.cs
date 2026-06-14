@@ -104,6 +104,26 @@ namespace Jianghu.Cultivation
 
             // —— M4：RealmCurve 四列等长 ——
             RealmCurve.Validate(def.Curve);
+
+            // —— §15.6：遍历本路所有模块算子，ratio-Kind 须 Amount2≥1（消 Amount2=0 双义）——
+            foreach (var cat in def.ArtCategories)
+                foreach (var art in cat.Arts)
+                    foreach (var op in art.Effects)
+                        AssertModuleValid(op);
+            foreach (var skill in def.CombatSkills)
+                foreach (var op in skill.OnUse)
+                    AssertModuleValid(op);
+        }
+
+        // ratio 类 Kind: 用 Amount/Amount2 整数除, Amount2 必须 ≥1 (§15.6 消双义)
+        static readonly EffectOpKind[] RatioKinds =
+            { EffectOpKind.PenFromResource, EffectOpKind.CounterMul, EffectOpKind.ReflectDamage };
+
+        public static void AssertModuleValid(EffectOp op)
+        {
+            if (System.Array.IndexOf(RatioKinds, op.Kind) >= 0 && op.Amount2 < 1)
+                throw new System.InvalidOperationException(
+                    $"ratio-Kind {op.Kind} 须 Amount2≥1(消Amount2=0双义,§15.6); Key={op.Key}");
         }
     }
 }

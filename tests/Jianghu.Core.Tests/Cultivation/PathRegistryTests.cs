@@ -127,6 +127,25 @@ public class PathRegistryTests
         Assert.Throws<InvalidOperationException>(() => PathValidator.AssertValid(bad));
     }
 
+    [Fact]
+    public void RatioKind_WithZeroAmount2_Rejected()
+    {
+        var bad = new EffectOp(EffectOpKind.PenFromResource, "qi", 4, null); // Amount2 默认 0
+        Assert.Throws<System.InvalidOperationException>(() => PathValidator.AssertModuleValid(bad));
+    }
+
+    [Fact]
+    public void NonRatioKind_ZeroAmount2_Ok()
+    {
+        PathValidator.AssertModuleValid(new EffectOp(EffectOpKind.AddPenInteger, null, 40, null)); // 不抛
+    }
+
+    [Fact]
+    public void RatioKind_PositiveAmount2_Ok()
+    {
+        PathValidator.AssertModuleValid(new EffectOp(EffectOpKind.CounterMul, "evil", 3, null, Amount2: 2)); // 不抛
+    }
+
     // —— 局部 helper ——
 
     static ArtDef A(string id) => new ArtDef(id, id, 1, "cat", Array.Empty<EffectOp>());
