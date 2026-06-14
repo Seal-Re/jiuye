@@ -12,6 +12,13 @@ namespace Jianghu.Events
         public int Count => _lines.Count;
 
         public void Append(DomainEvent e, Func<CharacterId, string> name)
+            => Append(e, name, null);
+
+        /// <summary>
+        /// realmDesc（可空）：境界 flatIndex → 「大境界·小境界（UT）」展示串（A1.5，调用方注 RealmQuery）。
+        /// 为 null 时 RealmBreakthrough 回退裸整数「第 N 重」——off 无此事件，故 off 逐字节不受扰。
+        /// </summary>
+        public void Append(DomainEvent e, Func<CharacterId, string> name, Func<int, string>? realmDesc)
         {
             string text;
             switch (e)
@@ -23,7 +30,11 @@ namespace Jianghu.Events
                 case RelationChanged r: text = $"[{r.Tick}] {name(r.From)} 对 {name(r.To)} 情谊变为 {r.NewValue}。"; break;
                 case CharacterDied x: text = $"[{x.Tick}] {name(x.Id)} 寿尽，享年 {x.Age}，江湖再无此人。"; break;
                 case PathEntered p: text = $"[{p.Tick}] {name(p.Id)} 拜入 {p.PathId} 一脉，自此踏上修行路。"; break;
-                case RealmBreakthrough rb: text = $"[{rb.Tick}] {name(rb.Id)} 冲破瓶颈，境界精进至第 {rb.NewRealmIndex} 重。"; break;
+                case RealmBreakthrough rb:
+                    text = realmDesc != null
+                        ? $"[{rb.Tick}] {name(rb.Id)} 冲破瓶颈，跻身 {realmDesc(rb.NewRealmIndex)} 之境。"
+                        : $"[{rb.Tick}] {name(rb.Id)} 冲破瓶颈，境界精进至第 {rb.NewRealmIndex} 重。";
+                    break;
                 default: text = $"[{e.Tick}] (未知事件)"; break;
             }
             _lines.Add(text);

@@ -79,7 +79,7 @@ static void RunCultivation(ulong seed, int steps, int budget)
         var st = c.Cultivation!;
         var def = registry.ById(st.PathId);
         int realmIdx = st.RealmIndex;
-        string realmName = realmIdx < def.Curve.RealmNames.Count ? def.Curve.RealmNames[realmIdx] : $"第{realmIdx}重";
+        string realmName = realmIdx < def.Curve.RealmNames.Count ? RealmQuery.Describe(def.Curve, realmIdx).Display : $"第{realmIdx}重";
         int pe = PowerEngine.Evaluate(st, c.Stats, def, LimitsConfig.Default);
         Console.WriteLine(
             $"【{c.Persona.Name}】{def.Name}({st.PathId}) · {realmName}(realm{realmIdx}) · " +

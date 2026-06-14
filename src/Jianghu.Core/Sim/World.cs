@@ -216,7 +216,8 @@ namespace Jianghu.Sim
             if (next != st.RealmIndex)
             {
                 st.RealmIndex = next;
-                Chronicle.Append(new RealmBreakthrough(Clock, actor.Id, next), NameOf);
+                Chronicle.Append(new RealmBreakthrough(Clock, actor.Id, next), NameOf,
+                                 fi => RealmQuery.Describe(curve, fi).Display);  // A1.5 大小境界·UT 渲染（on 专属，off 不入此径）
             }
         }
 
