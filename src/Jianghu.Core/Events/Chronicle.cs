@@ -22,6 +22,8 @@ namespace Jianghu.Events
                 case DuelResolved d: text = $"[{d.Tick}] {name(d.Winner)} 与 {name(d.Loser)} 切磋，胜（差 {d.Margin}）。"; break;
                 case RelationChanged r: text = $"[{r.Tick}] {name(r.From)} 对 {name(r.To)} 情谊变为 {r.NewValue}。"; break;
                 case CharacterDied x: text = $"[{x.Tick}] {name(x.Id)} 寿尽，享年 {x.Age}，江湖再无此人。"; break;
+                case PathEntered p: text = $"[{p.Tick}] {name(p.Id)} 拜入 {p.PathId} 一脉，自此踏上修行路。"; break;
+                case RealmBreakthrough rb: text = $"[{rb.Tick}] {name(rb.Id)} 冲破瓶颈，境界精进至第 {rb.NewRealmIndex} 重。"; break;
                 default: text = $"[{e.Tick}] (未知事件)"; break;
             }
             _lines.Add(text);

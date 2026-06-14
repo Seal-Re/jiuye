@@ -10,4 +10,6 @@ namespace Jianghu.Events
     public sealed record DuelResolved(long Tick, CharacterId Winner, CharacterId Loser, int Margin) : DomainEvent(Tick);
     public sealed record RelationChanged(long Tick, CharacterId From, CharacterId To, int Delta, int NewValue) : DomainEvent(Tick);
     public sealed record CharacterDied(long Tick, CharacterId Id, long Age) : DomainEvent(Tick);
+    public sealed record PathEntered(long Tick, CharacterId Id, string PathId) : DomainEvent(Tick);
+    public sealed record RealmBreakthrough(long Tick, CharacterId Id, int NewRealmIndex) : DomainEvent(Tick);
 }

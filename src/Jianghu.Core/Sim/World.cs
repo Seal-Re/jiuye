@@ -173,7 +173,9 @@ namespace Jianghu.Sim
 
             var result = PathAssigner.Assign(ch.Persona.Tags, registry, _cultRng);
             ch.Cultivation = result.State; // 散修时为 null
-            // Phase 3：此处产 PathEntered(Clock, ch.Id, result.PathId) 入 Chronicle。
+            // 定路成功（非散修）→ 产 PathEntered 入史（事件单源 §11）。散修不入史。
+            if (result.State != null && result.PathId != null)
+                Chronicle.Append(new PathEntered(Clock, ch.Id, result.PathId), NameOf);
         }
 
         /// <summary>深拷贝快照（v1.0 用 Clone；JSON 序列化是 v1.1）。逝者/Sect/Nodes 在 v1.0 不再变更，浅拷贝引用安全。</summary>
