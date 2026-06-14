@@ -6,7 +6,7 @@
 > 最后审计：2026-06-14。
 
 ## 当前 WIP 状态（红线 A.5：doing≤2）
-**doing = 1** → EPIC-A1-收尾（A1.3 命名 impl 在制）。停泊：pixel/ spike 未提交（EPIC-TIDY）。
+**doing = 1** → EPIC-A1-收尾（A1.3 命名 ✅done `436e7f9`；下一子任务 A1.5 渲染待启）。停泊：pixel/ spike 未提交（EPIC-TIDY）。
 
 ## 阶段地图（宏观·简要）
 > 派生视图，真相仍在下方任务块。✅完成 / 🔨在制 / 📐设计完未建 / ❌未设计 / 🧪spike
@@ -30,12 +30,12 @@
 | A1.0 RealmCurveDef 加三列 schema | ✅ | `daf4363` |
 | A1.1 Validate 扩多列校验 | ✅ | `daf4363` |
 | A1.2 前缀和投影+INV-REALM-1+4偏离路UT迁移 | ✅ | `18c521a`/`19d6ead` 224绿 |
-| A1.3 统一双轨命名 | 🔨 设计✅`573aabe` / impl在制 | — |
+| A1.3 统一双轨命名 | ✅ | 设计`573aabe` + impl`436e7f9`，227绿(224+3护栏) |
 | A1.4 辅助路 UT 战斗当量重锚 | ⛔ blocked | 依赖阶段5 BALANCE |
 | A1.5 三轴查询API+大小境界渲染 | ⬜ todo | 含 MajorRealmNames 决策 |
 | A1.6 境界竖切 gate | ⬜ todo | INV-REALM/UT-MONO/off逐字节/auditor |
 
-> 阶段3 进度：schema+投影+迁移层 done(A1.0-1.2)；命名设计done·impl在制(A1.3)；A1.4阻塞、A1.5/1.6待。
+> 阶段3 进度：schema+投影+迁移层 done(A1.0-1.2)；命名 done(A1.3,227绿)；A1.4阻塞、A1.5/1.6待。
 
 ---
 
@@ -53,9 +53,9 @@
 ## DOING（在制，≤2）
 
 - [ ] **EPIC-A1-收尾：境界竖切剩余**（分支 feat/jianghu-v1.2-A1）— doing
-  - [ ] **A1.3 统一双轨命名** — 设计稿 ✅ written（`specs/...A1.3-统一双轨命名-design.md`），**待用户审** → 审过转 impl
-    - 设计要点：双轨参照(修士轨‖武夫轨) + 21路命名总表 + 规整(魔修UT错位bug/雷错字/体名实不符) + 小境界两层模型 + determinism安全
-    - impl 待办：safe rename §3标▲路(魔8名全改/雷2/体顶/法顶/阵顶/鬼2/毒蛊2/符2) + 跨路命名一致性测试(护栏魔bug) + off逐字节
+  - [x] **A1.3 统一双轨命名** ✅ done — 设计`573aabe` + impl`436e7f9`；227绿(224+3护栏)，off逐字节守，IL浮点零
+    - 落：8路RealmNames规整(魔8名修UT错位bug/雷错字/体名实/法阵补flavor顶/鬼·毒蛊去backbone混入/符顶flavor)+注释同步 + RealmNamingConsistencyTests护栏(backbone名⇒canonicalUT)
+    - DoD余项显式转交：A1.5 接 MajorRealmNames存储+命/体大境界名(设计§2/§3.1)；A1.4 接 魔/阵顶UT11→UT12结构迁移(设计§5，非命名，deferred依赖阶段5)
   - [ ] A1.5 三轴查询 API + Chronicle 大小境界渲染（含 MajorRealmNames 存储决策、命/体大境界名落定）
   - [ ] A1.6 境界竖切 gate（INV-REALM-1/INV-UT-MONO/off逐字节/auditor）
 
