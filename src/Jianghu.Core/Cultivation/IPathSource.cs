@@ -27,6 +27,24 @@ namespace Jianghu.Cultivation
             Add(BodyHenglianPath.Def);
             Add(FaXiuPath.Def);
             Add(GhostYangHunPath.Def);
+            // —— Phase 5：其余 17 路全量入册（不舍弃任何路径）。——
+            Add(DanXiuPath.Def);
+            Add(QixiuArtificerPath.Def);
+            Add(ArrayFormationPath.Def);
+            Add(SoulDivineSensePath.Def);
+            Add(LeiXiuPath.Def);
+            Add(BuddhistGoldenBodyPath.Def);
+            Add(MingFateCausalityPath.Def);
+            Add(YuShouPath.Def);
+            Add(RuXiuHaoranPath.Def);
+            Add(MoXiuXinmoPath.Def);
+            Add(YaoXiuHuaxingPath.Def);
+            Add(XueXiuXueshaPath.Def);
+            Add(DuGuXiuPath.Def);
+            Add(FuXiuFuluPath.Def);
+            Add(KuileiShiPath.Def);
+            Add(YinXiuYuedaoPath.Def);
+            Add(YinguoFazePath.Def);
         }
 
         // Phase 5 逐路追加。
