@@ -21,8 +21,10 @@ namespace Jianghu.Cultivation
 
         public CodePathSource()
         {
-            // —— Phase 4 起逐路注册（范式：剑修 sword_immortal）。Phase 5 续填其余 20 路。——
+            // —— Phase 4 起逐路注册（范式：剑修 sword_immortal）。Phase 4 续：体修/法修/鬼修 三代表路。
+            //    Phase 5 续填其余路。——
             Add(SwordImmortalPath.Def);
+            Add(BodyHenglianPath.Def);
         }
 
         // Phase 5 逐路追加。
