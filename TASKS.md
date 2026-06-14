@@ -57,7 +57,8 @@
   - [x] B5.0 平衡标定设计稿（解析校准 mul=target×10/BaseSum）`336280d`
   - [x] batch1 PowerMatrix dump harness — 实测 spread 27-140x，233绿
   - [x] **R2 战斗设计稿** ✅（`specs/...B5-R2战斗系统重设计-design.md`）— 三层(通用维/公共武技/门派战斗方式)+相克复用SituationalResolver+3回合同时结算+pe量级锚+worked example自洽(修先手偏置)
-  - [ ] **R2 迭代设计（本会话拍，暂存 R2稿§14 待续）**：①功法门控防御(闪避需轻功/护体需内功,简版无真气资源) ②法宝=数值底+配套功法战斗效果(器修御宝流) ③**模块化EffectOp+稀有度**(普通/稀有/唯一,越好越复杂) — 🔖**恢复点=勘 EffectOp.cs/EffectOpKind enum → 设计模块库+稀有度+R2应用 → 折入§1-13主体 → writing-plans → impl**
+  - [x] **规则齐全审计**（4路并发审计21路 OnUse+Note+derived）— 裁决: **设计齐全但结构化近空白**(机器只读 Cost/AddResource/flag, 真机制全埋 Note, AddPenInteger.Amount 全占位); 自读 EffectOp.cs 证 ComputeOnUseDelta 只 return Amount; 归纳模块机制族(普通4/稀有9族/唯一签名11+)
+  - [ ] **R2 迭代设计 = 分层全量模块系统**（brainstorming 中）：①功法门控防御(闪避需轻功/护体需内功, 简版无真气) ②法宝=数值底+配套功法战斗效果(器修御宝流) ③模块化 EffectOp **三档**(普通/稀有参数化Kind复用 + 唯一Special-handler) + **trigger**(onUse/onDefend/passive) — **分层全量定义钉死: 所有招进统一模块框架 + 普通/稀有档全结构化即时参战(够当前版本21路全跑起来), 唯一档框架就位逐路增量**; 真·100%结构化 → EPIC-COMBAT-FULLSTRUCT(下方TODO)
   - [ ] **B5.R2 impl**（设计折毕+审过后拆）：DuelEngine.ResolveR2 → 通用武技池 → 模块库(EffectOp战斗机制) → 接SparAction ON分支(off不动) → 相克数据行 → narrator → INV-CROSS gate(R2版) → 辅助路UT实测重锚(解A1.4)
   - 依赖：无（A.1已合）。解阻塞：A1.4(辅助路UT重锚并入此)
   - DoD：同UT≥2战斗路 1v1 胜率∈[40,60]% gate + 辅助路UT锚战斗当量 + 全量绿 + off逐字节 + auditor
@@ -74,6 +75,14 @@
 - [ ] **EPIC-A1-余项**（10态流程/4劫/5失败/寿元）— 设计完（A2-FINAL/A123）
 - [ ] **EPIC-A2**（道心/破单调/奇遇自建storylet/闭关）— 设计完（A3-FINAL/A123）
 - [ ] **EPIC-A3**（转职/觉醒/双修）
+- [ ] **EPIC-COMBAT-FULLSTRUCT：真·全量机制结构化** 🔴 deferred — 启动条件 = 分层全量架构侧 done + 测试过(EPIC-COMBAT-R2)。**当前"分层全量"只够当前版本所有角色跑起来(普通/稀有档参战)**；本 epic 把 21 路 100% 机制从 Note 升为结构化算子。依赖底层(A.0 deferred，均未建，来自规则审计):
+  - [ ] derived:* 求和 provider(Σ鬼兵/Σ傀儡/Σ召唤兽/蛊群/stockFirepower/fleetWeighted 真派生，现全返0)
+  - [ ] 克制矩阵 SituationalEdges(灭阴×3/anti_evil×3/克邪×2/元素相生克，Phase3)
+  - [ ] PostMul ModKind + 负向压制(化形态×9/10、文宫×6/5、天道压制 LawSuppress 需负clamp)
+  - [ ] dot 时序 / 召唤物系统 / 结算回滚栈(因果逆演/夺舍续命/分魂挡刀)
+  - [ ] 结构化 Gate 字段(CombatSkillDef/ArtDef 加 Gates 列：开光jianCheng=100/合道lawBound==1/spellBreadth=4)
+  - [ ] 唯一档签名机制逐路全迁(落宝/炸阵/夺舍/金身态/因果栈/律场总门/布阵门控…)
+  - [ ] 非战斗机制(丹修改人四维+造关系边 ApplyStatDelta/AdjustRelationEdge；卖丹换realm 经济晋升)
 - [ ] **EPIC-BALANCE：平衡标定 INV-CROSS** 🔴 — 设计完，**最大功能缺口**（同UT 24-70×失衡）
 - [ ] **EPIC-B 戏剧引擎** — 设计完零代码
 - [ ] **EPIC-C 地图系统** — 设计完零代码
