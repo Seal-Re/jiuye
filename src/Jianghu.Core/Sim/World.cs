@@ -160,9 +160,6 @@ namespace Jianghu.Sim
         /// <summary>cultivation-on 时是否已构造修炼子流（off=false）。</summary>
         public bool CultivationEnabled => _cultRng != null;
 
-        // A.0 生成期灵根 tag 池（最小诚实集，对齐已知路线根 tag；内容补遗的全量灵根池属后续 spec）。
-        private static readonly string[] RootTagPool = { "sword_root", "body_root", "spirit_root", "yin_root" };
-
         /// <summary>
         /// 生成期定路接线（spec §10）：仅 cultivation-on。经 _cultRng 生成 Persona.Tags（灵根）→
         /// PathAssigner.Assign 定路 + 选功法战技 → 挂 Character.Cultivation。off（_cultRng==null）→ 无操作。
@@ -182,8 +179,13 @@ namespace Jianghu.Sim
         {
             if (_cultRng == null) return; // off：不消费 _cultRng（已为 null）
 
+            // 灵根 tag 池从注册表派生（Phase2 #6 缺口修）：= 全注册路 EntryGate 所需 tag 并集（排序去重，确定性）。
+            // 加路 → 新路 gate tag 自动入池 → 自动可定。空池（无任何 gate tag）→ 不抽 tag，留散修（不消费随机）。
+            var pool = registry.RootTagPool();
+            if (pool.Count == 0) { ch.Cultivation = null; return; }
+
             // 灵根 tag（经修炼子流 _cultRng，与 genRng/v1.0 轨迹无交叉）。
-            string root = RootTagPool[_cultRng.NextInt(RootTagPool.Length)];
+            string root = pool[_cultRng.NextInt(pool.Count)];
             ch.Persona = ch.Persona with { Tags = new[] { root } };
 
             var result = PathAssigner.Assign(ch.Persona.Tags, registry, _cultRng);

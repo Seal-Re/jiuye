@@ -86,6 +86,24 @@ namespace Jianghu.Cultivation
                 if (t == want) return true;
             return false;
         }
+
+        /// <summary>
+        /// 列出本闸所需的全部 tag（谓词原子 <c>tag:X</c> 的 X 集，按声明序）。空谓词=空表。
+        /// 供生成期从注册表派生灵根 tag 池（Phase2 #6 缺口修：加路自动可定）。不消费随机。
+        /// </summary>
+        public IReadOnlyList<string> RequiredTags()
+        {
+            var tags = new List<string>();
+            foreach (var raw in Pred.Split('&'))
+            {
+                var atom = raw.Trim();
+                if (atom.Length == 0) continue;
+                if (!atom.StartsWith("tag:", System.StringComparison.Ordinal))
+                    throw new System.ArgumentException($"未知 EntryGate 谓词原子: {atom}");
+                tags.Add(atom.Substring("tag:".Length));
+            }
+            return tags;
+        }
     }
 
     /// <summary>选功法/战技规则（战技抽取 [Min,Max]）。</summary>

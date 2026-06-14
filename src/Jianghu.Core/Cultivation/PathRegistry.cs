@@ -23,6 +23,20 @@ namespace Jianghu.Cultivation
         public IReadOnlyList<CultivationPathDef> All => _all;
 
         public CultivationPathDef ById(string pathId) => _byId[pathId];
+
+        /// <summary>
+        /// 生成期灵根 tag 池（Phase2 #6 缺口修）：= 全注册路 EntryGate 所需 tag 的并集，
+        /// **排序去重**（确定性，Ordinal 升序）。加路 → 新路 gate tag 自动入池 → 自动可被定路。
+        /// 散修不碰此池；off 不构造注册表故不调用。
+        /// </summary>
+        public IReadOnlyList<string> RootTagPool()
+        {
+            var set = new SortedSet<string>(StringComparer.Ordinal);
+            foreach (var p in _all)
+                foreach (var tag in p.EntryGate.RequiredTags())
+                    set.Add(tag);
+            return new List<string>(set);
+        }
     }
 
     /// <summary>
