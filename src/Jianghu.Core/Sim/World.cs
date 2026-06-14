@@ -113,6 +113,8 @@ namespace Jianghu.Sim
                 var events = _actions.Execute(this, actor, choice);
                 foreach (var e in events) { Project(actor, e); Chronicle.Append(e, NameOf); }
 
+                AdvanceCultivation(actor); // on：行动后累加本路修为 + 判突破（off=无操作）
+
                 _lifecycle.Tick(actor, this, out var died);
                 if (died != null) { Chronicle.Append(died, NameOf); RemoveDead(actor); continue; }
 
@@ -179,6 +181,33 @@ namespace Jianghu.Sim
             // 定路成功（非散修）→ 产 PathEntered 入史（事件单源 §11）。散修不入史。
             if (result.State != null && result.PathId != null)
                 Chronicle.Append(new PathEntered(Clock, ch.Id, result.PathId), NameOf);
+        }
+
+        // A.0 每次行动累加的本路修为定额（确定性，不掷随机 → 无运行期 _cultRng 消费）。
+        private const int CultivationGainPerAction = 1;
+        // 修为累加器 Flags 保留键（@ 前缀避免与功法 WeightStepKey 数据键冲突）。
+        private const string XiuweiFlag = "@xiuwei";
+
+        /// <summary>
+        /// on：角色行动后累加本路修为 → <see cref="RealmCurve.NextIndexIfReady"/> 判突破（A.0 确定性，
+        /// 达阈即升不掷随机，封顶不越界）→ 改 RealmIndex + 产 <see cref="RealmBreakthrough"/> 入史。
+        /// off（Cultivation==null）/ 散修 / 无注册表 → 无操作（off 无此路径）。
+        /// </summary>
+        private void AdvanceCultivation(Character actor)
+        {
+            var st = actor.Cultivation;
+            if (st == null || _registry == null) return;
+
+            int points = (st.Flags.TryGetValue(XiuweiFlag, out int v) ? v : 0) + CultivationGainPerAction;
+            st.Flags[XiuweiFlag] = points;
+
+            var curve = _registry.ById(st.PathId).Curve;
+            int next = RealmCurve.NextIndexIfReady(st.RealmIndex, points, curve);
+            if (next != st.RealmIndex)
+            {
+                st.RealmIndex = next;
+                Chronicle.Append(new RealmBreakthrough(Clock, actor.Id, next), NameOf);
+            }
         }
 
         /// <summary>深拷贝快照（v1.0 用 Clone；JSON 序列化是 v1.1）。逝者/Sect/Nodes 在 v1.0 不再变更，浅拷贝引用安全。</summary>
