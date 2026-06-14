@@ -6,7 +6,7 @@
 > 最后审计：2026-06-14。
 
 ## 当前 WIP 状态（红线 A.5：doing≤2）
-**doing = 1** → EPIC-A1-收尾（A1.3 命名 ✅done `436e7f9`；下一子任务 A1.5 渲染待启）。停泊：pixel/ spike 未提交（EPIC-TIDY）。
+**doing = 0** → 阶段3 A.1 境界竖切已闭（232绿，auditor过）。停泊：pixel/（EPIC-TIDY）；A1.4 重锚 blocked→阶段5。待用户定下一阶段。
 
 ## 阶段地图（宏观·简要）
 > 派生视图，真相仍在下方任务块。✅完成 / 🔨在制 / 📐设计完未建 / ❌未设计 / 🧪spike
@@ -16,7 +16,7 @@
 | 0 | 世界观地基（九野WorldBible+21路+地图/宗门） | ✅ | canonical docs |
 | 1 | 内核竖切 v1.0（事件驱动/Pcg32/RuleBrain/生老死） | ✅ | 38测试 master |
 | 2 | 修炼骨架 A.0（引擎+21路全入册+软战斗+基础realm+CLI） | ✅ | 204测试 master `579659f` |
-| **3** | **境界深化 A.1（大小境界双层/三轴/UT平衡/命名）** | 🔨**当前** | feat/jianghu-v1.2-A1 224绿 |
+| **3** | **境界深化 A.1（大小境界双层/三轴/UT平衡/命名）** | ✅ 竖切闭 | feat/jianghu-v1.2-A1 232绿,auditor过（A1.4→阶段5）|
 | 4 | 修炼深度层（A.1余10态/劫/寿元 + A.2道心/奇遇/闭关 + A.3转职/双修） | 📐 | 设计完 |
 | 5 | 平衡标定 INV-CROSS（跨路战力当量）🔴最大功能缺口 | 📐 | 方法设计完·零实现 |
 | 6 | 系统三件（B戏剧 / C地图 / D门派） | 📐 | 设计完·零代码 |
@@ -32,10 +32,10 @@
 | A1.2 前缀和投影+INV-REALM-1+4偏离路UT迁移 | ✅ | `18c521a`/`19d6ead` 224绿 |
 | A1.3 统一双轨命名 | ✅ | 设计`573aabe` + impl`436e7f9`，227绿(224+3护栏) |
 | A1.4 辅助路 UT 战斗当量重锚 | ⛔ blocked | 依赖阶段5 BALANCE |
-| A1.5 三轴查询API+大小境界渲染 | ⬜ todo | 含 MajorRealmNames 决策 |
-| A1.6 境界竖切 gate | ⬜ todo | INV-REALM/UT-MONO/off逐字节/auditor |
+| A1.5 三轴查询API+大小境界渲染 | ✅ | `42ad647` 231绿；段首派生免MajorRealmNames列 |
+| A1.6 境界竖切 gate | ✅ | `3ea18da` 232绿；auditor判过+findings(G1/T2/T1/D1)修 |
 
-> 阶段3 进度：schema+投影+迁移层 done(A1.0-1.2)；命名 done(A1.3,227绿)；A1.4阻塞、A1.5/1.6待。
+> 阶段3 闭：A1.0-1.3+1.5+1.6 全 done(232绿,auditor过)；A1.4(辅助路UT重锚)blocked→并入阶段5 BALANCE。
 
 ---
 
@@ -47,17 +47,13 @@
 - [x] **A.1/2/3 设计**（境界+对齐+A2/A3-FINAL）— 两轮审计，docs `1d66d16`/`a3b7ef1`
 - [x] **A.1 境界竖切 A1.0-A1.2**（三列schema+Validate+投影INV-REALM-1+4偏离路UT迁移）— 证据：224 绿，branch `19d6ead`
 - [x] **EPIC-PROCESS 流程红线**（CLAUDE.md + TASKS.md台账 + PROJECT-STATUS.md审计 + 记忆）— 据联网研究AI-agent最佳实践确立，证据：master `8eca0ed`，DoD全勾
+- [x] **A.1 境界竖切 A1.3+A1.5+A1.6**（统一双轨命名 + 三轴查询/大小境界渲染 + gate）— 证据：**232 绿**，auditor 独立复核判过(findings G1/T2/T1/D1 已修)，off逐字节守/IL浮点零；branch `3ea18da`。**A1.4(辅助路UT重锚) deferred→阶段5 BALANCE**（blocked，非静默）
 
 ---
 
 ## DOING（在制，≤2）
 
-- [ ] **EPIC-A1-收尾：境界竖切剩余**（分支 feat/jianghu-v1.2-A1）— doing
-  - [x] **A1.3 统一双轨命名** ✅ done — 设计`573aabe` + impl`436e7f9`；227绿(224+3护栏)，off逐字节守，IL浮点零
-    - 落：8路RealmNames规整(魔8名修UT错位bug/雷错字/体名实/法阵补flavor顶/鬼·毒蛊去backbone混入/符顶flavor)+注释同步 + RealmNamingConsistencyTests护栏(backbone名⇒canonicalUT)
-    - DoD余项显式转交：A1.5 接 MajorRealmNames存储+命/体大境界名(设计§2/§3.1)；A1.4 接 魔/阵顶UT11→UT12结构迁移(设计§5，非命名，deferred依赖阶段5)
-  - [ ] A1.5 三轴查询 API + Chronicle 大小境界渲染（含 MajorRealmNames 存储决策、命/体大境界名落定）
-  - [ ] A1.6 境界竖切 gate（INV-REALM-1/INV-UT-MONO/off逐字节/auditor）
+_（空 — WIP=0。阶段3 A.1境界竖切已闭，待用户定下一阶段方向）_
 
 ---
 
