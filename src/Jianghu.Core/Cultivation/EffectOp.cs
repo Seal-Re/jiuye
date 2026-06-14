@@ -25,11 +25,24 @@ namespace Jianghu.Cultivation
         Cost,              // 消耗资源（不足则拒）
     }
 
+    /// <summary>战斗期算子的触发时机：OnUse 主动使用 / OnDefend 受击防御 / Passive 被动常驻。</summary>
+    public enum EffectTrigger { OnUse, OnDefend, Passive }
+
+    /// <summary>模块算子稀有度：Common 常见 / Rare 稀有 / Unique 独门。</summary>
+    public enum EffectRarity  { Common, Rare, Unique }
+
     /// <summary>
     /// 单个整数算子（spec §7）。<see cref="Key"/> = 资源/标志/权重台阶键；
     /// <see cref="Amount"/> = 整数量；<see cref="Note"/> = flavor，不参与结算。
+    /// <see cref="Amount2"/> = 次参/分母（den），默认 0；
+    /// <see cref="Trigger"/> = 战斗期何时 fire，默认 OnUse；
+    /// <see cref="Rarity"/> = 稀有度，默认 Common。
     /// </summary>
-    public sealed record EffectOp(EffectOpKind Kind, string? Key, int Amount, string? Note);
+    public sealed record EffectOp(
+        EffectOpKind Kind, string? Key, int Amount, string? Note,
+        int Amount2 = 0,
+        EffectTrigger Trigger = EffectTrigger.OnUse,
+        EffectRarity Rarity = EffectRarity.Common);
 
     /// <summary>
     /// 有限算子集解释器（spec §7），确定性纯整数。
