@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Jianghu.Cultivation.Paths;
 
 namespace Jianghu.Cultivation
 {
@@ -11,13 +12,20 @@ namespace Jianghu.Cultivation
     }
 
     /// <summary>
-    /// 内置代码路线源（spec §3 paths/*.cs）。A.0-B3 先空表；Phase 4/5 逐路 <see cref="Add"/> 填 21 路。
+    /// 内置代码路线源（spec §3 paths/*.cs）。构造时注册已实现的内置路（Phase 4：剑修范式路起，
+    /// Phase 5 逐路 <see cref="Add"/> 续填至 21 路）。每路 def 经 PathValidator 门控（数据质量 gate）。
     /// </summary>
     public sealed class CodePathSource : IPathSource
     {
         private readonly List<CultivationPathDef> _paths = new List<CultivationPathDef>();
 
-        // Phase 4/5 逐路追加（本 task 不填路）。
+        public CodePathSource()
+        {
+            // —— Phase 4 起逐路注册（范式：剑修 sword_immortal）。Phase 5 续填其余 20 路。——
+            Add(SwordImmortalPath.Def);
+        }
+
+        // Phase 5 逐路追加。
         public void Add(CultivationPathDef def) => _paths.Add(def);
 
         public IReadOnlyList<CultivationPathDef> Load() => _paths;

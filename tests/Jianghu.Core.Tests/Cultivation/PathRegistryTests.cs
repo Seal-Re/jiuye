@@ -9,8 +9,10 @@ public class PathRegistryTests
     [Fact]
     public void Registry_ValidatesEveryPath()
     {
-        // A.0-B3：CodePathSource 先空表（Phase 4/5 逐路填 21 路）。空注册表过即 gate 接通。
+        // Phase 4 起 CodePathSource 注册内置路（剑修范式路，Phase 5 续填至 21 路）。
+        // 每路必过 PathValidator 全部数据校验 gate（数据质量门控）。
         var reg = new PathRegistry(new CodePathSource());
+        Assert.NotEmpty(reg.All); // 已有内置路（剑修起）
         foreach (var p in reg.All)
             PathValidator.AssertValid(p); // 不抛即过
     }
