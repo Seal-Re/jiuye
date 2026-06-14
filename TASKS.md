@@ -5,8 +5,8 @@
 > 会话开始读此、结束前回写。**WIP(doing) ≤ 2**。审计 cadence：每阶段边界/~5-8 步对账。
 > 最后审计：2026-06-14。
 
-## ⚠️ 当前 WIP 违规（红线 A.5：doing≤2）
-同时挂着：A.1 境界竖切、pixel、仓库整理 → **超 WIP**。收敛：先做完一个再开下一个。
+## 当前 WIP 状态（红线 A.5：doing≤2）
+**doing = 0**（EPIC-PROCESS 已 done `8eca0ed`）。停泊中（非 doing）：`feat/jianghu-v1.2-A1` 分支半成(A1.0-1.2/224 绿，A1.3-1.6 待续)；pixel/ spike 未提交。开新任务前确认方向。
 
 ---
 
@@ -17,18 +17,13 @@
 - [x] **World Bible《九野》+ 21路深度 + 地图/宗门 设计** — canonical docs committed
 - [x] **A.1/2/3 设计**（境界+对齐+A2/A3-FINAL）— 两轮审计，docs `1d66d16`/`a3b7ef1`
 - [x] **A.1 境界竖切 A1.0-A1.2**（三列schema+Validate+投影INV-REALM-1+4偏离路UT迁移）— 证据：224 绿，branch `19d6ead`
-- [x] **流程红线 + CLAUDE.md + PROJECT-STATUS.md + TASKS.md** — 据研究确立，本批
+- [x] **EPIC-PROCESS 流程红线**（CLAUDE.md + TASKS.md台账 + PROJECT-STATUS.md审计 + 记忆）— 据联网研究AI-agent最佳实践确立，证据：master `8eca0ed`，DoD全勾
 
 ---
 
 ## DOING（在制，≤2）
 
-- [ ] **EPIC-PROCESS：流程红线落地** — doing
-  - [x] 联网研究流程最佳实践
-  - [x] CLAUDE.md 红线（A流程+B技术）
-  - [x] TASKS.md 台账（本文）
-  - [ ] 存记忆（流程红线跨会话）
-  - [ ] git 提交（CLAUDE.md/TASKS.md/PROJECT-STATUS.md）— DoD：sha 落
+_（空 — WIP=0，待用户定下一任务方向）_
 
 ---
 
@@ -76,3 +71,4 @@
 ## 审计记录
 
 - 2026-06-14：首次审计。建台账。发现：A1.4 静默defer（已转blocked标依赖）；任务清单#14-22 stale 已弃；WIP 超限（3 doing）；pixel v2 broken。
+- 2026-06-14(第二次)：机器核验。`git log` 实证 master=`8eca0ed`、`feat/jianghu-v1.2-A1`=`19d6ead`(224绿在)、status仅`?? pixel/`。回写：EPIC-PROCESS 双挂修正(DONE 唯一+sha)；WIP警告纠为 doing=0；删工具 stale task #18/#22(superseded by EPIC-B)。确认：`.gitignore` 漏 `_research/raw3/`(22跟踪文件)与 `pixel/out/`(EPIC-TIDY 待补)。未重跑测试(已commit验过，git证)。
