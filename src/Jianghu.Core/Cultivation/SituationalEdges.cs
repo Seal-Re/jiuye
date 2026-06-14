@@ -27,7 +27,13 @@ namespace Jianghu.Cultivation
             // —— form：死物免精神（守方死物构装 & 攻方走精神攻击轴 → 几近无效）——
             new SituationalEdge("form", "defender.tag:undead_construct & attacker.axis:spirit_attack", -100),
 
-            // —— time：昼夜（夜间 & 攻方阴属/鬼 → 增益；A.0 无环境源时此边不命中，Phase 4.5 接 env）——
+            // —— spirit：魂力绕物防（鬼修代表路所涉，深度设计「spirit 维攻防绕物防,弃肉身」）。
+            //    攻方走魂力 spirit_attack tag & 守方靠肉身 body 横练 → 物理罩门挡不住魂念,攻方增益。
+            //    零 PathId（只认 spirit_attack/body tag），系数照深度设计「绕物防」语义取正 adj。——
+            new SituationalEdge("spirit", "attacker.tag:spirit_attack & defender.tag:body", +12),
+
+            // —— time：昼夜（夜间 & 攻方阴属/鬼 → 增益；Bible §6.4 daynight 轴；env:is_night 由战斗上下文供，
+            //    A.0 SparAction env 暂空此边不在切磋命中，直接喂 env 的 SituationalResolver 测试可验，Phase 4.5 接 SparAction env）——
             new SituationalEdge("time", "env:is_night=1 & attacker.tag:ghost", +10),
         };
     }
