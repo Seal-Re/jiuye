@@ -51,6 +51,8 @@ public class LeiXiuStandaloneTests
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.UnifiedTierOf.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmNames.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmThresholds.Count);
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.SubLevelCount.Sum());
 
         // SituationalTags = 属性/形态 tag（非对手 PathId）：雷修纯阳破邪声明 thunder/spirit_attack/righteous。
         Assert.Equal(new[] { "thunder", "spirit_attack", "righteous" }, d.SituationalTags);

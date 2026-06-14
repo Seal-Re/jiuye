@@ -33,7 +33,8 @@ namespace Jianghu.Core.Tests.Cultivation
                     new[] { 10, 15, 25 },
                     new[] { 0, 1, 2 },
                     new[] { "凝气", "小成", "大成" },
-                    new[] { 0, 100, 300 }),
+                    new[] { 0, 100, 300 },
+                    new[] { 1, 1, 1 }, true, 2),
                 new[]
                 {
                     new ArtCategoryDef("剑法", "attack", 1, 1, new[]
@@ -87,7 +88,8 @@ namespace Jianghu.Core.Tests.Cultivation
                     new[] { 10, 15, 25 },
                     new[] { 0, 1, 2 },
                     new[] { "凝气", "小成", "大成" },
-                    new[] { 0, 100, 300 }),
+                    new[] { 0, 100, 300 },
+                    new[] { 1, 1, 1 }, true, 2),
                 new[]
                 {
                     Cat("攻法", "attack"),

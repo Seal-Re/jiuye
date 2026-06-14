@@ -52,12 +52,18 @@ namespace Jianghu.Cultivation
     /// per-path 战力曲线（spec §9）。四列等长校验属 Task 1.5（M4）。
     /// RealmMultipliers[i] = 第 i 境界倍率（整数，÷10 定点）；UnifiedTierOf[i] = UT0-12 映射；
     /// RealmNames[i] = 境界称谓；RealmThresholds[i] = 升入第 i 境所需修为阈值。
+    /// —— A.1 新增（境界稿 §2）：SubLevelCount[major] = 每大境界小境界数（前缀和投影输入，
+    /// 长度=大境界数，Σ==flatIndex 数）；CanAscend = 修士 true/武夫 false；MaxMajor = 最高大境界索引。
+    /// 新三列不进运行期（PowerEngine/NextIndexIfReady 不读），仅供 schema 校验/投影/查询。
     /// </summary>
     public sealed record RealmCurveDef(
         IReadOnlyList<int> RealmMultipliers,
         IReadOnlyList<int> UnifiedTierOf,
         IReadOnlyList<string> RealmNames,
-        IReadOnlyList<int> RealmThresholds);
+        IReadOnlyList<int> RealmThresholds,
+        IReadOnlyList<int> SubLevelCount,
+        bool CanAscend,
+        int MaxMajor);
 
     /// <summary>
     /// 入门闸（纯查询谓词，读 Persona.Tags）。<see cref="Pred"/> = 小谓词 DSL：

@@ -39,6 +39,8 @@ public class MoXiuXinmoStandaloneTests
         Assert.Equal(curve.RealmMultipliers.Count, curve.UnifiedTierOf.Count);
         Assert.Equal(curve.RealmMultipliers.Count, curve.RealmNames.Count);
         Assert.Equal(curve.RealmMultipliers.Count, curve.RealmThresholds.Count);
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        Assert.Equal(curve.RealmMultipliers.Count, curve.SubLevelCount.Sum());
 
         // terms 无 ×0（R6）、无 daoHeart/innerDemon（R3）。
         Assert.All(d.Power.Terms, t => Assert.NotEqual(0, t.Weight));

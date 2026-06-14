@@ -51,6 +51,8 @@ public class MingFateCausalityStandaloneTests
         Assert.Equal(cv.RealmMultipliers.Count, cv.UnifiedTierOf.Count);
         Assert.Equal(cv.RealmMultipliers.Count, cv.RealmNames.Count);
         Assert.Equal(cv.RealmMultipliers.Count, cv.RealmThresholds.Count);
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        Assert.Equal(cv.RealmMultipliers.Count, cv.SubLevelCount.Sum());
 
         // SituationalTags = 属性/形态 tag（非已知 21 路对手 PathId，R2）。
         Assert.NotEmpty(d.SituationalTags);

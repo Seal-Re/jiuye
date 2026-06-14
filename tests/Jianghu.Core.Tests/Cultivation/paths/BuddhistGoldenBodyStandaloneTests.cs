@@ -52,6 +52,8 @@ public class BuddhistGoldenBodyStandaloneTests
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.UnifiedTierOf.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmNames.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmThresholds.Count);
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.SubLevelCount.Sum());
 
         // SituationalTags = 属性/形态 tag（非对手 PathId）；含克邪签名 tag anti_evil。
         Assert.Equal(new[] { "melee", "righteous", "anti_evil" }, d.SituationalTags);

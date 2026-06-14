@@ -65,6 +65,8 @@ public class YuShouStandaloneTests
         Assert.Equal(c2.RealmMultipliers.Count, c2.UnifiedTierOf.Count);
         Assert.Equal(c2.RealmMultipliers.Count, c2.RealmNames.Count);
         Assert.Equal(c2.RealmMultipliers.Count, c2.RealmThresholds.Count);
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        Assert.Equal(c2.RealmMultipliers.Count, c2.SubLevelCount.Sum());
 
         // 曲线倍率严格递增（厚积/枢纽型也需随境界单调抬升 → PowerEngine×Curve 随 realm 升不回落）。
         for (int i = 1; i < c2.RealmMultipliers.Count; i++)

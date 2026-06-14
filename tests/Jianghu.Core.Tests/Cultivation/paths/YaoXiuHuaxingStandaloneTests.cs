@@ -46,6 +46,8 @@ public class YaoXiuHuaxingStandaloneTests
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.UnifiedTierOf.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmNames.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmThresholds.Count);
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.SubLevelCount.Sum());
 
         // terms 无 ×0（R6）、无 daoHeart/innerDemon（R3）。
         Assert.All(d.Power.Terms, t => Assert.NotEqual(0, t.Weight));

@@ -48,6 +48,8 @@ public class SoulDivineSenseStandaloneTests
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.UnifiedTierOf.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmNames.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmThresholds.Count);
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.SubLevelCount.Sum());
 
         // SituationalTags = 属性/形态 tag（spirit 正交·绕物防），非对手 PathId（R2）；含 spirit_attack。
         Assert.Equal(new[] { "spirit", "spirit_attack", "ranged" }, d.SituationalTags);

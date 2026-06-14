@@ -24,7 +24,8 @@ namespace Jianghu.Core.Tests.Cultivation
                     new[] { 10, 12, 14 },
                     new[] { 0, 1, 2 },
                     new[] { "凝气", "小成", "大成" },
-                    new[] { 0, 3, 6 }),
+                    new[] { 0, 3, 6 },
+                    new[] { 1, 1, 1 }, true, 2),
                 EntryGate = new EntryGateDef("tag:spirit_root"),
             };
             return new ListPathSource(new[] { p });

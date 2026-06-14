@@ -56,6 +56,8 @@ public class YinXiuYuedaoStandaloneTests
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.UnifiedTierOf.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmNames.Count);
         Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.RealmThresholds.Count);
+        // A.1 §2：SubLevelCount 前缀和闭合（Σ == flatIndex 数）。
+        Assert.Equal(d.Curve.RealmMultipliers.Count, d.Curve.SubLevelCount.Sum());
 
         // SituationalTags = 属性/形态 tag（非对手 PathId，R2：不得等于任一已知 canon pathId）。
         Assert.Equal(new[] { "spirit_attack", "ranged", "righteous" }, d.SituationalTags);
