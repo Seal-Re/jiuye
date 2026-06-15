@@ -1,0 +1,14 @@
+# 统一行尾，消除 Windows 下 LF↔CRLF 反复警告。
+# 文本默认 LF；脚本/数据强制 LF（CCGS hooks 是 bash，必须 LF 才能跑）。
+* text=auto eol=lf
+*.sh text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.cs text eol=lf
+*.csproj text eol=lf
+*.sln text eol=lf
+# 二进制不转换
+*.png binary
+*.jpg binary
+*.pdf binary
