@@ -36,6 +36,13 @@ namespace Jianghu.Cultivation
             return v;
         }
 
+        /// <summary>
+        /// 该方是否注册了某资源 key（唯一档 handler 路无关，写前据此判定「该路是否有此资源」，
+        /// 区分「缺该 key」与「有 key 但值 0」——只对**该路存在**的资源经 chokepoint 落副作用，
+        /// 不往无该资源的路硬写（避免 <see cref="CultivationState.ApplyResource"/> 撞 KeyNotFound）。只读，不改 state。
+        /// </summary>
+        public bool HasResource(Side s, string key) => StateOf(s).Resources.ContainsKey(key);
+
         /// <summary>改该方资源（chokepoint）：转发 <see cref="CultivationState.ApplyResource"/>，钳 [Min,Cap]。</summary>
         public void ApplyResource(Side s, string key, int delta)
         {

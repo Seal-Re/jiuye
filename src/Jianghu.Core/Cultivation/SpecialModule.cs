@@ -32,8 +32,15 @@ namespace Jianghu.Cultivation
 
         static SpecialModuleRegistry()
         {
-            // 批1 占位 handler 验框架（批3 加真签名 luobao/explodeArray...）
+            // 批1 占位 handler 验框架。
             Register(new NoopSpecialModule());
+            // 批3 5 唯一档真签名（impl plan 3.1–3.5）：落宝(器)/炸阵(阵)/金身态(佛)/律场总门(音)/夺舍(鬼·魂·魔)。
+            // 各 handler 纪律：纯整数 / 无 RNG / 不读 daoHeart/innerDemon / 副作用经 ApplyResource chokepoint。
+            Register(new LuobaoModule());
+            Register(new ExplodeArrayModule());
+            Register(new GoldenBodyMaxModule());
+            Register(new FieldActiveModule());
+            Register(new DuosheModule());
         }
 
         static void Register(ISpecialModule m)

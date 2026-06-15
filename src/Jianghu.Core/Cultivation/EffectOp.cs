@@ -33,6 +33,8 @@ namespace Jianghu.Cultivation
         Control,           // L1 控场: defender 下Amount回合 selectMove失效
         ReflectDamage,     // L1 反伤(OnDefend): attacker受 incoming*Amount/Amount2(读扣血前/不递归)
         Evade,             // L1 闪避(OnDefend): 减伤=clamp((身法-命中+Amount)*k,0,maxReduce)连续
+        // —— 唯一档逃逸口(L1, B5 §7 M3 纪律): Key=handlerId → SpecialModuleRegistry 派发 ——
+        Special,           // L1 唯一档: ModuleResolver 派发 SpecialModuleRegistry[Key].Apply(ctx,op)→delta(纯整数/chokepoint)
         // 注: SumOfSet 撤(§15.1), 真Σ用 PenFromResource on 标量聚合资源
     }
 

@@ -93,7 +93,16 @@ namespace Jianghu.Cultivation
         public static EffectOp Evade(int amount, string? note = null)
             => new EffectOp(EffectOpKind.Evade, null, amount, note, Trigger: EffectTrigger.OnDefend);
 
-        // —— 唯一档（Unique）签名机制走 SpecialModuleRegistry 注册式插件（批3 接 Kind/派发）；
-        //    本工厂只覆盖普通/稀有档有限算子集，Special 构造待批3 wiring 后补。——
+        // —— 唯一档（Unique）签名机制走 SpecialModuleRegistry 注册式插件 ——
+
+        /// <summary>
+        /// 唯一档签名机制（§7 M3 逃逸口）：Key=handlerId，<see cref="ModuleResolver"/> 派发
+        /// <see cref="SpecialModuleRegistry"/>[handlerId].Apply(ctx,op) → 伤害 delta + chokepoint 副作用。
+        /// 落宝/炸阵/夺舍/金身态/律场总门等独门机制。handler 纪律：纯整数 / 不读 daoHeart / 不掷随机 / 副作用经 chokepoint。
+        /// <paramref name="amount"/>/<paramref name="amount2"/> 供 handler 读参（如阶数/回合数）。
+        /// </summary>
+        public static EffectOp Special(string handlerId, int amount = 0, int amount2 = 0, string? note = null)
+            => new EffectOp(EffectOpKind.Special, handlerId, amount, note,
+                Amount2: amount2, Rarity: EffectRarity.Unique);
     }
 }
