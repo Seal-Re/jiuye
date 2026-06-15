@@ -208,11 +208,13 @@ namespace Jianghu.Cultivation
             var skills = new[]
             {
                 // 起调·点律：把当前节点已蓄满 windupProgress 的曲/乐章全部点亮 fieldActive 0→1（开战核心动作,开场类）。qiYun≥8 + windupProgress 满。
+                // B5 批2：律场总门 fieldActive 点亮(未起调则律场项整体置 0 的 GateByFlag)是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
+                //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger(0)/GrantPassive 占位。
                 new CombatSkillDef("sk_yin_qidiao", "起调·点律", 1,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "把已蓄满windupProgress的曲/乐章全部点亮:fieldActive0→1,律场spirit效果解锁(开战核心动作,对应阵修'落阵·点枢')"),
-                        new EffectOp(EffectOpKind.GrantPassive, "fieldActive", 1, "fieldActive置1(律场总门,Phase3接GateByFlag)"),
+                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "把已蓄满windupProgress的曲/乐章全部点亮:fieldActive0→1(律场总门→batch3 Special defer,GateByFlag),律场spirit效果解锁(开战核心动作)"),
+                        new EffectOp(EffectOpKind.GrantPassive, "fieldActive", 1, "fieldActive置1(律场总门,批3接GateByFlag)"),
                     },
                     new Dictionary<string, int> { { "qiYun", 8 } }),
                 // 急奏·短调：无视常规起调节奏本步立刻起调1首tier≤2曲(应急开场),该律场效果−30%、乐韵双倍耗(被偷家救场手,开场类)。qiYun≥18,消耗18。
@@ -231,8 +233,10 @@ namespace Jianghu.Cultivation
                     },
                     new Dictionary<string, int> { { "qiYun", 6 } }),
                 // 裂石穿云·杀音爆：倾注律场为单点终极一击,对最高威胁者单点spirit真伤=悟性×2+内力×1+qiYun(绕物防),对死物傀儡/尸傀无效(本路罕见强单点仍受无心识免疫硬限)。qiYun≥16,清空一半。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(40) → Modules.PenFromResource(qiYun,×1)（悟性×2+内力×1+qiYun 绕物防,
+                //   乐韵越满单点越痛、见底哑火真差分；Amount2=1 工厂保证 §15.6）。死物免疫硬限走 Phase 3 CounterMatrix。
                 new CombatSkillDef("sk_yin_lieshi", "裂石穿云·杀音爆", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "对全场敌方中最高威胁者单点spirit真伤=悟性×2+内力×1+qiYun(绕物防),对死物傀儡/尸傀无效(无心识免疫硬限,DeadConstructImmune)") },
+                    new[] { Modules.PenFromResource("qiYun", 1, note:"对最高威胁者单点spirit真伤=悟性×2+内力×1+qiYun(qiYun乐韵转伤,绕物防);对死物傀儡/尸傀无效(无心识免疫硬限 Phase3)") },
                     new Dictionary<string, int> { { "qiYun", 16 } }),
                 // 万籁齐鸣·镇场：全律场共振一震,对范围内敌'乱兽/扰心/破奏'反制并清我方被乱被控,全场友方resonance+2、qiYun回+5(反·软控、反·斩首断线,反制/护奏类)。qiYun≥12,消耗12净回。
                 new CombatSkillDef("sk_yin_wanlai", "万籁齐鸣·镇场", 3,
@@ -244,8 +248,14 @@ namespace Jianghu.Cultivation
                     },
                     new Dictionary<string, int> { { "qiYun", 12 } }),
                 // 高山流水·遏邪奏：[正乐]对全场阴邪tag(ghost/demon/blood/gu)spirit真伤×3/2并使其煞气/阴煞护体减免本场失效(横向破邪,counterAdj在外置矩阵本技只声明tag)。qiYun≥10,消耗10。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(16) → FlatPen(16) 基线 + Modules.CounterMul(evil,×3/2)（正乐破邪：
+                //   防方带 evil tag(ghost/demon/blood/gu 阴邪)→×3/2,联合上界 §15.4；num=3 den=2 工厂 Amount2≥1 保证）。
                 new CombatSkillDef("sk_yin_gaoshan", "高山流水·遏邪奏", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 16, "[正乐]对全场阴邪tag(ghost/demon/blood/gu)目标spirit真伤×3/2并使其煞气/阴煞护体减免本场失效(以正乐横向破邪,counterAdj走外置CounterMatrix)") },
+                    new[]
+                    {
+                        Modules.FlatPen(16, "[正乐]全场阴邪 spirit 真伤基线破防量;使其煞气/阴煞护体减免本场失效"),
+                        Modules.CounterMul("evil", 3, 2, note:"正乐破邪对阴邪tag(ghost/demon/blood/gu,evil)×3/2(横向破邪,counterAdj走外置CounterMatrix)"),
+                    },
                     new Dictionary<string, int> { { "qiYun", 10 } }),
                 // 续弦·应急：将被打断/被夺的律场强制重续,恢复fieldActive触发条件并回windupProgress至半(被破奏后重整旗鼓,反制/护奏类)。qiYun≥4,消耗4。
                 new CombatSkillDef("sk_yin_xuxian", "续弦·应急", 1,

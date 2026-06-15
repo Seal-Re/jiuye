@@ -182,7 +182,9 @@ namespace Jianghu.Cultivation.Paths
                 // 燃血狂屠：本路招牌爆发——本回合燃尽指定额度血气,伤害=武力×3+燃血量×4;燃血量≥30且血神觉醒则无视根骨。
                 //   施后该额度血气清零、按溢出触发燃血自燃。门槛燃血≥20。
                 new CombatSkillDef("sk_xue_kuangtu", "燃血狂屠", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "武力×3+燃血量×4单点终极透支,燃血量≥30且血神觉醒无视根骨;施后该额度血气清零按溢出触自燃,xuesha+3") },
+                    // B5 批2 招牌招迁移：占位 AddPenInteger(60) → Modules.PenFromResource(qixie,×4)（武力×3+燃血量×4,
+                    //   血气本钱转穿透·血气越满越痛、见底哑火真差分；Amount2=1 由工厂保证 §15.6）。
+                    new[] { Modules.PenFromResource("qixie", 4, note:"武力×3+燃血量×4单点终极透支,qixie血气转穿透;燃血量≥30且血神觉醒无视根骨;施后该额度血气清零按溢出触自燃,xuesha+3") },
                     new Dictionary<string, int> { { "qixie", 20 } }),
                 // 噬血反哺：近敌抽血一击,造武力伤害并按命中回血气+8、本场承血阈临时+2;击杀额外回满一档(续航回本核心)。
                 new CombatSkillDef("sk_xue_fanbu", "噬血反哺", 3,
@@ -206,8 +208,10 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddResource, "xuesha", -15, "本回合不可燃血,立即xuesha-15(止杀凝煞,可在血煞天谴/走火触发前打断);daoHeart+3 属A.2道心轴不在A.0落算子(Note留痕)") },
                     new Dictionary<string, int>()),
                 // 噬尽夺元：对单一高威胁目标暗噬夺元,对目标Internal-6+Force-2并结死仇-25;专破他路高战力者本源/失血脆弱。
+                // B5 批2：招牌「夺元」改的是敌方 stat(Internal/Force) 非 qixie 资源 → Drain 需双方共有资源,语义不符；
+                //   ApplyStat chokepoint 未建 → 显式 deferred FULLSTRUCT（红线 A.8 不静默），保 FlatPen 占位破防量。
                 new CombatSkillDef("sk_xue_duoyuan", "噬尽夺元", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "暗噬夺元:对目标Internal-6+Force-2(经ApplyStat chokepoint)并造死仇负边-25,专破高战力者本源/失血脆弱,xuesha+3") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "暗噬夺元:对目标Internal-6+Force-2(改stat→FULLSTRUCT defer,ApplyStat chokepoint未建)并造死仇负边-25,专破高战力者本源/失血脆弱,xuesha+3") },
                     new Dictionary<string, int> { { "qixie", 8 } }),
                 // 血脉暴走：濒死血脉返祖——血气见底或濒死时强燃本源续命爆发,本回合所有燃血档视为满档、直伤+武力,但战后血气上限本场-30。
                 new CombatSkillDef("sk_xue_baozou", "血脉暴走", 3,

@@ -204,10 +204,12 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 万蛊噬身：倾巢,全部在册子蛊齐出寄生攻协,本次伤害=Σ子蛊 guPower×2;战后全体噬主度+2(倾巢必背债)。百毒值8。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(40) → Modules.PenFromResource(guSwarmPower,×2)（Σ子蛊齐出,蛊群越强越痛、空册哑火真差分；
+                //   真 per-child Σ 是逐蛊派生→FULLSTRUCT,本批用 guSwarmPower 聚合资源近似；Amount2=1 工厂保证 §15.6）。倾巢背债 guRevolt+2 保留。
                 new CombatSkillDef("sk_du_wangu", "万蛊噬身", 4,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 40, "令全部在册子蛊齐出寄生攻协,伤害=Σ子蛊 guPower×2,子蛊越多总伤越高"),
+                        Modules.PenFromResource("guSwarmPower", 2, note:"令全部在册子蛊齐出寄生攻协,伤害=Σ子蛊 guPower×2(真Σ子蛊 derived→FULLSTRUCT,本批用 guSwarmPower 聚合资源)"),
                         new EffectOp(EffectOpKind.AddResource, "guRevolt", 2, "倾巢必背债:战后全体子蛊噬主度+2"),
                     },
                     new Dictionary<string, int> { { "venomCharge", 8 } }),
@@ -216,16 +218,20 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "倾泻百毒值范围打击,伤害=当前全部百毒值×2,放完百毒值归零;对死物傀儡/纯阳/佛门伤害锐减") },
                     new Dictionary<string, int> { { "venomCharge", 20 } }),
                 // 夺心控蛊：对活体植蛊夺心,成功则其本回合反噬阵营/受己调遣(反向夺兽),占1宿主名额;对纯阳/佛门/死物命中失败。百毒值5。
+                // B5 批2：植蛊夺心(mind control,战力按比例转己/调遣敌方)是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
+                //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger 占位破防量。
                 new CombatSkillDef("sk_du_duoxin", "夺心控蛊", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "植蛊夺心:成功则目标本回合反噬其阵营/受己调遣(反向夺兽);对纯阳/佛门体质或死物傀儡(无血肉)命中失败") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "植蛊夺心(mind control→batch3 Special defer):成功则目标本回合反噬其阵营/受己调遣;对纯阳/佛门体质或死物傀儡(无血肉)命中失败") },
                     new Dictionary<string, int> { { "venomCharge", 5 } }),
                 // 淬毒一击：淬毒暗器/兵刃一击向单体,基于百毒值的渗透伤害并使中毒掉血;潜伏施放则额外破一层护体。百毒值3。
                 new CombatSkillDef("sk_du_cuidu", "淬毒一击", 1,
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "淬毒暗器/兵刃一击,基于百毒值的渗透伤害并使目标中毒掉血;潜伏施放(对方未察觉)则额外破一层护体") },
                     new Dictionary<string, int> { { "venomCharge", 3 } }),
                 // 瘟疫毒雾：范围毒雾消耗,区域内敌每动作-战力且累积中毒,judge 失败则持续掉血;对纯阳/佛门减半,对死物无效。百毒值4。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(8) → Modules.Dot(plague,8/tick,3回合)（范围毒雾持续掉血,
+                //   OnUse 挂载、回合间结算批4 接,ApplyOnUse 不改 dmg,本轮断言 Kind+Key 在册）。
                 new CombatSkillDef("sk_du_duwu", "瘟疫毒雾", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "范围毒雾:区域内敌方每动作-战力且累积中毒,群体 judge 失败则持续掉血;对纯阳/佛门减半,对死物傀儡无效") },
+                    new[] { Modules.Dot("plague", 8, 3, "范围毒雾持续掉血3回合(区域内敌每动作-战力且累积中毒);对纯阳/佛门减半,对死物傀儡无效(批4结算)") },
                     new Dictionary<string, int> { { "venomCharge", 4 } }),
                 // 弃子献蛊·镇母：防御性刹车,献祭1只最弱在册子蛊,立即噬主度-6并回百毒值+4,可在蛊噬主反噬触发前打断(保命核心)。无百毒门槛。
                 new CombatSkillDef("sk_du_xianzi", "弃子献蛊·镇母", 2,

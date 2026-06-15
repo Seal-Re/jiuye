@@ -149,16 +149,22 @@ namespace Jianghu.Cultivation
             var skills = new[]
             {
                 // 噬元夺脉[burst]：近敌夺修为,伤害基于 MoGong,击杀回 MoGong+8、夺目标1层增益;轻量夺养无暴走负担。消耗 MoGong3。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(12) → Modules.PenFromResource(MoGong,×1)（伤害基于 MoGong 魔功燃料转伤,
+                //   一致性优先：魔功越满越痛、见底哑火真差分；Amount2=1 工厂保证 §15.6）。击杀回 MoGong/夺增益走 Phase 3。
                 new CombatSkillDef("mo_sk_duomai", "噬元夺脉", 1,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "近敌夺修为,伤害基于 MoGong;击杀回 MoGong+8、夺目标1层增益") },
+                    new[] { Modules.PenFromResource("MoGong", 1, note:"近敌夺修为,伤害基于 MoGong 魔功转伤;击杀回 MoGong+8、夺目标1层增益 Phase3") },
                     new Dictionary<string, int> { { "MoGong", 3 } }),
                 // 灭世魔刀·斩[burst]：蓄 MoGong 越满本招 power 越高的定向重斩,对资源型修士(丹/器/符/驭兽)额外+10。消耗 MoGong6。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(36) → Modules.PenFromResource(MoGong,×1)（蓄 MoGong 越满 power 越高=魔功燃料转伤,
+                //   真差分；Amount2=1 工厂保证 §15.6）。对资源型修士额外+10 走 Phase 3 CounterMatrix。
                 new CombatSkillDef("mo_sk_modao", "灭世魔刀·斩", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "蓄 MoGong 越满 power 越高的定向重斩,对资源型修士额外+10(夺养克资源依赖者)") },
+                    new[] { Modules.PenFromResource("MoGong", 1, note:"蓄 MoGong 越满 power 越高的定向重斩(MoGong魔功转伤);对资源型修士额外+10 Phase3(夺养克资源依赖者)") },
                     new Dictionary<string, int> { { "MoGong", 6 } }),
                 // 血河倾泻[burst]：清空全部 MoGong 自爆式范围打击,伤害=MoGong全槽×2(燃心阀开则再乘放大),放后归零。消耗全槽 MoGong。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(60) → Modules.PenFromResource(MoGong,×2)（清空 MoGong 自爆,MoGong 全槽×2,
+                //   满槽自爆极痛、空槽哑火真差分；Amount2=1 工厂保证 §15.6）。燃心阀放大走 Phase 3。
                 new CombatSkillDef("mo_sk_xuehe", "血河倾泻", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "清空全部 MoGong 自爆式范围打击,伤害=MoGong全槽×2(燃心阀开再乘放大),放后归零(空电量极高方差)") },
+                    new[] { Modules.PenFromResource("MoGong", 2, note:"清空全部 MoGong 自爆式范围打击,伤害=MoGong全槽×2(燃心阀开再乘放大 Phase3),放后归零(空电量极高方差)") },
                     new Dictionary<string, int> { { "MoGong", 6 } }),
                 // 燃心狂魔[burst]：主动把 burnGate 拉满3档持续3动作,魔功分量×(10+innerDemon×3/10)/10 暴涨;结束 innerDemon+12。
                 //   赌命起手:无 MoGong 门槛,代价是 innerDemon 风险(A.0 仅以 AddResource(burnGate,3) 落档位占位,放大与心魔涨 L1/A.2 接)。
@@ -172,13 +178,17 @@ namespace Jianghu.Cultivation
                     new Dictionary<string, int> { { "MoGong", 4 } }),
                 // 夺舍重生[escape]：魔念濒死强夺邻近肉身续命,成功保命且 innerDemon 清零洗暗德、按宿主 realm 重算;
                 //   失败(场上有佛光/纯阳/雷)则魂飞魄散永久退场。消耗 MoGong15 + 全部魔念压上。
+                // B5 批2：夺舍(强夺肉身续命/按宿主 realm 重算/innerDemon 清零)属 A.2 道心层(innerDemon)+唯一档机制 → 保持原样,
+                //   显式标注（红线 A.8 不静默）：A.2 道心层 innerDemon 不在 A.0 落算子,夺舍重算 batch3 Special 后接。
                 new CombatSkillDef("mo_sk_duoshe", "夺舍重生", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "魔念濒死强夺邻近肉身续命:成功保命且 innerDemon 清零洗暗德、按宿主 realm 重算;失败(场上佛光/纯阳/雷)则永久退场") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "魔念濒死强夺邻近肉身续命:成功保命且 innerDemon 清零洗暗德、按宿主 realm 重算;失败(场上佛光/纯阳/雷)则永久退场(A.2道心层+batch3 Special defer)") },
                     new Dictionary<string, int> { { "MoGong", 15 } }),
                 // 渡心魔劫·证道[control]：双变体收束技,moHeart≥60 主动引心魔劫自炼:过则 moHeart+10、innerDemon-20(借魔入道·洗白);
                 //   fallenDevil 态则不可渡、强制 innerDemon+10 换永久 power+8(堕魔淬魔档)。消耗 MoGong10 + 一次心魔劫掷点。
+                // B5 批2：渡心魔劫(moHeart/innerDemon 双向杠杆,借魔入道洗白 vs 堕魔淬魔)纯属 A.2 道心层 → 保持原样,
+                //   显式标注（红线 A.8 不静默）：moHeart/innerDemon 不在 A.0 落算子,双变体收束 A.2 道心层后接。
                 new CombatSkillDef("mo_sk_dujie", "渡心魔劫·证道", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "双变体收束:moHeart≥60 引心魔劫自炼,过则 moHeart+10、innerDemon-20(洗白);fallenDevil 态则强制 innerDemon+10 换永久 power+8(堕魔淬魔,均 A.2 接)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "双变体收束:moHeart≥60 引心魔劫自炼,过则 moHeart+10、innerDemon-20(洗白);fallenDevil 态则强制 innerDemon+10 换永久 power+8(堕魔淬魔,均 A.2 道心层 defer)") },
                     new Dictionary<string, int> { { "MoGong", 10 } }),
             };
 

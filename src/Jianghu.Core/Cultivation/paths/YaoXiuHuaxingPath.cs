@@ -201,8 +201,9 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 血脉爆发·撼天扑：兽躯终极扑击,倾注当前妖丹单点穿透(武力×2+妖丹×3);本命属性对对应被克属性无视根骨。施后妖丹清空。门槛妖丹≥10。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(50) → Modules.PenFromResource(yaoDan,×3)（妖丹越满扑击越狠,见底哑火真差分；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_yx_hantian", "血脉爆发·撼天扑", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 50, "武力×2+妖丹×3单点终极穿透,本命属性对对应被克属性目标无视根骨;施后妖丹清空(全或无血脉爆发)") },
+                    new[] { Modules.PenFromResource("yaoDan", 3, note:"武力×2+妖丹×3单点穿透,妖丹转穿透;本命属性对对应被克属性目标无视根骨;施后妖丹清空(全或无血脉爆发)") },
                     new Dictionary<string, int> { { "yaoDan", 10 } }),
                 // 返祖暴走：激发祖兽血脉,3 tick 内 根骨/武力各×130/100、本命神通element克制系数+;但化形度归0、暴走结束理智不过则误伤场上并结仇。返祖度≥40,妖丹6。
                 new CombatSkillDef("sk_yx_atavism", "返祖暴走", 4,

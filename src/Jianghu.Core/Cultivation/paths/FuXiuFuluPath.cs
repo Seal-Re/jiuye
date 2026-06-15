@@ -185,8 +185,11 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "talismanStore", 1 }, { "fuPotency", 2 } }),
                 // 符海齐射（攻·多线）t4:一次性引爆多张攻符覆盖全场,对每邻近敌stockFirepower/8+悟性/2,敌越多总伤越高;
                 //   引爆张数=2+叠射符纹。castWindow=2。耗 talismanStore×2(按引爆张数近似)。
+                // B5 批2：本招吃 stockFirepower（=Σ符库各档存量×档火力,是 derived:stockFirepower 派生量,**非 ResourceDef**：
+                //   本路 Resources 仅 talismanStore/fuPotency）→ PenFromResource 锚不到资源 → 显式 deferred FULLSTRUCT
+                //   （红线 A.8 不静默,真 stockFirepower 派生求和 L1 IDerivedProvider 后接）,保 FlatPen 占位破防量。
                 new CombatSkillDef("sk_fu_qishe", "符海齐射", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "一次性引爆多张攻符覆盖全场,对每邻近敌stockFirepower/8+悟性/2,敌越多总伤越高(多线齐射)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "一次性引爆多张攻符覆盖全场,对每邻近敌stockFirepower/8+悟性/2(stockFirepower=derived非资源→FULLSTRUCT defer),敌越多总伤越高") },
                     new Dictionary<string, int> { { "talismanStore", 2 } }),
                 // 护身金光符（防·一次性挡）t2:即贴护身符吸收gradeFirepower[t2]×2+内力伤害并免一次穿透,可贴己/贴1友军;
                 //   castWindow=1。耗 talismanStore×1。
@@ -210,8 +213,14 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "talismanStore", 1 }, { "fuPotency", 3 } }),
                 // 血符·焚尽（邪·搏命）t4:以精血为引强催符威(悟性×3+stockFirepower/4,倾尽部分库存),
                 //   但 innerDemon+5、根骨−2(本场)、fuPotency减半(邪符暴涨+反噬+道德下滑搏命引信)。castWindow=1。耗 talismanStore×1+fuPotency×2。
+                // B5 批2 招牌招迁移：FlatPen(40) 基线破防量（stockFirepower/4 是 derived 派生→FULLSTRUCT defer,与符海齐射同因）
+                //   + Modules.Backlash(bloodCast,自损)（以精血催符自损 innerDemon+5/根骨-2；selfDmg 通道批4 接,ApplyOnUse 不改 dmg,本轮断言 Kind 在册）。
                 new CombatSkillDef("sk_fu_xuefu", "血符·焚尽", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "以精血为引强催符威,悟性×3+当前stockFirepower/4(倾尽部分库存),自损:innerDemon+5/根骨−2本场/fuPotency减半(战斗期结算)") },
+                    new[]
+                    {
+                        Modules.FlatPen(40, "以精血为引强催符威 悟性×3+stockFirepower/4(stockFirepower=derived→FULLSTRUCT defer) 基线破防量"),
+                        Modules.Backlash("bloodCast", 0, "以精血催符自损:innerDemon+5/根骨−2本场/fuPotency减半(自伤通道批4接,A.2 道心轴 innerDemon 不在 A.0 落)"),
+                    },
                     new Dictionary<string, int> { { "talismanStore", 1 }, { "fuPotency", 2 } }),
                 // 纸人金蝉（保命·反斩首）t5:被斩首/濒死时一次性纸人替身硬抗致死伤并原地脱战(每境界1次);缓役使物断线斩首脆性。
                 //   耗 talismanStore×1(被动触发,高品符为引)。

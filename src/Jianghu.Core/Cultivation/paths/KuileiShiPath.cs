@@ -191,8 +191,10 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 万傀齐攻 [t1]：全部在役傀儡同时扑击单一目标,本回合傀儡战力之和按带宽乘子全额集火一次(死物军团集火,精确无随机应变)。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(40) → Modules.PenFromResource(fleetWeighted,×1)（傀儡军团集火,
+                //   带宽乘子全额=fleetWeighted 全额转伤,军团越强越痛、空册哑火真差分；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_kl_wankuiqi", "万傀齐攻", 1,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "全军傀儡战力之和按当前带宽乘子全额计入一次集火伤害(死物军团集火)") },
+                    new[] { Modules.PenFromResource("fleetWeighted", 1, note:"傀儡军团集火单一目标,带宽乘子全额=fleetWeighted 全额计入一次集火伤害(死物军团集火)") },
                     new Dictionary<string, int> { { "fleetWeighted", 8 } }),
                 // 傀附本体·临阵 [t2]：一具高品阶傀机括之力暂附本体,本体指挥项临时+悟性×3,弥补藏阵脆皮(近身自保/脱困;该傀本回合退出名册)。
                 new CombatSkillDef("sk_kl_kuifu", "傀附本体·临阵", 2,
@@ -211,10 +213,12 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddSituationalAdj, null, 10, "钢令贯链:把范围内被乱己方活体援军/契约兽拉回节奏并清除被乱状态(死物路独有心智净土反制)") },
                     new Dictionary<string, int> { { "fleetWeighted", 4 } }),
                 // 断链应急·影替傀 [t4]：本体将受致命/斩首打击时触发,指定影替傀代受并把本体瞬移出阵,阻止本体斩首→全军失令一次(保命技;与残命惯性大法联动彻底化解一次断链)。
+                // B5 批2：断链应急(影替代受致命/瞬移本体/commandSevered 复位)是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
+                //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddFlatDR(999)/SetFlag 占位。
                 new CombatSkillDef("sk_kl_yingti", "断链应急·影替傀", 4,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddFlatDR, null, 999, "影替傀代受致命/斩首一击并瞬移本体出阵,阻止本体斩首→全军失令一次(影替傀当场损毁)"),
+                        new EffectOp(EffectOpKind.AddFlatDR, null, 999, "影替傀代受致命/斩首一击并瞬移本体出阵(断链应急→batch3 Special defer),阻止本体斩首→全军失令一次(影替傀当场损毁)"),
                         new EffectOp(EffectOpKind.SetFlag, "commandSevered", 0, "化解一次断链:commandSevered 复位,军团不趋零"),
                     },
                     new Dictionary<string, int> { { "fleetWeighted", 10 } }),

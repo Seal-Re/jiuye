@@ -216,8 +216,10 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 90, "终极AOE:对全场阴邪 base×anti_evil 真伤并群体渡化低煞者;耗尽愿力") },
                     new Dictionary<string, int> { { "vow", 3000 } }),
                 // 不动明王怒目：开金身大成态3回合,DR×2、所有受击全额转愿、对阴邪伤害再×1.5。愿力≥1500,消耗1500。
+                // B5 批2：开金身大成态(goldenBodyMax 态 3 回合,DR×2/受击全额转愿)是唯一档签名状态机制(SpecialModuleRegistry 派发) → batch3 Special,
+                //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger 占位破防量。
                 new CombatSkillDef("sk_bd_budongming", "不动明王怒目", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "开金身大成态3回合:DR×2、所有受击全额转愿、对阴邪伤害再×1.5") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "开金身大成态3回合:DR×2、所有受击全额转愿、对阴邪伤害再×1.5(goldenBodyMax态→batch3 Special defer)") },
                     new Dictionary<string, int> { { "vow", 1500 } }),
                 // 大须弥山掌：AOE镇压,对全场阴邪 base×2 伤害并附'镇';对非阴邪 base 伤害。愿力≥500,消耗500(+内力60 flavor)。
                 new CombatSkillDef("sk_bd_xumi", "大须弥山掌", 4,
@@ -236,8 +238,15 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 20, "结界:圈内阴邪攻-30%、本方DR+5/层;持续3回合,期间受击转愿×2(内力40开销 flavor)") },
                     new Dictionary<string, int> { { "vow", 200 } }),
                 // 摩诃无量佛光：对单体阴邪 anti_evil 倍伤(默认×3,整数定标);非阴邪只算 base 的一半。愿力≥300,消耗300。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(30) → FlatPen(30) 基线 + Modules.CounterMul(evil,×3)（佛光 anti_evil：
+                //   防方带 evil tag(阴邪)→×3,联合上界钳 ×3/2 §15.4；非阴邪半数走 Phase 3。佛 SituationalTags 用 anti_evil 克制 tag,
+                //   敌侧阴邪以 evil tag 表达,故 CounterMul 锚 "evil"）。
                 new CombatSkillDef("sk_bd_foguang", "摩诃无量佛光", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "对单体阴邪 anti_evil 倍伤(默认×3,整数定标);非阴邪只算 base 的一半") },
+                    new[]
+                    {
+                        Modules.FlatPen(30, "对单体阴邪 anti_evil 倍伤基线破防量(整数定标)"),
+                        Modules.CounterMul("evil", 3, note:"对阴邪(evil tag) anti_evil×3(默认,联合上界钳);非阴邪只算 base 的一半 Phase3"),
+                    },
                     new Dictionary<string, int> { { "vow", 300 } }),
                 // 韦驮献杵：金身重击,伤害=2×根骨+8×goldenLayers;命中回愿+100。门槛内力20(flavor),无愿力门槛,命中回愿。
                 new CombatSkillDef("sk_bd_weituo", "韦驮献杵", 2,

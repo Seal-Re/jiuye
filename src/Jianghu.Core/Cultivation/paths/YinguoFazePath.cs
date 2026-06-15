@@ -188,16 +188,22 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "抹除目标本回合全部'因'(其 counterAdj/先手/Tempo 价值归零)并按 causalAuth 从因果栈弹一条还施其身,法则修士最强先手技") },
                     new Dictionary<string, int> { { "retributionDebt", 12 }, { "lifespanDebt", 3 } }),
                 // 时光回溯·逆演[control]：本场限一次,撤销 KarmicIndex 栈中指定一条交锋结算(伤害/夺运/胜负回滚),天谴债不回滚。规则纠错'重来一手'。
+                // B5 批2：KarmicIndex 栈回溯是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
+                //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger(0) 占位。
                 new CombatSkillDef("sk_yg_niyan", "时光回溯·逆演", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "撤销 KarmicIndex 栈中指定一条交锋结算(伤害/夺运/胜负回滚),天谴债不回滚(规则纠错重来一手),需 spaceTimeAuth≥4") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "撤销 KarmicIndex 栈中指定一条交锋结算(伤害/夺运/胜负回滚),天谴债不回滚(栈回溯→batch3 Special defer),需 spaceTimeAuth≥4") },
                     new Dictionary<string, int> { { "retributionDebt", 10 }, { "lifespanDebt", 3 } }),
                 // 夺定数·截命一击[burst]：对单体强改定数,削其 EffectivePower 的 destinyAuth×3% 并计入己;撞大气运者 reflect=对方气运-己权限 全额入己(自险)。
+                // B5 批2：本招削的是敌方 EffectivePower%（destinyAuth 是攻方权限非敌方资源,Drain 语义不符）→
+                //   改 EffectivePower% 通道未建 → 显式 deferred FULLSTRUCT（红线 A.8 不静默）,保 FlatPen 占位破防量。
                 new CombatSkillDef("sk_yg_jieming", "夺定数·截命一击", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "对单体强改定数:削其 EffectivePower 的 destinyAuth×3%(整除)并计入己;撞大气运者 reflect=对方气运-己权限 全额入己 RetributionDebt+LifespanDebt(自险),需 destinyAuth≥3") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "对单体强改定数:削其 EffectivePower 的 destinyAuth×3%(改EP%→FULLSTRUCT defer)并计入己;撞大气运者 reflect 全额入己 自险,需 destinyAuth≥3") },
                     new Dictionary<string, int> { { "retributionDebt", 8 } }),
                 // 须弥困界[control]：布时空囚困目标一回合(移动/瞬移/逃遁/拉开失效),换己方一次免干扰布法窗口;对放风筝/群战拖延位的反制。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(12) → Modules.Control(voidPrison,1)（时空囚困一回合,selectMove 失效；
+                //   ApplyOnUse 不改 dmg,控场结算批4 接,本轮断言 Kind+Key 在册）。
                 new CombatSkillDef("sk_yg_kunjie", "须弥困界", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "布时空囚困目标一回合(移动/瞬移/逃遁/拉开失效),换己方一次免干扰布法窗口;对放风筝/群战拖延位反制") },
+                    new[] { Modules.Control("voidPrison", 1, "布时空囚困目标一回合(移动/瞬移/逃遁/拉开失效,强控),换己方一次免干扰布法窗口;对放风筝/群战拖延位反制(批4结算)") },
                     new Dictionary<string, int> { { "retributionDebt", 8 } }),
                 // 须弥遁影[escape]：'缩地'瞬移脱战/接战择一,遁后下一法则技 RetributionDebt 消耗-4。本体太脆时的活路(破'近身快攻'天敌)。
                 new CombatSkillDef("sk_yg_dunying", "须弥遁影", 2,

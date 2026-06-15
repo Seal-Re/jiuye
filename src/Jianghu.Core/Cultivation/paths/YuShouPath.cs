@@ -182,8 +182,10 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 群兽突袭：令全部在役灵兽同时扑击单一目标,本回合兽群战力按兽阵倍率全额计入一次集火(兽海集火)。bond 不变,内力中。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(24) → Modules.PenFromResource(rosterPower,×1)（全在役兽集火,
+                //   兽群强度 rosterPower 全额计入转伤,兽群越强越痛、空册哑火真差分；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_yu_tuxi", "群兽突袭", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "全在役兽集火单一目标,兽群强度按当前兽阵倍率全额计入一次") },
+                    new[] { Modules.PenFromResource("rosterPower", 1, note:"全在役兽集火单一目标,兽群强度(rosterPower)按当前兽阵倍率全额计入一次") },
                     new Dictionary<string, int>()),
                 // 嗜血催狂：催动指定灵兽狂化,该兽 beastPower×150/100 持续3 tick,结束后 bond−20(透支纽带换爆发)。门槛 bond≥20。
                 new CombatSkillDef("sk_yu_cuikuang", "嗜血催狂", 2,
@@ -202,10 +204,12 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 999, "护主兽代受致命/斩首一次并瞬移本体出阵(克斩首脆性的保命技,近似全免一次)") },
                     new Dictionary<string, int> { { "bond", 15 } }),
                 // 灵兽献祭·爆体：献祭一只契约灵兽,造成等于其 beastPower×300/100 的一次性范围爆发,该兽永久移出栏位。bond≥5(纽带网震荡−5)。
+                // B5 批2：本招伤害=单兽 beastPower×300/100（逐兽派生量,非聚合 rosterPower）+ 多算子(loss rosterPower) →
+                //   真 per-beast Σ derived 未建 → 显式 deferred FULLSTRUCT（红线 A.8 不静默）,保 FlatPen 占位破防量。
                 new CombatSkillDef("sk_yu_xianji", "灵兽献祭·爆体", 4,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 45, "献祭一兽,等于其 beastPower×300/100 范围爆发(资源换斩杀,该兽永久移出栏位)"),
+                        new EffectOp(EffectOpKind.AddPenInteger, null, 45, "献祭一兽,等于其 beastPower×300/100 范围爆发(beastPower×300=逐兽derived→FULLSTRUCT defer,该兽永久移出栏位)"),
                         new EffectOp(EffectOpKind.AddResource, "rosterPower", -10, "永久损失一只灵兽,兽群强度回落"),
                     },
                     new Dictionary<string, int> { { "bond", 5 } }),

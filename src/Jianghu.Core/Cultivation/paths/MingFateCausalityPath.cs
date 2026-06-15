@@ -170,12 +170,16 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "按tempo档削对方EP×tempo/16(整除)并截其下一动作,同时夺Fortune-5入己") },
                     new Dictionary<string, int> { { "karma", 5 }, { "lifespanDebt", 3 }, { "netFortune", 4 } }),
                 // 夺运截命·一击：对单体夺Fortune-8→己+5;目标气运>己则reflect全额入己LifespanDebt+Karma(强夺命大者自险),命中则其tempo-2。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(24) → Modules.Drain(netFortune,8)（夺运=经 chokepoint 防方 netFortune-8、
+                //   攻方 +8,各按 [Min,Cap] 钳；dmg 不变,本轮断言 chokepoint 移动）。reflect/tempo-2 等细则批3/4 接。
                 new CombatSkillDef("sk_mi_duoyun", "夺运截命·一击", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "夺单体Fortune-8→己+5;气运>己则reflect=目标-己全额入己,命中其tempo-2") },
+                    new[] { Modules.Drain("netFortune", 8, "夺单体 netFortune-8→己+8(夺运截命,经chokepoint钳);气运>己则reflect入己/命中其tempo-2 批3/4接") },
                     new Dictionary<string, int> { { "karma", 4 }, { "lifespanDebt", 2 } }),
                 // 逆演重开：本场限一次,撤销刚结算的一次交锋(伤害/夺运/胜负回滚),但Karma不回滚。以信息优势重来一手纠错。
+                // B5 批2：逆演栈回滚是唯一档签名机制(SpecialModuleRegistry 派发,栈回滚结算) → batch3 Special,
+                //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger(0) 占位。
                 new CombatSkillDef("sk_mi_niyan", "逆演重开", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "撤销刚结算的一次交锋结果(伤害/夺运/胜负回滚),Karma不回滚(信息优势纠错)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "撤销刚结算的一次交锋结果(伤害/夺运/胜负回滚),Karma不回滚(逆演栈回滚→batch3 Special defer)") },
                     new Dictionary<string, int> { { "netFortune", 10 }, { "lifespanDebt", 3 } }),
                 // 移祸天下：群体转嫁,把自身Karma一半(整除)平摊场上所有敌方(各NetFortune同步降),顺带各夺Fortune-2。多打一时摊薄天谴。
                 new CombatSkillDef("sk_mi_yihuo", "移祸天下", 3,

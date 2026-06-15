@@ -190,8 +190,14 @@ namespace Jianghu.Cultivation
             var skills = new[]
             {
                 // 诗成杀敌·绝句：吟绝命战诗集火单体,伤害=Insight×3+usableHaoran×2;对 demon/ghost/illusion 享克邪×2 并打断养魂/施幻/炼尸。浩然≥20,消耗20。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(40) → FlatPen(40) 基线 + Modules.CounterMul(evil,×2) 克邪两档
+                //   （正气克邪：防方带 evil tag→×2,联合上界 ×3/2，§15.4；ru 用 "evil" 统覆 demon/ghost/blood/gu 阴邪）。
                 new CombatSkillDef("sk_ru_jueju", "诗成杀敌·绝句", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "吟绝命战诗集火单体 Insight×3+usableHaoran×2;对 demon/ghost/illusion 享正气克邪×2 并打断养魂/施幻/炼尸") },
+                    new[]
+                    {
+                        Modules.FlatPen(40, "吟绝命战诗集火单体 Insight×3+usableHaoran×2 基线破防量"),
+                        Modules.CounterMul("evil", 2, note:"对 demon/ghost/illusion 等阴邪(evil tag)享正气克邪×2 并打断养魂/施幻/炼尸"),
+                    },
                     new Dictionary<string, int> { { "haoran", 20 } }),
                 // 浩然破幻·正气护神：以浩然斩幻身/魂体,对 illusion/soul 真伤无视绕物防,破魂力绕物防/天魔乱心,本方全体免疫一次乱心。浩然≥25+内力5。
                 new CombatSkillDef("sk_ru_pohuan", "浩然破幻·正气护神", 4,
@@ -206,8 +212,10 @@ namespace Jianghu.Cultivation
                     new[] { new EffectOp(EffectOpKind.AddSituationalAdj, null, 12, "在场同阵营攻+12%、护神 DR+5、士气+1档共3回合;wenGong 派生项当回合翻倍(群战开团)") },
                     new Dictionary<string, int> { { "haoran", 15 } }),
                 // 王法镇压·律狱：以律条布律狱困范围失德/阴邪,被困者每步受固定正气灼伤,且无法借煞/遁走/施幻。浩然≥16+1道律条敕牒。
+                // B5 批2 招牌招迁移：占位 AddPenInteger(14) → Modules.Control(lawPrison,1)（控场困范围,selectMove 失效；
+                //   ApplyOnUse 不改 dmg,控场结算批4 接,本轮断言 Kind+Key 在册）。
                 new CombatSkillDef("sk_ru_lvyu", "王法镇压·律狱", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 14, "布律狱困范围失德/阴邪:被困者每步受固定正气灼伤,且无法借煞/遁走/施幻(控场非伤害)") },
+                    new[] { Modules.Control("lawPrison", 1, "布律狱困范围失德/阴邪:被困者每步受固定正气灼伤,且无法借煞/遁走/施幻(控场非伤害,批4结算)") },
                     new Dictionary<string, int> { { "haoran", 16 } }),
                 // 舍身取义·浩然爆发：浩然槽连同部分文胆一次性引爆,超高范围破邪净化(全槽×2 折算);自身 WenDan 永久-3、规则压制位清零——文人风骨赌命技。
                 new CombatSkillDef("sk_ru_sheshen", "舍身取义·浩然爆发", 4,
