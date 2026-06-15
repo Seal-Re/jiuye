@@ -24,19 +24,19 @@ stories:
     name: "batch2 普通/稀有档全路迁（21 路招牌招→Modules 模块）"
     file: "production/epics/combat-r2/story-001-batch2-path-module-migration.md"
     priority: must-have
-    status: in-progress        # 9/21 done（剑/体/法/鬼/丹/器/阵/魂/雷），289 绿
+    status: done               # 21/21 done（全 21 路招式→Modules 模块），329 绿，smoke PASS
     owner: ""
     estimate_days: 0
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
   - id: "combat-r2-002"
     name: "batch3 唯一档 Special handler（落宝/炸阵/夺舍/金身态/律场总门）"
     file: "production/epics/combat-r2/story-002-batch3-special-handlers.md"
     priority: must-have
-    status: backlog
+    status: ready-for-dev      # batch2 普通/稀有档框架已在位(21/21 done),可开工
     owner: ""
     estimate_days: 0
-    blocker: "依赖 combat-r2-001 普通/稀有档框架在位"
+    blocker: ""
     completed: ""
   - id: "combat-r2-003"
     name: "batch4 DuelEngine.ResolveR2 接模块（off 逐字节不动）"

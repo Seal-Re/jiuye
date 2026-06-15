@@ -1,7 +1,7 @@
 # Story 001: batch2 — 普通/稀有档全路迁（21 路招牌招 → Modules 模块）
 
 > **Epic**: combat-r2
-> **Status**: In Progress
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 大（21 路，逐路 TDD）
@@ -26,8 +26,8 @@
 - [x] 阵（Control(困龙)；炸阵→batch3 Special、Σ阵→FULLSTRUCT defer）`065403b`
 - [x] 魂（PenFromResource(soulForce)；夺舍→batch3 Special）`065403b`
 - [x] 雷（CounterMul(evil) 灭阴/Backlash(引天劫承雷)）`065403b`
-- [ ] 血/毒蛊/符/傀儡/音/因果/妖/儒/驭兽/命（余 11 路）
-- [ ] §10 覆盖账每路标"已结构化"（除显式 deferred）
+- [x] 血/妖/儒/驭兽/命/因果/毒蛊/符/傀儡/音/佛/魔（余 12 路）`da12104` — 329 绿
+- [x] §10 覆盖账每路标"已结构化"（签名 Special/derived 显式 deferred，A.8）
 
 ## Implementation Notes
 
