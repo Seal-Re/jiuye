@@ -23,6 +23,7 @@
 6. **Σ=80 仅生成期**；侧表纪律（新态挂侧表不污染 v1.0 record）。
 7. **subagent 一律 Opus 4.8**（dev/review/research）。
 8. **可视化分轨**：游戏世界(tile/角色/物品)=像素(Pillow)；**UI/界面=精细化古风**(非像素，SVG/HTML-CSS 水墨/卷轴，贴合武侠背景)。程序化只做「变换/派生/拼装」，原创基础件交手绘/AI。
+9. **模块化·可插拔·不重复造轮子**：战斗效果/功法/战技等可扩展内容必须**积木化组合**——普通/稀有档经 `Modules` 工厂（`Cultivation/Modules.cs`，单一构造入口，封 ratio-Kind Amount2≥1/Trigger/Rarity 等易漏参），唯一档签名机制经 `SpecialModuleRegistry` 注册式插件。**禁路文件里裸写 `new EffectOp(七参)` 散造**（易漏参、难查错、重复轮子）。新算子=加 1 工厂方法 + `ModuleResolver` 1 分支，不改既有积木。跨路平衡视图靠 `BalanceMatrixDump` harness **派生**，不靠集中源码（承 A.2 单一真相源：源唯一、看板派生）。
 
 ## C. 文档地图
 
