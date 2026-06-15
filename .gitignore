@@ -21,6 +21,10 @@ CLAUDE.local.md
 production/session-state/
 production/session-logs/
 docs/consistency-failures.md
+# 凭据/密钥（绝不入库）——SunshineFlow 等 skill 的 .env
+.env
+**/config/.env
+.claude/skills/**/config/
 # Python 工具产物
 __pycache__/
 *.pyc

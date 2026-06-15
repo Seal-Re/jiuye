@@ -26,12 +26,18 @@
 
 ## 3. 一次性配置（需用户网易 token）
 
-脚本要 `.env`（3 字段），放 `<skill>/config/.env` 或 `~/.config/sunshineflow/.env`：
+脚本要 `.env`（3 字段），放 `<skill>/config/.env`（**已 gitignore，绝不入库**）或 `~/.config/sunshineflow/.env`：
 ```env
-SUNSHINEFLOW_AUTH_TOKEN=...   # https://console-auth.nie.netease.com/ 登录取 v2 token
-SUNSHINEFLOW_AUTH_USER=...    # 用户名
-SUNSHINEFLOW_APP_CODE=...     # https://dreammaker.netease.com/permission 取
+SUNSHINEFLOW_AUTH_TOKEN=...   # https://console-auth.nie.netease.com/ 登录取 token
+SUNSHINEFLOW_AUTH_USER=...    # 用户名(企业邮箱前缀)
+SUNSHINEFLOW_APP_CODE=...     # DreamMaker 项目码,形如 _dm_prod_xxxxxxx
 ```
+> **⚠️ 实测踩坑（2026-06-15 验证通过，永久记录）**：
+> - **AUTH_TOKEN 不要带 `v2:` 前缀**——console 页面显示的是 `v2:eyJ...`，但填进 .env 只取 `eyJ...` 的 JWT 本体；带 `v2:` 会 401 `token is invalid`。
+> - **APP_CODE = DreamMaker 项目码**（`_dm_prod_xxx`），**不是** authkey。authkey（`X-Auth-API-key`）是另一回事，本公开蓝图无需配（蓝图 key 已内置 blueprints.json）。
+> - 字段→请求头映射：AUTH_TOKEN→`X-Access-Token`，AUTH_USER→`X-Auth-User`，APP_CODE→`X-Aigw-App`。
+> - **账号需有 DreamMaker 积分**：认证过但积分不足会报 `剩余积分不足，请联系值班`——属账号配额，需充值/联系值班，非配置问题。
+> - token 有有效期（JWT exp），过期重取（401 时）。
 - Token 会过期 → 脚本报 401/403 时重新取。
 - `SUNSHINEFLOW_API_KEY` 用公开蓝图 key（已内置），无需配。
 - 依赖：`requests`（已装）。
