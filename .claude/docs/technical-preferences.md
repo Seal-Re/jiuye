@@ -5,16 +5,16 @@
 
 ## Engine & Language
 
-- **Engine**: .NET 8 (custom headless turn-based simulation — 非实时游戏引擎，无 Godot/Unity/Unreal)
-- **Language**: C# (Jianghu.Core: netstandard2.1 库; Jianghu.Cli: net8.0 可执行)
-- **Rendering**: N/A — headless 控制台；可视化为独立离线像素/SVG 轨（红线 B.8）
-- **Physics**: N/A — 确定性整数回合制模拟（红线 B.2，禁浮点）
+- **Engine**: **Unity（目标平台，后期）** — 当前阶段 Core 为纯 C# 逻辑库经 CLI 驱动；`Jianghu.Core` 设计为 `netstandard2.1`（Unity 默认 API 兼容级）**后期直接被 Unity 引用渲染/玩家介入**（原始设计 §架构：「Core 纯逻辑零改写进 Unity」）。**非"无引擎"——是分阶段：v1 Core+CLI，后期 Unity 宿主。**
+- **Language**: C# (Jianghu.Core: netstandard2.1 库 → Unity 引用; Jianghu.Cli: net8.0 当前驱动)
+- **Rendering**: 后期 Unity 渲染（读 World 状态）；当前 CLI 文本快照。原始基础件/UI 见红线 B.8 分轨。
+- **Physics**: N/A — Core 确定性整数模拟（红线 B.2 禁浮点；同种子逐字节复现，跨 CLI/Unity IL2CPP 一致）
 
 ## Input & Platform
 
-- **Target Platforms**: Desktop CLI (.NET, 跨平台)
-- **Input Methods**: CLI args / stdin
-- **Primary Input**: CLI
+- **Target Platforms**: **Unity（桌面，后期玩家介入）**；当前 CLI 驱动 Core 模拟
+- **Input Methods**: 当前 CLI；**后期 Unity 玩家输入（含即时交互层可行）**
+- **Primary Input**: 当前 CLI
 - **Gamepad Support**: None
 - **Touch Support**: None
 - **Platform Notes**: 无实时渲染/输入；模拟以种子驱动逐字节可复现（B.2）
@@ -64,22 +64,22 @@
 
 ## Engine Specialists
 
-<!-- jiuye 无游戏引擎，无引擎专家适用。 -->
+<!-- 分阶段:当前 Core=纯逻辑库(无引擎API,故无引擎专家);后期 Unity 宿主层=Unity-C# 专家适用。 -->
 
-- **Primary**: 通用 code review（lead-programmer / gameplay-programmer 作协作者）
-- **Language/Code Specialist**: C# 通用（**非** godot-csharp-specialist — 其假设 Godot API）
-- **Shader Specialist**: N/A
-- **UI Specialist**: N/A（古风 UI 轨独立，非引擎 UI）
-- **Additional Specialists**: N/A
-- **Routing Notes**: `.cs` 路由到通用 C# 审查；不调任何引擎专家（无 Godot/Unity/Unreal）
+- **Primary**: 当前阶段通用 C# code review（Core 是纯 netstandard2.1 逻辑库，**禁** UnityEngine.* 等引擎 API，BannedApiAnalyzers 守）
+- **Language/Code Specialist**: C# 通用（Core 层）；**后期 Unity 宿主层 → Unity-C# 专家**
+- **Shader Specialist**: 后期 Unity 阶段适用；当前 N/A
+- **UI Specialist**: 后期 Unity UI；古风 UI 资产轨独立（红线 B.8）
+- **Additional Specialists**: 后期 Unity（渲染/输入/即时交互层）
+- **Routing Notes**: 当前 `.cs`（Core）路由通用 C# 审查，**Core 必须无引擎 API**（零改写进 Unity 的前提）；Unity 宿主代码（后期）路由 Unity 专家。
 
 ### File Extension Routing
 
 | File Extension / Type | Specialist to Spawn |
 |-----------------------|---------------------|
-| Game code (primary language) | 通用 C# 审查（非 godot-csharp-specialist） |
-| Shader / material files | N/A |
-| UI / screen files | N/A（古风 UI 独立轨） |
-| Scene / prefab / level files | N/A |
-| Native extension / plugin files | N/A |
+| Core 逻辑 (.cs, netstandard2.1) | 通用 C# 审查（必须无 UnityEngine.* — 零改写前提） |
+| Unity 宿主代码 (.cs, 后期) | Unity-C# 专家（后期阶段） |
+| Shader / material files | Unity 阶段 |
+| UI / screen files | Unity 阶段 + 古风 UI 资产轨(B.8) |
+| Scene / prefab files | Unity 阶段 |
 | General architecture review | Primary |
