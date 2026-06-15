@@ -181,8 +181,9 @@ namespace Jianghu.Cultivation.Paths
                     },
                     new Dictionary<string, int> { { "shaCharge", 15 } }),
                 // 幽冥煞爆：倾泻煞值自爆式打击,伤害=当前全部煞值×2(入夜再×昼夜系数),放完归零。清空全部煞值。
+                // B5批2: → PenFromResource(shaCharge,2) 煞值自爆(带电量越满越痛,见底哑火;昼夜系数 Phase3 接)。
                 new CombatSkillDef("sk_gu_shabao", "幽冥煞爆", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "倾泻煞值自爆式打击,伤害=当前全部煞值×2(入夜再×昼夜系数),放完归零(空电量极高方差爆发)") },
+                    new[] { Modules.PenFromResource("shaCharge", 2, note: "倾泻煞值自爆,伤害=当前全部煞值×2(入夜再×昼夜系数),放完归零(空电量极高方差爆发)") },
                     new Dictionary<string, int> { { "shaCharge", 20 } }),
                 // 万鬼夜行：倾巢令全部在册鬼兵齐出协攻,伤害=Σ鬼兵power×2;战后全体鬼兵噬主度+2。煞值≥8(+噬主度风险+2)。
                 new CombatSkillDef("sk_gu_yexing", "万鬼夜行", 4,
@@ -193,8 +194,9 @@ namespace Jianghu.Cultivation.Paths
                     },
                     new Dictionary<string, int> { { "shaCharge", 8 } }),
                 // 勾魂索命：锁定单体施勾魂鬼音强化版,目标战力-20并定身一动作;对纯阳/佛门体质命中率减半(天克)。煞值≥5,消耗5。
+                // B5批2: → Control(soulLock,1) 定身一动作(控场积木,回合间结算批4接;战力-20 debuff 批4 接,本轮不改dmg)。
                 new CombatSkillDef("sk_gu_suoming", "勾魂索命", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 20, "锁定单体目标战力-20并定身一动作;对纯阳/佛门命中率减半(天克)") },
+                    new[] { Modules.Control("soulLock", 1, "锁定单体定身一动作;对纯阳/佛门命中率减半(天克)") },
                     new Dictionary<string, int> { { "shaCharge", 5 } }),
                 // 阴风血雾：范围阴雾,区域内敌每动作-煞值/失血,普通敌悟性judge失败则战力-8;白昼范围与时长减半(昼弱)。煞值≥4,消耗4。
                 new CombatSkillDef("sk_gu_xuewu", "阴风血雾", 2,
