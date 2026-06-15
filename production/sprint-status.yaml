@@ -24,7 +24,7 @@ stories:
     name: "batch2 普通/稀有档全路迁（21 路招牌招→Modules 模块）"
     file: "production/epics/combat-r2/story-001-batch2-path-module-migration.md"
     priority: must-have
-    status: in-progress        # 6/21 done（剑/体/法/鬼/丹/器），282 绿
+    status: in-progress        # 9/21 done（剑/体/法/鬼/丹/器/阵/魂/雷），289 绿
     owner: ""
     estimate_days: 0
     blocker: ""

@@ -23,7 +23,10 @@
 - [x] 鬼（PenFromResource(shaCharge)/Control）`6fdb156`
 - [x] 丹（PenFromResource(flameTier) 占位；改人造网 deferred FULLSTRUCT）`d3b73ea`
 - [x] 器（PenFromResource(itemTier)/Drain；落宝→batch3 Special）`43a5873`
-- [ ] 阵/魂/雷/佛/血/毒蛊/符/傀儡/音/因果/妖/儒/驭兽/命（余 15 路）
+- [x] 阵（Control(困龙)；炸阵→batch3 Special、Σ阵→FULLSTRUCT defer）`065403b`
+- [x] 魂（PenFromResource(soulForce)；夺舍→batch3 Special）`065403b`
+- [x] 雷（CounterMul(evil) 灭阴/Backlash(引天劫承雷)）`065403b`
+- [ ] 血/毒蛊/符/傀儡/音/因果/妖/儒/驭兽/命（余 11 路）
 - [ ] §10 覆盖账每路标"已结构化"（除显式 deferred）
 
 ## Implementation Notes
