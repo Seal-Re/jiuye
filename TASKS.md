@@ -3,10 +3,10 @@
 > 全项目任务唯一真相源（红线 A.2）。状态 ∈ {todo, doing, review, done, blocked}。
 > `done` 必须 DoD 清单全勾 + 证据（测试计数/git sha）。`blocked` 必记阻塞点+原因+依赖。
 > 会话开始读此、结束前回写。**WIP(doing) ≤ 2**。审计 cadence：每阶段边界/~5-8 步对账。
-> 最后审计：2026-06-14。
+> 最后审计：2026-06-15。
 
 ## 当前 WIP 状态（红线 A.5：doing≤2）
-**doing = 1** → 阶段5 EPIC-BALANCE 平衡标定（设计先行）。A.1竖切已合 master `9d951da`(232绿,auditor过)。停泊：pixel/（EPIC-TIDY）。
+**doing = 1** → EPIC-COMBAT-R2 战斗系统重设计+平衡（分支 `feat/jianghu-v1.2-B5-modules`）。设计链全 done；**impl 批1 框架已 done（255绿，主控独立核验 sha `946ea75`）**，下一步批2(21路招式→模块迁移)。A.1竖切已合 master `9d951da`(232绿,auditor过)。停泊：pixel/（EPIC-TIDY，pixel文件已随 `d474aab` 提交）。
 
 ## 阶段地图（宏观·简要）
 > 派生视图，真相仍在下方任务块。✅完成 / 🔨在制 / 📐设计完未建 / ❌未设计 / 🧪spike
@@ -60,7 +60,8 @@
   - [x] **规则齐全审计**（4路并发审计21路 OnUse+Note+derived）— 裁决: **设计齐全但结构化近空白**(机器只读 Cost/AddResource/flag, 真机制全埋 Note, AddPenInteger.Amount 全占位); 自读 EffectOp.cs 证 ComputeOnUseDelta 只 return Amount; 归纳模块机制族(普通4/稀有9族/唯一签名11+)
   - [x] **R2 迭代设计 = 分层全量模块系统**（设计稿 done）：`specs/...模块化效果系统-design.md`(`182b5a4`)+§15复验补丁(`db7a7c4`)。三档(普通4/稀有9参数化Kind/唯一Special)+trigger(OnUse/OnDefend/Passive)+功法门控防御(Evade连续)+法宝配套+Special逃逸口纪律+无RNG。网文校验(85%命中,补反伤/越级维度门控/克制两档)+gate-auditor两轮(揪7缺口+3风险+5新洞,8项全折§15)
   - [x] **impl plan**（writing-plans done）：`plans/2026-06-14-模块化效果系统-impl.md` 6批TDD(批1框架全代码/批2 21路映射表/批3 Special handler/批4 DuelEngine/批5法宝/批6硬化gate冻结数字)
-  - [ ] **B5 impl 批1-6**（subagent-driven 待启）：批1框架(EffectOp扩字段+9 Kind+ModuleResolver+CombatContext chokepoint+Special registry+IL扫描)→批2普通稀有全路迁→批3 Special→批4 DuelEngine.ResolveR2(off不动)→批5法宝→批6硬gate(G1-M7+辅助路UT重锚解A1.4)
+  - [x] **B5 impl 批1 框架**（地基·全员依赖）✅ — 6 Task↔6提交：1.1 EffectOp扩Amount2/Trigger/Rarity字段`6241a8e` + 1.2 EffectOpKind+9稀有战斗Kind`e5dc0cd` + 1.3 CombatContext(chokepoint)+ModuleResolver OnUse分支`1a210e0` + 1.4 PathValidator ratio-Kind Amount2≥1注册期断言`7a130b1` + 1.5 SpecialModuleRegistry+ISpecialModule骨架`5024c58` + 1.6 IL浮点扫描扩模块+handler`946ea75`。**255绿/0失败**（2026-06-15 dotnet 8.0.422 主控独立核验，非自报）。off逐字节守/IL浮点零。
+  - [ ] **B5 impl 批2-6**（subagent-driven 待启）：批2普通稀有全路迁(21路招式→模块映射表)→批3 Special handler(落宝/炸阵/夺舍/金身态/律场总门)→批4 DuelEngine.ResolveR2(off不动)→批5法宝配套→批6硬gate(§13 DoD G1-M7+辅助路UT重锚解A1.4)
   - DoD：§13硬化DoD全过(防MVP蒙混,每gate可测断言)+全量绿+off逐字节+ON路逐字节+IL浮点零+auditor终验+辅助路UT重锚(解A1.4)
   - 依赖：无（A.1已合）。解阻塞：A1.4(辅助路UT重锚并入此)
   - DoD：同UT≥2战斗路 1v1 胜率∈[40,60]% gate + 辅助路UT锚战斗当量 + 全量绿 + off逐字节 + auditor
@@ -115,3 +116,4 @@
 
 - 2026-06-14：首次审计。建台账。发现：A1.4 静默defer（已转blocked标依赖）；任务清单#14-22 stale 已弃；WIP 超限（3 doing）；pixel v2 broken。
 - 2026-06-14(第二次)：机器核验。`git log` 实证 master=`8eca0ed`、`feat/jianghu-v1.2-A1`=`19d6ead`(224绿在)、status仅`?? pixel/`。回写：EPIC-PROCESS 双挂修正(DONE 唯一+sha)；WIP警告纠为 doing=0；删工具 stale task #18/#22(superseded by EPIC-B)。确认：`.gitignore` 漏 `_research/raw3/`(22跟踪文件)与 `pixel/out/`(EPIC-TIDY 待补)。未重跑测试(已commit验过，git证)。
+- 2026-06-15：日志对账审计（旧机会话 `e733e301` 06-13~06-14 全轨迹 vs TASKS.md vs git）。**发现断链**：批1框架实际已做完+提交+绿，但 TASKS.md 仍标"批1-6 待启"——日志会话 context 耗尽，止于批1转绿后、未执行红线 A.3 回写。对治：①本机装 .NET 8 SDK 8.0.422(winget MSI 失败→官方 dotnet-install.ps1 用户级)②`dotnet test` 主控独立核验 **255绿/0失败**(HEAD=`d474aab`)③回写批1✅(6 Task↔6提交 `6241a8e`→`946ea75`)+批2-6 todo+WIP状态。其余轨迹全对账无虚报；FULLSTRUCT deferred 项红线 A.8 已诚实登记。
