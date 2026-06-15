@@ -156,15 +156,17 @@ namespace Jianghu.Cultivation.Paths
             };
 
             // —— 战技（深度设计「战技」节,OnUse 算子 + Cost 资源表;弹药=pillStock 成品丹库存）。
-            //    丹修无主动杀招:自卫/改人/造边为主。改他人 stat/造关系边核心算子集无 → 战技效果以 AddPenInteger 近似量级
-            //    占位（自卫加成/毒丹 debuff 量级,Note 留痕真实语义,完整跨路结算 Phase 3 + InteractionResolver L1 接）;
-            //    Cost 表达资源门槛（多数消耗 pillStock 成品丹,呼应「不打人改人」需先有丹）。——
+            //    丹修无主动杀招:自卫/改人/造边为主。**改人造网(夺元改stat/施丹造关系边/聚丹换realm)非战斗机制、
+            //    核心算子集缺(ApplyStatDelta/AdjustRelationEdge 未建) → 显式 deferred EPIC-COMBAT-FULLSTRUCT
+            //    (红线 A.8 不静默;§10 覆盖账丹标'占位战斗+改人造网 deferred')**。本批仅炸炉(异火引爆)可结构化为
+            //    PenFromResource(flameTier);夺元/毒烟/施丹/聚丹保 Note 占位待 FULLSTRUCT L1 接。——
             var skills = new[]
             {
                 // 炸炉自爆（孤注）：主动引爆丹炉,对当前节点全体(含自身)施 directPower 比例范围伤害;被逼绝境的同归招(正典炸炉武器化)。
                 // 牺牲全部在炉药材+自身重伤,消耗成品丹3(在炉储备)。
+                // B5批2: → PenFromResource(flameTier,4) 异火阶越高炉越猛(占位战斗;plan原写directPower但其非本路资源,锚真资源flameTier)。
                 new CombatSkillDef("sk_da_zhalu", "炸炉自爆", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "引爆丹炉对当前节点全体(含自身)施directPower比例范围伤害,牺牲全部在炉药材+自身重伤(同归绝境招)") },
+                    new[] { Modules.PenFromResource("flameTier", 4, note: "引爆丹炉对当前节点全体(含自身)施异火阶比例范围伤害,牺牲全部在炉药材+自身重伤(同归绝境招)") },
                     new Dictionary<string, int> { { "pillStock", 3 } }),
                 // 夺元一击（毒丹暗杀分支·斩首）：对单一高威胁目标暗下夺元丹,内力-6+悟性-4并造死仇负边-25(L1);
                 // 不溯源者最强阴招,专破他路高战力者的资源依赖。消耗1枚夺元丹(pillStock) + 一次接触机会窗口。
