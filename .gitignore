@@ -13,3 +13,17 @@ obj/
 # IDE
 .vs/
 .idea/
+
+# === CCGS 管理骨架（手工并入·只取安全行；绝不加 *.sln/*.csproj/[Oo]bj/ 等会吞 .NET 工程文件的行）===
+# CCGS 本地/瞬态
+.claude/settings.local.json
+CLAUDE.local.md
+production/session-state/
+production/session-logs/
+docs/consistency-failures.md
+# Python 工具产物
+__pycache__/
+*.pyc
+# EPIC-TIDY 顺手补（像素产物 + 抓取 raw3）
+pixel/out/
+_research/raw3/
