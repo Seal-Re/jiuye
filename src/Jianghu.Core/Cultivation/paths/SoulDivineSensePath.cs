@@ -165,8 +165,9 @@ namespace Jianghu.Cultivation
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 28, "对 realm 个目标同时摄魂穿透,击穿者下回合行动判定-25(多目标神识覆盖的兑现);每多锁1目标额外魂力8") },
                     new Dictionary<string, int> { { "soulForce", 35 } }),
                 // 焚魂自爆·阳神反噬：绝境技,燃烧全部魂力+30点 SeaIntegrity,对当前目标 SpiritPen=(魂力当前值×2)必杀级一击;施后 SeaIntegrity 至多剩10。
+                // B5批2: → PenFromResource(soulForce,2) 魂力自爆(魂力当前值×2,越满越痛,见底哑火;SeaIntegrity 自损 Phase3 结算)。
                 new CombatSkillDef("sk_so_fenhun", "焚魂自爆·阳神反噬", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "燃烧全部魂力+30点SeaIntegrity发(魂力当前值×2)必杀级一击,施后 SeaIntegrity 至多剩10需长期炼神(同归于尽向);Cost=代表性占位,真'全部当前魂力+SeaIntegrity-30'Phase3结算") },
+                    new[] { Modules.PenFromResource("soulForce", 2, note: "燃烧全部魂力(魂力当前值×2)必杀级一击,同归于尽向(SeaIntegrity 自损 Phase3 结算)") },
                     new Dictionary<string, int> { { "soulForce", 30 } }),
                 // 夺舍·借尸：对濒死活体/傀儡容器发动,成功则本体神魂迁入新躯(realm跃升1、识海回满、寿元重置、继承新躯根骨);失败分魂尽灭。战略级而非战术级。
                 new CombatSkillDef("sk_so_jieshi", "夺舍·借尸", 5,

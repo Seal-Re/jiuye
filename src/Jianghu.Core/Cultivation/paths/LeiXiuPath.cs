@@ -174,12 +174,22 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 普化天雷·诛邪：九天应元普化天雷降世,对全场阴邪AOE净化+重创(叠灭阴×3+辟邪驱除);对纯阳/正道几乎无伤。雷力40,realm≥5。
+                // B5批2: → AddPenInteger(64基线)+CounterMul(evil,3) 灭阴×3(对阴邪联合上界倍乘,正道几乎无伤=不乘)。
                 new CombatSkillDef("sk_le_puhua", "普化天雷·诛邪", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 64, "对全场阴邪标签目标AOE净化+重创,叠灭阴×3与辟邪驱除;对纯阳/正道目标几乎无伤(破邪不利正)") },
+                    new[]
+                    {
+                        Modules.FlatPen(64, "九天应元普化天雷AOE基线"),
+                        Modules.CounterMul("evil", 3, note: "对tag:evil(阴邪)叠灭阴×3(联合上界);对纯阳/正道不乘(破邪不利正)"),
+                    },
                     new Dictionary<string, int> { { "thunderCharge", 40 } }),
                 // 引天劫：主动招天劫雷劈战场,对阴邪范围爆发(power×灭阴系数);自身按max(0,thr-根骨)×3承雷噬。根骨够=纯增益,不够=高自损。雷力30。
+                // B5批2: → AddPenInteger(40基线)+Backlash(承雷自伤) 高伤高自险(自伤通道批4 selfDmg 接,本轮ApplyOnUse不改入伤)。
                 new CombatSkillDef("sk_le_yintianjie", "引天劫", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "招天劫对阴邪范围爆发power×纯阳灭阴系数;自身按max(0,thr-根骨)×3承雷噬自伤+武力-2/级差(高伤高自险)") },
+                    new[]
+                    {
+                        Modules.FlatPen(40, "招天劫对阴邪范围爆发power×纯阳灭阴系数(基线)"),
+                        Modules.Backlash("thunderRecoil", 0, "自身按max(0,thr-根骨)×3承雷噬自伤+武力-2/级差(高伤高自险,自伤量Phase3按根骨阈结算)"),
+                    },
                     new Dictionary<string, int> { { "thunderCharge", 30 } }),
                 // 辟邪斩魂：纯阳雷刃斩魂体/幻身,对illusion_soul/ghost真伤无视绕物防,破魂力绕物防类阴防。雷力25+内力5。
                 new CombatSkillDef("sk_le_zhanhun", "辟邪斩魂", 4,
