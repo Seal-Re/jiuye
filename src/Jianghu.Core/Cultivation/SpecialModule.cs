@@ -41,6 +41,12 @@ namespace Jianghu.Cultivation
             Register(new GoldenBodyMaxModule());
             Register(new FieldActiveModule());
             Register(new DuosheModule());
+            // 批3收口 3 新唯一档（毒蛊/傀儡/命·因果）：夺心(植蛊反噬 guRevolt)/断链(残命惯性 residualOrder 初值)/
+            // 逆演栈(结算回滚的确定性代价 netFortune·spaceTimeAuth·lifespanDebt；回滚本体 defer 批4 result-stack)。
+            // 同纪律：纯整数 / 无 RNG / 不读 daoHeart/innerDemon / 副作用经 ApplyResource chokepoint（HasResource 守路无关写）。
+            Register(new DuoxinModule());
+            Register(new BrokenChainModule());
+            Register(new ReverseStackModule());
         }
 
         static void Register(ISpecialModule m)

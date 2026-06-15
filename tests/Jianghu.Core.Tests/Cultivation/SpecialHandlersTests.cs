@@ -170,6 +170,122 @@ namespace Jianghu.Core.Tests.Cultivation
             Assert.Equal(77, dmg);
         }
 
+        // —————————————————————————— 夺心 duoxin（毒蛊）——————————————————————————
+
+        [Fact]
+        public void test_special_duoxin_raises_defender_guRevolt()
+        {
+            // Arrange：防方蛊群反噬度 guRevolt=0（[0,100]，蛊目标在场）。
+            var ctx = MakeCtx(defenderRes: new[] { ("guRevolt", 0, 100, 0) });
+
+            // Act：植蛊夺心 Special（amount=25 植入反噬，效果是控制非直伤）。
+            int dmg = ModuleResolver.ApplyOnUse(100, Modules.Special("duoxin", amount: 25), ctx);
+
+            // Assert：防方 guRevolt 抬升 +25（经 chokepoint），dmg 不变（delta 0）。
+            Assert.Equal(25, ctx.ReadResource(Side.Defender, "guRevolt"));
+            Assert.Equal(100, dmg);
+        }
+
+        [Fact]
+        public void test_special_duoxin_no_defender_guRevolt_is_noop()   // 反向：对纯阳/佛门/死物傀儡命中失败
+        {
+            // Arrange：防方无 guRevolt 资源（非蛊目标：纯阳/佛门/死物傀儡），攻方无关。
+            var ctx = MakeCtx();
+
+            // Act
+            int dmg = ModuleResolver.ApplyOnUse(60, Modules.Special("duoxin", amount: 25), ctx);
+
+            // Assert：防方 guRevolt 仍 0（命中失败空转），dmg 不变。
+            Assert.Equal(0, ctx.ReadResource(Side.Defender, "guRevolt"));
+            Assert.Equal(60, dmg);
+        }
+
+        // ———————————————————————— 断链 brokenChain（傀儡）————————————————————————
+
+        [Fact]
+        public void test_special_brokenChain_sets_attacker_residualOrder()
+        {
+            // Arrange：傀儡师攻方 residualOrder=0（[0,100]，残命惯性待置）。
+            var ctx = MakeCtx(attackerRes: new[] { ("residualOrder", 0, 100, 0) });
+
+            // Act：断链 Special（amount=40 置残命惯性初值，防御/状态签名非直伤）。
+            int dmg = ModuleResolver.ApplyOnUse(100, Modules.Special("brokenChain", amount: 40), ctx);
+
+            // Assert：攻方 residualOrder 置 40（经 chokepoint），dmg 不变（delta 0）。
+            Assert.Equal(40, ctx.ReadResource(Side.Attacker, "residualOrder"));
+            Assert.Equal(100, dmg);
+        }
+
+        [Fact]
+        public void test_special_brokenChain_no_attacker_residualOrder_is_noop()   // 反向：非傀儡师空转
+        {
+            // Arrange：攻方无 residualOrder 资源（非傀儡师）。
+            var ctx = MakeCtx();
+
+            // Act
+            int dmg = ModuleResolver.ApplyOnUse(70, Modules.Special("brokenChain", amount: 40), ctx);
+
+            // Assert：攻方 residualOrder 仍 0（空转），dmg 不变。
+            Assert.Equal(0, ctx.ReadResource(Side.Attacker, "residualOrder"));
+            Assert.Equal(70, dmg);
+        }
+
+        // ——————————————————————— 逆演栈 reverseStack（命 / 因果）———————————————————————
+
+        [Fact]
+        public void test_special_reverseStack_ming_charges_netFortune_and_lifespanDebt()
+        {
+            // Arrange：命路攻方 netFortune=20（[-50,40]）、lifespanDebt=0（[0,100]）。
+            var ctx = MakeCtx(attackerRes: new[]
+            {
+                ("netFortune", -50, 40, 20),
+                ("lifespanDebt", 0, 100, 0),
+            });
+
+            // Act：逆演重开 Special（结算回滚的确定性代价，回滚本体 defer 批4）。
+            int dmg = ModuleResolver.ApplyOnUse(100, Modules.Special("reverseStack"), ctx);
+
+            // Assert：netFortune -10 → 10、lifespanDebt +3 → 3（经 chokepoint），dmg 不变（delta 0）。
+            Assert.Equal(10, ctx.ReadResource(Side.Attacker, "netFortune"));
+            Assert.Equal(3, ctx.ReadResource(Side.Attacker, "lifespanDebt"));
+            Assert.Equal(100, dmg);
+        }
+
+        [Fact]
+        public void test_special_reverseStack_yinguo_charges_spaceTimeAuth_when_no_netFortune()
+        {
+            // Arrange：因果路攻方无 netFortune，改持 spaceTimeAuth=5（[0,9]）+ lifespanDebt=0。
+            var ctx = MakeCtx(attackerRes: new[]
+            {
+                ("spaceTimeAuth", 0, 9, 5),
+                ("lifespanDebt", 0, 100, 0),
+            });
+
+            // Act：逆演重开 Special（因果路无 netFortune → 改消 spaceTimeAuth）。
+            int dmg = ModuleResolver.ApplyOnUse(100, Modules.Special("reverseStack"), ctx);
+
+            // Assert：spaceTimeAuth -1 → 4、lifespanDebt +3 → 3，dmg 不变（delta 0）。
+            Assert.Equal(4, ctx.ReadResource(Side.Attacker, "spaceTimeAuth"));
+            Assert.Equal(3, ctx.ReadResource(Side.Attacker, "lifespanDebt"));
+            Assert.Equal(100, dmg);
+        }
+
+        [Fact]
+        public void test_special_reverseStack_no_cost_resources_is_noop()   // 反向：无代价资源全空转
+        {
+            // Arrange：攻方既无 netFortune/spaceTimeAuth 也无 lifespanDebt（非命/因果路）。
+            var ctx = MakeCtx();
+
+            // Act
+            int dmg = ModuleResolver.ApplyOnUse(55, Modules.Special("reverseStack"), ctx);
+
+            // Assert：无任何代价键可落，全空转，dmg 不变（delta 0）。
+            Assert.Equal(0, ctx.ReadResource(Side.Attacker, "netFortune"));
+            Assert.Equal(0, ctx.ReadResource(Side.Attacker, "spaceTimeAuth"));
+            Assert.Equal(0, ctx.ReadResource(Side.Attacker, "lifespanDebt"));
+            Assert.Equal(55, dmg);
+        }
+
         // —————————————————————————— Registry 派发确定性 ——————————————————————————
 
         [Fact]
@@ -183,14 +299,26 @@ namespace Jianghu.Core.Tests.Cultivation
         }
 
         [Fact]
-        public void test_special_registry_all_five_handlers_registered()
+        public void test_special_registry_all_eight_handlers_registered()
         {
-            // 5 唯一档全注册，HandlerId 对应单例。
+            // 8 唯一档全注册（批3 5 个 + 批3收口 3 个），HandlerId 对应单例。
             Assert.Equal("luobao", SpecialModuleRegistry.Get("luobao").HandlerId);
             Assert.Equal("explodeArray", SpecialModuleRegistry.Get("explodeArray").HandlerId);
             Assert.Equal("goldenBodyMax", SpecialModuleRegistry.Get("goldenBodyMax").HandlerId);
             Assert.Equal("fieldActive", SpecialModuleRegistry.Get("fieldActive").HandlerId);
             Assert.Equal("duoshe", SpecialModuleRegistry.Get("duoshe").HandlerId);
+            Assert.Equal("duoxin", SpecialModuleRegistry.Get("duoxin").HandlerId);
+            Assert.Equal("brokenChain", SpecialModuleRegistry.Get("brokenChain").HandlerId);
+            Assert.Equal("reverseStack", SpecialModuleRegistry.Get("reverseStack").HandlerId);
+        }
+
+        [Fact]
+        public void test_special_registry_new_handlers_return_same_singleton()
+        {
+            // 3 新 handler 同 id → 始终同单例（派发确定，spec §7 chokepoint）。
+            Assert.Same(SpecialModuleRegistry.Get("duoxin"), SpecialModuleRegistry.Get("duoxin"));
+            Assert.Same(SpecialModuleRegistry.Get("brokenChain"), SpecialModuleRegistry.Get("brokenChain"));
+            Assert.Same(SpecialModuleRegistry.Get("reverseStack"), SpecialModuleRegistry.Get("reverseStack"));
         }
 
         [Fact]
