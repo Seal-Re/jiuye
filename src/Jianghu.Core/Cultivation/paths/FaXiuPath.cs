@@ -149,16 +149,26 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "需spellBreadth=4,融四系一击40+realm×3,无视相克与护盾") },
                     new Dictionary<string, int> { { "manaPool", 40 } }),
                 // 五雷正法：召天雷,雷系伤害+28;对tag:ghost/tag:demon额外+10。manaPool≥20,消耗20。
+                // B5批2: → AddPenInteger(28基线)+CounterMul(evil,3/2) 破阴邪(对evil敌联合上界×3/2,非evil不变)。
                 new CombatSkillDef("sk_fa_wulei", "五雷正法", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 28, "召天雷雷系伤害+28;对tag:ghost/tag:demon额外+10(破阴邪)") },
+                    new[]
+                    {
+                        new EffectOp(EffectOpKind.AddPenInteger, null, 28, "召天雷雷系伤害+28(基线)"),
+                        new EffectOp(EffectOpKind.CounterMul, "evil", 3, "对tag:evil(阴邪:鬼/魔/血/妖/蛊)破阴邪×3/2(联合上界)", Amount2: 2, Rarity: EffectRarity.Rare),
+                    },
                     new Dictionary<string, int> { { "manaPool", 20 } }),
                 // 焚天燎原阵：火系AoE每敌16伤;命中木属性敌每个额外+5。manaPool≥22,消耗22。
                 new CombatSkillDef("sk_fa_fentian", "焚天燎原阵", 5,
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 16, "火系AoE每敌16伤;命中木属性敌每个额外+5") },
                     new Dictionary<string, int> { { "manaPool", 22 } }),
                 // 万剑诀·御物千刃：御使飞剑/法宝群攻,伤害=12+2×spellBreadth。manaPool≥15,消耗15。
+                // B5批2: → AddPenInteger(12基线)+PenFromResource(spellBreadth,2) 法术库越广御物群攻越强(真差分)。
                 new CombatSkillDef("sk_fa_wanjian", "万剑诀·御物千刃", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "御使飞剑/法宝群攻,伤害=12+2×spellBreadth") },
+                    new[]
+                    {
+                        new EffectOp(EffectOpKind.AddPenInteger, null, 12, "御使飞剑/法宝群攻基线12"),
+                        new EffectOp(EffectOpKind.PenFromResource, "spellBreadth", 2, "伤害+2×spellBreadth(法术库广度转伤)", Amount2: 1, Rarity: EffectRarity.Rare),
+                    },
                     new Dictionary<string, int> { { "manaPool", 15 } }),
                 // 寒冰六合困：范围冻结,敌全体可释战技数-1共1回合。manaPool≥18,消耗18。
                 new CombatSkillDef("sk_fa_hanbing", "寒冰六合困", 4,
