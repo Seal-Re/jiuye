@@ -181,7 +181,7 @@ namespace Jianghu.Cultivation.Paths
                 // 五雷轰顶符（攻·爆发）t5:引爆顶品攻符,单点/小范围终极火力(悟性×2+gradeFirepower[t5]×3+fuPotency);
                 //   对 ghost/demon/阴邪+10。castWindow=2 被断则符废。耗 talismanStore×1+fuPotency×2。
                 new CombatSkillDef("sk_fu_wulei", "五雷轰顶符", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "引爆顶品攻符,悟性×2+gradeFirepower[t5]×3+fuPotency终极火力,对ghost/demon/阴邪+10;castWindow=2被断符废") },
+                    new[] { Modules.FlatPen(60, "引爆顶品攻符,悟性×2+gradeFirepower[t5]×3+fuPotency终极火力(gradeFirepower derived→Phase3),对ghost/demon/阴邪+10;castWindow=2被断符废") },
                     new Dictionary<string, int> { { "talismanStore", 1 }, { "fuPotency", 2 } }),
                 // 符海齐射（攻·多线）t4:一次性引爆多张攻符覆盖全场,对每邻近敌stockFirepower/8+悟性/2,敌越多总伤越高;
                 //   引爆张数=2+叠射符纹。castWindow=2。耗 talismanStore×2(按引爆张数近似)。
@@ -204,12 +204,12 @@ namespace Jianghu.Cultivation.Paths
                 // 破阵焚符（控·破被动防御）t3:对敌方阵法/被动防御流/护盾引爆破阵符,使其一张在场阵归0或护盾power清零;
                 //   castWindow=1。耗 talismanStore×1。
                 new CombatSkillDef("sk_fu_pozhen", "破阵焚符", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "对敌方阵法/被动防御流/护盾引爆破阵符,使其一张在场阵arrayed_flag归0或护盾power清零(克阵修/防御流)") },
+                    new[] { Modules.FlatPen(24, "对敌方阵法/被动防御流/护盾引爆破阵符,使其一张在场阵arrayed_flag归0或护盾power清零(克阵修/防御流;拆阵 Phase3)") },
                     new Dictionary<string, int> { { "talismanStore", 1 } }),
                 // 召将纸甲（役使·代战）t3:召纸甲神兵/符将群代战1场,分担伤害并对全场敌持续悟性/2真伤;死物役使免毒蛊/音修乱心。
                 //   耗 talismanStore×1+fuPotency×3。
                 new CombatSkillDef("sk_fu_zhaojiazhijia", "召将纸甲", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "召纸甲神兵/符将群代战1场,分担伤害并对全场敌持续悟性/2真伤;死物役使免疫毒蛊/音修乱心(万金油役使位)") },
+                    new[] { Modules.FlatPen(12, "召纸甲神兵/符将群代战1场,分担伤害并对全场敌持续悟性/2真伤;死物役使免疫毒蛊/音修乱心(万金油役使位;召物+持续真伤 Phase3)") },
                     new Dictionary<string, int> { { "talismanStore", 1 }, { "fuPotency", 3 } }),
                 // 血符·焚尽（邪·搏命）t4:以精血为引强催符威(悟性×3+stockFirepower/4,倾尽部分库存),
                 //   但 innerDemon+5、根骨−2(本场)、fuPotency减半(邪符暴涨+反噬+道德下滑搏命引信)。castWindow=1。耗 talismanStore×1+fuPotency×2。

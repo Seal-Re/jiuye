@@ -158,11 +158,12 @@ namespace Jianghu.Cultivation
             {
                 // 神识奇袭·夺魂一击：先手偷袭,DivineProbe 已读壁且穿透≥壁则无视一切物理防御秒杀(spirit 全额入魂);误判则反震=壁−穿透全额扣 SeaIntegrity。
                 new CombatSkillDef("sk_so_qixi", "神识奇袭·夺魂一击", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "无视一切物理防御秒杀(spirit 全额入魂);须先用神识探查否则反震系数×2,本路标志性高风险一击") },
+                    new[] { Modules.FlatPen(60, "无视一切物理防御秒杀(spirit 全额入魂)基线破防量;须先用神识探查否则反震系数×2(误判反震 Phase3/批4),本路标志性高风险一击") },
                     new Dictionary<string, int> { { "soulForce", 40 } }),
                 // 万魂幡·群体摄神：对 realm 个目标同时摄魂,各受 SpiritPen 穿透判定;击穿者下回合行动判定-25(神乱)。
+                // B5扫尾: 占位 AddPenInteger(28) → Modules.AoePerTarget(28)（对 realm 个目标群攻,R2 单挑退化×1=+28,群战按敌数放大）。
                 new CombatSkillDef("sk_so_wanhun", "万魂幡·群体摄神", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 28, "对 realm 个目标同时摄魂穿透,击穿者下回合行动判定-25(多目标神识覆盖的兑现);每多锁1目标额外魂力8") },
+                    new[] { Modules.AoePerTarget(28, "对 realm 个目标同时摄魂穿透,敌越多总伤越高(R2单挑退化×1);击穿者下回合行动判定-25(神乱 Phase3)") },
                     new Dictionary<string, int> { { "soulForce", 35 } }),
                 // 焚魂自爆·阳神反噬：绝境技,燃烧全部魂力+30点 SeaIntegrity,对当前目标 SpiritPen=(魂力当前值×2)必杀级一击;施后 SeaIntegrity 至多剩10。
                 // B5批2: → PenFromResource(soulForce,2) 魂力自爆(魂力当前值×2,越满越痛,见底哑火;SeaIntegrity 自损 Phase3 结算)。
@@ -170,20 +171,21 @@ namespace Jianghu.Cultivation
                     new[] { Modules.PenFromResource("soulForce", 2, note: "燃烧全部魂力(魂力当前值×2)必杀级一击,同归于尽向(SeaIntegrity 自损 Phase3 结算)") },
                     new Dictionary<string, int> { { "soulForce", 30 } }),
                 // 夺舍·借尸：对濒死活体/傀儡容器发动,成功则本体神魂迁入新躯(realm跃升1、识海回满、寿元重置、继承新躯根骨);失败分魂尽灭。战略级而非战术级。
+                // B5扫尾 defer(红线A.8): 夺舍战略级(realm跃升/识海回满/寿元重置)→batch4/A.2 战略层,非战术伤害(amount 0),保 AddPenInteger(0) 占位。
                 new CombatSkillDef("sk_so_jieshi", "夺舍·借尸", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "战略级:成功 realm 跃升1+识海回满+寿元重置+继承新躯根骨,失败分魂尽灭;须一道分魂前提,成功率受九转洗魂诀/SeaIntegrity 加成(非伤害置0)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "战略级:成功 realm 跃升1+识海回满+寿元重置+继承新躯根骨,失败分魂尽灭(realm跃升/寿元重置→batch4/A.2 defer);须一道分魂前提,成功率受九转洗魂诀/SeaIntegrity 加成(非伤害置0)") },
                     new Dictionary<string, int> { { "soulForce", 50 } }),
                 // 神念结界·锁魂困敌：以神识织结界罩住一节点,域内敌方游历判定-30(神识封路)、其对我方物理偷袭仍按 spirit 轴被反制。控场/逃生两用。
                 new CombatSkillDef("sk_so_jinjie", "神念结界·锁魂困敌", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "罩住一节点:域内敌方游历判定-30(神识封路),其物理偷袭仍按 spirit 轴被反制(控场/逃生两用);每回合维持魂力5(非伤害置0)") },
+                    new[] { Modules.FlatPen(0, "罩住一节点:域内敌方游历判定-30(神识封路),其物理偷袭仍按 spirit 轴被反制(控场/逃生两用);每回合维持魂力5(结界非伤害置0)") },
                     new Dictionary<string, int> { { "soulForce", 25 } }),
                 // 分魂诱敌·金蝉脱壳：放出一道分魂代本体承受下一次攻击(无论物理或神魂),本体脱离;分魂亡则 SeaIntegrity-15。低容错路线核心走位保命。
                 new CombatSkillDef("sk_so_jinchan", "分魂诱敌·金蝉脱壳", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "放出一道分魂代本体承受下一次攻击(物理/神魂皆可),本体脱离;分魂亡则 SeaIntegrity-15,凝有分魂为前提(低容错核心保命,非伤害置0)") },
+                    new[] { Modules.FlatPen(0, "放出一道分魂代本体承受下一次攻击(物理/神魂皆可),本体脱离;分魂亡则 SeaIntegrity-15,凝有分魂为前提(低容错核心保命,代受/脱离非伤害置0)") },
                     new Dictionary<string, int> { { "soulForce", 20 } }),
                 // 望气探魂：非伤害侦察,对一目标读出神魂壁整数估值与 SeaIntegrity 残量,误差≤探查精度;为后续奇袭/规避提供数据。开战前必备侦察。
                 new CombatSkillDef("sk_so_wangqi", "望气探魂", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "对一目标读出神魂壁整数估值与 SeaIntegrity 残量,误差≤探查精度,为奇袭/规避提供数据(开战前必备侦察,非伤害置0)") },
+                    new[] { Modules.FlatPen(0, "对一目标读出神魂壁整数估值与 SeaIntegrity 残量,误差≤探查精度,为奇袭/规避提供数据(开战前必备侦察,纯侦察非伤害置0)") },
                     new Dictionary<string, int> { { "soulForce", 10 } }),
             };
 

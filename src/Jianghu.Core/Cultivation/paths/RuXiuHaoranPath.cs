@@ -201,11 +201,12 @@ namespace Jianghu.Cultivation
                     new Dictionary<string, int> { { "haoran", 20 } }),
                 // 浩然破幻·正气护神：以浩然斩幻身/魂体,对 illusion/soul 真伤无视绕物防,破魂力绕物防/天魔乱心,本方全体免疫一次乱心。浩然≥25+内力5。
                 new CombatSkillDef("sk_ru_pohuan", "浩然破幻·正气护神", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 35, "对 illusion/soul 真伤无视绕物防,破魂力绕物防/天魔乱心;本方全体免疫一次乱心") },
+                    new[] { Modules.FlatPen(35, "对 illusion/soul 真伤无视绕物防,破魂力绕物防/天魔乱心;本方全体免疫一次乱心(真伤定值;无视绕物防/免乱心 Phase3)") },
                     new Dictionary<string, int> { { "haoran", 25 } }),
                 // 微言诛心·断罪：对心术不正者宣读其罪,按目标 innerDemon×3 真伤+引动其心魔走火;对德全/正道几无伤。浩然≥18+文胆透支3。
+                // B5扫尾 defer(红线A.8): 伤害按目标 innerDemon×3 缩放,innerDemon 属 A.2 道心轴(B1 解耦:战斗期不读 innerDemon)→A.2 道心层 defer,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_ru_zhuxin", "微言诛心·断罪", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "按目标 innerDemon×3 真伤+引动其心魔本回合走火打折;对德全/正道者几乎无伤(诛不义不诛义)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "按目标 innerDemon×3 真伤(innerDemon→A.2 道心层 defer)+引动其心魔本回合走火打折;对德全/正道者几乎无伤(诛不义不诛义)") },
                     new Dictionary<string, int> { { "haoran", 18 }, { "wenDan", 3 } }),
                 // 文宫鼓舞·阵词：开群战增益词,在场同阵营攻+12%、护神 DR+5、士气+1档共3回合;wenGong 当回合翻倍——群战开团核心。浩然≥15。
                 new CombatSkillDef("sk_ru_zhenci", "文宫鼓舞·阵词", 2,
@@ -218,16 +219,24 @@ namespace Jianghu.Cultivation
                     new[] { Modules.Control("lawPrison", 1, "布律狱困范围失德/阴邪:被困者每步受固定正气灼伤,且无法借煞/遁走/施幻(控场非伤害,批4结算)") },
                     new Dictionary<string, int> { { "haoran", 16 } }),
                 // 舍身取义·浩然爆发：浩然槽连同部分文胆一次性引爆,超高范围破邪净化(全槽×2 折算);自身 WenDan 永久-3、规则压制位清零——文人风骨赌命技。
+                // B5扫尾: 占位 AddPenInteger(50) → Modules.PenFromResource(haoran,×2)（全槽浩然×2 折算,浩然越满越痛、见底哑火真差分；
+                //   wenDan 永久-3 自损另以 AddResource 表达；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_ru_sheshen", "舍身取义·浩然爆发", 4,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 50, "全槽浩然×2 折算超高范围破邪净化(赌命终极)"),
+                        Modules.PenFromResource("haoran", 2, note:"全槽浩然×2 折算超高范围破邪净化(赌命终极,浩然转伤)"),
                         new EffectOp(EffectOpKind.AddResource, "wenDan", -3, "自身文胆永久-3(文位倒退风险),本场规则压制位清零"),
                     },
                     new Dictionary<string, int> { { "haoran", 40 } }),
                 // 浩然正气·天地一统：为天地立心降临式,对全场阴邪/幻术/失德 AOE 净化+诛心重创(叠克邪×2 与 innerDemon 加伤),本方全体护神+师表;对纯阳正道同道几无伤。浩然≥40+realm≥6。
+                // B5扫尾: 占位 AddPenInteger(60) → FlatPen(60) 基线 + Modules.CounterMul(evil,×2)（对阴邪(evil tag)叠正气克邪×2,
+                //   §15.4 联合上界）。innerDemon 加伤属 A.2 道心轴不在 A.0 落,AOE全场/护神 Phase3。
                 new CombatSkillDef("sk_ru_tiandiyitong", "浩然正气·天地一统", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "对全场阴邪/幻术/失德 AOE 净化+诛心重创(叠正气克邪×2 与 innerDemon 加伤);本方全体护神+师表;对纯阳正道同道几无伤") },
+                    new[]
+                    {
+                        Modules.FlatPen(60, "对全场阴邪/幻术/失德 AOE 净化+诛心重创基线破防量;本方全体护神+师表;对纯阳正道同道几无伤 Phase3"),
+                        Modules.CounterMul("evil", 2, note:"对阴邪(evil tag)叠正气克邪×2(联合上界);innerDemon 加伤属 A.2 道心轴 defer"),
+                    },
                     new Dictionary<string, int> { { "haoran", 40 } }),
             };
 

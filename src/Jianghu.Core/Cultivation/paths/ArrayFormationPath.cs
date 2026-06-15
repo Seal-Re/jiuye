@@ -168,7 +168,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "stones", 30 } }),
                 // 破阵·反制：反向解析敌方阵修,命中使其一张在场阵arrayed_flag归0(阵修内战/拆台手),命中率随双方悟性差;消耗compute-12。
                 new CombatSkillDef("sk_ar_pozhen", "破阵·反制", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "反向解析敌方阵:命中使其一张在场阵arrayed_flag归0(拆台手),命中率随双方悟性差") },
+                    new[] { Modules.FlatPen(30, "反向解析敌方阵:命中使其一张在场阵arrayed_flag归0(拆台手),命中率随双方悟性差") },
                     new Dictionary<string, int> { { "compute", 12 } }),
                 // 困龙·锁：对阵内最高战力单体施'锁',其逃离/位移判定-50、realm结算-1,持续3步(越级困杀专点强敌);需杀阵/锁阵在场 + stones-12。
                 // B5批2: → Control(arrayLock,3) 困龙锁定3步(控场积木,逃离/realm debuff 批4接,本轮ApplyOnUse不改dmg)。
@@ -177,17 +177,17 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "stones", 12 } }),
                 // 挪阵·乾坤：把一张已布成阵的坐标平移到相邻节点并保持arrayed_flag(破'拉离灵脉'克制);消耗compute-8 + stones-15。
                 new CombatSkillDef("sk_ar_nuozhen", "挪阵·乾坤", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "把一张已布成阵平移到相邻节点并保持arrayed_flag(把灵脉/护山阵搬到敌前,破拉离灵脉克制)") },
+                    new[] { Modules.FlatPen(0, "把一张已布成阵平移到相邻节点并保持arrayed_flag(把灵脉/护山阵搬到敌前,破拉离灵脉克制;挪阵非伤害置0)") },
                     new Dictionary<string, int> { { "compute", 8 }, { "stones", 15 } }),
                 // 急布·简阵：无视常规setup节奏,本步立刻布成1张tier≤2阵(应急开阵),但该阵power-30%、stones双倍耗;消耗compute≥10 + stones-20。
                 new CombatSkillDef("sk_ar_jibu", "急布·简阵", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "无视常规setup节奏本步立刻布成1张tier≤2阵(应急开阵),该阵power-30%、stones双倍耗") },
+                    new[] { Modules.FlatPen(0, "无视常规setup节奏本步立刻布成1张tier≤2阵(应急开阵),该阵power-30%、stones双倍耗;急布非伤害置0") },
                     new Dictionary<string, int> { { "compute", 10 }, { "stones", 20 } }),
                 // 落阵·点枢：一次性把当前节点已蓄满setup_progress的阵全部点亮:arrayed_flag 0→1,阵图power解锁(开战核心动作);需 setupProgress≥20 且 stones≥10。
                 new CombatSkillDef("sk_ar_dianshu", "落阵·点枢", 1,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "把当前节点已蓄满setup_progress的阵全部点亮:arrayed_flag 0→1,阵图power解锁(开战核心动作)"),
+                        Modules.FlatPen(0, "把当前节点已蓄满setup_progress的阵全部点亮:arrayed_flag 0→1,阵图power解锁(开战核心动作;点阵非伤害置0)"),
                         new EffectOp(EffectOpKind.AddResource, "setupProgress", -20, "消耗已蓄满的布阵进度点亮在场阵"),
                     },
                     new Dictionary<string, int> { { "setupProgress", 20 }, { "stones", 10 } }),

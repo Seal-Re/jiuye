@@ -214,8 +214,10 @@ namespace Jianghu.Cultivation.Paths
                     },
                     new Dictionary<string, int> { { "venomCharge", 8 } }),
                 // 百毒朝天·瘟疫爆：倾泻百毒值自爆式范围,伤害=当前全部百毒值×2,放完归零(空量极高方差);对死物/纯阳/佛门锐减。清空 venomCharge。
+                // B5扫尾: 占位 AddPenInteger(40) → Modules.PenFromResource(venomCharge,×2)（百毒值越满越痛、见底哑火真差分；
+                //   Amount2=1 工厂保证 §15.6；对死物/纯阳/佛门锐减走 Phase3 CounterMatrix）。
                 new CombatSkillDef("sk_du_chaotian", "百毒朝天·瘟疫爆", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "倾泻百毒值范围打击,伤害=当前全部百毒值×2,放完百毒值归零;对死物傀儡/纯阳/佛门伤害锐减") },
+                    new[] { Modules.PenFromResource("venomCharge", 2, note:"倾泻百毒值范围打击,伤害=当前全部百毒值×2,放完百毒值归零(空量极高方差);对死物傀儡/纯阳/佛门锐减 Phase3") },
                     new Dictionary<string, int> { { "venomCharge", 20 } }),
                 // 夺心控蛊：对活体植蛊夺心,成功则其本回合反噬阵营/受己调遣(反向夺兽),占1宿主名额;对纯阳/佛门/死物命中失败。百毒值5。
                 // B5 批2：植蛊夺心(mind control,战力按比例转己/调遣敌方)是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
@@ -225,7 +227,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "venomCharge", 5 } }),
                 // 淬毒一击：淬毒暗器/兵刃一击向单体,基于百毒值的渗透伤害并使中毒掉血;潜伏施放则额外破一层护体。百毒值3。
                 new CombatSkillDef("sk_du_cuidu", "淬毒一击", 1,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "淬毒暗器/兵刃一击,基于百毒值的渗透伤害并使目标中毒掉血;潜伏施放(对方未察觉)则额外破一层护体") },
+                    new[] { Modules.FlatPen(12, "淬毒暗器/兵刃一击,基于百毒值的渗透伤害并使目标中毒掉血;潜伏施放(对方未察觉)则额外破一层护体") },
                     new Dictionary<string, int> { { "venomCharge", 3 } }),
                 // 瘟疫毒雾：范围毒雾消耗,区域内敌每动作-战力且累积中毒,judge 失败则持续掉血;对纯阳/佛门减半,对死物无效。百毒值4。
                 // B5 批2 招牌招迁移：占位 AddPenInteger(8) → Modules.Dot(plague,8/tick,3回合)（范围毒雾持续掉血,
@@ -246,7 +248,7 @@ namespace Jianghu.Cultivation.Paths
                     new[]
                     {
                         new EffectOp(EffectOpKind.AddResource, "guRevolt", -100, "蛊母濒死弃旧身夺新宿续命兼重置:成功则保命且噬主度清零;失败(遇符/丹/雷火/纯阳/佛光在场)则蛊母俱焚永久退场风险"),
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "终极手段:阴德污点不洗"),
+                        Modules.FlatPen(0, "终极手段:阴德污点不洗(脱壳续命非伤害置0)"),
                     },
                     new Dictionary<string, int> { { "venomCharge", 15 } }),
             };

@@ -171,8 +171,10 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 至宝压境：无视境界压制,满足整数门槛(itemTier≥对手realm+2)直接判定镇压(伤害=itemTier*20且对手失先手)。门槛 soulBond≥8。
+                // B5扫尾: 占位 AddPenInteger(100) → Modules.PenFromResource(itemTier,20)（itemTier 绝对主导转伤,脱宝即崩→0;
+                //   失先手/越境压制走 Phase3；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_qi_yazhi", "至宝压境", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 100, "itemTier*20无视境界压制,满足itemTier≥对手realm+2则对手当回合失去先手") },
+                    new[] { Modules.PenFromResource("itemTier", 20, note:"itemTier*20无视境界压制(法宝品阶主导),满足itemTier≥对手realm+2则对手当回合失去先手 Phase3") },
                     new Dictionary<string, int> { { "soulBond", 8 } }),
                 // 万宝齐发：AOE/爆发,所驱使全部法宝itemTier之和*8一次性倾泻;发动后soulBond骤降转虚弱(low容错)。soulBond≥5且需已御≥2宝。
                 // B5批2: → PenFromResource(itemTier,8) 本批用自身itemTier×8(真Σ多宝聚合 derived → EPIC-COMBAT-FULLSTRUCT defer)。
@@ -199,8 +201,10 @@ namespace Jianghu.Cultivation.Paths
                     new[] { Modules.PenFromResource("itemTier", 10, note: "驱本命法宝攻敌itemTier*10(法宝品阶主导,脱宝即崩),最廉价的输出手段") },
                     new Dictionary<string, int>()),
                 // 器灵自爆(舍器一击)：绝境终招,将一件法宝itemTier*30倾泻为真伤后该宝损毁;脱宝即崩路线的'同归于尽'保险。无 soulBond 门槛(代价=销毁本命法宝)。
+                // B5扫尾: 占位 AddPenInteger(90) → Modules.PenFromResource(itemTier,30)（itemTier 倾泻为真伤,品阶越高越猛;
+                //   该宝损毁=itemTier 永久损耗走 Phase3；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_qi_zibao", "器灵自爆", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 90, "一件法宝itemTier*30倾泻为真伤后该宝损毁(itemTier永久损耗),脱宝即崩路线的同归于尽保险") },
+                    new[] { Modules.PenFromResource("itemTier", 30, note:"一件法宝itemTier*30倾泻为真伤(同归于尽保险)后该宝损毁(itemTier永久损耗 Phase3),脱宝即崩路线") },
                     new Dictionary<string, int>()),
             };
 

@@ -188,8 +188,9 @@ namespace Jianghu.Cultivation.Paths
                     new[] { Modules.PenFromResource("rosterPower", 1, note:"全在役兽集火单一目标,兽群强度(rosterPower)按当前兽阵倍率全额计入一次") },
                     new Dictionary<string, int>()),
                 // 嗜血催狂：催动指定灵兽狂化,该兽 beastPower×150/100 持续3 tick,结束后 bond−20(透支纽带换爆发)。门槛 bond≥20。
+                // B5扫尾 defer(红线A.8): beastPower×倍率=逐兽派生量(非聚合 rosterPower 资源),真 per-beast derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_yu_cuikuang", "嗜血催狂", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 18, "指定兽 beastPower×150/100 狂化3 tick;透支纽带,结束 bond−20") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 18, "指定兽 beastPower×150/100 狂化3 tick(beastPower derived→FULLSTRUCT defer);透支纽带,结束 bond−20") },
                     new Dictionary<string, int> { { "bond", 20 } }),
                 // 万兽齐鸣·镇魂：全在役兽齐吼,反制范围内音修乱兽/精神扰动并清我方被乱,bond 全体回+10(反·乱兽)。内力高。
                 new CombatSkillDef("sk_yu_zhenhun", "万兽齐鸣·镇魂", 3,
@@ -214,8 +215,9 @@ namespace Jianghu.Cultivation.Paths
                     },
                     new Dictionary<string, int> { { "bond", 5 } }),
                 // 灵兽附身·夺魄：将一只高 bond 灵兽之力暂附本体,本体指挥项临时+悟性×3,弥补本体弱、用于近身自保/脱困。门槛 bond≥10(该兽本回合退出兽阵),内力高。
+                // B5扫尾 defer(红线A.8): 改本体自身 stat(指挥项+悟性×3)需 ApplyStatDelta(未建)→改stat→EPIC-COMBAT-FULLSTRUCT(与傀儡'傀附本体'同构),保 AddPenInteger 占位。
                 new CombatSkillDef("sk_yu_fushen", "灵兽附身·夺魄", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "高 bond 灵兽之力暂附本体,本体指挥项临时+悟性×3(近身自保/脱困)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "高 bond 灵兽之力暂附本体,本体指挥项临时+悟性×3(改self-stat→FULLSTRUCT defer;近身自保/脱困)") },
                     new Dictionary<string, int> { { "bond", 10 } }),
                 // 召兽归阵：将散落/被乱/逃逸的灵兽强制召回阵中并重置阵位,恢复兽阵倍率触发条件(被打散后重整旗鼓)。内力低,无门槛。
                 new CombatSkillDef("sk_yu_guizhen", "召兽归阵", 1,

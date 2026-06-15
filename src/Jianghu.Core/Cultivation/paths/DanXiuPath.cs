@@ -170,8 +170,10 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "pillStock", 3 } }),
                 // 夺元一击（毒丹暗杀分支·斩首）：对单一高威胁目标暗下夺元丹,内力-6+悟性-4并造死仇负边-25(L1);
                 // 不溯源者最强阴招,专破他路高战力者的资源依赖。消耗1枚夺元丹(pillStock) + 一次接触机会窗口。
+                // B5扫尾 defer(红线A.8): 夺元改的是敌方 stat(内力-6/悟性-4)+造关系负边-25,ApplyStatDelta/AdjustRelationEdge 未建
+                //   → 改stat/造网→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位破防量。
                 new CombatSkillDef("sk_da_duoyuan", "夺元一击", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 28, "对单一高威胁目标暗下夺元丹:内力-6+悟性-4并造死仇负边-25(L1跨路改stat/造边),专破他路高战力者资源依赖") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 28, "对单一高威胁目标暗下夺元丹:内力-6+悟性-4并造死仇负边-25(改stat/造边→FULLSTRUCT defer),专破他路高战力者资源依赖") },
                     new Dictionary<string, int> { { "pillStock", 1 } }),
                 // 护身丹爆（自保）：战斗中吞服储备丹,directPower 临时+realm×2 维持3结算步;纯自卫不增杀伤(丹修无主动杀招写照)。
                 // 消耗1枚成品丹(pillStock)。
@@ -185,8 +187,10 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "pillStock", 1 } }),
                 // 毒烟丹·撒豆（毒丹暗杀分支）：投掷毒烟丹,对当前节点全体非己目标内力-2并降其受击战力1步;造群体微负边(一念发情丹乱军式)。
                 // 消耗1枚毒丹(pillStock),暴露概率低。
+                // B5扫尾 defer(红线A.8): 群体改stat(内力-2/降受击战力1步)+造群体负边,ApplyStatDelta/AdjustRelationEdge 未建
+                //   → 改stat/造网→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位破防量。
                 new CombatSkillDef("sk_da_duyan", "毒烟丹·撒豆", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "投掷毒烟丹对当前节点全体非己:内力-2并降受击战力1步,造群体微负边(L1群体debuff/造边,一念发情丹乱军式)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "投掷毒烟丹对当前节点全体非己:内力-2并降受击战力1步,造群体微负边(改stat/造边→FULLSTRUCT defer,一念发情丹乱军式)") },
                     new Dictionary<string, int> { { "pillStock", 1 } }),
                 // 施丹结契（资源枢纽·造网）：非战斗主动技,向目标赠突破/疗伤丹,造依附正边+15(L1)并登记『丹债』;把战力弱转成关系网中心。
                 // 消耗1枚高阶丹(pillStock),无战斗消耗。

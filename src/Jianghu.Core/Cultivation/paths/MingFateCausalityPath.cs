@@ -166,8 +166,9 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 一念断因果：开战即结算,按tempo档削对方本回合EP并截其下一动作,夺其Fortune-5入己。决战起手最强先手技。
+                // B5扫尾 defer(红线A.8): 主效=削对方 EffectivePower×tempo/16(改敌EP%通道未建)+截动作,改EP%→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_mi_yinian", "一念断因果", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "按tempo档削对方EP×tempo/16(整除)并截其下一动作,同时夺Fortune-5入己") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "按tempo档削对方EP×tempo/16(整除)并截其下一动作(改EP%→FULLSTRUCT defer),同时夺Fortune-5入己") },
                     new Dictionary<string, int> { { "karma", 5 }, { "lifespanDebt", 3 }, { "netFortune", 4 } }),
                 // 夺运截命·一击：对单体夺Fortune-8→己+5;目标气运>己则reflect全额入己LifespanDebt+Karma(强夺命大者自险),命中则其tempo-2。
                 // B5 批2 招牌招迁移：占位 AddPenInteger(24) → Modules.Drain(netFortune,8)（夺运=经 chokepoint 防方 netFortune-8、
@@ -183,7 +184,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "netFortune", 10 }, { "lifespanDebt", 3 } }),
                 // 移祸天下：群体转嫁,把自身Karma一半(整除)平摊场上所有敌方(各NetFortune同步降),顺带各夺Fortune-2。多打一时摊薄天谴。
                 new CombatSkillDef("sk_mi_yihuo", "移祸天下", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "把自身Karma一半(整除)平摊全场敌方(各NetFortune同步降),各夺Fortune-2") },
+                    new[] { Modules.FlatPen(12, "把自身Karma一半(整除)平摊全场敌方(各NetFortune同步降),各夺Fortune-2(群体转嫁/derived摊薄 Phase3)") },
                     new Dictionary<string, int> { { "netFortune", 6 } }),
                 // 借寿演天：瞬间满算,tempo直升当前realm上限并netFortune+4。以折寿换此刻全知。
                 new CombatSkillDef("sk_mi_jieshou", "借寿演天", 3,
@@ -199,7 +200,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "netFortune", 4 }, { "karma", 1 } }),
                 // 断生死·绝命：终结技,仅己净气运>0且>目标时可发——清零目标本场tempo并夺其NetFortune的1/3,几乎必杀已被压制者;条件不满足则发动反噬全额入己。
                 new CombatSkillDef("sk_mi_jueming", "断生死·绝命", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 50, "清零目标本场tempo并夺其NetFortune的1/3(几乎必杀已被压制者);仅己净气运>0且>目标可发,否则反噬全额入己") },
+                    new[] { Modules.FlatPen(50, "清零目标本场tempo并夺其NetFortune的1/3(几乎必杀已被压制者);仅己净气运>0且>目标可发,否则反噬全额入己(执行斩杀基线;条件/反噬 Phase3/批4)") },
                     new Dictionary<string, int> { { "netFortune", 15 }, { "karma", 6 }, { "lifespanDebt", 6 } }),
             };
 

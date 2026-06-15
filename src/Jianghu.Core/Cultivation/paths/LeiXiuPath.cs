@@ -193,23 +193,25 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "thunderCharge", 30 } }),
                 // 辟邪斩魂：纯阳雷刃斩魂体/幻身,对illusion_soul/ghost真伤无视绕物防,破魂力绕物防类阴防。雷力25+内力5。
                 new CombatSkillDef("sk_le_zhanhun", "辟邪斩魂", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 32, "纯阳雷刃对illusion_soul/ghost真伤,无视绕物防,破魂力绕物防这类阴防机制") },
+                    new[] { Modules.FlatPen(32, "纯阳雷刃对illusion_soul/ghost真伤,无视绕物防,破魂力绕物防这类阴防机制(真伤定值;无视绕物防 Phase3)") },
                     new Dictionary<string, int> { { "thunderCharge", 25 } }),
                 // 舍身雷爆：雷力槽连同部分内力一次性引爆,超高范围爆发(全槽雷力×2折算power);自身根骨永久-3、本场武力减半。雷力全槽30+内力20+根骨永久-3。
+                // B5扫尾: 占位 AddPenInteger(60) → Modules.PenFromResource(thunderCharge,×2)（全槽雷力×2折算,雷力越满越痛、见底哑火真差分；
+                //   根骨永久-3/武力减半自损走 Phase3/批4 selfDmg；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_le_sheshen", "舍身雷爆", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "全槽雷力×2折算超高范围爆发,自身根骨永久-3、本场武力减半(自险流终极赌命技)") },
+                    new[] { Modules.PenFromResource("thunderCharge", 2, note:"全槽雷力×2折算超高范围爆发,自身根骨永久-3、本场武力减半(自险流终极赌命技,自损 Phase3)") },
                     new Dictionary<string, int> { { "thunderCharge", 30 } }),
                 // 雷狱困魔阵：社雷布纯阳雷狱困范围阴邪,被困者每步受固定纯阳灼伤,无法遁走/借煞气回复。雷力18+1张雷纹符胆(leiwen)。
                 new CombatSkillDef("sk_le_leiyu", "雷狱困魔阵", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 18, "纯阳雷狱困范围阴邪,被困者每步受固定纯阳灼伤,且无法遁走/借煞气回复") },
+                    new[] { Modules.FlatPen(18, "纯阳雷狱困范围阴邪,被困者每步受固定纯阳灼伤,且无法遁走/借煞气回复(困场+逐步灼伤 Phase3)") },
                     new Dictionary<string, int> { { "thunderCharge", 18 }, { "leiwen", 1 } }),
                 // 五雷轰顶：五道连环天雷集火单体,对ghost/corpse/demon直接打断养魂/炼尸/施法并清1层护体阴煞。雷力20。
                 new CombatSkillDef("sk_le_hongding", "五雷轰顶", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 22, "五道连环天雷集火单体,对ghost/corpse/demon打断养魂/炼尸/施法并清1层护体阴煞") },
+                    new[] { Modules.FlatPen(22, "五道连环天雷集火单体,对ghost/corpse/demon打断养魂/炼尸/施法并清1层护体阴煞(打断/净化 Phase3)") },
                     new Dictionary<string, int> { { "thunderCharge", 20 } }),
                 // 惊雷破障：定向惊雷专破禁制/结界/护体罡气/阵纹,对非阴邪目标伤害平平但拆防/破阵判定+15。雷力12。
                 new CombatSkillDef("sk_le_pozhang", "惊雷破障", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "定向惊雷专破禁制/结界/护体罡气/阵纹,拆防/破阵判定+15(对非阴邪目标伤害平平)") },
+                    new[] { Modules.FlatPen(12, "定向惊雷专破禁制/结界/护体罡气/阵纹,拆防/破阵判定+15(对非阴邪目标伤害平平;拆防 Phase3)") },
                     new Dictionary<string, int> { { "thunderCharge", 12 } }),
                 // 蓄雷·引气：主动引地火社雷温养筋脉,立即+8雷力、雷纹载位临时+1。无雷力门槛(雷力见底的起爆引信)。
                 new CombatSkillDef("sk_le_xulei", "蓄雷·引气", 1,

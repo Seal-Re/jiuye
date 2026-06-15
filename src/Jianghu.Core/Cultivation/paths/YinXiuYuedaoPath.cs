@@ -208,20 +208,20 @@ namespace Jianghu.Cultivation
             var skills = new[]
             {
                 // 起调·点律：把当前节点已蓄满 windupProgress 的曲/乐章全部点亮 fieldActive 0→1（开战核心动作,开场类）。qiYun≥8 + windupProgress 满。
-                // B5 批2：律场总门 fieldActive 点亮(未起调则律场项整体置 0 的 GateByFlag)是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
-                //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger(0)/GrantPassive 占位。
+                // B5扫尾: 占位 AddPenInteger(0) → FlatPen(0)（起调非伤害,开场flag-flip;律场总门 GateByFlag 由配套 GrantPassive(fieldActive) 表达,
+                //   完整门控解锁 Phase3/批3 接,FlatPen(0) 为诚实非伤害占位）。
                 new CombatSkillDef("sk_yin_qidiao", "起调·点律", 1,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "把已蓄满windupProgress的曲/乐章全部点亮:fieldActive0→1(律场总门→batch3 Special defer,GateByFlag),律场spirit效果解锁(开战核心动作)"),
-                        new EffectOp(EffectOpKind.GrantPassive, "fieldActive", 1, "fieldActive置1(律场总门,批3接GateByFlag)"),
+                        Modules.FlatPen(0, "把已蓄满windupProgress的曲/乐章全部点亮:fieldActive0→1(律场总门GateByFlag),律场spirit效果解锁(开战核心动作,起调非伤害置0)"),
+                        new EffectOp(EffectOpKind.GrantPassive, "fieldActive", 1, "fieldActive置1(律场总门,GateByFlag解锁 Phase3)"),
                     },
                     new Dictionary<string, int> { { "qiYun", 8 } }),
                 // 急奏·短调：无视常规起调节奏本步立刻起调1首tier≤2曲(应急开场),该律场效果−30%、乐韵双倍耗(被偷家救场手,开场类)。qiYun≥18,消耗18。
                 new CombatSkillDef("sk_yin_jizou", "急奏·短调", 2,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "无视常规起调节奏本步立刻起调1首tier≤2曲(应急开场),该律场效果−30%(被偷家时救场手)"),
+                        Modules.FlatPen(0, "无视常规起调节奏本步立刻起调1首tier≤2曲(应急开场),该律场效果−30%(被偷家时救场手,起调非伤害置0)"),
                         new EffectOp(EffectOpKind.GrantPassive, "fieldActive", 1, "fieldActive置1(应急点律)"),
                     },
                     new Dictionary<string, int> { { "qiYun", 18 } }),
@@ -242,7 +242,7 @@ namespace Jianghu.Cultivation
                 new CombatSkillDef("sk_yin_wanlai", "万籁齐鸣·镇场", 3,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 12, "全律场共振一震,对范围内敌'乱兽/扰心/破奏'反制并清我方被乱被控状态(反·软控、反·斩首断线,与驭兽'万兽齐鸣·镇魂'互为镜像)"),
+                        Modules.FlatPen(12, "全律场共振一震,对范围内敌'乱兽/扰心/破奏'反制并清我方被乱被控状态(反·软控、反·斩首断线,与驭兽'万兽齐鸣·镇魂'互为镜像;反制/清控 Phase3)"),
                         new EffectOp(EffectOpKind.AddResource, "resonance", 2, "全场友方resonance应和+2"),
                         new EffectOp(EffectOpKind.AddResource, "qiYun", 5, "qiYun回+5"),
                     },

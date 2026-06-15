@@ -173,10 +173,11 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 夺舍·借尸还魂：魂力濒死强夺邻近肉身续命,成功保命且噬主度清零;失败(遇雷/纯阳/佛光)魂飞魄散。煞值≥15(+全部魂力压上)。
+                // B5扫尾 defer(红线A.8): 夺舍战略级(强夺肉身续命/realm重算)→batch4/A.2 战略层,非战术伤害(amount 0),保 AddPenInteger(0) 占位 + devourMeter 清零。
                 new CombatSkillDef("sk_gu_duoshe", "夺舍·借尸还魂", 5,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "濒死强夺邻近肉身续命,成功保命;失败(遇雷/纯阳/佛光在场)魂飞魄散(永久退场风险,刹车/保命类)"),
+                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "濒死强夺邻近肉身续命,成功保命;失败(遇雷/纯阳/佛光在场)魂飞魄散(夺舍战略级→batch4/A.2 defer,永久退场风险,刹车/保命类)"),
                         new EffectOp(EffectOpKind.AddResource, "devourMeter", -100, "夺舍成功噬主度清零"),
                     },
                     new Dictionary<string, int> { { "shaCharge", 15 } }),
@@ -186,10 +187,13 @@ namespace Jianghu.Cultivation.Paths
                     new[] { Modules.PenFromResource("shaCharge", 2, note: "倾泻煞值自爆,伤害=当前全部煞值×2(入夜再×昼夜系数),放完归零(空电量极高方差爆发)") },
                     new Dictionary<string, int> { { "shaCharge", 20 } }),
                 // 万鬼夜行：倾巢令全部在册鬼兵齐出协攻,伤害=Σ鬼兵power×2;战后全体鬼兵噬主度+2。煞值≥8(+噬主度风险+2)。
+                // B5扫尾: 占位 AddPenInteger(36) → Modules.PenFromResource(ghostSoldierPower,×2)（与毒蛊'万蛊噬身'同构:Σ鬼兵 power×2
+                //   的真 per-鬼 Σ 是逐兵派生→FULLSTRUCT,本批用聚合资源 ghostSoldierPower 近似差分(越多越痛、空册哑火);Amount2=1 工厂保证 §15.6）。
+                //   倾巢背债 devourMeter+2 保留。
                 new CombatSkillDef("sk_gu_yexing", "万鬼夜行", 4,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 36, "倾巢:全部在册鬼兵齐出协攻,伤害=Σ鬼兵power×2"),
+                        Modules.PenFromResource("ghostSoldierPower", 2, note:"倾巢全部在册鬼兵齐出协攻,伤害=Σ鬼兵power×2(真Σ鬼兵 derived→FULLSTRUCT,本批用 ghostSoldierPower 聚合资源近似)"),
                         new EffectOp(EffectOpKind.AddResource, "devourMeter", 2, "战后全体鬼兵噬主度+2(倾巢必背债)"),
                     },
                     new Dictionary<string, int> { { "shaCharge", 8 } }),
@@ -200,13 +204,13 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "shaCharge", 5 } }),
                 // 阴风血雾：范围阴雾,区域内敌每动作-煞值/失血,普通敌悟性judge失败则战力-8;白昼范围与时长减半(昼弱)。煞值≥4,消耗4。
                 new CombatSkillDef("sk_gu_xuewu", "阴风血雾", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "范围阴雾,敌悟性judge失败则战力-8;白昼范围与时长减半(昼弱)") },
+                    new[] { Modules.FlatPen(8, "范围阴雾,敌悟性judge失败则战力-8;白昼范围与时长减半(昼弱;judge/debuff Phase3)") },
                     new Dictionary<string, int> { { "shaCharge", 4 } }),
                 // 噬魂一缕：近敌抽魂造基于魂力的伤害并回煞值+3;击杀时噬主度不增(轻量噬魂无反噬负担)。煞值≥2,消耗2。
                 new CombatSkillDef("sk_gu_yilv", "噬魂一缕", 1,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 12, "近敌抽魂造基于魂力的伤害(轻量噬魂,击杀时噬主度不增)"),
+                        Modules.FlatPen(12, "近敌抽魂造基于魂力的伤害(轻量噬魂,击杀时噬主度不增;魂力scaling Phase3 基线)"),
                         new EffectOp(EffectOpKind.AddResource, "shaCharge", 3, "回煞值+3"),
                     },
                     new Dictionary<string, int> { { "shaCharge", 2 } }),

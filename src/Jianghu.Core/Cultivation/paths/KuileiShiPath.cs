@@ -197,16 +197,19 @@ namespace Jianghu.Cultivation.Paths
                     new[] { Modules.PenFromResource("fleetWeighted", 1, note:"傀儡军团集火单一目标,带宽乘子全额=fleetWeighted 全额计入一次集火伤害(死物军团集火)") },
                     new Dictionary<string, int> { { "fleetWeighted", 8 } }),
                 // 傀附本体·临阵 [t2]：一具高品阶傀机括之力暂附本体,本体指挥项临时+悟性×3,弥补藏阵脆皮(近身自保/脱困;该傀本回合退出名册)。
+                // B5扫尾 defer(红线A.8): 改本体自身 stat(指挥项+悟性×3)需 ApplyStatDelta(未建)→改stat→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_kl_kuifu", "傀附本体·临阵", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 18, "本体指挥项临时+悟性×3,弥补本体藏阵脆皮(近身自保/脱困,该傀本回合退出名册)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 18, "本体指挥项临时+悟性×3(改self-stat→FULLSTRUCT defer),弥补本体藏阵脆皮(近身自保/脱困,该傀本回合退出名册)") },
                     new Dictionary<string, int> { { "fleetWeighted", 6 } }),
                 // 强令催动 [t2]：超频驱动指定傀,该傀constructPower×150/100持续3tick,结束后机括过载constructTier临时−1(透支构件换爆发)。
+                // B5扫尾 defer(红线A.8): constructPower×倍率=逐傀派生量(非聚合 fleetWeighted 资源),真 per-construct derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_kl_qiangling", "强令催动", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "指定傀constructPower×150/100持续3tick,后机括过载constructTier临时−1(透支构件换爆发,死物不喊累会损耗)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "指定傀constructPower×150/100持续3tick(constructPower derived→FULLSTRUCT defer),后机括过载constructTier临时−1(透支构件换爆发,死物不喊累会损耗)") },
                     new Dictionary<string, int> { { "fleetWeighted", 6 } }),
                 // 机枢自爆·焚甲 [t4]：引爆一具傀造constructPower×300/100一次性范围爆发,该傀永久移出名册(资源换斩杀,消耗战收尾);不损其余傀。
+                // B5扫尾 defer(红线A.8): constructPower×倍率=逐傀派生量(非聚合 fleetWeighted 资源),真 per-construct derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_kl_jishuzibao", "机枢自爆·焚甲", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "引爆一具傀constructPower×300/100一次性范围爆发,该傀永久移出名册(资源换斩杀);不损其余傀(死物无纽带网震荡)") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "引爆一具傀constructPower×300/100一次性范围爆发(constructPower derived→FULLSTRUCT defer),该傀永久移出名册(资源换斩杀);不损其余傀(死物无纽带网震荡)") },
                     new Dictionary<string, int> { { "fleetWeighted", 12 } }),
                 // 镇魂不乱·钢令 [t3]：被音修乱兽/精神扰动笼罩时,钢令贯链——死物本免疫心智,本技额外把范围内被乱己方活体援军/契约兽拉回钢令节奏并清除被乱状态(反·乱兽)。
                 new CombatSkillDef("sk_kl_zhenhun", "镇魂不乱·钢令", 3,

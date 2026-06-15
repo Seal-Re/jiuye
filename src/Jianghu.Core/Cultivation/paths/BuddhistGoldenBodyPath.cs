@@ -212,8 +212,14 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 诸天神佛降世：终极AOE,对全场阴邪 base×anti_evil 真伤并群体渡化低煞者;耗尽愿力。门槛愿力≥3000(清空)。
+                // B5扫尾: 占位 AddPenInteger(90) → FlatPen(90) 基线 + Modules.CounterMul(evil,×3)（佛光 anti_evil 对阴邪(evil tag)×3
+                //   联合上界钳 §15.4；全场AOE 与 群体渡化低煞者走 Phase3,本模块表达 anti_evil 倍乘破防量）。
                 new CombatSkillDef("sk_bd_zhutian", "诸天神佛降世", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 90, "终极AOE:对全场阴邪 base×anti_evil 真伤并群体渡化低煞者;耗尽愿力") },
+                    new[]
+                    {
+                        Modules.FlatPen(90, "终极AOE对全场阴邪 base×anti_evil 真伤基线破防量;群体渡化低煞者/耗尽愿力 Phase3"),
+                        Modules.CounterMul("evil", 3, note:"对阴邪(evil tag) anti_evil×3(联合上界钳);非阴邪与群体渡化 Phase3"),
+                    },
                     new Dictionary<string, int> { { "vow", 3000 } }),
                 // 不动明王怒目：开金身大成态3回合,DR×2、所有受击全额转愿、对阴邪伤害再×1.5。愿力≥1500,消耗1500。
                 // B5 批2：开金身大成态(goldenBodyMax 态 3 回合,DR×2/受击全额转愿)是唯一档签名状态机制(SpecialModuleRegistry 派发) → batch3 Special,
@@ -222,20 +228,25 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "开金身大成态3回合:DR×2、所有受击全额转愿、对阴邪伤害再×1.5(goldenBodyMax态→batch3 Special defer)") },
                     new Dictionary<string, int> { { "vow", 1500 } }),
                 // 大须弥山掌：AOE镇压,对全场阴邪 base×2 伤害并附'镇';对非阴邪 base 伤害。愿力≥500,消耗500(+内力60 flavor)。
+                // B5扫尾: 占位 AddPenInteger(48) → FlatPen(48) 基线 + Modules.CounterMul(evil,×2)（对阴邪(evil tag)×2;非阴邪 base 走 Phase3,'镇' debuff Phase3）。
                 new CombatSkillDef("sk_bd_xumi", "大须弥山掌", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 48, "AOE镇压:对全场阴邪 base×2 伤害并附'镇';对非阴邪 base 伤害(内力60开销 flavor)") },
+                    new[]
+                    {
+                        Modules.FlatPen(48, "AOE镇压对全场阴邪 base×2 基线破防量;对非阴邪 base 伤害(内力60开销 flavor)"),
+                        Modules.CounterMul("evil", 2, note:"对阴邪(evil tag)×2并附'镇';非阴邪只算 base Phase3"),
+                    },
                     new Dictionary<string, int> { { "vow", 500 } }),
                 // 渡魔往生印：收束技,对濒败阴邪触发渡化,煞气转功德、使其退场,不计杀业。愿力≥400+功德≥100。
                 new CombatSkillDef("sk_bd_duomo", "渡魔往生印", 4,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "收束技:对濒败阴邪触发渡化,使其退场不计杀业(降魔渡魔戏剧收束)"),
+                        Modules.FlatPen(0, "收束技:对濒败阴邪触发渡化,使其退场不计杀业(降魔渡魔戏剧收束;收束非伤害置0)"),
                         new EffectOp(EffectOpKind.AddResource, "merit", 100, "渡化所得:煞气转本方功德+100"),
                     },
                     new Dictionary<string, int> { { "vow", 400 }, { "merit", 100 } }),
                 // 金刚伏魔圈：结界,圈内阴邪攻-30%、本方DR+5/层;持续3回合,期间受击转愿×2。愿力≥200,消耗200(+内力40 flavor)。
                 new CombatSkillDef("sk_bd_fumoquan", "金刚伏魔圈", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 20, "结界:圈内阴邪攻-30%、本方DR+5/层;持续3回合,期间受击转愿×2(内力40开销 flavor)") },
+                    new[] { Modules.FlatPen(20, "结界:圈内阴邪攻-30%、本方DR+5/层;持续3回合,期间受击转愿×2(内力40开销 flavor;结界debuff/buff Phase3)") },
                     new Dictionary<string, int> { { "vow", 200 } }),
                 // 摩诃无量佛光：对单体阴邪 anti_evil 倍伤(默认×3,整数定标);非阴邪只算 base 的一半。愿力≥300,消耗300。
                 // B5 批2 招牌招迁移：占位 AddPenInteger(30) → FlatPen(30) 基线 + Modules.CounterMul(evil,×3)（佛光 anti_evil：
@@ -252,13 +263,13 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_bd_weituo", "韦驮献杵", 2,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 24, "金身重击:伤害=2×根骨+8×goldenLayers(内力20开销 flavor)"),
+                        Modules.FlatPen(24, "金身重击:伤害=2×根骨+8×goldenLayers 基线破防量(根骨/goldenLayers 双项 Phase3;内力20开销 flavor)"),
                         new EffectOp(EffectOpKind.AddResource, "vow", 100, "命中回愿+100(金身吃打涨愿)"),
                     },
                     new Dictionary<string, int>()),
                 // 狮子吼：震慑范围内目标(攻-15%/1回合);对阴邪改为眩晕1回合。愿力≥50,消耗50(+内力20 flavor)。
                 new CombatSkillDef("sk_bd_shizihou", "狮子吼", 1,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "震慑范围内目标(攻-15%/1回合);对阴邪改为眩晕1回合(内力20开销 flavor)") },
+                    new[] { Modules.FlatPen(8, "震慑范围内目标(攻-15%/1回合);对阴邪改为眩晕1回合(内力20开销 flavor;debuff/对阴邪眩晕 Phase3)") },
                     new Dictionary<string, int> { { "vow", 50 } }),
             };
 

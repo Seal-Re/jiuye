@@ -228,7 +228,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "yaoDan", 2 } }),
                 // 妖王威压·镇群：以血脉位阶强制威慑低阶兽/驭兽群,战力−15并打断兽阵协同;对纯人族只算半数(妖王立威,集体分支起手)。妖丹6。
                 new CombatSkillDef("sk_yx_zhenqun", "妖王威压·镇群", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 15, "对低阶兽/驭兽群施血脉压制使其战力−15并打断兽阵协同;对纯人族目标只算半数(妖王立威,克驭兽师/低阶妖)") },
+                    new[] { Modules.FlatPen(15, "对低阶兽/驭兽群施血脉压制使其战力−15并打断兽阵协同;对纯人族目标只算半数(妖王立威,克驭兽师/低阶妖;血脉压制debuff Phase3)") },
                     new Dictionary<string, int> { { "yaoDan", 6 } }),
                 // 玄煞兽鳞罩：起妖煞护体抵下次伤害=妖丹×2;被纯阳/雷法/佛光攻击时该护罩仅减半失效(兼防天克的刹车)。妖丹5。(防天克/保命类)
                 new CombatSkillDef("sk_yx_linzhao", "玄煞兽鳞罩", 2,

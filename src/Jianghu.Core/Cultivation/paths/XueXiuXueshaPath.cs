@@ -190,17 +190,20 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_xue_fanbu", "噬血反哺", 3,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 16, "近敌抽血一击,基于武力的伤害,本场承血阈临时+2,xuesha+1"),
+                        Modules.FlatPen(16, "近敌抽血一击,基于武力的伤害(武力scaling Phase3 基线),本场承血阈临时+2,xuesha+1"),
                         new EffectOp(EffectOpKind.AddResource, "qixie", 8, "按命中回血气+8(击杀额外回满一档)"),
                     },
                     new Dictionary<string, int>()),
                 // 血河漫卷：召本命血器/血河之力群攻全场,对每个邻近敌手武力×1+燃血量×1燃血穿透,敌越多总伤越高,命中失血/肉身系+5。
+                // B5扫尾: 占位 AddPenInteger(30) → Modules.AoePerTarget(30)（对每邻近敌群攻,R2 单挑退化×1=+30,群战按敌数放大,敌越多总伤越高）。
                 new CombatSkillDef("sk_xue_manjuan", "血河漫卷", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "对每邻近敌手武力×1+燃血量×1燃血穿透,敌越多总伤越高,命中失血/肉身系目标额外+5") },
+                    new[] { Modules.AoePerTarget(30, "对每邻近敌手武力×1+燃血量×1燃血穿透,敌越多总伤越高(R2单挑退化×1),命中失血/肉身系目标额外+5 Phase3") },
                     new Dictionary<string, int> { { "qixie", 15 } }),
                 // 血祭·焚身爆：孤注同归——一次性燃尽当前全部血气自爆式打击,范围伤=当前全部血气×2;放完血气归零、根骨永久-3、本场武力减半。
+                // B5扫尾: 占位 AddPenInteger(80) → Modules.PenFromResource(qixie,×2)（全部血气×2自爆,血气越满越痛、见底哑火真差分；
+                //   血气归零/根骨永久-3/武力减半自损走 Phase3/批4；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_xue_fenshen", "血祭·焚身爆", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 80, "燃尽全部血气自爆,范围伤=当前全部血气×2(透支流终极赌命);放完血气归零、根骨永久-3、本场武力减半,xuesha+5") },
+                    new[] { Modules.PenFromResource("qixie", 2, note:"燃尽全部血气自爆,范围伤=当前全部血气×2(透支流终极赌命);放完血气归零、根骨永久-3、本场武力减半,xuesha+5(自损 Phase3)") },
                     new Dictionary<string, int>()),
                 // 锁血止煞·镇心：防御性刹车(强制对冲项)——本回合不可燃血,立即xuesha-15、daoHeart+3,可在天谴/走火触发前打断(对应选取规则brake强制)。
                 //   xuesha-15 走 AddResource 压煞(核心算子近似);daoHeart+3 是道心轴(A.2)不在 A.0 落算子,仅 Note(放算子会崩,且 daoHeart 不在 Resources)。
@@ -215,7 +218,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "qixie", 8 } }),
                 // 血脉暴走：濒死血脉返祖——血气见底或濒死时强燃本源续命爆发,本回合所有燃血档视为满档、直伤+武力,但战后血气上限本场-30。
                 new CombatSkillDef("sk_xue_baozou", "血脉暴走", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "血气≤cap/4或濒死时强燃本源续命,本回合燃血档视为满档、直伤+武力(血神道搏命高方差);战后血气上限本场-30,xuesha+8") },
+                    new[] { Modules.FlatPen(24, "血气≤cap/4或濒死时强燃本源续命,本回合燃血档视为满档、直伤+武力(血神道搏命高方差);战后血气上限本场-30,xuesha+8(满档态/cap自损 Phase3/批4)") },
                     new Dictionary<string, int>()),
             };
 

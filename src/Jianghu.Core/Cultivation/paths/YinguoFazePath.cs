@@ -185,7 +185,7 @@ namespace Jianghu.Cultivation.Paths
             {
                 // 一念抹因[burst]：开战即结算,抹除目标本回合全部'因'(counterAdj/先手/Tempo 价值归零)并按 causalAuth 从因果栈弹一条还施其身。最强先手'未战先胜'。
                 new CombatSkillDef("sk_yg_moyin", "一念抹因", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "抹除目标本回合全部'因'(其 counterAdj/先手/Tempo 价值归零)并按 causalAuth 从因果栈弹一条还施其身,法则修士最强先手技") },
+                    new[] { Modules.FlatPen(36, "抹除目标本回合全部'因'(其 counterAdj/先手/Tempo 价值归零)并按 causalAuth 从因果栈弹一条还施其身,法则修士最强先手技(抹因/栈还施 Phase3)") },
                     new Dictionary<string, int> { { "retributionDebt", 12 }, { "lifespanDebt", 3 } }),
                 // 时光回溯·逆演[control]：本场限一次,撤销 KarmicIndex 栈中指定一条交锋结算(伤害/夺运/胜负回滚),天谴债不回滚。规则纠错'重来一手'。
                 // B5 批2：KarmicIndex 栈回溯是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
@@ -219,7 +219,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int>()),
                 // 一指定数·绝命[burst]：终结技,仅己三律权限阶之和>目标气运/命格评估时可发,直接判目标本场定数为负(近乎必杀已压制者);条件不满足则发动即天谴全额反噬入己。
                 new CombatSkillDef("sk_yg_jueming", "一指定数·绝命", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 50, "终结技:仅己三律权限阶之和>目标气运/命格评估时可发,直接判目标本场定数为负(近乎必杀已压制者);条件不满足则发动即天谴全额反噬入己,需 destinyAuth≥7 且 lawBound==1") },
+                    new[] { Modules.FlatPen(50, "终结技:仅己三律权限阶之和>目标气运/命格评估时可发,直接判目标本场定数为负(近乎必杀已压制者);条件不满足则发动即天谴全额反噬入己,需 destinyAuth≥7 且 lawBound==1(执行斩杀基线;条件/反噬 Phase3/批4)") },
                     new Dictionary<string, int> { { "retributionDebt", 30 }, { "lifespanDebt", 6 } }),
             };
 
