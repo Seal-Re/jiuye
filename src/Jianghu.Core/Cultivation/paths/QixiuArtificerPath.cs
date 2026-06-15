@@ -175,24 +175,28 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 100, "itemTier*20无视境界压制,满足itemTier≥对手realm+2则对手当回合失去先手") },
                     new Dictionary<string, int> { { "soulBond", 8 } }),
                 // 万宝齐发：AOE/爆发,所驱使全部法宝itemTier之和*8一次性倾泻;发动后soulBond骤降转虚弱(low容错)。soulBond≥5且需已御≥2宝。
+                // B5批2: → PenFromResource(itemTier,8) 本批用自身itemTier×8(真Σ多宝聚合 derived → EPIC-COMBAT-FULLSTRUCT defer)。
                 new CombatSkillDef("sk_qi_wanbao", "万宝齐发", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "所驱使全部法宝itemTier之和*8一次性倾泻,高方差,发动后转入虚弱") },
+                    new[] { Modules.PenFromResource("itemTier", 8, note: "所驱使法宝itemTier*8一次性倾泻(本批自身itemTier;真Σ多宝聚合deferred FULLSTRUCT),高方差发动后转虚弱") },
                     new Dictionary<string, int> { { "soulBond", 5 } }),
                 // 落宝金光：经济维核心,判定(本路power+落纹加成)过门槛则夺/打落对手1件法宝→对手该宝itemTier/法术power本战清零;命中后自身借用1回合。soulBond≥3。
+                // B5批2: 唯一档签名机制(夺器清零+借用) → 批3 Special(luobao) handler(§10覆盖账器=已结构化·签名Special批3);本批保 Note 占位。
                 new CombatSkillDef("sk_qi_luobao", "落宝金光", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "判定过门槛夺/打落对手1件法宝→其itemTier或法术power本战清零(克剑修飞剑/法修符),命中后借用1回合") },
+                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "判定过门槛夺/打落对手1件法宝→其itemTier或法术power本战清零(克剑修飞剑/法修符),命中后借用1回合(批3 Special luobao)") },
                     new Dictionary<string, int> { { "soulBond", 3 } }),
                 // 玄黄护宝罡：防御/反夺器,开'御'罩本战免疫一次落宝/缚器,并把对手落宝反弹(谁夺器谁被夺)。soulBond≥4。
                 new CombatSkillDef("sk_qi_huhao", "玄黄护宝罡", 3,
                     new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 20, "开'御'罩本战免疫一次落宝/缚器,并把对手的落宝反弹(谁夺器谁被夺)") },
                     new Dictionary<string, int> { { "soulBond", 4 } }),
                 // 缚锋锁器：压制非夺取,令对手itemTier与所选功法power各-2(持续2回合),配'缚/困'纹连锁;对装备依附者结构性克制。soulBond≥2。
+                // B5批2: → Drain(itemTier,2) 夺压对手itemTier(经chokepoint,攻方借得;法术power-2 debuff 批4接)。
                 new CombatSkillDef("sk_qi_fufeng", "缚锋锁器", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 16, "令对手itemTier与所选功法power各-2(持续2回合),配'缚/困'纹连锁,对装备依附者结构性克制") },
+                    new[] { Modules.Drain("itemTier", 2, "令对手itemTier-2(夺压,经chokepoint攻方借得),配'缚/困'纹连锁,对装备依附者结构性克制") },
                     new Dictionary<string, int> { { "soulBond", 2 } }),
                 // 御剑斩：基础御宝攻,驱本命法宝攻敌,伤害=itemTier*10+悟性;最廉价输出手段(soulBond 0/法力少量)。无 soulBond 门槛。
+                // B5批2: → PenFromResource(itemTier,10) 法宝品阶绝对主导(脱宝即崩→0;悟性部分批4基线承载)。
                 new CombatSkillDef("sk_qi_yujian", "御剑斩", 1,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 10, "驱本命法宝攻敌itemTier*10+悟性,最廉价的输出手段") },
+                    new[] { Modules.PenFromResource("itemTier", 10, note: "驱本命法宝攻敌itemTier*10(法宝品阶主导,脱宝即崩),最廉价的输出手段") },
                     new Dictionary<string, int>()),
                 // 器灵自爆(舍器一击)：绝境终招,将一件法宝itemTier*30倾泻为真伤后该宝损毁;脱宝即崩路线的'同归于尽'保险。无 soulBond 门槛(代价=销毁本命法宝)。
                 new CombatSkillDef("sk_qi_zibao", "器灵自爆", 5,
