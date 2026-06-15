@@ -162,29 +162,29 @@ namespace Jianghu.Cultivation.Paths
                 // B5批2: 招牌招结构化 → PenFromResource(swordWill,4) 剑意转伤(剑意越满越痛,见底则哑火),
                 //   武力×3 基础部分由 power 公式/DuelEngine 基线承载(批4),本模块表达剑意爆发的可变穿透。
                 new CombatSkillDef("sk_sw_jian23", "剑二十三", 5,
-                    new[] { new EffectOp(EffectOpKind.PenFromResource, "swordWill", 4, "剑意值×4单点终极穿透(资源转伤),斩道开光无视根骨", Amount2: 1, Rarity: EffectRarity.Rare) },
+                    new[] { Modules.PenFromResource("swordWill", 4, note: "剑意值×4单点终极穿透(资源转伤),斩道开光无视根骨") },
                     new Dictionary<string, int> { { "swordWill", 20 } }),
                 // 万剑归宗：召本命剑分化群剑攻全场(武力×1+悟性×1/敌)。剑意值≥15,消耗15。
                 // B5批2: → AoePerTarget(30) 群攻(R2单挑退化×1=+30,群战按敌数放大,敌越多总伤越高)。
                 new CombatSkillDef("sk_sw_wanjian", "万剑归宗", 4,
-                    new[] { new EffectOp(EffectOpKind.AoePerTarget, null, 30, "对每个邻近敌手武力×1+悟性×1穿透,敌越多总伤越高(R2单挑退化×1)") },
+                    new[] { Modules.AoePerTarget(30, "对每个邻近敌手武力×1+悟性×1穿透,敌越多总伤越高(R2单挑退化×1)") },
                     new Dictionary<string, int> { { "swordWill", 15 } }),
                 // 破·御剑诀：御剑直取最高power者,必中(武力×2+剑意值×2);窃势-5。剑意值≥10,消耗10。
                 new CombatSkillDef("sk_sw_poyujian", "破·御剑诀", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "无视阻挡与距离直取敌方最高power者,必中") },
+                    new[] { Modules.FlatPen(24, "无视阻挡与距离直取敌方最高power者,必中") },
                     new Dictionary<string, int> { { "swordWill", 10 } }),
                 // 遇强破式：独孤九剑反制,读招,对方power每高10本人下一击+8(上限+48)。剑意值≥6,消耗6。
                 new CombatSkillDef("sk_sw_yuqiang", "遇强破式", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "对方power每高出本人10点,本人下一击伤害+8(上限+48)") },
+                    new[] { Modules.FlatPen(8, "对方power每高出本人10点,本人下一击伤害+8(上限+48)") },
                     new Dictionary<string, int> { { "swordWill", 6 } }),
                 // 剑气如虹：直线剑气穿透至多2目标(武力×1+8,无视根骨2)。剑意值≥4,消耗4。
                 new CombatSkillDef("sk_sw_jianqi", "剑气如虹", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "直线至多2目标各武力×1+8穿透,无视根骨2点") },
+                    new[] { Modules.FlatPen(8, "直线至多2目标各武力×1+8穿透,无视根骨2点") },
                     new Dictionary<string, int> { { "swordWill", 4 } }),
                 // 舍身一剑：放弃全部闪避,换下一击+武力值,但本回合受击+10。剑意值≥3,消耗3。
-                // B5批2: → Backlash(lowHp) 自伤换爆发通道(本回合受击+10由批4 selfDmg 接,ApplyOnUse 不改入伤)。
+                // B5批2: → Backlash(selfExposed) 自伤换爆发通道(本回合受击+10由批4 selfDmg 接,ApplyOnUse 不改入伤)。
                 new CombatSkillDef("sk_sw_sheshen", "舍身一剑", 2,
-                    new[] { new EffectOp(EffectOpKind.Backlash, "selfExposed", 10, "下一击伤害+武力值(翻倍式爆发),本回合受击+10(低容错,自伤通道)", Rarity: EffectRarity.Rare) },
+                    new[] { Modules.Backlash("selfExposed", 10, "下一击伤害+武力值(翻倍式爆发),本回合受击+10(低容错,自伤通道)") },
                     new Dictionary<string, int> { { "swordWill", 3 } }),
                 // 祭剑·见血：主动割血祭剑,立即+8剑意值、剑成度+2,根骨-2(本场)。无剑意门槛。
                 new CombatSkillDef("sk_sw_jijian", "祭剑·见血", 1,
