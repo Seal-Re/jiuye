@@ -36,6 +36,9 @@ SUNSHINEFLOW_APP_CODE=...     # DreamMaker 项目码,形如 _dm_prod_xxxxxxx
 > - **AUTH_TOKEN 不要带 `v2:` 前缀**——console 页面显示的是 `v2:eyJ...`，但填进 .env 只取 `eyJ...` 的 JWT 本体；带 `v2:` 会 401 `token is invalid`。
 > - **APP_CODE = DreamMaker 项目码**（`_dm_prod_xxx`），**不是** authkey。authkey（`X-Auth-API-key`）是另一回事，本公开蓝图无需配（蓝图 key 已内置 blueprints.json）。
 > - 字段→请求头映射：AUTH_TOKEN→`X-Access-Token`，AUTH_USER→`X-Auth-User`，APP_CODE→`X-Aigw-App`。
+> - **APP_CODE 用「个人体验用户组」的码**（形如 `_dm_prod_<用户名>`，如 `_dm_prod_huangjiaqi13`）——这个组有体验积分；项目级码（`_dm_prod_cza9bi0zed` 等）认证过但可能 0 积分报「剩余积分不足」。app_code 在 https://dreammaker.netease.com/permission 查（需登录，按用户组找）。
+> - **2026-06-15 全链路实测成功**：`_dm_prod_huangjiaqi13` 出图通，43s/张，自动下载本地（带 alpha + 不带 alpha 两版）。质量=精致像素插画（远超程序化几何件）。
+> - token 有有效期（JWT exp 2026-06-22），过期重取（401 时）。
 > - **账号需有 DreamMaker 积分**：认证过但积分不足会报 `剩余积分不足，请联系值班`——属账号配额，需充值/联系值班，非配置问题。
 > - token 有有效期（JWT exp），过期重取（401 时）。
 - Token 会过期 → 脚本报 401/403 时重新取。
@@ -63,6 +66,8 @@ python $SKILL --prompt "..." --reference_textures "./pixel/parts/3_robe/robe_swo
 ② 生图        ← SunshineFlow（image2 出 alpha 部件 / pixel-art-fs 出像素资产）
 ③ 后处理      ← 对齐 32×48 像素格 + 抠透明底 + 量化调色板（AI直出难精确踩格，需此步；
                 可写对齐脚本辅助，见 PARTS_CONTRACT §5）
+                ⚠️ 实测：image2 直出约 **1254×1254 RGBA 高清像素插画**（非 32×48 网格）。
+                → 当**图标/物品/立绘**可直接用(高清)；进 **char_gen 部件**需先 downscale 到 32×48 + 调色板量化(后处理脚本)。
 ④ 入库        ← 按 PARTS_CONTRACT 命名丢 pixel/parts/<层>/
 ⑤ 拼装        ← python pixel/char_gen.py（零改代码加载新件 + palette-swap 染色 + 装备层 + 光环）
 ```
