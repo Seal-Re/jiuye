@@ -75,9 +75,34 @@ python $SKILL --prompt "..." --reference_textures "./pixel/parts/3_robe/robe_swo
 - **图标优化路径**（你提的）：用 `image2` 蓝图按门类母题出 21 路功法图标（带 alpha），替换 icon_gen 的几何母题 → 图标从"程序化几何"升到"AI 精绘"。
 - **角色路径**：见 §6.1 —— **角色本体不用 AI**，AI 只出静态挂件/立绘。
 
+### 5.1 ⚡ 网格批量出料（省额度核心，100 件装备的解法）
+
+> **问题**：脚本无 `--count`，逐件出 100 件装备 = 100 次额度 + 慢。**解法**：一张图 prompt 成 N×N 网格、本地切片。
+> **2026-06-15 实证**：1 张 4×4 网格 prompt → 切出 12-16 件干净 48² 独立装备 → **1 次调用 ≈ 12-16 件**，100 件仅 ~8-9 次调用，**省 ~92% 额度**。
+
+```bash
+# ① AI 出网格图(prompt 要求 NxN grid, each centered, transparent, clean grid lines)
+python $SKILL --prompt "pixel art equipment icons, a 4x4 grid of 16 different ... each centered in its own cell, transparent background, consistent style, clean dark grid lines" --output-dir ./pixel/_aigen
+# ② 本地切片成 N 独立件(48² 游戏尺寸)
+python pixel/postprocess.py grid <网格图> --rows 4 --cols 4 --cell 48 --names jian,dao,spear,... --out-dir pixel/_aigen/equip_sliced
+# ③ 精修挑用的入库 pixel/parts/ 或挂 char_skeleton 装备点
+```
+
+**100 件装备生产策略（评估定，承用户②）**：
+- AI 网格批量出 **~20-30 件"种类基底"**（2 张网格图）——不逐件出。
+- `postprocess grid` 切片 + 缩 48²。
+- **palette-swap**（染金/银/玄铁/血红…品阶色）+ **程序化叠饰**（realm 流光/宝石/符文）→ 派生到 100+ 件变体。
+- **= AI 只出"种类"，code 派生"品阶/染色/特效变体"**（承 PIXEL_RULES §0：AI 出基础件 + code 批量派生）。
+
+### 5.2 尺寸纪律（承用户②"像素太高没用"）
+
+- 装备图标 **48²**、角色本体 **32×48**（char_skeleton）——游戏内尺寸，不追高像素。
+- AI 直出高清（image2≈1254²/网格每格≈150²）→ postprocess 缩到目标格，高像素只是"出图中转"不入库。
+
 ## 6. 边界与纪律
 
 ### 6.1 ⚠️ AI vs 程序化分工（2026-06-15 定，按"是否要逐帧动画/骨架一致"切）
+
 
 > **关键约束**：角色要移动动画（idle/walk/attack），靠**骨架驱动**——每帧关节位置必须一致。**AI 逐帧生成无法保证骨架一致**（同角色第2帧手臂/肩宽/头身比/脚位漂移→动画抖动变形），这是 AI 生图根本缺陷，prompt 修不了。**故角色本体（要动画的）不用 AI 绘制。**
 
