@@ -89,16 +89,56 @@ def process(inp, out, tw, th, anchor, ramp):
     im.save(out)
     return im.size
 
+def slice_grid(inp, rows, cols, cell, out_dir, names=None, ramp=None):
+    """网格图(rows×cols)→ 每格切出 → trim+downscale 到 cell×cell → 独立 PNG。
+    『一次 AI 出 N 件、本地切成 N 独立件』的支点(省额度)。names: 每格命名(可选)。"""
+    os.makedirs(out_dir, exist_ok=True)
+    im = Image.open(inp); im = alpha_or_keycolor(im)
+    W0, H0 = im.size
+    cw, ch = W0 // cols, H0 // rows
+    saved = []
+    for r in range(rows):
+        for c in range(cols):
+            idx = r * cols + c
+            cellimg = im.crop((c*cw, r*ch, (c+1)*cw, (r+1)*ch))
+            cellimg = trim(cellimg)
+            if cellimg.size[0] < 4 or cellimg.size[1] < 4:  # 空格跳过
+                continue
+            cellimg = downscale_fit(cellimg, cell, cell, pad=2)
+            cellimg = quantize_to_ramp(cellimg, ramp) if ramp else quantize_kmeans(cellimg)
+            cellimg = compose(cellimg, cell, cell, "center")
+            nm = (names[idx] if names and idx < len(names) else f"item_{idx:02d}")
+            p = os.path.join(out_dir, f"{nm}.png")
+            cellimg.save(p); saved.append(p)
+    return saved
+
 if __name__=="__main__":
-    ap = argparse.ArgumentParser()
-    ap.add_argument("input")
-    ap.add_argument("--out", default=None)
-    ap.add_argument("--w", type=int, default=32)
-    ap.add_argument("--h", type=int, default=48)
-    ap.add_argument("--anchor", default="bottom", choices=["bottom","center"])
-    ap.add_argument("--ramp", default=None, help="量化到 char_gen RAMP 某阶(如 steel/azure);留空=保色相 k-means 减色")
-    a = ap.parse_args()
-    out = a.out or os.path.splitext(a.input)[0] + f"_pp{a.w}x{a.h}.png"
-    sz = process(a.input, out, a.w, a.h, a.anchor, a.ramp)
     sys.stdout.reconfigure(encoding="utf-8")
-    print(f"后处理: {a.input} -> {out}  ({sz[0]}x{sz[1]}, anchor={a.anchor}, ramp={a.ramp or 'kmeans'})")
+    # 手动分派(避免 argparse subparser 与顶层 positional 的 dest 冲突)
+    if len(sys.argv) > 1 and sys.argv[1] == "grid":
+        g = argparse.ArgumentParser(prog="postprocess.py grid")
+        g.add_argument("input")
+        g.add_argument("--rows", type=int, required=True)
+        g.add_argument("--cols", type=int, required=True)
+        g.add_argument("--cell", type=int, default=48, help="每件目标像素(默认48,游戏内尺寸)")
+        g.add_argument("--out-dir", default="./pixel/_aigen/sliced")
+        g.add_argument("--names", default=None, help="逗号分隔的每格命名")
+        g.add_argument("--ramp", default=None)
+        a = g.parse_args(sys.argv[2:])
+        names = a.names.split(",") if a.names else None
+        saved = slice_grid(a.input, a.rows, a.cols, a.cell, a.out_dir, names, a.ramp)
+        print(f"网格切片: {a.input} → {len(saved)} 件 @ {a.cell}² → {a.out_dir}")
+        for p in saved: print("  ", os.path.basename(p))
+    else:
+        ap = argparse.ArgumentParser()
+        ap.add_argument("input")
+        ap.add_argument("--out", default=None)
+        ap.add_argument("--w", type=int, default=32)
+        ap.add_argument("--h", type=int, default=48)
+        ap.add_argument("--anchor", default="bottom", choices=["bottom","center"])
+        ap.add_argument("--ramp", default=None, help="量化到 char_gen RAMP 某阶;留空=k-means 减色")
+        a = ap.parse_args()
+        out = a.out or os.path.splitext(a.input)[0] + f"_pp{a.w}x{a.h}.png"
+        sz = process(a.input, out, a.w, a.h, a.anchor, a.ramp)
+        print(f"后处理: {a.input} -> {out}  ({sz[0]}x{sz[1]}, anchor={a.anchor}, ramp={a.ramp or 'kmeans'})")
+
