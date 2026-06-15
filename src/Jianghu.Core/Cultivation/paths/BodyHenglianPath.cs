@@ -161,8 +161,9 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 燃血狂攻：燃尽当前血气,每10点转来袭武力威+6并附穿透,打空对手放风筝窗口。门槛血气≥30,清空全部。
+                // B5批2: → PenFromResource(qixue,6,÷10) 血气转伤(每10点血气+6,满池约+120窗口爆发;血池越满越痛,见底哑火)。
                 new CombatSkillDef("sk_ti_ranxue", "燃血狂攻", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "燃尽当前血气,每10点转武力威+6并附穿透(满池约+120的窗口爆发)") },
+                    new[] { new EffectOp(EffectOpKind.PenFromResource, "qixue", 6, "燃尽当前血气,每10点转武力威+6并附穿透(资源转伤,满池约+120的窗口爆发)", Amount2: 10, Rarity: EffectRarity.Rare) },
                     new Dictionary<string, int> { { "qixue", 30 } }),
                 // 金身震：对周身所有交互对象造根骨/2真实伤害并打断蓄力,反制围杀消耗。血气≥30,消耗30。
                 new CombatSkillDef("sk_ti_jinshenzhen", "金身震", 4,
@@ -177,8 +178,9 @@ namespace Jianghu.Cultivation.Paths
                     new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 20, "1回合封闭自身罩门,免疫'罩门×2'与直击罩门类战技(专破打罩门套路)") },
                     new Dictionary<string, int> { { "qixue", 20 } }),
                 // 横练护体(铁山靠)：1回合内henglian×2,把整段攻势硬扛成擦伤;结束后复原。血气≥15,消耗15。
+                // B5批2: → ReflectDamage(OnDefend,÷2) 铁山靠硬扛反震(入伤的1/2反弹攻方;时序读扣血前/不递归批4接,本轮ApplyOnUse不改入伤)。
                 new CombatSkillDef("sk_ti_henglianhuti", "横练护体·铁山靠", 2,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 24, "1回合henglian×2把整段攻势硬扛成擦伤(整段减伤,结束后复原)") },
+                    new[] { new EffectOp(EffectOpKind.ReflectDamage, null, 1, "1回合henglian×2硬扛整段攻势,入伤1/2反震攻方(铁山靠)", Amount2: 2, Trigger: EffectTrigger.OnDefend, Rarity: EffectRarity.Rare) },
                     new Dictionary<string, int> { { "qixue", 15 } }),
                 // 不灭金身(被动·濒死自启)：realm≥6每场首次濒死自动燃尽血气复活并回50%体力;血气=0不触发。无血气门槛(被动)。
                 new CombatSkillDef("sk_ti_bumiejinshen", "不灭金身", 6,
