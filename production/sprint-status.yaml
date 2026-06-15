@@ -33,11 +33,11 @@ stories:
     name: "batch3 唯一档 Special handler（落宝/炸阵/夺舍/金身态/律场总门）"
     file: "production/epics/combat-r2/story-002-batch3-special-handlers.md"
     priority: must-have
-    status: ready-for-dev      # batch2 普通/稀有档框架已在位(21/21 done),可开工
+    status: done               # batch3 wiring + 8 Special handler(落宝/炸阵/金身态/律场/夺舍/夺心/断链/逆演栈),核心batch4门控部分defer
     owner: ""
     estimate_days: 0
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
   - id: "combat-r2-003"
     name: "batch4 DuelEngine.ResolveR2 接模块（off 逐字节不动）"
     file: "production/epics/combat-r2/story-003-batch4-duelengine-resolve-r2.md"
