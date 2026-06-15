@@ -129,7 +129,73 @@ def aura(spr, realm, ac):
 
 # —— 角色档（pid, 名, 体型, 袍色, accent, 装备件, realm, seed名）——
 EQUIP = {"sword":equip_sword, "gourd":equip_gourd, "artifact":equip_artifact, "none":equip_none}
+
+# ════════════════════════════════════════════════════════════════════════
+# 部件库加载（PARTS_CONTRACT.md）：parts/<层>/<款>_v<变体>.png 存在则加载,否则回退几何占位件。
+# AI 出的部件按契约丢进 pixel/parts/ → 零改代码即被拼装。grayscale 袍服件运行时 palette-swap。
+# ════════════════════════════════════════════════════════════════════════
+PARTS = os.path.join(os.path.dirname(__file__), "parts")
+
+def _find_part(layer_dir, style, seed):
+    """在 parts/<layer_dir>/ 找 <style>_v*.png；多变体按 seed 确定性选。无→None(回退占位)。"""
+    d = os.path.join(PARTS, layer_dir)
+    if not os.path.isdir(d): return None
+    cands = sorted(f for f in os.listdir(d) if f.startswith(style + "_v") and f.endswith(".png"))
+    if not cands: return None
+    return os.path.join(d, cands[seed % len(cands)])
+
+def _paste_part(spr, path, recolor_ramp=None):
+    """把部件 PNG 叠到 32×48 画布(契约同尺寸,锚点底中已对齐)。recolor_ramp!=None→灰阶映射到该 ramp(palette-swap)。"""
+    part = Image.open(path).convert("RGBA")
+    if part.size != (W, H):
+        part = part.resize((W, H), Image.NEAREST)   # 契约要求 32×48,容错缩放
+    ppx = part.load()
+    rampcols = rp(recolor_ramp) if recolor_ramp else None
+    for y in range(H):
+        for x in range(W):
+            r, g, b, a = ppx[x, y]
+            if a < 8: continue
+            if rampcols:                              # palette-swap: 灰度→ramp 5 阶
+                lum = (r*30 + g*59 + b*11) // 100
+                k = min(4, lum * 5 // 256)
+                c = rampcols[k]
+                spr.put(x, y, c, a)
+            else:
+                spr.put(x, y, (r, g, b), a)
+
 def assemble(pid, name, build, robe, ac, equip, realm, seedkey):
+    """优先加载 parts/ 库件(AI出料);缺件回退几何占位件。Z序合成,确定性。"""
+    seed = seeded(seedkey)
+    spr = Spr()
+    aura(spr, realm, ac)                              # [0] 光环(程序生成,AI可选替换)
+    # path→款式映射(契约 §3):款由 path 定,变体由 seed 定。
+    robe_style = {"sword_immortal":"robe_sword","dan_xiu":"robe_alchemist",
+                  "qixiu_artificer":"robe_artificer"}.get(pid, "robe_sword")
+    # [1]body
+    p = _find_part("1_body", "body_"+build, seed)
+    if p: _paste_part(spr, p)
+    else: layer_body(spr, build)
+    # [3]robe(grayscale 件→palette-swap 套袍色)
+    p = _find_part("3_robe", robe_style, seed)
+    if p: _paste_part(spr, p, recolor_ramp=robe)
+    else: (layer_robe(spr, robe), layer_belt(spr, ac))
+    # [4]hair
+    p = _find_part("4_hair", "hair", seed)
+    if p: _paste_part(spr, p)
+    else: layer_hair(spr, seed)
+    # [5]face
+    p = _find_part("5_face", "face", seed)
+    if p: _paste_part(spr, p)
+    else: layer_face(spr)
+    # [7/8]装备(path派生);库件缺→几何占位
+    p = _find_part("7_weapon", "weapon_"+equip, seed) or _find_part("8_accessory", "acc_"+equip, seed)
+    if p: _paste_part(spr, p)
+    else: EQUIP[equip](spr, ac)
+    spr.selout()
+    return spr.img
+
+def _assemble_geometric(pid, name, build, robe, ac, equip, realm, seedkey):
+    """纯几何占位件版本(无 parts/ 库时的当前画法,留作对照/回退基准)。"""
     seed = seeded(seedkey)
     spr = Spr()
     aura(spr, realm, ac)             # [9] 光环(底,半透)
