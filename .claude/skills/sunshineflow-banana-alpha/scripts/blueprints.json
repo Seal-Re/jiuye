@@ -1,0 +1,39 @@
+{
+  "_comment": "SunshineFlow 蓝图注册表。文件可以安全上传到云端 Hub（api_key 是公开蓝图 key，不是用户认证 token）。新增/修改蓝图后，generate_image.py 会自动加载。",
+  "default": "image2",
+  "blueprints": {
+    "pixel-art-fs": {
+      "display_name": "像素图蓝图 (pixel-art-fs)",
+      "description": "专用于生成像素风格游戏资产：sprite sheet 序列帧、像素角色动画、chibi 像素角色、HD-2D 场景贴图、平视贴图等。仅在明确需要『像素游戏资产』时才使用，普通生图请用 image2。",
+      "api_key": "4f4a0381-f9fe-422e-b8b8-b05ab5a7e151",
+      "base_path": "pixel-art-fs",
+      "prompt_param": "提示词",
+      "image_input_keys": ["image01", "image02", "image03", "image04", "image05", "image06"],
+      "supports_image_input": true,
+      "output_keys": ["pixel-out"],
+      "trigger_keywords": [
+        "序列帧", "sprite sheet", "spritesheet", "sprite",
+        "像素游戏资产", "像素角色", "角色动画", "动画帧",
+        "chibi", "平视贴图", "场景贴图", "title screen"
+      ],
+      "priority": 50
+    },
+    "image2": {
+      "display_name": "Image2 带 alpha 通道蓝图 (image2-alpha-fs)",
+      "description": "默认通用生图蓝图。带 alpha 通道（透明背景）的高质量文生图 / 图生图。支持可选参考图输入（图生图）。会同时输出两张图：带 alpha 通道版本（主产物，可直接用）和不带 alpha 通道版本（备份/对比）。适合绝大多数生图需求：插画、UI 图标、角色立绘、商品/物品图、贴纸、装饰素材、概念图等。",
+      "api_key": "9c4bb66f-511d-4f42-a135-0ec0c464d1a0",
+      "base_path": "image2-alpha-fs",
+      "prompt_param": "提示词",
+      "image_input_keys": ["输入图片"],
+      "supports_image_input": true,
+      "output_keys": ["带alpha图", "不带alpha图"],
+      "trigger_keywords": [
+        "alpha", "透明背景", "透明通道", "去背", "抠图",
+        "立绘", "UI", "ui 图标", "icon", "图标",
+        "贴纸", "sticker", "装饰素材", "物品图", "道具图",
+        "image2", "插画", "概念图", "非像素"
+      ],
+      "priority": 100
+    }
+  }
+}

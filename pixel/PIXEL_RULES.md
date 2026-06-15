@@ -4,6 +4,8 @@
 > 程序化的本分 = **确定性「变换 / 派生 / 拼装 / 后处理」**，不是凭空绘制原创内容。原创基础件交手绘/AI 小库，code 负责组合 + 批量 + 复现。
 > 全程纯整数确定性（同输入同输出），与 sim 内核 ethos 一致。
 
+> **美术管线文档地图**：本文(像素规则) · [`AIGEN_TOOL.md`](AIGEN_TOOL.md)(文生图工具 SunshineFlow 接入·永久知识) · [`PARTS_CONTRACT.md`](PARTS_CONTRACT.md)(角色部件契约) · [`AI_PROMPTS.md`](AI_PROMPTS.md)(逐部件 AI prompt) · `char_gen.py`(角色拼装器) · `icon_gen.py`(图标生成)
+
 研究依据：autotile（redblobgames）/ 9-slice / 无缝 tile（np.roll+边界混合、4D 噪声环面）/ 鬼谷八荒=方格+PCG / 元气骑士=房间式模块 / 程序化强项=变换派生、弱项=原创角色立绘。
 
 ---

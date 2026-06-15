@@ -27,3 +27,5 @@ __pycache__/
 # EPIC-TIDY 顺手补（像素产物 + 抓取 raw3）
 pixel/out/
 _research/raw3/
+# AI 文生图 raw 产物（精修入库的才进 pixel/parts/）
+pixel/_aigen/
