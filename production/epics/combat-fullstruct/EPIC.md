@@ -2,7 +2,7 @@
 
 **Layer**: Core
 **Status**: Deferred
-**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源指向现有 docs/superpowers/specs/ 文件
+**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源指向现有 docs/legacy-specs/specs/ 文件
 **Governing ADRs**: None yet（P8 增量补）
 **Engine Risk**: LOW（.NET 8 纯整数）
 **Created**: 2026-06-15（迁自 TASKS.md）

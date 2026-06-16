@@ -17,7 +17,7 @@
 - GDDs audited: **0**（design/gdd/ 不存在）
 - ADRs audited: **0**（docs/architecture/ 不存在）
 - Stories audited: **0**（production/epics/ 空）
-- 现有设计知识（非 CCGS 格式，原地保留）：docs/superpowers/specs 18 份 + TASKS.md（单一真相源）
+- 现有设计知识（非 CCGS 格式，原地保留）：docs/legacy-specs/specs 18 份 + TASKS.md（单一真相源）
 
 **Gap counts:**
 - BLOCKING: **0** — 尚无 systems-index，故无括号状态值陷阱
@@ -90,7 +90,7 @@
 - [ ] ADR adr-0003-cultivation-off-byte-identical（B.3）
 
 ### DEFER（显式·红线 A.8 不静默）— 待各 epic 转 doing 再补 GDD/ADR
-- [ ] drama-engine GDD（EPIC.md 已指向 docs/superpowers/specs/...B-戏剧引擎...）
+- [ ] drama-engine GDD（EPIC.md 已指向 docs/legacy-specs/specs/...B-戏剧引擎...）
 - [ ] map-system GDD（已指向 ...C-江湖地图与门派...）
 - [ ] faction GDD（同 C）
 - [ ] llm-brain GDD（未设计，原始核心愿景）

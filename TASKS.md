@@ -9,7 +9,7 @@
 - **看全部 epic**：`production/epics/index.md`（13 epic 总表）
 - **看 sprint 进度**：`/sprint-status`（读 sprint-status.yaml）
 - **采用路线图**：`docs/adoption-plan-2026-06-15.md`（增量补 GDD/ADR）
-- **设计深度源**：`docs/superpowers/`（18 spec/4 plan/3 research，原地保留）
+- **设计深度源**：`docs/legacy-specs/`（18 spec/4 plan/3 research，原地保留）
 
 ## 当前状态（派生快照，权威以 production/ 为准）
 

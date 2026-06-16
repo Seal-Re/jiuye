@@ -43,7 +43,7 @@
 
 **plans**：`plans/...v1.0`(✅) / `plans/2026-06-14-修炼A0-21路引擎.md`(✅) / `plans/2026-06-14-A1-境界竖切.md`(🔨)
 **对账 backlog**：`specs/2026-06-14-内容补遗-对账backlog.md` / `specs/2026-06-14-余9路与地图-对账backlog.md`(部分项已在 spec 消解)
-**可视化**：`pixel/PIXEL_RULES.md`
+**可视化**：`tools/pixel-pipeline/PIXEL_RULES.md`
 
 ## 3. Done-but-incomplete / 静默漏项（用户重点问，诚实列）
 

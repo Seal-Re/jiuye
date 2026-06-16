@@ -24,4 +24,4 @@
 | 13 | 仓库整理 | `repo-tidy` | chore | Todo | _research/raw3、pixel 决断、icon_gen bug |
 
 > 阶段（production/stage.txt）= Production。jiuye 0-9 细分阶序保留为本表 epic 排序（0-3 done 历史，5=combat 当前，6-9 future）。
-> 设计深度源仍在 `docs/superpowers/specs/`（18 份，原地保留，P8 增量逆向补 GDD）。
+> 设计深度源仍在 `docs/legacy-specs/specs/`（18 份，原地保留，P8 增量逆向补 GDD）。

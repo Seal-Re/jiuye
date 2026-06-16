@@ -52,7 +52,7 @@ pixel/parts/
 - **方式 A（推荐·可换色）**：袍服/可染色件用**中性 ramp**（如灰阶 5 阶 `#222/#555/#888/#bbb/#eee`），loader 按角色 element/faction 把灰阶映射到目标 ramp（steel/fire/azure...）。→ 一件出无限色。
 - **方式 B（固定色）**：直接出成品色，不换色（适合金属武器/肤色/特效这类不需染色的）。
 
-ramp 5 阶（暗→亮）参考值见 `pixel/PIXEL_RULES.md` §RAMP 与 `char_gen.py` RAMP 表，出图时尽量贴近以保成套统一。
+ramp 5 阶（暗→亮）参考值见 `tools/pixel-pipeline/PIXEL_RULES.md` §RAMP 与 `char_gen.py` RAMP 表，出图时尽量贴近以保成套统一。
 
 - **光源**：左上（§3，全项目一致）——出图时高光在左上、阴影在右下。
 
@@ -61,6 +61,6 @@ ramp 5 阶（暗→亮）参考值见 `pixel/PIXEL_RULES.md` §RAMP 与 `char_ge
 1. 拿 §6 的 prompt 去 AI 工具出图。
 2. 出的 PNG 按 §1 规格修整（32×48、透明底、锚点底中、硬边）——多数 AI 出图需手动裁切/抠底/缩放到 32×48（这步是出图者的活）。
 3. 命名按 §3，丢进 `pixel/parts/<层>/`。
-4. 跑 `python pixel/char_gen.py` → 自动加载新件拼装，零改代码。
+4. 跑 `python tools/pixel-pipeline/char_gen.py` → 自动加载新件拼装，零改代码。
 
 > **诚实提示**：AI 出的图几乎都需要"后处理对齐到 32×48 像素网格 + 抠透明底"，这一步目前靠人工（或后续我写个对齐脚本辅助）。AI 直出很难精确踩 32×48 像素格。

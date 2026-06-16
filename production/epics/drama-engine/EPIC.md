@@ -2,7 +2,7 @@
 
 **Layer**: Feature
 **Status**: Designed (0 code)
-**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 docs/superpowers/specs/2026-06-13-v1.2-B-戏剧引擎-design.md
+**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 docs/legacy-specs/specs/2026-06-13-v1.2-B-戏剧引擎-design.md
 **Governing ADRs**: None yet（P8 增量补）
 **Engine Risk**: LOW（.NET 8 纯整数）
 **Created**: 2026-06-15（迁自 TASKS.md）

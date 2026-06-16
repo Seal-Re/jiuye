@@ -9,7 +9,7 @@
 
 ## Context
 
-**GDD**: design/gdd/combat-system.md（P8 补）；深度源 docs/superpowers/specs/2026-06-14-v1.2-B5-模块化效果系统-design.md §10 覆盖账 + §15.9 per-path 映射。
+**GDD**: design/gdd/combat-system.md（P8 补）；深度源 docs/legacy-specs/specs/2026-06-14-v1.2-B5-模块化效果系统-design.md §10 覆盖账 + §15.9 per-path 映射。
 **Requirement**: TR-combat-???（tr-registry P8 bootstrap）
 **Governing ADR**: adr-0002-module-factory-effect-system（P8）
 

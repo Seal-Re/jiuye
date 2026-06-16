@@ -9,7 +9,7 @@
 
 ## Context
 
-**深度源**: docs/superpowers/specs/2026-06-14-v1.2-B5-模块化效果系统-design.md §7 + impl plan 批3。
+**深度源**: docs/legacy-specs/specs/2026-06-14-v1.2-B5-模块化效果系统-design.md §7 + impl plan 批3。
 **Governing ADR**: adr-0002-module-factory-effect-system。
 
 ## Acceptance Criteria

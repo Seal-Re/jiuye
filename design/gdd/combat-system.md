@@ -4,7 +4,7 @@
 > **Author**: huangjiaqi13 + Claude（/design-system 务实路径，前置 game-concept/systems-index 待 P8 补）
 > **Last Updated**: 2026-06-16
 > **Implements Pillar**: 武侠/仙侠"以快打慢·见招拆招·门派各异"的战斗质感
-> **真相源（上游）**: `docs/superpowers/specs/2026-06-14-v1.2-B5-R2战斗系统重设计-design.md`（R2 回合循环 §4 + 功法门控 §14.1）、`...模块化效果系统-design.md`（EffectOp 模块/Special）、`...平衡标定INV-CROSS-design.md`（pe 量级锚）
+> **真相源（上游）**: `docs/legacy-specs/specs/2026-06-14-v1.2-B5-R2战斗系统重设计-design.md`（R2 回合循环 §4 + 功法门控 §14.1）、`...模块化效果系统-design.md`（EffectOp 模块/Special）、`...平衡标定INV-CROSS-design.md`（pe 量级锚）
 
 ---
 

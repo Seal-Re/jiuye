@@ -11,7 +11,7 @@
 
 > ⚠️ **设计已升级**：本 story 原描述 R2 "3 回合同时结算"。**现以 `design/gdd/combat-system.md`（306fb64）为权威**——战斗升级为**速度序列(CTB) + 即时窗口模型 + 操作分类学**。batch4 实现据 GDD，下列验收条目作 R2 基线参考，speed/window 细节见 GDD。即时窗口数学放 Core(NPC 概率采样确定性)，玩家按键层留 Unity(后期)。
 
-**深度源**: design/gdd/combat-system.md（权威）+ docs/superpowers/specs/...B5-R2战斗系统重设计-design.md §4 + §15 补丁。
+**深度源**: design/gdd/combat-system.md（权威）+ docs/legacy-specs/specs/...B5-R2战斗系统重设计-design.md §4 + §15 补丁。
 **Governing ADR**: adr-0002 + adr-0003-cultivation-off-byte-identical（off 不动）。
 
 ## Acceptance Criteria

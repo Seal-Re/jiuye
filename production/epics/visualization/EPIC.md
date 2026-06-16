@@ -2,7 +2,7 @@
 
 **Layer**: Presentation
 **Status**: Spike only
-**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 pixel/PIXEL_RULES.md
+**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 tools/pixel-pipeline/PIXEL_RULES.md
 **Governing ADRs**: None yet（P8 增量补）
 **Engine Risk**: LOW（.NET 8 纯整数）
 **Created**: 2026-06-15（迁自 TASKS.md）

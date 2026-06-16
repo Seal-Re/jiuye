@@ -69,7 +69,7 @@ python $SKILL --prompt "..." --reference_textures "./pixel/parts/3_robe/robe_swo
                 ⚠️ 实测：image2 直出约 **1254×1254 RGBA 高清像素插画**（非 32×48 网格）。
                 → 当**图标/物品/立绘**可直接用(高清)；进 **char_gen 部件**需先 downscale 到 32×48 + 调色板量化(后处理脚本)。
 ④ 入库        ← 按 PARTS_CONTRACT 命名丢 pixel/parts/<层>/
-⑤ 拼装        ← python pixel/char_gen.py（零改代码加载新件 + palette-swap 染色 + 装备层 + 光环）
+⑤ 拼装        ← python tools/pixel-pipeline/char_gen.py（零改代码加载新件 + palette-swap 染色 + 装备层 + 光环）
 ```
 
 - **图标优化路径**（你提的）：用 `image2` 蓝图按门类母题出 21 路功法图标（带 alpha），替换 icon_gen 的几何母题 → 图标从"程序化几何"升到"AI 精绘"。
@@ -84,7 +84,7 @@ python $SKILL --prompt "..." --reference_textures "./pixel/parts/3_robe/robe_swo
 # ① AI 出网格图(prompt 要求 NxN grid, each centered, transparent, clean grid lines)
 python $SKILL --prompt "pixel art equipment icons, a 4x4 grid of 16 different ... each centered in its own cell, transparent background, consistent style, clean dark grid lines" --output-dir ./pixel/_aigen
 # ② 本地切片成 N 独立件(48² 游戏尺寸)
-python pixel/postprocess.py grid <网格图> --rows 4 --cols 4 --cell 48 --names jian,dao,spear,... --out-dir pixel/_aigen/equip_sliced
+python tools/pixel-pipeline/postprocess.py grid <网格图> --rows 4 --cols 4 --cell 48 --names jian,dao,spear,... --out-dir pixel/_aigen/equip_sliced
 # ③ 精修挑用的入库 pixel/parts/ 或挂 char_skeleton 装备点
 ```
 

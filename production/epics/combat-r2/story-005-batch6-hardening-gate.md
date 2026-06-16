@@ -9,7 +9,7 @@
 
 ## Context
 
-**深度源**: docs/superpowers/specs/...模块化效果系统-design.md §13 硬化 DoD + §15.7 冻结数字；...平衡标定INV-CROSS-design.md；impl plan 批6。
+**深度源**: docs/legacy-specs/specs/...模块化效果系统-design.md §13 硬化 DoD + §15.7 冻结数字；...平衡标定INV-CROSS-design.md；impl plan 批6。
 **Governing ADR**: adr-0001-integer-determinism + adr-0002。
 
 ## Acceptance Criteria（§13 硬化 DoD，防 MVP 蒙混）

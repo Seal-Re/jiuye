@@ -2,7 +2,7 @@
 
 **Layer**: Feature
 **Status**: Designed (0 code)
-**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 同 map（C 设计含门派）+ docs/superpowers/specs/...地图概要与宗门排布-canonical.md
+**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 同 map（C 设计含门派）+ docs/legacy-specs/specs/...地图概要与宗门排布-canonical.md
 **Governing ADRs**: None yet（P8 增量补）
 **Engine Risk**: LOW（.NET 8 纯整数）
 **Created**: 2026-06-15（迁自 TASKS.md）

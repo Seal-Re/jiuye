@@ -2,7 +2,7 @@
 
 **Layer**: Core
 **Status**: Designed
-**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 docs/superpowers/specs/2026-06-14-v1.2-B5-平衡标定INV-CROSS-design.md
+**GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 docs/legacy-specs/specs/2026-06-14-v1.2-B5-平衡标定INV-CROSS-design.md
 **Governing ADRs**: None yet（P8 增量补）
 **Engine Risk**: LOW（.NET 8 纯整数）
 **Created**: 2026-06-15（迁自 TASKS.md）
