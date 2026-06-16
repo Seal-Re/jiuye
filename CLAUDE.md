@@ -29,10 +29,15 @@
 
 ## C. 文档地图
 
+- **Agent 知识库（新 agent 必读）**：`docs/agent-guide/`
+  - `红线速查.md` — A+B 红线 + 每条原因（光有规则没有原因容易误触）
+  - `开发方式.md` — TDD仪式/证据门/WIP/分层实现/skill调度/提交规范
+  - `修炼系统架构.md` — Core 架构/关键类型/IBrain接口/战斗模块系统
+  - `美术管线.md` — AI出料/骨架角色/尺寸纪律/工具使用
 - **任务台账（单一真相源 A.2）**：`production/`（`epics/[slug]/EPIC.md` + `story-NNN-*.md` + `sprint-status.yaml` + `stage.txt`）。速览：`/sprint-status` 或读 `production/epics/index.md`。
 - 派生指针：根目录 `TASKS.md`（指向 production/，不持真相）
-- CCGS 采用路线图：`docs/reports/adoption-plan-2026-06-15.md`（增量补 GDD/ADR roadmap）
-- 项目状态审计（历史派生）：`docs/reports/PROJECT-STATUS.md`
+- CCGS 采用路线图：`docs/reports/采用迁移计划.md`（增量补 GDD/ADR roadmap）
+- 项目状态审计（历史派生）：`docs/reports/项目状态审计.md`
 - 设计深度源（18 spec/4 plan/3 research，旧版/legacy）：`docs/legacy-specs/`
 - 世界观 canonical：`docs/legacy-specs/specs/...WorldBible-九野...`
 - 像素管线规则/工具：`tools/pixel-pipeline/`（脚本 + PIXEL_RULES.md + AIGEN_TOOL.md）
