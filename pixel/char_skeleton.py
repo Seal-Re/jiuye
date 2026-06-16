@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
 """九野像素角色 · 骨架驱动 v1（PIXEL_RULES §8 + AIGEN_TOOL §6.1）。
+
+⚠️ 定位（2026-06-16 定，勿再投精力美化）：本脚本是【过渡期占位渲染】。
+   几何 limb 拼的小人到不了正式品质，且 **Unity 阶段角色动画走 Spine/DragonBones 骨骼绑定 + 美术部件**，
+   这张几何 PNG 素材 Unity 用不到、不带走。**故不再美化几何渲染**（曾议精修，已撤）。
+   - 保留价值：当前 CLI/调试能看到角色长相 + 验证「装备挂载点=骨架关节」逻辑。
+   - 长期资产是另外三样（Unity 复用）：AI 网格出料/切片/品阶派生(装备)、SunshineFlow 管线、静态图标立绘。
+   - 角色「好看」是 Unity 阶段美术+Spine 的事，非本脚本。
+
 角色本体=程序化骨架(关节)驱动,逐帧一致可动画(idle/walk),非AI(AI逐帧骨架会漂移)。
-部件(头/躯干/四肢/装备)按关节位置绘制 → 换姿势=换关节角度,骨架不变 → 动画一致。
+部件按关节位置绘制 → 换姿势=换关节角度,骨架不变 → 动画一致。
 palette-swap 门派色 + 装备挂载点(手/背)。确定性:同(persona/path/realm/seed/frame)同输出。
-32×48 native,锚点底中,左上光源。run: python pixel/char_skeleton.py"""
+32×48 native,锚点底中。run: python pixel/char_skeleton.py"""
 import os, math, hashlib, sys
 from PIL import Image, ImageDraw, ImageFont
 sys.stdout.reconfigure(encoding="utf-8")
