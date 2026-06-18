@@ -89,23 +89,23 @@ namespace Jianghu.Cultivation
             long totalDmgToB = 0, totalDmgToA = 0;
             for (int round = 0; round < roundLimit && hpA > 0 && hpB > 0; round++)
             {
-                int dmgToB = ResolveExchange(
+                var (dmgToB, reflectToA) = ResolveExchange(
                     aSkill, peA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender, defCanEvade, defCanReflect);
 
-                int dmgToA = ResolveExchange(
+                var (dmgToA, reflectToB) = ResolveExchange(
                     dSkill, peB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     HasMovementArt(attackerPath, attacker.Cultivation),
                     HasBodyArt(attackerPath, attacker.Cultivation));
 
-                // 同时扣血（读 pre-HP）
-                hpB = Math.Max(0, hpB - dmgToB);
-                hpA = Math.Max(0, hpA - dmgToA);
-                totalDmgToB += dmgToB;
-                totalDmgToA += dmgToA;
+                // 同时扣血（读 pre-HP）：反伤加到对应方向
+                hpB = Math.Max(0, hpB - dmgToB - reflectToB);
+                hpA = Math.Max(0, hpA - dmgToA - reflectToA);
+                totalDmgToB += dmgToB + reflectToB;
+                totalDmgToA += dmgToA + reflectToA;
 
                 // —— AC 4.3：dot/control 回合间结算 ——
                 TickDots(ctx, Side.Attacker);
@@ -153,9 +153,9 @@ namespace Jianghu.Cultivation
         }
 
         /// <summary>
-        /// 单次交锋结算：攻方 OnUse→防方 OnDefend→软情境→伤害返回。
+        /// 单次交锋结算：攻方 OnUse→防方 OnDefend→软情境→(对防方伤害, 反伤回攻方量)。
         /// </summary>
-        private static int ResolveExchange(
+        private static (int DmgToDefender, int ReflectToAttacker) ResolveExchange(
             CombatSkillDef? skill,
             int attackerPe,
             CultivationState defenderState,
@@ -164,11 +164,11 @@ namespace Jianghu.Cultivation
             Side attackerSide, Side defenderSide,
             bool defCanEvade, bool defCanReflect)
         {
-            // 基础伤害（scaled ×100 防截断，situational adj 后除回）
             const int Scale = 100;
             long dmg = (long)attackerPe * Scale / BaseDamageDivisor;
+            long totalReflect = 0;
 
-            // OnUse：经 ModuleResolver 逐模块修正（模块操作 scaled dmg）
+            // OnUse：经 ModuleResolver 逐模块修正
             if (skill != null)
             {
                 foreach (var op in skill.OnUse)
@@ -179,7 +179,7 @@ namespace Jianghu.Cultivation
                 }
             }
 
-            // OnDefend：防方防御模块（经 ModuleResolver.ApplyOnDefend）
+            // OnDefend：防方防御模块（经 ModuleResolver.ApplyOnDefend），收集反伤
             foreach (var defSkill in defenderPath.CombatSkills)
             {
                 if (!ListHas(defenderState.ChosenSkillIds, defSkill.Id)) continue;
@@ -190,12 +190,13 @@ namespace Jianghu.Cultivation
                     if (op.Kind == EffectOpKind.Evade && !defCanEvade) continue;
                     if (op.Kind == EffectOpKind.ReflectDamage && !defCanReflect) continue;
                     int dmgUnscaled = (int)(dmg / Scale);
-                    int result = ModuleResolver.ApplyOnDefend(dmgUnscaled, op, ctx, defenderSide);
+                    int result = ModuleResolver.ApplyOnDefend(dmgUnscaled, op, ctx, defenderSide, out int reflectDmg);
                     dmg = (long)result * Scale + (dmg % Scale);
+                    totalReflect += reflectDmg;
                 }
             }
 
-            // 软情境修正（在 scaled dmg 上做，避免小值截断）
+            // 软情境修正
             if (resolver != null)
             {
                 var defTags = defenderPath?.SituationalTags ?? Array.Empty<string>();
@@ -207,7 +208,7 @@ namespace Jianghu.Cultivation
                 dmg = dmg * (100 + adj) / 100;
             }
 
-            return (int)Math.Max(0, dmg / Scale);
+            return ((int)Math.Max(0, dmg / Scale), (int)totalReflect);
         }
 
         /// <summary>回合间 dot/control 结算（AC 4.3）。</summary>
