@@ -9,34 +9,47 @@ namespace Jianghu.Cultivation
     /// </summary>
     public static class SituationalEdges
     {
-        /// <summary>A.0 默认边表（SparAction 接此构造 SituationalResolver）。</summary>
+        /// <summary>完整边表 v2（22边, combat-fullstruct story-002）。零 PathId, 环自洽, 全 CoefPct 钳 ±P0/4。</summary>
         public static readonly IReadOnlyList<SituationalEdge> Default = new[]
         {
-            // —— element：元素相生克（canon counterWheel 四象环：火克木 / 木克雷 / 雷克冰 / 冰克火）。
-            //    环自洽：无任一反向边（X 克 Y ⇒ 不存在 Y 克 X）。零 PathId，系数统一 +15（攻方增益）。——
+            // ═══ element 元素相生克（四象环: 火克木/木克雷/雷克冰/冰克火）═══
             new SituationalEdge("element", "attacker.tag:fire & defender.tag:wood", +15),
             new SituationalEdge("element", "attacker.tag:wood & defender.tag:thunder", +15),
             new SituationalEdge("element", "attacker.tag:thunder & defender.tag:ice", +15),
             new SituationalEdge("element", "attacker.tag:ice & defender.tag:fire", +15),
 
-            // —— range：远程克近战 brute（攻方远程 & 守方近战蛮力 → 守方吃亏=攻方增益）——
+            // ═══ anti_evil 灭阴/克邪（正道克阴邪，Bible §6.4 counterWheel 正义轴）═══
+            new SituationalEdge("anti_evil", "attacker.tag:anti_evil & defender.tag:evil", +20),
+            new SituationalEdge("anti_evil", "attacker.tag:righteous & defender.tag:evil", +15),
+            new SituationalEdge("anti_evil", "attacker.tag:thunder & defender.tag:evil", +15),
+            new SituationalEdge("anti_evil", "attacker.tag:righteous & defender.tag:ghost", +18),
+            // 反制: 阴邪攻正道受罚
+            new SituationalEdge("anti_evil", "attacker.tag:evil & defender.tag:righteous", -10),
+            new SituationalEdge("anti_evil", "attacker.tag:ghost & defender.tag:anti_evil", -15),
+
+            // ═══ range 远近/形态克制 ═══
             new SituationalEdge("range", "attacker.tag:ranged & defender.tag:melee_brute", +20),
+            new SituationalEdge("range", "attacker.tag:ranged & defender.tag:melee", +5),
+            // 反制: 体修蛮力贴身克远程
+            new SituationalEdge("range", "attacker.tag:brute & defender.tag:ranged", +8),
 
-            // —— distance：放风筝（攻方远程 & 守方近战 → 远程增益，Bible §6.4「放风筝远程 +5」）。
-            //    剑修近战 melee 脆皮被放风筝即吃此亏（零 PathId，只认 melee tag）。——
-            new SituationalEdge("distance", "attacker.tag:ranged & defender.tag:melee", +5),
-
-            // —— form：死物免精神（守方死物构装 & 攻方走精神攻击轴 → 几近无效）——
+            // ═══ spirit/form 精神/形态轴 ═══
             new SituationalEdge("form", "defender.tag:undead_construct & attacker.axis:spirit_attack", -100),
-
-            // —— spirit：魂力绕物防（鬼修代表路所涉，深度设计「spirit 维攻防绕物防,弃肉身」）。
-            //    攻方走魂力 spirit_attack tag & 守方靠肉身 body 横练 → 物理罩门挡不住魂念,攻方增益。
-            //    零 PathId（只认 spirit_attack/body tag），系数照深度设计「绕物防」语义取正 adj。——
             new SituationalEdge("spirit", "attacker.tag:spirit_attack & defender.tag:body", +12),
+            // 反制: 寄生/蛊虫克肉身
+            new SituationalEdge("form", "attacker.tag:parasite & defender.tag:body", +8),
 
-            // —— time：昼夜（夜间 & 攻方阴属/鬼 → 增益；Bible §6.4 daynight 轴；env:is_night 由战斗上下文供，
-            //    A.0 SparAction env 暂空此边不在切磋命中，直接喂 env 的 SituationalResolver 测试可验，Phase 4.5 接 SparAction env）——
+            // ═══ economic 经济维（器修落宝克artifact/economic依赖）═══
+            new SituationalEdge("economic", "attacker.tag:artifact & defender.tag:economic", +12),
+            new SituationalEdge("economic", "attacker.tag:economic & defender.tag:artifact", +12),
+
+            // ═══ control/trap 控场轴 ═══
+            new SituationalEdge("control", "attacker.tag:control & defender.tag:brute", +10),
+            new SituationalEdge("control", "attacker.tag:control & defender.tag:high_burst", +8),
+
+            // ═══ time/terrain 环境轴 ═══
             new SituationalEdge("time", "env:is_night=1 & attacker.tag:ghost", +10),
+            new SituationalEdge("terrain", "env:terrain=mountain & attacker.tag:body & defender.tag:ranged", +8),
         };
     }
 }

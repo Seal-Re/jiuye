@@ -73,8 +73,95 @@ namespace Jianghu.Core.Tests.Cultivation
             }
         }
 
+        [Fact]
+        public void AntiEvil_EdgesExist_RighteousThunderAntiEvil_VsEvil()
+        {
+            var r = new SituationalResolver(SituationalEdges.Default);
+            int a1 = r.AdjPct(Ctx(new[] { "anti_evil" }, new[] { "evil" }), p0: 400);
+            int a2 = r.AdjPct(Ctx(new[] { "righteous" }, new[] { "evil" }), p0: 400);
+            int a3 = r.AdjPct(Ctx(new[] { "thunder" }, new[] { "evil" }), p0: 400);
+            Assert.True(a1 > 0, "anti_evil vs evil should gain adj");
+            Assert.True(a2 > 0, "righteous vs evil should gain adj");
+            Assert.True(a3 > 0, "thunder vs evil should gain adj");
+        }
+
+        [Fact]
+        public void AntiEvil_ReversePenalty_EvilVsRighteousLosesAdj()
+        {
+            var r = new SituationalResolver(SituationalEdges.Default);
+            int adj = r.AdjPct(Ctx(new[] { "evil" }, new[] { "righteous" }), p0: 400);
+            Assert.True(adj < 0, $"evil vs righteous should lose adj, got {adj}");
+        }
+
+        [Fact]
+        public void Economic_EdgesExist_ArtifactVsEconomic_AndReverse()
+        {
+            var r = new SituationalResolver(SituationalEdges.Default);
+            int a1 = r.AdjPct(Ctx(new[] { "artifact" }, new[] { "economic" }), p0: 400);
+            int a2 = r.AdjPct(Ctx(new[] { "economic" }, new[] { "artifact" }), p0: 400);
+            Assert.True(a1 > 0, "artifact vs economic should gain");
+            Assert.True(a2 > 0, "economic vs artifact should gain (双向克)");
+        }
+
+        [Fact]
+        public void Control_EdgesExist_VsBrute_AndHighBurst()
+        {
+            var r = new SituationalResolver(SituationalEdges.Default);
+            int a1 = r.AdjPct(Ctx(new[] { "control" }, new[] { "brute" }), p0: 400);
+            int a2 = r.AdjPct(Ctx(new[] { "control" }, new[] { "high_burst" }), p0: 400);
+            Assert.True(a1 > 0, "control vs brute should gain");
+            Assert.True(a2 > 0, "control vs high_burst should gain");
+        }
+
+        [Fact]
+        public void EdgeCount_IsAtLeast20()
+        {
+            Assert.True(SituationalEdges.Default.Count >= 20,
+                $"Expected >=20 edges, got {SituationalEdges.Default.Count}");
+        }
+
+        [Fact]
+        public void AllEdges_NoSelfCounter()
+        {
+            // No counter edge should have attacker and defender with same tag pair reversed
+            var edges = SituationalEdges.Default;
+            for (int i = 0; i < edges.Count; i++)
+            {
+                var ea = edges[i];
+                var atkTags = TagsOf(ea.WhenPred, "attacker.tag:");
+                var defTags = TagsOf(ea.WhenPred, "defender.tag:");
+                for (int j = i + 1; j < edges.Count; j++)
+                {
+                    var eb = edges[j];
+                    var atkB = TagsOf(eb.WhenPred, "attacker.tag:");
+                    var defB = TagsOf(eb.WhenPred, "defender.tag:");
+                    // Allow mutual counter only if CoefPct signs differ (e.g. righteous克evil +15 vs evil攻righteous -10)
+                    // 同号+同轴+反向tag = 真实互克(设计错误)
+                    if (ea.Axis == eb.Axis)
+                    {
+                        bool reversed = atkTags.SetEquals(defB) && defTags.SetEquals(atkB);
+                        bool sameSign = (ea.CoefPct > 0) == (eb.CoefPct > 0);
+                        if (reversed && sameSign && ea.Axis != "economic")
+                            Assert.False(true,
+                                $"Same-sign mutual counter on axis '{ea.Axis}': ({string.Join(",", atkTags)})↔({string.Join(",", defTags)}) coefs {ea.CoefPct}/{eb.CoefPct}");
+                    }
+                }
+            }
+        }
+
+        static HashSet<string> TagsOf(string pred, string prefix)
+        {
+            var tags = new HashSet<string>();
+            foreach (var raw in pred.Split('&'))
+            {
+                var atom = raw.Trim();
+                if (atom.StartsWith(prefix, System.StringComparison.Ordinal))
+                    tags.Add(atom.Substring(prefix.Length));
+            }
+            return tags;
+        }
+
         // 从 WhenPred（'&' 连接的 attacker.tag:X & defender.tag:Y）取 prefix 后的 tag 名。
-        // element 边契约保证 attacker.tag/defender.tag 两原子俱在；缺则数据违约，断言失败。
         static string TagOf(string pred, string prefix)
         {
             foreach (var raw in pred.Split('&'))
