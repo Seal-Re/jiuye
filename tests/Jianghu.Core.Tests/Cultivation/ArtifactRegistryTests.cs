@@ -66,4 +66,34 @@ public class ArtifactRegistryTests
         Assert.Single(uniques);
         Assert.Equal(EffectRarity.Unique, uniques[0].Rarity);
     }
+
+    [Fact]
+    public void Data_FirstBatch_HasExpectedCount()
+    {
+        var all = ArtifactData.All;
+        Assert.True(all.Count >= 50, $"Expected >=50 artifacts, got {all.Count}");
+    }
+
+    [Fact]
+    public void Data_NoDuplicateIds()
+    {
+        var ids = new HashSet<string>();
+        foreach (var a in ArtifactData.All)
+            Assert.True(ids.Add(a.Id), $"Duplicate artifact id: {a.Id}");
+    }
+
+    [Fact]
+    public void Data_AllItemTiersInRange()
+    {
+        foreach (var a in ArtifactData.All)
+            Assert.True(a.ItemTier >= 0 && a.ItemTier <= 9,
+                $"Artifact {a.Id} itemTier {a.ItemTier} out of [0,9]");
+    }
+
+    [Fact]
+    public void Data_NoNullEffects()
+    {
+        foreach (var a in ArtifactData.All)
+            Assert.NotNull(a.Effects);
+    }
 }
