@@ -95,29 +95,30 @@ namespace Jianghu.Cultivation
             var pendingControls = new List<ControlEntry>();
             for (int round = 0; round < roundLimit && hpA > 0 && hpB > 0; round++)
             {
-                // 被控方伤害=0（控场效果）
-                int effectiveDmgToB = IsControlled(pendingControls, Side.Defender) ? 0 : 1;
-                int effectiveDmgToA = IsControlled(pendingControls, Side.Attacker) ? 0 : 1;
+                // 被控方 selectMove 失效: skill→null, dmg=0, 不施dot/control
+                bool defenderControlled = IsControlled(pendingControls, Side.Defender);
+                bool attackerControlled = IsControlled(pendingControls, Side.Attacker);
+                var activeASkill = attackerControlled ? null : aSkill;
+                var activeDSkill = defenderControlled ? null : dSkill;
 
-                // EP modifiers: weaken the affected side's combat power
                 int effPeA = ctx.ApplyEPModifiers(Side.Attacker, peA);
                 int effPeB = ctx.ApplyEPModifiers(Side.Defender, peB);
 
                 var (dmgToB, reflectToA) = ResolveExchange(
-                    aSkill, effPeA, defender.Cultivation,
+                    activeASkill, effPeA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender, defCanEvade, defCanReflect,
                     pendingDots, pendingControls);
-                dmgToB *= effectiveDmgToB;
+                if (attackerControlled) dmgToB = 0;
 
                 var (dmgToA, reflectToB) = ResolveExchange(
-                    dSkill, effPeB, attacker.Cultivation,
+                    activeDSkill, effPeB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     HasMovementArt(attackerPath, attacker.Cultivation),
                     HasBodyArt(attackerPath, attacker.Cultivation),
                     pendingDots, pendingControls);
-                dmgToA *= effectiveDmgToA;
+                if (defenderControlled) dmgToA = 0;
 
                 // 同时扣血（读 pre-HP）：反伤加到对应方向
                 hpB = Math.Max(0, hpB - dmgToB - reflectToB);
