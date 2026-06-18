@@ -26,3 +26,14 @@
 ## Out of Scope
 
 硬化 gate + 平衡冻结 → story-005。
+
+## Completion Notes
+
+**Completed**: 2026-06-18
+**Criteria**: 3/3 passing
+**Design**: brainstorming→spec→plan流程完整. docs/superpowers/specs/2026-06-18-artifact-system-design.md
+**Implementation**: subagent-driven 8 tasks. 200 artifacts (凡器→混沌至宝 + 21路镇派 + 散落 + 遗迹).
+  24形态 × 7功能双轴. ArtifactDef + ArtifactRegistry + ArtifactData.
+**Test Evidence**: Logic — tests/.../ArtifactDefTests.cs (2) + ArtifactRegistryTests.cs (10). 381 green.
+**Code Review**: Subagent two-stage review per task.
+**Commits**: b516684, 4252925, 9e6c49e, 0e7dde0, 73a6990
