@@ -13,12 +13,18 @@ namespace Jianghu.Cultivation
     }
 
     /// <summary>
-    /// derived:&lt;key&gt; 解析注册表（spec §6）。A.0 空注册——未注册 key 返回 0（占位）。
-    /// 后续路线可经 <see cref="Register"/> 装配 provider。纯整数确定性。
+    /// derived:&lt;key&gt; 解析注册表（spec §6）。静态构造 auto-register 4 provider。
+    /// 未注册 key 返回 0。纯整数确定性。
     /// </summary>
     public static class DerivedRegistry
     {
         private static readonly Dictionary<string, IDerivedProvider> _providers = new();
+
+        static DerivedRegistry()
+        {
+            // A.0 真派生: 4 derived provider 自动注册
+            DerivedProviders.RegisterAll();
+        }
 
         /// <summary>注册一个派生提供者（覆盖同 key）。</summary>
         public static void Register(string key, IDerivedProvider provider) => _providers[key] = provider;
