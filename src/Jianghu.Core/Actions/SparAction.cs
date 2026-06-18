@@ -40,18 +40,41 @@ namespace Jianghu.Actions
             foreach (var x in w.AtNode(a.Node)) if (x.Id.Value == c.Target.Value) { target = x; break; }
             if (target == null) return new DomainEvent[0];
 
-            int pa = EffectivePower(a, target), pb = EffectivePower(target, a);
-            var winner = pa >= pb ? a : target;
-            var loser = pa >= pb ? target : a;
-            int margin = System.Math.Abs(pa - pb);
+            // ON 分支：双方均有 Cultivation + registry → DuelEngine.ResolveR2（模块战斗）
+            if (a.Cultivation != null && target.Cultivation != null && _registry != null && _limits != null)
+            {
+                var aPath = _registry.ById(a.Cultivation.PathId);
+                var tPath = _registry.ById(target.Cultivation.PathId);
+                var result = DuelEngine.ResolveR2(a, target, aPath, tPath, _registry, _limits, _resolver,
+                    attackerSkill: null, defenderSkill: null); // 自动选招
 
-            int wToL = w.AdjustRelation(winner.Id, loser.Id, +3);
-            int lToW = w.AdjustRelation(loser.Id, winner.Id, margin > 20 ? -4 : +2);
+                var winner = result.Winner == a.Id ? a : target;
+                var loser = result.Winner == a.Id ? target : a;
+                int margin = result.WasAutoWin ? 999 : result.Margin;
+
+                int wToL = w.AdjustRelation(winner.Id, loser.Id, +3);
+                int lToW = w.AdjustRelation(loser.Id, winner.Id, margin > 20 ? -4 : +2);
+                return new DomainEvent[]
+                {
+                    new DuelResolved(w.Clock, winner.Id, loser.Id, margin),
+                    new RelationChanged(w.Clock, winner.Id, loser.Id, +3, wToL),
+                    new RelationChanged(w.Clock, loser.Id, winner.Id, margin > 20 ? -4 : +2, lToW),
+                };
+            }
+
+            // OFF 分支：legacy 公式（逐字节，不碰 cultivation/resolver）
+            int pa = EffectivePower(a, target), pb = EffectivePower(target, a);
+            var legacyWinner = pa >= pb ? a : target;
+            var legacyLoser = pa >= pb ? target : a;
+            int legacyMargin = System.Math.Abs(pa - pb);
+
+            int lwToL = w.AdjustRelation(legacyWinner.Id, legacyLoser.Id, +3);
+            int llToW = w.AdjustRelation(legacyLoser.Id, legacyWinner.Id, legacyMargin > 20 ? -4 : +2);
             return new DomainEvent[]
             {
-                new DuelResolved(w.Clock, winner.Id, loser.Id, margin),
-                new RelationChanged(w.Clock, winner.Id, loser.Id, +3, wToL),
-                new RelationChanged(w.Clock, loser.Id, winner.Id, margin > 20 ? -4 : +2, lToW),
+                new DuelResolved(w.Clock, legacyWinner.Id, legacyLoser.Id, legacyMargin),
+                new RelationChanged(w.Clock, legacyWinner.Id, legacyLoser.Id, +3, lwToL),
+                new RelationChanged(w.Clock, legacyLoser.Id, legacyWinner.Id, legacyMargin > 20 ? -4 : +2, llToW),
             };
         }
 
