@@ -148,6 +148,102 @@ namespace Jianghu.Core.Tests.Cultivation
         }
 
         // ================================================================
+        // 4. DuelSim — 同UT战斗路对拍胜率验证 (INV-CROSS gate)
+        // ================================================================
+
+        [Fact]
+        public void DuelSim_UT8_CombatPairs_PowerProxyBalanced()
+        {
+            int testUT = 8;
+            // Collect combat paths at UT8 (power >= sword/2 ≈ 570)
+            var combatPaths = new List<CultivationPathDef>();
+            foreach (var path in AllPaths)
+            {
+                if (!path.Curve.UnifiedTierOf.Contains(testUT)) continue;
+                int realmIdx = FirstRealmAtUT(path, testUT);
+                var st = MakeTypicalRole(path, realmIdx);
+                int pe = PowerEngine.Evaluate(st, MakeStats(), path, Limits);
+                if (pe >= 570) combatPaths.Add(path); // combat threshold
+            }
+
+            _out.WriteLine($"UT{testUT} combat paths: {combatPaths.Count}");
+            _out.WriteLine($"Power proxy band test (target ±25%):");
+
+            int swordPE = 0;
+            foreach (var p in combatPaths)
+            {
+                int ri = FirstRealmAtUT(p, testUT);
+                var st = MakeTypicalRole(p, ri);
+                int pe = PowerEngine.Evaluate(st, MakeStats(), p, Limits);
+                if (p.PathId == "sword_immortal") swordPE = pe;
+            }
+
+            int violations = 0;
+            foreach (var p in combatPaths)
+            {
+                int ri = FirstRealmAtUT(p, testUT);
+                var st = MakeTypicalRole(p, ri);
+                int pe = PowerEngine.Evaluate(st, MakeStats(), p, Limits);
+                double ratio = (double)pe / swordPE;
+                bool inBand = ratio >= 0.75 && ratio <= 1.25;
+                _out.WriteLine($"  {p.PathId,-24} PE={pe,6} ratio={ratio:F2} {(inBand ? "✓" : "✗ OUT OF BAND")}");
+                if (!inBand) violations++;
+            }
+
+            // Gate: >=80% combat paths within ±25% of sword PE
+            double passRate = 1.0 - (double)violations / combatPaths.Count;
+            _out.WriteLine($"Pass rate: {passRate:P0} ({combatPaths.Count - violations}/{combatPaths.Count} in band)");
+            Assert.True(passRate >= 0.80, $"Only {passRate:P0} combat paths within ±25% band");
+        }
+
+        [Fact]
+        public void DuelSim_UT8_CrossDuels_ReasonableMargins()
+        {
+            int testUT = 8;
+            var reg = new PathRegistry(new ListPathSource(AllPaths));
+
+            // Pick 3 representative pairs
+            var pairs = new[]
+            {
+                ("sword_immortal", "fa_xiu"),
+                ("sword_immortal", "du_gu_xiu"),
+                ("fa_xiu", "gui_xiu_yang_hun"),
+            };
+
+            foreach (var (pathAId, pathBId) in pairs)
+            {
+                var pathA = AllPaths.First(p => p.PathId == pathAId);
+                var pathB = AllPaths.First(p => p.PathId == pathBId);
+                int riA = FirstRealmAtUT(pathA, testUT);
+                int riB = FirstRealmAtUT(pathB, testUT);
+                var stA = MakeTypicalRole(pathA, riA);
+                var stB = MakeTypicalRole(pathB, riB);
+
+                var a = new Character(new CharacterId(1),
+                    new Persona("攻", "t", "s", ArchetypeKind.Martial, null),
+                    MakeStats(), new NodeId(0), new Goal(GoalKind.Advance, 0), 0, 800, 16);
+                a.Cultivation = stA;
+                var b = new Character(new CharacterId(2),
+                    new Persona("防", "t", "s", ArchetypeKind.Martial, null),
+                    MakeStats(), new NodeId(0), new Goal(GoalKind.Advance, 0), 0, 800, 16);
+                b.Cultivation = stB;
+
+                var result = DuelEngine.ResolveR2(a, b, pathA, pathB, reg, Limits, null, null, null);
+
+                int aPE = PowerEngine.Evaluate(stA, MakeStats(), pathA, Limits);
+                int bPE = PowerEngine.Evaluate(stB, MakeStats(), pathB, Limits);
+                int winnerStartPE = result.Winner == a.Id ? aPE : bPE;
+                double marginPct = (double)result.Margin / Math.Max(1, winnerStartPE);
+
+                _out.WriteLine($"{pathAId}({aPE}) vs {pathBId}({bPE}): winner={result.Winner.Value} margin={result.Margin} marginPct={marginPct:P0}");
+
+                // Gate: margin <= 30% of starting PE
+                Assert.True(marginPct <= 0.30,
+                    $"{pathAId} vs {pathBId} margin {result.Margin}/{winnerStartPE}={marginPct:P0} exceeds 30%");
+            }
+        }
+
+        // ================================================================
         // Helpers — 典型角色构造
         // ================================================================
 
@@ -203,5 +299,12 @@ namespace Jianghu.Core.Tests.Cultivation
             }
             return sum;
         }
+    }
+
+    sealed class ListPathSource : IPathSource
+    {
+        readonly IReadOnlyList<CultivationPathDef> _paths;
+        public ListPathSource(IReadOnlyList<CultivationPathDef> paths) => _paths = paths;
+        public IReadOnlyList<CultivationPathDef> Load() => _paths;
     }
 }
