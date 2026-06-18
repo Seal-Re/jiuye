@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Jianghu.Config;
 using Jianghu.Cultivation;
@@ -43,23 +44,26 @@ namespace Jianghu.Core.Tests.Cultivation
         [Fact]
         public void PowerMatrix_Dump_AllPaths_AllUTs()
         {
-            _out.WriteLine($"{"Path",-24} {"UT",4} {"RealmIdx",8} {"BaseSum",8} {"mul",6} {"power",8}");
-            _out.WriteLine(new string('-', 70));
-
-            foreach (var path in AllPaths)
+            var dumpPath = Path.Combine(Directory.GetCurrentDirectory(), "power_matrix_dump.txt");
+            using (var f = new StreamWriter(dumpPath))
             {
-                // Collect unique UTs for this path
-                var uts = path.Curve.UnifiedTierOf.Distinct().OrderBy(u => u).ToList();
-                foreach (int ut in uts)
-                {
-                    int realmIdx = FirstRealmAtUT(path, ut);
-                    var st = MakeTypicalRole(path, realmIdx);
-                    int pe = PowerEngine.Evaluate(st, MakeStats(), path, Limits);
+                f.WriteLine($"{"Path",-24} {"UT",4} {"RealmIdx",8} {"BaseSum",8} {"mul",6} {"power",8}");
+                f.WriteLine(new string('-', 70));
 
-                    _out.WriteLine(
-                        $"{path.PathId,-24} {ut,4} {realmIdx,8} {BaseSum(path, st),8} {path.Curve.RealmMultipliers[realmIdx],6} {pe,8}");
+                foreach (var path in AllPaths)
+                {
+                    var uts = path.Curve.UnifiedTierOf.Distinct().OrderBy(u => u).ToList();
+                    foreach (int ut in uts)
+                    {
+                        int realmIdx = FirstRealmAtUT(path, ut);
+                        var st = MakeTypicalRole(path, realmIdx);
+                        int pe = PowerEngine.Evaluate(st, MakeStats(), path, Limits);
+
+                        f.WriteLine($"{path.PathId,-24} {ut,4} {realmIdx,8} {BaseSum(path, st),8} {path.Curve.RealmMultipliers[realmIdx],6} {pe,8}");
+                    }
                 }
             }
+            _out.WriteLine($"PowerMatrix dump written to: {dumpPath}");
 
             // Assertion: all paths produce positive power at UT0
             foreach (var path in AllPaths)

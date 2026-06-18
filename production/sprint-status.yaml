@@ -8,7 +8,7 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 #
-# 真相源（红线 A.2）。WIP(in-progress)≤2，当前=0（空闲）。
+# 真相源（红线 A.2）。WIP(in-progress)≤2，当前=1（combat-r2 story-005）。
 # 阶段 production/stage.txt = Production。
 
 sprint: 1
@@ -58,7 +58,7 @@ stories:
     name: "batch6 硬化 DoD gate + 辅助路 UT 重锚（解 A1.4）"
     file: "production/epics/combat-r2/story-005-batch6-hardening-gate.md"
     priority: must-have
-    status: blocked
+    status: in-progress            # 2026-06-18 开工. 001-004 done, 先做70%独立部分(G1/G2/M4/M5/M6+常量冻结)
     owner: ""
     estimate_days: 0
     blocker: "依赖 001-004 + balance-cross 的 INV-CROSS 对拍（辅助路 UT 重锚）"

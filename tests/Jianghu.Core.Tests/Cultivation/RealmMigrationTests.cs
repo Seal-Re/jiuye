@@ -6,7 +6,8 @@ using Xunit;
 // A1.2 迁移验证：4 偏离路 UT 迁移到锚集 + 全 21 路 SubLevelCount == UnifiedTierOf 同 UT 段长。
 public class RealmMigrationTests
 {
-    static readonly HashSet<int> Anchor = new HashSet<int> { 0, 2, 4, 6, 8, 9, 10, 11, 12 };
+    // INV-CROSS校准后: 辅助路(丹/阵/器)UT重锚引入1,3,5,7,10. 扩展锚集.
+    static readonly HashSet<int> Anchor = new HashSet<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
     static IReadOnlyList<CultivationPathDef> All() => new CodePathSource().Load();
 
