@@ -11,13 +11,14 @@ namespace Jianghu.Cultivation
     /// </summary>
     public static class DerivedProviders
     {
-        /// <summary>注册全部 4 derived provider。</summary>
+        /// <summary>注册全部 5 derived provider。</summary>
         public static void RegisterAll()
         {
             DerivedRegistry.Register("stockFirepower", new StockFirepowerProvider());
             DerivedRegistry.Register("demonWeapon", new DemonWeaponProvider());
             DerivedRegistry.Register("wenGong", new WenGongProvider());
             DerivedRegistry.Register("atavismFold", new AtavismFoldProvider());
+            DerivedRegistry.Register("arrayPower", new ArrayPowerProvider());
         }
     }
 
@@ -76,6 +77,21 @@ namespace Jianghu.Cultivation
             st.Resources.TryGetValue("yaoDan", out int yd);
             st.Resources.TryGetValue("atavismDeg", out int ad);
             return yd / 5 + ad / 10;
+        }
+    }
+
+    /// <summary>
+    /// derived:arrayPower（阵修·在场阵power聚合）:
+    /// = (compute + stones) × 2（灵石储量+算力折为在场阵法总威力）。
+    /// 真 per-array Σ → FULLSTRUCT（需 array roster 结构）。
+    /// </summary>
+    internal sealed class ArrayPowerProvider : IDerivedProvider
+    {
+        public int Compute(CultivationState st, StatBlock stats)
+        {
+            st.Resources.TryGetValue("compute", out int cmp);
+            st.Resources.TryGetValue("stones", out int stn);
+            return (cmp + stn) * 2;
         }
     }
 }

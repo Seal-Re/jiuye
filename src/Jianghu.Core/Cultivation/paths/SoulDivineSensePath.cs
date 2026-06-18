@@ -173,7 +173,7 @@ namespace Jianghu.Cultivation
                 // 夺舍·借尸：对濒死活体/傀儡容器发动,成功则本体神魂迁入新躯(realm跃升1、识海回满、寿元重置、继承新躯根骨);失败分魂尽灭。战略级而非战术级。
                 // B5扫尾 defer(红线A.8): 夺舍战略级(realm跃升/识海回满/寿元重置)→batch4/A.2 战略层,非战术伤害(amount 0),保 AddPenInteger(0) 占位。
                 new CombatSkillDef("sk_so_jieshi", "夺舍·借尸", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "战略级:成功 realm 跃升1+识海回满+寿元重置+继承新躯根骨,失败分魂尽灭(realm跃升/寿元重置→batch4/A.2 defer);须一道分魂前提,成功率受九转洗魂诀/SeaIntegrity 加成(非伤害置0)") },
+                    new[] { Modules.Special("duoshe", 1, 0, "夺舍:realm跃升+识海回满+寿元重置(失败→分魂尽灭)") },
                     new Dictionary<string, int> { { "soulForce", 50 } }),
                 // 神念结界·锁魂困敌：以神识织结界罩住一节点,域内敌方游历判定-30(神识封路)、其对我方物理偷袭仍按 spirit 轴被反制。控场/逃生两用。
                 new CombatSkillDef("sk_so_jinjie", "神念结界·锁魂困敌", 3,

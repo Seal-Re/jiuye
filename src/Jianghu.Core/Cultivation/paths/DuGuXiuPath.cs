@@ -223,7 +223,7 @@ namespace Jianghu.Cultivation.Paths
                 // B5 批2：植蛊夺心(mind control,战力按比例转己/调遣敌方)是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
                 //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger 占位破防量。
                 new CombatSkillDef("sk_du_duoxin", "夺心控蛊", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "植蛊夺心(mind control→batch3 Special defer):成功则目标本回合反噬其阵营/受己调遣;对纯阳/佛门体质或死物傀儡(无血肉)命中失败") },
+                    new[] { Modules.Special("duoxin", 1, 0, "植蛊夺心:目标本回合反噬其阵营") },
                     new Dictionary<string, int> { { "venomCharge", 5 } }),
                 // 淬毒一击：淬毒暗器/兵刃一击向单体,基于百毒值的渗透伤害并使中毒掉血;潜伏施放则额外破一层护体。百毒值3。
                 new CombatSkillDef("sk_du_cuidu", "淬毒一击", 1,

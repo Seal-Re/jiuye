@@ -180,7 +180,7 @@ namespace Jianghu.Cultivation.Paths
                 // B5 批2：逆演栈回滚是唯一档签名机制(SpecialModuleRegistry 派发,栈回滚结算) → batch3 Special,
                 //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger(0) 占位。
                 new CombatSkillDef("sk_mi_niyan", "逆演重开", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "撤销刚结算的一次交锋结果(伤害/夺运/胜负回滚),Karma不回滚(逆演栈回滚→batch3 Special defer)") },
+                    new[] { Modules.Special("reverseStack", 1, 0, "逆演回滚:撤销一次交锋结果,Karma不回滚") },
                     new Dictionary<string, int> { { "netFortune", 10 }, { "lifespanDebt", 3 } }),
                 // 移祸天下：群体转嫁,把自身Karma一半(整除)平摊场上所有敌方(各NetFortune同步降),顺带各夺Fortune-2。多打一时摊薄天谴。
                 new CombatSkillDef("sk_mi_yihuo", "移祸天下", 3,

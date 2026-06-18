@@ -74,13 +74,12 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
                 "噬元夺脉未随 MoGong 缩放");
         }
 
-        // —— 夺舍重生：A.2 道心层(innerDemon)+batch3 Special defer，仍 AddPenInteger(0) 占位 ——
+        // —— 夺舍重生：B5消化 → Special(duoshe) handler 已激活 ——
         [Fact]
-        public void DuoShe_DeferredPlaceholder()
+        public void DuoShe_UpgradedToSpecial()
         {
             var sk = Skill("mo_sk_duoshe");
-            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
-            Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource);
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "duoshe");
         }
 
         [Fact]

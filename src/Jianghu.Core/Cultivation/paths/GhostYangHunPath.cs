@@ -177,7 +177,7 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_gu_duoshe", "夺舍·借尸还魂", 5,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 0, "濒死强夺邻近肉身续命,成功保命;失败(遇雷/纯阳/佛光在场)魂飞魄散(夺舍战略级→batch4/A.2 defer,永久退场风险,刹车/保命类)"),
+                        Modules.Special("duoshe", 1, 0, "夺舍续命:濒死强夺肉身(遇雷/纯阳/佛光→失败)"),
                         new EffectOp(EffectOpKind.AddResource, "devourMeter", -100, "夺舍成功噬主度清零"),
                     },
                     new Dictionary<string, int> { { "shaCharge", 15 } }),

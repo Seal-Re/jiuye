@@ -199,7 +199,7 @@ namespace Jianghu.Cultivation.Paths
                 // 傀附本体·临阵 [t2]：一具高品阶傀机括之力暂附本体,本体指挥项临时+悟性×3,弥补藏阵脆皮(近身自保/脱困;该傀本回合退出名册)。
                 // B5扫尾 defer(红线A.8): 改本体自身 stat(指挥项+悟性×3)需 ApplyStatDelta(未建)→改stat→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_kl_kuifu", "傀附本体·临阵", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 18, "本体指挥项临时+悟性×3(改self-stat→FULLSTRUCT defer),弥补本体藏阵脆皮(近身自保/脱困,该傀本回合退出名册)") },
+                    new[] { Modules.ModifyStat("self:Insight", 3, "本体指挥项+悟性×3(近身自保)") },
                     new Dictionary<string, int> { { "fleetWeighted", 6 } }),
                 // 强令催动 [t2]：超频驱动指定傀,该傀constructPower×150/100持续3tick,结束后机括过载constructTier临时−1(透支构件换爆发)。
                 // B5扫尾 defer(红线A.8): constructPower×倍率=逐傀派生量(非聚合 fleetWeighted 资源),真 per-construct derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
@@ -221,8 +221,8 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_kl_yingti", "断链应急·影替傀", 4,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddFlatDR, null, 999, "影替傀代受致命/斩首一击并瞬移本体出阵(断链应急→batch3 Special defer),阻止本体斩首→全军失令一次(影替傀当场损毁)"),
-                        new EffectOp(EffectOpKind.SetFlag, "commandSevered", 0, "化解一次断链:commandSevered 复位,军团不趋零"),
+                        Modules.Special("brokenChain", 1, 0, "断链应急:影替傀代受致命+瞬移本体+化解断链"),
+                        Modules.FlatDR(40, "影替傀护体减伤"),
                     },
                     new Dictionary<string, int> { { "fleetWeighted", 10 } }),
                 // 重整旗鼓·召傀归阵 [t1]：将散落/惯性僵立/被打断的傀强制召回阵中并重置阵位,恢复带宽乘子触发条件(被破阵纹打散后重整军团)。无资源门槛。

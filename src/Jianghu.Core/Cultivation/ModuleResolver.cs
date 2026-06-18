@@ -50,10 +50,13 @@ namespace Jianghu.Cultivation
                     return dmg;
 
                 case EffectOpKind.ModifyStat:
-                    // 跨路改四维: Key=statKind("Force"/"Internal"/"Constitution"/"Insight"), Amount=delta.
-                    // 经 CombatContext accumulator 累积, 战后 SparAction 落地。
-                    ctx.AccumulateStatDelta(Side.Defender, m.Key!, m.Amount);
+                {
+                    // Key="self:StatKind"→攻方自身, 否则→防方(敌方). Amount=delta.
+                    bool self = m.Key!.StartsWith("self:");
+                    string statKind = self ? m.Key.Substring(5) : m.Key;
+                    ctx.AccumulateStatDelta(self ? Side.Attacker : Side.Defender, statKind, m.Amount);
                     return dmg;
+                }
 
                 case EffectOpKind.Special:
                     // 唯一档逃逸口(§7 M3)：派发 SpecialModuleRegistry[Key]，handler 经 chokepoint 落副作用、返伤害 delta。

@@ -47,13 +47,12 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.True(vsEvil > vsNorm, "摩诃无量佛光对 evil 未触发 anti_evil 倍乘");
         }
 
-        // —— 不动明王怒目：goldenBodyMax态 batch3 Special defer，仍 AddPenInteger 占位 ——
+        // —— 不动明王怒目：B5消化 → Special(goldenBodyMax) handler 已激活 ——
         [Fact]
-        public void BuDongMing_DeferredPlaceholder()
+        public void BuDongMing_UpgradedToSpecial()
         {
             var sk = Skill("sk_bd_budongming");
-            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
-            Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.CounterMul);
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "goldenBodyMax");
         }
 
         [Fact]

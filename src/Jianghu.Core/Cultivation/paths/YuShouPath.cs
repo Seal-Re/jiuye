@@ -217,7 +217,7 @@ namespace Jianghu.Cultivation.Paths
                 // 灵兽附身·夺魄：将一只高 bond 灵兽之力暂附本体,本体指挥项临时+悟性×3,弥补本体弱、用于近身自保/脱困。门槛 bond≥10(该兽本回合退出兽阵),内力高。
                 // B5扫尾 defer(红线A.8): 改本体自身 stat(指挥项+悟性×3)需 ApplyStatDelta(未建)→改stat→EPIC-COMBAT-FULLSTRUCT(与傀儡'傀附本体'同构),保 AddPenInteger 占位。
                 new CombatSkillDef("sk_yu_fushen", "灵兽附身·夺魄", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 12, "高 bond 灵兽之力暂附本体,本体指挥项临时+悟性×3(改self-stat→FULLSTRUCT defer;近身自保/脱困)") },
+                    new[] { Modules.ModifyStat("self:Insight", 3, "灵兽附身:本体指挥项+悟性×3") },
                     new Dictionary<string, int> { { "bond", 10 } }),
                 // 召兽归阵：将散落/被乱/逃逸的灵兽强制召回阵中并重置阵位,恢复兽阵倍率触发条件(被打散后重整旗鼓)。内力低,无门槛。
                 new CombatSkillDef("sk_yu_guizhen", "召兽归阵", 1,

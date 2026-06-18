@@ -43,12 +43,12 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource);
         }
 
-        // —— 时光回溯·逆演：batch3 Special defer，仍 AddPenInteger(0) 占位 ——
+        // —— 时光回溯·逆演：B5消化 → Special(reverseStack) handler 已激活 ——
         [Fact]
-        public void NiYan_DeferredPlaceholder()
+        public void NiYan_UpgradedToSpecial()
         {
             var sk = Skill("sk_yg_niyan");
-            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "reverseStack");
         }
 
         [Fact]

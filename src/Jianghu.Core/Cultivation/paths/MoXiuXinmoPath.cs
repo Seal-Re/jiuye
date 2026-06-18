@@ -184,7 +184,7 @@ namespace Jianghu.Cultivation
                 // B5 批2：夺舍(强夺肉身续命/按宿主 realm 重算/innerDemon 清零)属 A.2 道心层(innerDemon)+唯一档机制 → 保持原样,
                 //   显式标注（红线 A.8 不静默）：A.2 道心层 innerDemon 不在 A.0 落算子,夺舍重算 batch3 Special 后接。
                 new CombatSkillDef("mo_sk_duoshe", "夺舍重生", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "魔念濒死强夺邻近肉身续命:成功保命且 innerDemon 清零洗暗德、按宿主 realm 重算;失败(场上佛光/纯阳/雷)则永久退场(A.2道心层+batch3 Special defer)") },
+                    new[] { Modules.Special("duoshe", 1, 0, "夺舍续命:濒死强夺肉身(innerDemon→A.2道心层)") },
                     new Dictionary<string, int> { { "MoGong", 15 } }),
                 // 渡心魔劫·证道[control]：双变体收束技,moHeart≥60 主动引心魔劫自炼:过则 moHeart+10、innerDemon-20(借魔入道·洗白);
                 //   fallenDevil 态则不可渡、强制 innerDemon+10 换永久 power+8(堕魔淬魔档)。消耗 MoGong10 + 一次心魔劫掷点。

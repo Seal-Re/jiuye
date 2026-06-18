@@ -225,7 +225,7 @@ namespace Jianghu.Cultivation.Paths
                 // B5 批2：开金身大成态(goldenBodyMax 态 3 回合,DR×2/受击全额转愿)是唯一档签名状态机制(SpecialModuleRegistry 派发) → batch3 Special,
                 //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger 占位破防量。
                 new CombatSkillDef("sk_bd_budongming", "不动明王怒目", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "开金身大成态3回合:DR×2、所有受击全额转愿、对阴邪伤害再×1.5(goldenBodyMax态→batch3 Special defer)") },
+                    new[] { Modules.Special("goldenBodyMax", 3, 0, "金身大成态:DR×2+全额转愿+对阴邪×1.5") },
                     new Dictionary<string, int> { { "vow", 1500 } }),
                 // 大须弥山掌：AOE镇压,对全场阴邪 base×2 伤害并附'镇';对非阴邪 base 伤害。愿力≥500,消耗500(+内力60 flavor)。
                 // B5扫尾: 占位 AddPenInteger(48) → FlatPen(48) 基线 + Modules.CounterMul(evil,×2)（对阴邪(evil tag)×2;非阴邪 base 走 Phase3,'镇' debuff Phase3）。

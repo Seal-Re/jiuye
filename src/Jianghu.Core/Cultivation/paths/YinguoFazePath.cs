@@ -191,7 +191,7 @@ namespace Jianghu.Cultivation.Paths
                 // B5 批2：KarmicIndex 栈回溯是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
                 //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddPenInteger(0) 占位。
                 new CombatSkillDef("sk_yg_niyan", "时光回溯·逆演", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "撤销 KarmicIndex 栈中指定一条交锋结算(伤害/夺运/胜负回滚),天谴债不回滚(栈回溯→batch3 Special defer),需 spaceTimeAuth≥4") },
+                    new[] { Modules.Special("reverseStack", 1, 0, "时光回溯:栈回滚一条交锋结算,天谴债不回滚") },
                     new Dictionary<string, int> { { "retributionDebt", 10 }, { "lifespanDebt", 3 } }),
                 // 夺定数·截命一击[burst]：对单体强改定数,削其 EffectivePower 的 destinyAuth×3% 并计入己;撞大气运者 reflect=对方气运-己权限 全额入己(自险)。
                 // B5 批2：本招削的是敌方 EffectivePower%（destinyAuth 是攻方权限非敌方资源,Drain 语义不符）→

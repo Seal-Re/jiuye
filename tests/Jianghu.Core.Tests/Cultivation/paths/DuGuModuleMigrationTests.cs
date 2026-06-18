@@ -56,12 +56,12 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Dot && o.Key == "plague");
         }
 
-        // —— 夺心控蛊：mind control batch3 Special defer，仍 AddPenInteger 占位 ——
+        // —— 夺心控蛊：B5消化 → Special(duoxin) handler 已激活 ——
         [Fact]
-        public void DuoXin_DeferredPlaceholder()
+        public void DuoXin_UpgradedToSpecial()
         {
             var sk = Skill("sk_du_duoxin");
-            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "duoxin");
         }
 
         [Fact]
