@@ -36,9 +36,13 @@ namespace Jianghu.Cultivation
                     return ctx.HasTag(Side.Defender, m.Key!) ? CapCounter(dmg, m) : dmg;
 
                 case EffectOpKind.DrainResource:
-                    // 夺取：防方 res(Key) -= Amount、攻方 += Amount（经 chokepoint 钳），dmg 不变
-                    ctx.ApplyResource(Side.Defender, m.Key!, -m.Amount);
-                    ctx.ApplyResource(Side.Attacker, m.Key!, m.Amount);
+                    // 夺取：防方 res(Key) -= Amount、攻方 += Amount（经 chokepoint 钳）。
+                    // 安全护栏：仅双方均有该 key 时执行（防 KeyNotFound，跨路 drain 非共享资源时静默跳过）
+                    if (ctx.HasResource(Side.Defender, m.Key!) && ctx.HasResource(Side.Attacker, m.Key!))
+                    {
+                        ctx.ApplyResource(Side.Defender, m.Key!, -m.Amount);
+                        ctx.ApplyResource(Side.Attacker, m.Key!, m.Amount);
+                    }
                     return dmg;
 
                 case EffectOpKind.Backlash:

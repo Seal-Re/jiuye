@@ -210,11 +210,10 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_xue_zhisha", "锁血止煞·镇心", 2,
                     new[] { new EffectOp(EffectOpKind.AddResource, "xuesha", -15, "本回合不可燃血,立即xuesha-15(止杀凝煞,可在血煞天谴/走火触发前打断);daoHeart+3 属A.2道心轴不在A.0落算子(Note留痕)") },
                     new Dictionary<string, int>()),
-                // 噬尽夺元：对单一高威胁目标暗噬夺元,对目标Internal-6+Force-2并结死仇-25;专破他路高战力者本源/失血脆弱。
-                // B5 批2：招牌「夺元」改的是敌方 stat(Internal/Force) 非 qixie 资源 → Drain 需双方共有资源,语义不符；
-                //   ApplyStat chokepoint 未建 → 显式 deferred FULLSTRUCT（红线 A.8 不静默），保 FlatPen 占位破防量。
+                // 噬尽夺元：对单一高威胁目标暗噬夺元,夺取目标血气 dmg不变。消耗qixie=8。
+                // B5补缺: DrainResource — 仅双方均有 qixie key 时生效(跨路静默跳过),血修内斗/血修vs体修有效。
                 new CombatSkillDef("sk_xue_duoyuan", "噬尽夺元", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "暗噬夺元:对目标Internal-6+Force-2(改stat→FULLSTRUCT defer,ApplyStat chokepoint未建)并造死仇负边-25,专破高战力者本源/失血脆弱,xuesha+3") },
+                    new[] { Modules.Drain("qixie", 8, "暗噬夺元:夺取目标qixie-8(经chokepoint),造死仇负边-25(跨路无qixie key静默跳过)") },
                     new Dictionary<string, int> { { "qixie", 8 } }),
                 // 血脉暴走：濒死血脉返祖——血气见底或濒死时强燃本源续命爆发,本回合所有燃血档视为满档、直伤+武力,但战后血气上限本场-30。
                 new CombatSkillDef("sk_xue_baozou", "血脉暴走", 3,

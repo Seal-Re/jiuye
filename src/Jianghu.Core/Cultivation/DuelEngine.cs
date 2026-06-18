@@ -87,19 +87,29 @@ namespace Jianghu.Cultivation
             // —— AC 4.2：回合循环，双方同时互攻 ——
             int roundLimit = MaxRounds;
             long totalDmgToB = 0, totalDmgToA = 0;
+            var pendingDots = new List<DotEntry>();
+            var pendingControls = new List<ControlEntry>();
             for (int round = 0; round < roundLimit && hpA > 0 && hpB > 0; round++)
             {
+                // 被控方伤害=0（控场效果）
+                int effectiveDmgToB = IsControlled(pendingControls, Side.Defender) ? 0 : 1;
+                int effectiveDmgToA = IsControlled(pendingControls, Side.Attacker) ? 0 : 1;
+
                 var (dmgToB, reflectToA) = ResolveExchange(
                     aSkill, peA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
-                    Side.Attacker, Side.Defender, defCanEvade, defCanReflect);
+                    Side.Attacker, Side.Defender, defCanEvade, defCanReflect,
+                    pendingDots, pendingControls);
+                dmgToB *= effectiveDmgToB;
 
                 var (dmgToA, reflectToB) = ResolveExchange(
                     dSkill, peB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     HasMovementArt(attackerPath, attacker.Cultivation),
-                    HasBodyArt(attackerPath, attacker.Cultivation));
+                    HasBodyArt(attackerPath, attacker.Cultivation),
+                    pendingDots, pendingControls);
+                dmgToA *= effectiveDmgToA;
 
                 // 同时扣血（读 pre-HP）：反伤加到对应方向
                 hpB = Math.Max(0, hpB - dmgToB - reflectToB);
@@ -108,8 +118,7 @@ namespace Jianghu.Cultivation
                 totalDmgToA += dmgToA + reflectToA;
 
                 // —— AC 4.3：dot/control 回合间结算 ——
-                TickDots(ctx, Side.Attacker);
-                TickDots(ctx, Side.Defender);
+                TickDots(pendingDots, pendingControls, ref hpA, ref hpB);
             }
 
             // —— AC 4.6：胜者 HP 高；同时死时累计伤害高者胜；平 Tiebreak(CharacterId) ——
@@ -154,6 +163,7 @@ namespace Jianghu.Cultivation
 
         /// <summary>
         /// 单次交锋结算：攻方 OnUse→防方 OnDefend→软情境→(对防方伤害, 反伤回攻方量)。
+        /// Dot/Control 模块不直接改 dmg，而是通过 out 列表挂载到对应方，TickDots 结算。
         /// </summary>
         private static (int DmgToDefender, int ReflectToAttacker) ResolveExchange(
             CombatSkillDef? skill,
@@ -162,7 +172,8 @@ namespace Jianghu.Cultivation
             CultivationPathDef attackerPath, CultivationPathDef defenderPath,
             CombatContext ctx, LimitsConfig limits, SituationalResolver? resolver,
             Side attackerSide, Side defenderSide,
-            bool defCanEvade, bool defCanReflect)
+            bool defCanEvade, bool defCanReflect,
+            List<DotEntry> pendingDots, List<ControlEntry> pendingControls)
         {
             const int Scale = 100;
             long dmg = (long)attackerPe * Scale / BaseDamageDivisor;
@@ -173,6 +184,19 @@ namespace Jianghu.Cultivation
             {
                 foreach (var op in skill.OnUse)
                 {
+                    // Dot/Control: 不修改 dmg，挂载到防方侧，TickDots 结算
+                    if (op.Kind == EffectOpKind.Dot)
+                    {
+                        int turns = op.Amount2 >= 1 ? op.Amount2 : 1;
+                        pendingDots.Add(new DotEntry(defenderSide, op.Key ?? "dot", op.Amount, turns));
+                        continue;
+                    }
+                    if (op.Kind == EffectOpKind.Control)
+                    {
+                        int turns = op.Amount >= 1 ? op.Amount : 1;
+                        pendingControls.Add(new ControlEntry(defenderSide, op.Key ?? "ctrl", turns));
+                        continue;
+                    }
                     int dmgUnscaled = (int)(dmg / Scale);
                     int result = ModuleResolver.ApplyOnUse(dmgUnscaled, op, ctx);
                     dmg = (long)result * Scale + (dmg % Scale);
@@ -211,13 +235,59 @@ namespace Jianghu.Cultivation
             return ((int)Math.Max(0, dmg / Scale), (int)totalReflect);
         }
 
-        /// <summary>回合间 dot/control 结算（AC 4.3）。</summary>
-        private static void TickDots(CombatContext ctx, Side side)
+        /// <summary>dot 挂载条目：对哪方、每 tick 伤害、剩余回合。</summary>
+        private sealed class DotEntry
         {
-            // dot/control 模块的回合间结算
-            // 持续伤：每回合扣 HP（经 chokepoint）
-            // 控场：减少剩余回合数
-            // 当前简化：dot/control 在 batch4 中只做占位，完整逻辑在后续 story
+            public readonly Side Target;
+            public readonly string Key;
+            public readonly int PerTick;
+            public int TurnsRemaining;
+            public DotEntry(Side target, string key, int perTick, int turns)
+            { Target = target; Key = key; PerTick = perTick; TurnsRemaining = turns; }
+        }
+
+        /// <summary>control 挂载条目：对哪方、剩余回合（>0 则该方本回合伤害=0）。</summary>
+        private sealed class ControlEntry
+        {
+            public readonly Side Target;
+            public readonly string Key;
+            public int TurnsRemaining;
+            public ControlEntry(Side target, string key, int turns)
+            { Target = target; Key = key; TurnsRemaining = turns; }
+        }
+
+        /// <summary>回合间 dot/control 结算（AC 4.3）。dot 扣 hp；control 减回合。</summary>
+        private static void TickDots(List<DotEntry> dots, List<ControlEntry> controls, ref int hpA, ref int hpB)
+        {
+            // Dot：每 tick 扣对应方 HP
+            for (int i = dots.Count - 1; i >= 0; i--)
+            {
+                var d = dots[i];
+                if (d.Target == Side.Attacker)
+                    hpA = Math.Max(0, hpA - d.PerTick);
+                else
+                    hpB = Math.Max(0, hpB - d.PerTick);
+                d.TurnsRemaining--;
+                if (d.TurnsRemaining <= 0)
+                    dots.RemoveAt(i);
+            }
+            // Control：只减回合（伤害归零由被控方 dmg=0 实现）
+            for (int i = controls.Count - 1; i >= 0; i--)
+            {
+                var c = controls[i];
+                c.TurnsRemaining--;
+                if (c.TurnsRemaining <= 0)
+                    controls.RemoveAt(i);
+            }
+        }
+
+        /// <summary>检查某方是否被控（control turns>0）。被控则攻击伤害=0。</summary>
+        private static bool IsControlled(List<ControlEntry> controls, Side side)
+        {
+            foreach (var c in controls)
+                if (c.Target == side && c.TurnsRemaining > 0)
+                    return true;
+            return false;
         }
 
         /// <summary>

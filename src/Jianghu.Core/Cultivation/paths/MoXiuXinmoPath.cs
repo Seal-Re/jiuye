@@ -148,11 +148,14 @@ namespace Jianghu.Cultivation
             //    强制风险对冲选取规则(必含 brake mo_sk_zhenmo)由 Selection/Tuning 留 Note,A 调度层接。——
             var skills = new[]
             {
-                // 噬元夺脉[burst]：近敌夺修为,伤害基于 MoGong,击杀回 MoGong+8、夺目标1层增益;轻量夺养无暴走负担。消耗 MoGong3。
-                // B5 批2 招牌招迁移：占位 AddPenInteger(12) → Modules.PenFromResource(MoGong,×1)（伤害基于 MoGong 魔功燃料转伤,
-                //   一致性优先：魔功越满越痛、见底哑火真差分；Amount2=1 工厂保证 §15.6）。击杀回 MoGong/夺增益走 Phase 3。
+                // 噬元夺脉[burst]：近敌夺修为+抽魔功,伤害基于 MoGong 魔功转伤,同时夺取目标 MoGong-4(若对方也有魔功)。
+                // B5补缺: DrainResource — 仅双方均有 MoGong key 时生效(跨路静默跳过,魔修内斗有效)。
                 new CombatSkillDef("mo_sk_duomai", "噬元夺脉", 1,
-                    new[] { Modules.PenFromResource("MoGong", 1, note:"近敌夺修为,伤害基于 MoGong 魔功转伤;击杀回 MoGong+8、夺目标1层增益 Phase3") },
+                    new[]
+                    {
+                        Modules.PenFromResource("MoGong", 1, note:"近敌夺修为,伤害基于 MoGong 魔功转伤;击杀回 MoGong+8 Phase3"),
+                        Modules.Drain("MoGong", 4, "夺取目标 MoGong-4(经chokepoint;双方均有MoGong key时生效,跨路静默跳过)"),
+                    },
                     new Dictionary<string, int> { { "MoGong", 3 } }),
                 // 灭世魔刀·斩[burst]：蓄 MoGong 越满本招 power 越高的定向重斩,对资源型修士(丹/器/符/驭兽)额外+10。消耗 MoGong6。
                 // B5 批2 招牌招迁移：占位 AddPenInteger(36) → Modules.PenFromResource(MoGong,×1)（蓄 MoGong 越满 power 越高=魔功燃料转伤,

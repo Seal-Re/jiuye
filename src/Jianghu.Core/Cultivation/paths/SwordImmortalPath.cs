@@ -194,6 +194,11 @@ namespace Jianghu.Cultivation.Paths
                         new EffectOp(EffectOpKind.AddResource, "jianCheng", 2, "本命剑剑成度+2"),
                     },
                     new Dictionary<string, int>()),
+                // 剑遁·闪：御剑遁形闪避（OnDefend）。需身法类功法→门控。剑意值≥5,消耗5。
+                // B5补缺：Evade 模块 — 剑修脆皮低容错的保命闪避, Amount=30→30%来袭伤害减免(功法门控)。
+                new CombatSkillDef("sk_sw_jiandun", "剑遁·闪", 3,
+                    new[] { Modules.Evade(30, "御剑遁形闪避来袭:30%来袭伤害减免(需身法类功法→门控)") },
+                    new Dictionary<string, int> { { "swordWill", 5 } }),
             };
 
             return new CultivationPathDef(

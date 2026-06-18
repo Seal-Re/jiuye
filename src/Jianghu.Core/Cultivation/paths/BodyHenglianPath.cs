@@ -182,6 +182,11 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_ti_henglianhuti", "横练护体·铁山靠", 2,
                     new[] { Modules.Reflect(1, 2, "1回合henglian×2硬扛整段攻势,入伤1/2反震攻方(铁山靠)") },
                     new Dictionary<string, int> { { "qixue", 15 } }),
+                // 横练闪身：体修闪避（OnDefend）。需拳脚功→门控。血气≥8,消耗8。
+                // B5补缺：Evade 模块 — 体修靠拳脚功练就的闪身卸力, Amount=20→20%来袭伤害减免(功法门控)。
+                new CombatSkillDef("sk_ti_henglian_shanshen", "横练闪身", 2,
+                    new[] { Modules.Evade(20, "拳脚功闪身卸力:20%来袭伤害减免(需拳脚功→门控)") },
+                    new Dictionary<string, int> { { "qixue", 8 } }),
                 // 不灭金身(被动·濒死自启)：realm≥6每场首次濒死自动燃尽血气复活并回50%体力;血气=0不触发。无血气门槛(被动)。
                 new CombatSkillDef("sk_ti_bumiejinshen", "不灭金身", 6,
                     new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 0, "realm≥6每场首次濒死自动燃尽血气复活并回50%体力(克制点:血气=0不触发,被动)") },

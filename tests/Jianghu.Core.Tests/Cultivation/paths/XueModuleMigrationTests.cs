@@ -47,13 +47,13 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.True(full > empty, "燃血狂屠未随 qixie 缩放（仍是占位定值）");
         }
 
-        // —— 噬尽夺元：FULLSTRUCT defer，仍是 AddPenInteger 占位（改 stat 非 qixie 资源）——
+        // —— 噬尽夺元：B5补缺 → DrainResource（双方均有 qixie key 时生效，跨路静默跳过）——
         [Fact]
-        public void DuoYuan_DeferredFlatPen()
+        public void DuoYuan_UpgradedToDrainResource()
         {
             var sk = Skill("sk_xue_duoyuan");
-            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
-            Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource);
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.DrainResource);
+            Assert.Contains(sk.OnUse, o => o.Key == "qixie" && o.Amount == 8);
         }
 
         [Fact]
