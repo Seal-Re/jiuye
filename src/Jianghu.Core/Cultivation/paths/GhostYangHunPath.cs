@@ -222,6 +222,16 @@ namespace Jianghu.Cultivation.Paths
                         new EffectOp(EffectOpKind.AddResource, "shaCharge", 4, "回煞值+4,可在反噬触发前打断"),
                     },
                     new Dictionary<string, int> { { "ghostSoldierPower", 10 } }),
+                // 鬼影遁·闪：鬼影遁形闪避（OnDefend）。需养魂→门控。shaCharge≥4,消耗4。
+                // B5扩21: Evade — 鬼修鬼影遁闪避,Amount=35→35%减免(高闪避脆皮路线)。
+                new CombatSkillDef("sk_gu_guiying_dun", "鬼影遁·闪", 2,
+                    new[] { Modules.Evade(35, "鬼影遁形闪避:35%来袭减免(需养魂→门控)") },
+                    new Dictionary<string, int> { { "shaCharge", 4 } }),
+                // 勾魂索命[control]：控场—目标下2回合无法行动。shaCharge≥8,消耗8。
+                // B5扩21: Control — 鬼修控场代表招。
+                new CombatSkillDef("sk_gu_gouhun", "勾魂索命", 3,
+                    new[] { Modules.Control("gouhun", 2, "控场:目标下2回合无法行动(勾魂锁命)") },
+                    new Dictionary<string, int> { { "shaCharge", 8 } }),
             };
 
             return new CultivationPathDef(

@@ -264,6 +264,16 @@ namespace Jianghu.Cultivation
                         new EffectOp(EffectOpKind.AddResource, "windupProgress", 50, "被打断/被夺律场强制重续:恢复fieldActive触发条件并回windupProgress至半(被破奏后重整旗鼓,对应驭兽'召兽归阵')"),
                     },
                     new Dictionary<string, int> { { "qiYun", 4 } }),
+                // 乐韵遁形·闪：乐韵遁形闪避（OnDefend）。需乐章→门控。qiYun≥3,消耗3。
+                // B5扩21: Evade — 音修乐韵遁形闪避,Amount=28→28%减免。
+                new CombatSkillDef("sk_yin_yuedun", "乐韵遁形·闪", 2,
+                    new[] { Modules.Evade(28, "乐韵遁形闪避:28%来袭减免(需乐章→门控)") },
+                    new Dictionary<string, int> { { "qiYun", 3 } }),
+                // 迷魂引[control]：控场—目标下1回合无法行动。qiYun≥6,消耗6。
+                // B5扩21: Control — 音修迷魂控场代表招。
+                new CombatSkillDef("sk_yin_mihun", "迷魂引", 2,
+                    new[] { Modules.Control("mihun", 1, "控场:目标下1回合无法行动(迷魂引)") },
+                    new Dictionary<string, int> { { "qiYun", 6 } }),
             };
 
             return new CultivationPathDef(

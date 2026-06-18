@@ -223,6 +223,11 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_yu_guizhen", "召兽归阵", 1,
                     new[] { new EffectOp(EffectOpKind.AddResource, "rosterPower", 6, "召回散落/被乱/逃逸灵兽并重置阵位,恢复兽阵触发条件(兽群强度回补)") },
                     new Dictionary<string, int>()),
+                // 兽遁·闪：兽遁闪避（OnDefend）。需兽阵役使→门控。bond≥5。
+                // B5扩21: Evade — 驭兽师借兽阵遁形闪避,Amount=22→22%减免。
+                new CombatSkillDef("sk_yu_shoudun", "兽遁·闪", 2,
+                    new[] { Modules.Evade(22, "兽遁闪避:22%来袭减免(需兽阵役使→门控)") },
+                    new Dictionary<string, int> { { "bond", 5 } }),
             };
 
             return new CultivationPathDef(

@@ -271,6 +271,11 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_bd_shizihou", "狮子吼", 1,
                     new[] { Modules.FlatPen(8, "震慑范围内目标(攻-15%/1回合);对阴邪改为眩晕1回合(内力20开销 flavor;debuff/对阴邪眩晕 Phase3)") },
                     new Dictionary<string, int> { { "vow", 50 } }),
+                // 金刚反震：金身反震（OnDefend）。愿力≥30,消耗30。
+                // B5扩21: ReflectDamage — 佛修金身反震,Amount=1/Amount2=3→1/3来袭伤害反震攻方。
+                new CombatSkillDef("sk_bd_jingang_fanzhen", "金刚反震", 3,
+                    new[] { Modules.Reflect(1, 3, "金身反震:1/3来袭伤害反震攻方") },
+                    new Dictionary<string, int> { { "vow", 30 } }),
             };
 
             return new CultivationPathDef(

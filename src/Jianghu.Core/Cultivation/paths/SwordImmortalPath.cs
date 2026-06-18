@@ -199,6 +199,11 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_sw_jiandun", "剑遁·闪", 3,
                     new[] { Modules.Evade(30, "御剑遁形闪避来袭:30%来袭伤害减免(需身法类功法→门控)") },
                     new Dictionary<string, int> { { "swordWill", 5 } }),
+                // 破邪剑意：对阴邪(evil tag)伤害×3/2(联合上界)。剑意值≥4,消耗4。
+                // B5扩21: CounterMul — 剑修正道破邪。
+                new CombatSkillDef("sk_sw_poxie", "破邪剑意", 2,
+                    new[] { Modules.CounterMul("evil", 3, 2, "对阴邪(evil tag)伤害×3/2(联合上界)") },
+                    new Dictionary<string, int> { { "swordWill", 4 } }),
             };
 
             return new CultivationPathDef(

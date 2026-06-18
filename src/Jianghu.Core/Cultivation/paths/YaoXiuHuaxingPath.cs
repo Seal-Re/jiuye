@@ -234,6 +234,16 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_yx_linzhao", "玄煞兽鳞罩", 2,
                     new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 10, "起妖煞护体抵下次伤害=妖丹×2;被纯阳/雷法/佛光攻击时该护罩仅减半失效而非全失(兼防本路天克的刹车之一)") },
                     new Dictionary<string, int> { { "yaoDan", 5 } }),
+                // 妖兽铠·反震：妖兽鳞甲反震（OnDefend）。yaoDan≥8,消耗8。
+                // B5扩21: ReflectDamage — 妖修妖兽鳞甲反震,Amount=1/Amount2=4→1/4来袭伤害反震攻方。
+                new CombatSkillDef("sk_yx_yaoshou_kai", "妖兽铠·反震", 3,
+                    new[] { Modules.Reflect(1, 4, "妖兽鳞甲反震:1/4来袭伤害反震攻方") },
+                    new Dictionary<string, int> { { "yaoDan", 8 } }),
+                // 妖毒噬体[dot]：妖毒持续伤,2/tick×3回合。yaoDan≥3,消耗3。
+                // B5扩21: Dot — 妖修妖毒挂载持续伤。
+                new CombatSkillDef("sk_yx_yaodu", "妖毒噬体", 2,
+                    new[] { Modules.Dot("yaoDu", 2, 3, "妖毒噬体:2/tick×3回合持续伤") },
+                    new Dictionary<string, int> { { "yaoDan", 3 } }),
             };
 
             return new CultivationPathDef(

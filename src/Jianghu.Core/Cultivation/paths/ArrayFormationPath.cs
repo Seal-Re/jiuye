@@ -191,6 +191,11 @@ namespace Jianghu.Cultivation.Paths
                         new EffectOp(EffectOpKind.AddResource, "setupProgress", -20, "消耗已蓄满的布阵进度点亮在场阵"),
                     },
                     new Dictionary<string, int> { { "setupProgress", 20 }, { "stones", 10 } }),
+                // 阵遁·移形：阵纹遁形闪避（OnDefend）。需阵纹→门控。stones≥5,消耗5。
+                // B5扩21: Evade — 阵修借阵纹地形闪避,Amount=25→25%来袭减免。
+                new CombatSkillDef("sk_ar_zhendun", "阵遁·移形", 2,
+                    new[] { Modules.Evade(25, "阵纹遁形闪避:25%来袭减免(需阵纹→门控)") },
+                    new Dictionary<string, int> { { "stones", 5 } }),
             };
 
             return new CultivationPathDef(

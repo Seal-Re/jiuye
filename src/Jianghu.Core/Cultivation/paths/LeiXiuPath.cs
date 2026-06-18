@@ -221,6 +221,11 @@ namespace Jianghu.Cultivation.Paths
                         new EffectOp(EffectOpKind.AddResource, "leiwen", 1, "临时多承1道雷纹载位"),
                     },
                     new Dictionary<string, int>()),
+                // 雷遁·闪：雷遁闪避（OnDefend）。需承雷心法→门控。thunderCharge≥5,消耗5。
+                // B5扩21: Evade — 雷修雷遁闪避,Amount=20→20%减免(侧重进攻非闪避专精)。
+                new CombatSkillDef("sk_le_leidun", "雷遁·闪", 2,
+                    new[] { Modules.Evade(20, "雷遁闪避:20%来袭减免(需承雷心法→门控)") },
+                    new Dictionary<string, int> { { "thunderCharge", 5 } }),
             };
 
             return new CultivationPathDef(

@@ -202,6 +202,11 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_mi_jueming", "断生死·绝命", 5,
                     new[] { Modules.FlatPen(50, "清零目标本场tempo并夺其NetFortune的1/3(几乎必杀已被压制者);仅己净气运>0且>目标可发,否则反噬全额入己(执行斩杀基线;条件/反噬 Phase3/批4)") },
                     new Dictionary<string, int> { { "netFortune", 15 }, { "karma", 6 }, { "lifespanDebt", 6 } }),
+                // 因果锁命[control]：控场—目标下2回合无法行动。netFortune≥10,消耗10。
+                // B5扩21: Control — 命修因果锁命控场代表招。
+                new CombatSkillDef("sk_mi_suoming", "因果锁命", 4,
+                    new[] { Modules.Control("suoming", 2, "控场:目标下2回合无法行动(因果锁命)") },
+                    new Dictionary<string, int> { { "netFortune", 10 }, { "karma", 3 } }),
             };
 
             return new CultivationPathDef(
