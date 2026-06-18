@@ -8,7 +8,7 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 #
-# 真相源（红线 A.2）。WIP(in-progress)≤2，当前=1（combat-r2 story-003）。
+# 真相源（红线 A.2）。WIP(in-progress)≤2，当前=0（空闲）。
 # 阶段 production/stage.txt = Production。
 
 sprint: 1
@@ -42,8 +42,8 @@ stories:
     name: "batch4 DuelEngine.ResolveR2 接模块（off 逐字节不动）"
     file: "production/epics/combat-r2/story-003-batch4-duelengine-resolve-r2.md"
     priority: must-have
-    status: review                # 2026-06-18 DuelEngine.ResolveR2 实现完，366绿，待 code-review+commit
-    completed: ""
+    status: done                  # 2026-06-18 三轮补缺完，366绿，code-review通过，模块覆盖21路
+    completed: "2026-06-18"
   - id: "combat-r2-004"
     name: "batch5 法宝配套战斗效果"
     file: "production/epics/combat-r2/story-004-batch5-artifact-modules.md"

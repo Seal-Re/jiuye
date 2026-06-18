@@ -1,7 +1,8 @@
 # Story 003: batch4 — DuelEngine.ResolveR2 接模块（核心引擎）
 
 > **Epic**: combat-r2
-> **Status**: Not Started
+> **Status**: Complete
+> **Last Updated**: 2026-06-18
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 大
@@ -31,3 +32,14 @@
 ## Out of Scope
 
 法宝 → story-004；硬化 gate → story-005。
+
+## Completion Notes
+
+**Completed**: 2026-06-18
+**Criteria**: 7/7 passing
+**Deviations**: ADVISORY — ADR adr-0002/0003 not yet created (P8补).
+  OUT OF SCOPE — 21路 path Evade/Reflect/Control/Dot/CounterMul/Drain expansion (valid scope creep).
+  ReflectDamage bug found+fixed in code-review (02b86af→561df1d).
+**Test Evidence**: Integration — tests/.../DuelEngineTests.cs (16) + SparCultivationTests (2 adapted). 366 green.
+**Code Review**: Complete — /code-review passed, 1 bug fixed, 3 suggestions addressed.
+**Commits**: 02b86af (initial), 561df1d (ReflectDamage fix), d080fd4 (TickDots+Dot/Control+Evade+Drain), 875c681 (21路扩)。
