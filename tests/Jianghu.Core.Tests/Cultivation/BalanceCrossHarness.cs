@@ -244,6 +244,49 @@ namespace Jianghu.Core.Tests.Cultivation
         }
 
         // ================================================================
+        // 5. 辅助路 UT 锚锁 gate (fullstruct-003)
+        // ================================================================
+
+        [Fact]
+        public void AuxiliaryPaths_UT_CappedAtCombatEquivalent()
+        {
+            // 辅助路 UT 锚锁终定值
+            var caps = new Dictionary<string, int>
+            {
+                ["dan_xiu"] = 7,           // 丹修: 实战当量<UT1, 顶UT7
+                ["array_formation"] = 7,    // 阵修: 实战当量≈UT3, 顶UT7
+                ["qixiu_artificer"] = 10,   // 器修: 厚积晚发, 顶UT10
+            };
+
+            foreach (var (pathId, expectedMaxUT) in caps)
+            {
+                var path = AllPaths.First(p => p.PathId == pathId);
+                int actualMax = path.Curve.UnifiedTierOf.Max();
+                Assert.True(actualMax <= expectedMaxUT,
+                    $"{pathId} max UT={actualMax} exceeds cap {expectedMaxUT}");
+            }
+
+            // 符修: dump实证UT8=1153≈剑修 → 战斗路, 保留全UT
+            var fu = AllPaths.First(p => p.PathId == "fu_xiu_fulu");
+            Assert.Equal(12, fu.Curve.UnifiedTierOf.Max());
+        }
+
+        [Fact]
+        public void AuxiliaryPaths_UT_Incremental_Conservative()
+        {
+            // 辅助路 UT 保严格递增(不降), 后续值≤前值+1
+            string[] auxPaths = { "dan_xiu", "array_formation", "qixiu_artificer" };
+            foreach (var pid in auxPaths)
+            {
+                var path = AllPaths.First(p => p.PathId == pid);
+                var ut = path.Curve.UnifiedTierOf;
+                for (int i = 1; i < ut.Count; i++)
+                    Assert.True(ut[i] >= ut[i - 1],
+                        $"{pid} UT[{i}]={ut[i]} < UT[{i - 1}]={ut[i - 1]}");
+            }
+        }
+
+        // ================================================================
         // Helpers — 典型角色构造
         // ================================================================
 
