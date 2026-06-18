@@ -37,6 +37,7 @@ namespace Jianghu.Cultivation
         Special,           // L1 唯一档: ModuleResolver 派发 SpecialModuleRegistry[Key].Apply(ctx,op)→delta(纯整数/chokepoint)
         // —— 跨路机制(L1) ——
         ModifyStat,        // L1 改四维: Key=statKind(Force/Internal/Constitution/Insight), Amount=delta(可为负)。经CombatContext accumulator→DuelEngine→SparAction落地
+        ModifyEffectivePower, // L1 改EP%: Key=resource, Amount=num, Amount2=den. 防方EP×=(1+Amount×res(Key)/den/100). 命修/因果削EP
         // 注: SumOfSet 撤(§15.1), 真Σ用 PenFromResource on 标量聚合资源
     }
 

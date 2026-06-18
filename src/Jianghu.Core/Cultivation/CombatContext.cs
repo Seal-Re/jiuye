@@ -18,6 +18,7 @@ namespace Jianghu.Cultivation
         private readonly CultivationState _defender;
         private readonly CultivationPathDef _defenderPath;
         private readonly Dictionary<Side, Dictionary<string, int>> _statDeltas = new();
+        private readonly Dictionary<Side, List<(string ResourceKey, int Num, int Den)>> _epModifiers = new();
 
         public CombatContext(
             CultivationState attacker, CultivationPathDef attackerPath,
@@ -72,5 +73,28 @@ namespace Jianghu.Cultivation
         /// <summary>提取指定方 stat delta 快照。</summary>
         public IReadOnlyDictionary<string, int> GetStatDeltas(Side s)
             => _statDeltas.TryGetValue(s, out var d) ? d : new Dictionary<string, int>();
+
+        /// <summary>累积 EP 百分比修改器。Amount×res(Key)/Den → 乘子。</summary>
+        public void AccumulateEPModifier(Side target, string resourceKey, int num, int den)
+        {
+            if (!_epModifiers.TryGetValue(target, out var list))
+                _epModifiers[target] = list = new List<(string, int, int)>();
+            list.Add((resourceKey, num, den));
+        }
+
+        /// <summary>应用所有 EP 修改器到给定 PE 值，返回修正后 PE。</summary>
+        public int ApplyEPModifiers(Side s, int basePE)
+        {
+            if (!_epModifiers.TryGetValue(s, out var list)) return basePE;
+            long adjusted = basePE * 100; // ×100 防截断
+            foreach (var (key, num, den) in list)
+            {
+                int resVal = ReadResource(s, key);
+                // modifier = (10000 + num × resVal × 100 / den) / 10000
+                long mod = 10000L + (long)num * resVal * 100 / den;
+                adjusted = adjusted * mod / 10000;
+            }
+            return (int)(adjusted / 100);
+        }
     }
 }

@@ -197,7 +197,7 @@ namespace Jianghu.Cultivation.Paths
                 // B5 批2：本招削的是敌方 EffectivePower%（destinyAuth 是攻方权限非敌方资源,Drain 语义不符）→
                 //   改 EffectivePower% 通道未建 → 显式 deferred FULLSTRUCT（红线 A.8 不静默）,保 FlatPen 占位破防量。
                 new CombatSkillDef("sk_yg_jieming", "夺定数·截命一击", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "对单体强改定数:削其 EffectivePower 的 destinyAuth×3%(改EP%→FULLSTRUCT defer)并计入己;撞大气运者 reflect 全额入己 自险,需 destinyAuth≥3") },
+                    new[] { Modules.ModifyEP("destinyAuth", -3, 1, "削EP×destinyAuth×3%"), Modules.Drain("destinyAuth", 1, "夺定数入己") },
                     new Dictionary<string, int> { { "retributionDebt", 8 } }),
                 // 须弥困界[control]：布时空囚困目标一回合(移动/瞬移/逃遁/拉开失效),换己方一次免干扰布法窗口;对放风筝/群战拖延位的反制。
                 // B5 批2 招牌招迁移：占位 AddPenInteger(12) → Modules.Control(voidPrison,1)（时空囚困一回合,selectMove 失效；

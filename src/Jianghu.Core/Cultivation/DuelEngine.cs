@@ -97,15 +97,19 @@ namespace Jianghu.Cultivation
                 int effectiveDmgToB = IsControlled(pendingControls, Side.Defender) ? 0 : 1;
                 int effectiveDmgToA = IsControlled(pendingControls, Side.Attacker) ? 0 : 1;
 
+                // EP modifiers: weaken the affected side's combat power
+                int effPeA = ctx.ApplyEPModifiers(Side.Attacker, peA);
+                int effPeB = ctx.ApplyEPModifiers(Side.Defender, peB);
+
                 var (dmgToB, reflectToA) = ResolveExchange(
-                    aSkill, peA, defender.Cultivation,
+                    aSkill, effPeA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender, defCanEvade, defCanReflect,
                     pendingDots, pendingControls);
                 dmgToB *= effectiveDmgToB;
 
                 var (dmgToA, reflectToB) = ResolveExchange(
-                    dSkill, peB, attacker.Cultivation,
+                    dSkill, effPeB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     HasMovementArt(attackerPath, attacker.Cultivation),

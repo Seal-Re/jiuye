@@ -33,14 +33,13 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
         }
 
-        // —— 夺定数·截命一击：FULLSTRUCT defer（削 EP%），仍 AddPenInteger 占位 ——
+        // —— 夺定数·截命一击：B5消化 → ModifyEP(destinyAuth,-3,1) + Drain(destinyAuth,1) ——
         [Fact]
-        public void JieMing_DeferredFlatPen()
+        public void JieMing_UpgradedToModifyEP()
         {
             var sk = Skill("sk_yg_jieming");
-            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
-            Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.DrainResource);
-            Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource);
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.ModifyEffectivePower && o.Key == "destinyAuth");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.DrainResource);
         }
 
         // —— 时光回溯·逆演：B5消化 → Special(reverseStack) handler 已激活 ——

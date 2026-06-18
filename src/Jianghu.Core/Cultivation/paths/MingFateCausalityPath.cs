@@ -168,7 +168,7 @@ namespace Jianghu.Cultivation.Paths
                 // 一念断因果：开战即结算,按tempo档削对方本回合EP并截其下一动作,夺其Fortune-5入己。决战起手最强先手技。
                 // B5扫尾 defer(红线A.8): 主效=削对方 EffectivePower×tempo/16(改敌EP%通道未建)+截动作,改EP%→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_mi_yinian", "一念断因果", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "按tempo档削对方EP×tempo/16(整除)并截其下一动作(改EP%→FULLSTRUCT defer),同时夺Fortune-5入己") },
+                    new[] { Modules.ModifyEP("tempo", -1, 16, "削EP×tempo/16(整除)"), Modules.Drain("netFortune", 5, "夺Fortune-5") },
                     new Dictionary<string, int> { { "karma", 5 }, { "lifespanDebt", 3 }, { "netFortune", 4 } }),
                 // 夺运截命·一击：对单体夺Fortune-8→己+5;目标气运>己则reflect全额入己LifespanDebt+Karma(强夺命大者自险),命中则其tempo-2。
                 // B5 批2 招牌招迁移：占位 AddPenInteger(24) → Modules.Drain(netFortune,8)（夺运=经 chokepoint 防方 netFortune-8、
