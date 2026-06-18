@@ -35,6 +35,8 @@ namespace Jianghu.Cultivation
         Evade,             // L1 闪避(OnDefend): 减伤=clamp((身法-命中+Amount)*k,0,maxReduce)连续
         // —— 唯一档逃逸口(L1, B5 §7 M3 纪律): Key=handlerId → SpecialModuleRegistry 派发 ——
         Special,           // L1 唯一档: ModuleResolver 派发 SpecialModuleRegistry[Key].Apply(ctx,op)→delta(纯整数/chokepoint)
+        // —— 跨路机制(L1) ——
+        ModifyStat,        // L1 改四维: Key=statKind(Force/Internal/Constitution/Insight), Amount=delta(可为负)。经CombatContext accumulator→DuelEngine→SparAction落地
         // 注: SumOfSet 撤(§15.1), 真Σ用 PenFromResource on 标量聚合资源
     }
 

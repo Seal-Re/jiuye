@@ -52,6 +52,10 @@ namespace Jianghu.Actions
                 var loser = result.Winner == a.Id ? target : a;
                 int margin = result.WasAutoWin ? 999 : result.Margin;
 
+                // Apply stat deltas (ModifyStat 算子累积的跨路 stat 修改)
+                ApplyStatDeltas(w, a, result.AttackerStatDeltas);
+                ApplyStatDeltas(w, target, result.DefenderStatDeltas);
+
                 int wToL = w.AdjustRelation(winner.Id, loser.Id, +3);
                 int lToW = w.AdjustRelation(loser.Id, winner.Id, margin > 20 ? -4 : +2);
                 return new DomainEvent[]
@@ -106,5 +110,24 @@ namespace Jianghu.Actions
 
         private static readonly IReadOnlyDictionary<string, string> EmptyEnv =
             new Dictionary<string, string>();
+
+        /// <summary>将 DuelEngine 累积的 stat delta 经 IWorldMutator.ApplyStat 落地。</summary>
+        private static void ApplyStatDeltas(IWorldMutator w, Character c, IReadOnlyDictionary<string, int>? deltas)
+        {
+            if (deltas == null) return;
+            foreach (var kv in deltas)
+            {
+                var kind = kv.Key switch
+                {
+                    "Force" => StatKind.Force,
+                    "Internal" => StatKind.Internal,
+                    "Constitution" => StatKind.Constitution,
+                    "Insight" => StatKind.Insight,
+                    _ => (StatKind)(-1)
+                };
+                if ((int)kind >= 0)
+                    w.ApplyStat(c, kind, kv.Value);
+            }
+        }
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Jianghu.Cultivation
 {
     /// <summary>战斗双方标识：算子从攻方/防方视角读写资源、查情境 tag。</summary>
@@ -15,6 +17,7 @@ namespace Jianghu.Cultivation
         private readonly CultivationPathDef _attackerPath;
         private readonly CultivationState _defender;
         private readonly CultivationPathDef _defenderPath;
+        private readonly Dictionary<Side, Dictionary<string, int>> _statDeltas = new();
 
         public CombatContext(
             CultivationState attacker, CultivationPathDef attackerPath,
@@ -56,5 +59,18 @@ namespace Jianghu.Cultivation
                 if (t == tag) return true;
             return false;
         }
+
+        /// <summary>累积 stat 修改（ModifyStat 算子用）。不直接改 StatBlock，战后落。</summary>
+        public void AccumulateStatDelta(Side s, string statKind, int delta)
+        {
+            if (!_statDeltas.TryGetValue(s, out var dict))
+                _statDeltas[s] = dict = new Dictionary<string, int>();
+            dict.TryGetValue(statKind, out int cur);
+            dict[statKind] = cur + delta;
+        }
+
+        /// <summary>提取指定方 stat delta 快照。</summary>
+        public IReadOnlyDictionary<string, int> GetStatDeltas(Side s)
+            => _statDeltas.TryGetValue(s, out var d) ? d : new Dictionary<string, int>();
     }
 }

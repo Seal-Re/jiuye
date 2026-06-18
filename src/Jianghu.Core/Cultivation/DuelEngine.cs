@@ -23,7 +23,9 @@ namespace Jianghu.Cultivation
         /// </summary>
         public sealed record Result(
             CharacterId Winner, CharacterId Loser, int Margin,
-            bool WasAutoWin, int AttackerHpRemaining, int DefenderHpRemaining);
+            bool WasAutoWin, int AttackerHpRemaining, int DefenderHpRemaining,
+            IReadOnlyDictionary<string, int>? AttackerStatDeltas = null,
+            IReadOnlyDictionary<string, int>? DefenderStatDeltas = null);
 
         /// <summary>
         /// 双方经模块系统战斗（story-003 batch4）。
@@ -60,7 +62,7 @@ namespace Jianghu.Cultivation
                 return new Result(
                     aWins ? attacker.Id : defender.Id,
                     aWins ? defender.Id : attacker.Id,
-                    int.MaxValue, // 碾压无实际 margin
+                    int.MaxValue,
                     WasAutoWin: true,
                     AttackerHpRemaining: aWins ? 1 : 0,
                     DefenderHpRemaining: aWins ? 0 : 1);
@@ -158,7 +160,9 @@ namespace Jianghu.Cultivation
                 margin,
                 WasAutoWin: false,
                 AttackerHpRemaining: hpA,
-                DefenderHpRemaining: hpB);
+                DefenderHpRemaining: hpB,
+                AttackerStatDeltas: ctx.GetStatDeltas(Side.Attacker),
+                DefenderStatDeltas: ctx.GetStatDeltas(Side.Defender));
         }
 
         /// <summary>

@@ -173,7 +173,7 @@ namespace Jianghu.Cultivation.Paths
                 // B5扫尾 defer(红线A.8): 夺元改的是敌方 stat(内力-6/悟性-4)+造关系负边-25,ApplyStatDelta/AdjustRelationEdge 未建
                 //   → 改stat/造网→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位破防量。
                 new CombatSkillDef("sk_da_duoyuan", "夺元一击", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 28, "对单一高威胁目标暗下夺元丹:内力-6+悟性-4并造死仇负边-25(改stat/造边→FULLSTRUCT defer),专破他路高战力者资源依赖") },
+                    new[] { Modules.ModifyStat("Internal", -6, "内力-6"), Modules.ModifyStat("Force", -2, "武力-2"), Modules.FlatPen(8, "夺元丹药理穿透(造死仇负边→drama-engine defer)") },
                     new Dictionary<string, int> { { "pillStock", 1 } }),
                 // 护身丹爆（自保）：战斗中吞服储备丹,directPower 临时+realm×2 维持3结算步;纯自卫不增杀伤(丹修无主动杀招写照)。
                 // 消耗1枚成品丹(pillStock)。
@@ -190,7 +190,7 @@ namespace Jianghu.Cultivation.Paths
                 // B5扫尾 defer(红线A.8): 群体改stat(内力-2/降受击战力1步)+造群体负边,ApplyStatDelta/AdjustRelationEdge 未建
                 //   → 改stat/造网→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位破防量。
                 new CombatSkillDef("sk_da_duyan", "毒烟丹·撒豆", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 8, "投掷毒烟丹对当前节点全体非己:内力-2并降受击战力1步,造群体微负边(改stat/造边→FULLSTRUCT defer,一念发情丹乱军式)") },
+                    new[] { Modules.ModifyStat("Internal", -2, "全体内力-2"), Modules.FlatPen(4, "毒烟丹范围毒素(造群体微负边→drama-engine defer)") },
                     new Dictionary<string, int> { { "pillStock", 1 } }),
                 // 施丹结契（资源枢纽·造网）：非战斗主动技,向目标赠突破/疗伤丹,造依附正边+15(L1)并登记『丹债』;把战力弱转成关系网中心。
                 // 消耗1枚高阶丹(pillStock),无战斗消耗。

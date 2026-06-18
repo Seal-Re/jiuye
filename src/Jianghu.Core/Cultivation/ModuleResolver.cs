@@ -49,6 +49,12 @@ namespace Jianghu.Cultivation
                     // 自伤走批4 selfDmg 通道，本 task 不处理 → dmg 不变
                     return dmg;
 
+                case EffectOpKind.ModifyStat:
+                    // 跨路改四维: Key=statKind("Force"/"Internal"/"Constitution"/"Insight"), Amount=delta.
+                    // 经 CombatContext accumulator 累积, 战后 SparAction 落地。
+                    ctx.AccumulateStatDelta(Side.Defender, m.Key!, m.Amount);
+                    return dmg;
+
                 case EffectOpKind.Special:
                     // 唯一档逃逸口(§7 M3)：派发 SpecialModuleRegistry[Key]，handler 经 chokepoint 落副作用、返伤害 delta。
                     // 缺失 handlerId 注册期/查询期抛(不静默)；handler 纪律纯整数/不读 daoHeart/不掷随机。

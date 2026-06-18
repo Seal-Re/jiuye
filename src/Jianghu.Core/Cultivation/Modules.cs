@@ -95,6 +95,10 @@ namespace Jianghu.Cultivation
 
         // —— 唯一档（Unique）签名机制走 SpecialModuleRegistry 注册式插件 ——
 
+        /// <summary>跨路改四维: Key=statKind("Force"/"Internal"/"Constitution"/"Insight"), Amount=delta(负=削减)。经CombatContext accumulator落stat delta。</summary>
+        public static EffectOp ModifyStat(string statKind, int delta, string? note = null)
+            => new EffectOp(EffectOpKind.ModifyStat, statKind, delta, note, Rarity: EffectRarity.Rare);
+
         /// <summary>
         /// 唯一档签名机制（§7 M3 逃逸口）：Key=handlerId，<see cref="ModuleResolver"/> 派发
         /// <see cref="SpecialModuleRegistry"/>[handlerId].Apply(ctx,op) → 伤害 delta + chokepoint 副作用。
