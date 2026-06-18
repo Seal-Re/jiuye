@@ -71,7 +71,7 @@ public class ArtifactRegistryTests
     public void Data_FirstBatch_HasExpectedCount()
     {
         var all = ArtifactData.All;
-        Assert.True(all.Count >= 99, $"Expected >=99 artifacts, got {all.Count}");
+        Assert.True(all.Count >= 200, $"Expected >=200 artifacts, got {all.Count}");
     }
 
     [Fact]

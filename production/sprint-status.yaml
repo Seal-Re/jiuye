@@ -48,7 +48,8 @@ stories:
     name: "batch5 法宝配套战斗效果"
     file: "production/epics/combat-r2/story-004-batch5-artifact-modules.md"
     priority: should-have
-    status: review               # 2026-06-18 落宝→Special+护宝罡→Reflect+artifact gate+3 tests, 369绿
+    status: done                  # 2026-06-18 落宝→Special+护宝罡→Reflect+artifact gate+3 tests, 369绿
+    completed: "2026-06-18"
     owner: ""
     estimate_days: 0
     blocker: "依赖 003"

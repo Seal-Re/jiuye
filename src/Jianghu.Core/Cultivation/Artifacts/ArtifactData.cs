@@ -370,11 +370,655 @@ namespace Jianghu.Cultivation.Artifacts
                 flavor: "可炼化万物之神火鼎，攻防一体。");
         }
 
-        // ------- 7-9品 placeholder (batch3) -------
-        static IEnumerable<ArtifactDef> HeavenReachingProfoundSkyPrimordial() { yield break; }
+        // ------- 7-9品: 通天灵宝/玄天之宝/混沌至宝 (batch3) -------
+        static IEnumerable<ArtifactDef> HeavenReachingProfoundSkyPrimordial()
+        {
+            // ===== 通天灵宝 HeavenReaching (7品, itemTier=6, basePower=340) =====
+            // 下品(272)
+            yield return A("art_hr_abyss_frost_sword_i", "寒渊破虚剑", ArtifactForm.Sword,
+                ArtifactFunction.Attack, ArtifactGrade.HeavenReaching, QualityTier.Inferior, 6, 272,
+                new[] { Modules.PenFromResource("swordWill", 6), Modules.FlatPen(40) },
+                rarity: EffectRarity.Rare,
+                flavor: "采九幽寒铁铸就，出鞘则虚空凝霜。剑修合体期标志性法宝。");
+            yield return A("art_hr_mountain_suppress_tower_i", "镇岳玄黄塔", ArtifactForm.Tower,
+                ArtifactFunction.Defense, ArtifactGrade.HeavenReaching, QualityTier.Inferior, 6, 272,
+                new[] { Modules.FlatDR(45), Modules.Reflect(1, 3) },
+                rarity: EffectRarity.Rare,
+                flavor: "以玄黄之气凝成七层宝塔，可镇山河、定乾坤。");
+            yield return A("art_hr_void_escape_talisman_i", "破虚遁空符", ArtifactForm.Talisman,
+                ArtifactFunction.Escape, ArtifactGrade.HeavenReaching, QualityTier.Inferior, 6, 272,
+                new[] { Modules.Evade(60) },
+                rarity: EffectRarity.Rare,
+                flavor: "合体期遁术至宝，一符破虚、瞬息万里。");
+            yield return A("art_hr_soul_bind_rope_i", "缚魂锁仙索", ArtifactForm.Rope,
+                ArtifactFunction.Trap, ArtifactGrade.HeavenReaching, QualityTier.Inferior, 6, 272,
+                new[] { Modules.Control("bind", 3), Modules.Drain("manaPool", 5) },
+                rarity: EffectRarity.Rare,
+                flavor: "以魂丝织成的锁仙索，可封困元神、锁死法力。");
+            yield return A("art_hr_soul_return_lamp_i", "还魂续命灯", ArtifactForm.Lamp,
+                ArtifactFunction.Heal, ArtifactGrade.HeavenReaching, QualityTier.Inferior, 6, 272,
+                new[] { new EffectOp(EffectOpKind.AddResource, "qixue", 40, "回血气+40") },
+                rarity: EffectRarity.Rare,
+                flavor: "燃千年魂灯，可续一息残命。");
 
-        // ------- Unique placeholder (batch4) -------
-        static IEnumerable<ArtifactDef> UniqueArtifacts() { yield break; }
+            // 中品(340)
+            yield return A("art_hr_violet_thunder_hammer_c", "紫电雷光锤", ArtifactForm.Hammer,
+                ArtifactFunction.Attack, ArtifactGrade.HeavenReaching, QualityTier.Common, 6, 340,
+                new[] { Modules.PenFromResource("thunderCharge", 5), Modules.FlatPen(50), Modules.CounterMul("evil", 3, 1) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "引九天神雷淬炼而成的雷锤，一锤之下万雷齐发。");
+            yield return A("art_hr_army_breaker_axe_c", "破军裂天斧", ArtifactForm.Axe,
+                ArtifactFunction.Attack, ArtifactGrade.HeavenReaching, QualityTier.Common, 6, 340,
+                new[] { Modules.FlatPen(55), Modules.AoePerTarget(35), Modules.Backlash("burnGate", 30) },
+                rarity: EffectRarity.Rare,
+                flavor: "上古战神遗留的裂天斧，一斧可破万军。但每一击皆噬主精元。");
+            yield return A("art_hr_tortoise_shield_c", "玄武不灭盾", ArtifactForm.Shield,
+                ArtifactFunction.Defense, ArtifactGrade.HeavenReaching, QualityTier.Common, 6, 340,
+                new[] { Modules.FlatDR(50), Modules.Reflect(1, 2), Modules.Evade(25) },
+                rarity: EffectRarity.Rare,
+                flavor: "以北冥玄龟甲炼成，盾坚不破、反震万钧。");
+            yield return A("art_hr_soul_banner_c", "万魂噬天幡", ArtifactForm.Banner,
+                ArtifactFunction.Attack, ArtifactGrade.HeavenReaching, QualityTier.Common, 6, 340,
+                new[] { Modules.PenFromResource("ghostSoldierPower", 5), Modules.Drain("shaCharge", 8) },
+                secFunc: ArtifactFunction.Snatch, rarity: EffectRarity.Rare,
+                flavor: "幡中炼化万魂为兵，遮天蔽日、噬魂夺魄。");
+            yield return A("art_hr_eight_trigram_mirror_c", "八卦封天镜", ArtifactForm.Mirror,
+                ArtifactFunction.Defense, ArtifactGrade.HeavenReaching, QualityTier.Common, 6, 340,
+                new[] { Modules.FlatDR(40), Modules.Reflect(2, 3), Modules.Control("seal", 2) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "八卦运转、镜光封天，可封印一切外道。");
+
+            // 上品(408)
+            yield return A("art_hr_luobao_money_s", "落宝金钱", ArtifactForm.Ring,
+                ArtifactFunction.Snatch, ArtifactGrade.HeavenReaching, QualityTier.Superior, 6, 408,
+                new[] { Modules.Special("luobao", 6, 0, "落宝金钱"), Modules.Drain("itemTier", 5) },
+                secFunc: ArtifactFunction.Support, rarity: EffectRarity.Rare,
+                flavor: "通天灵宝上品·落宝金钱，可落尽天下法宝。一宝落尽万宝空。");
+            yield return A("art_hr_overturn_heaven_seal_s", "翻天印", ArtifactForm.Seal,
+                ArtifactFunction.Attack, ArtifactGrade.HeavenReaching, QualityTier.Superior, 6, 408,
+                new[] { Modules.FlatPen(65), Modules.CounterMul("body", 3, 1), Modules.AoePerTarget(30) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "翻天印，一印翻天覆地。体修遇之亦难当。");
+            yield return A("art_hr_primal_chaos_orb_s", "混元一气珠", ArtifactForm.Orb,
+                ArtifactFunction.Attack, ArtifactGrade.HeavenReaching, QualityTier.Superior, 6, 408,
+                new[] { Modules.PenFromResource("manaPool", 2), Modules.FlatPen(50), Modules.FlatDR(25) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "混元一气化珠，攻防一体、变化万千。");
+            yield return A("art_hr_nine_bend_array_s", "九曲黄河阵图", ArtifactForm.Scroll,
+                ArtifactFunction.Trap, ArtifactGrade.HeavenReaching, QualityTier.Superior, 6, 408,
+                new[] { Modules.Control("trap", 4), Modules.Dot("river_drown", 20, 3), Modules.Drain("manaPool", 8) },
+                rarity: EffectRarity.Rare,
+                flavor: "九曲黄河阵，陷仙困圣、消魂蚀骨。入阵者十死无生。");
+
+            // 极品(510)
+            yield return A("art_hr_12_golden_lotus_m", "十二品金莲", ArtifactForm.Lotus,
+                ArtifactFunction.Defense, ArtifactGrade.HeavenReaching, QualityTier.Supreme, 6, 510,
+                new[] { Modules.FlatDR(60), Modules.Reflect(2, 3), Modules.Evade(35),
+                    new EffectOp(EffectOpKind.AddResource, "qixue", 25, "回血气+25") },
+                secFunc: ArtifactFunction.Heal, rarity: EffectRarity.Rare,
+                flavor: "十二品金莲，万法不侵、功德无量。佛修至高防宝。");
+            yield return A("art_hr_24_sea_fixing_orbs_m", "二十四颗定海珠", ArtifactForm.Orb,
+                ArtifactFunction.Trap, ArtifactGrade.HeavenReaching, QualityTier.Supreme, 6, 510,
+                new[] { Modules.Control("flood", 5), Modules.Dot("sea_pressure", 25, 4), Modules.FlatDR(40) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "二十四颗定海神珠，可演化二十四诸天。颗颗皆含一界之力。");
+            yield return A("art_hr_sword_formation_fake_m", "诛仙阵图·通灵仿", ArtifactForm.ArrayDisk,
+                ArtifactFunction.Trap, ArtifactGrade.HeavenReaching, QualityTier.Supreme, 6, 510,
+                new[] { Modules.Special("explodeArray", 6, 0, "诛仙剑意·仿"), Modules.Control("trap", 4) },
+                rarity: EffectRarity.Rare,
+                flavor: "仿诛仙剑阵而制的阵盘，虽不及真品万一，亦足以惊退大乘。");
+
+            // ===== 玄天之宝 ProfoundSky (8品, itemTier=7, basePower=480) =====
+            // 下品(384)
+            yield return A("art_ps_void_pierce_sword_i", "破虚裂空剑", ArtifactForm.Sword,
+                ArtifactFunction.Attack, ArtifactGrade.ProfoundSky, QualityTier.Inferior, 7, 384,
+                new[] { Modules.PenFromResource("swordWill", 8), Modules.FlatPen(55), Modules.CounterMul("void", 3, 2) },
+                rarity: EffectRarity.Rare,
+                flavor: "大乘期剑修玄天至宝，一剑出则虚空碎裂。");
+            yield return A("art_ps_sky_net_umbrella_i", "天罗混元伞", ArtifactForm.Tower,
+                ArtifactFunction.Defense, ArtifactGrade.ProfoundSky, QualityTier.Inferior, 7, 384,
+                new[] { Modules.FlatDR(55), Modules.Reflect(2, 3), Modules.Evade(30) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "撑开可遮天蔽日，收拢可纳山河。玄天级防宝。");
+            yield return A("art_ps_dragon_trap_pillar_i", "遁龙桩", ArtifactForm.Seal,
+                ArtifactFunction.Trap, ArtifactGrade.ProfoundSky, QualityTier.Inferior, 7, 384,
+                new[] { Modules.Control("bind", 4), Modules.Drain("manaPool", 8) },
+                rarity: EffectRarity.Rare,
+                flavor: "遁龙桩，仙神难逃。困龙锁仙只在一念之间。");
+            yield return A("art_ps_demon_summon_banner_i", "招妖幡", ArtifactForm.Banner,
+                ArtifactFunction.Support, ArtifactGrade.ProfoundSky, QualityTier.Inferior, 7, 384,
+                new[] { new EffectOp(EffectOpKind.AddResourceCap, "bond", 20, "bond上限+20"),
+                    Modules.PenFromResource("bond", 2) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Rare,
+                flavor: "招妖幡动，万妖听令。御兽/傀儡修士梦寐之宝。");
+
+            // 中品(480)
+            yield return A("art_ps_chaos_bell_fake_c", "混沌钟·仿", ArtifactForm.Bell,
+                ArtifactFunction.Defense, ArtifactGrade.ProfoundSky, QualityTier.Common, 7, 480,
+                new[] { Modules.FlatDR(65), Modules.Reflect(2, 3), Modules.Control("stun", 3) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "仿混沌至宝混沌钟而制，钟声一响镇压时空。");
+            yield return A("art_ps_taiji_scroll_fake_c", "太极图·仿", ArtifactForm.Scroll,
+                ArtifactFunction.Trap, ArtifactGrade.ProfoundSky, QualityTier.Common, 7, 480,
+                new[] { Modules.Control("trap", 4), Modules.Dot("yin_yang_grind", 25, 3), Modules.FlatDR(35) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "仿太极图而炼，阴阳二气化桥、困杀阵中一切。");
+            yield return A("art_ps_pangu_banner_fake_c", "盘古幡·仿", ArtifactForm.Banner,
+                ArtifactFunction.Attack, ArtifactGrade.ProfoundSky, QualityTier.Common, 7, 480,
+                new[] { Modules.FlatPen(75), Modules.AoePerTarget(45), Modules.CounterMul("void", 3, 1) },
+                rarity: EffectRarity.Rare,
+                flavor: "仿盘古幡的无上攻伐至宝，幡动则混沌裂、万界崩。");
+            yield return A("art_ps_immortal_slayer_fake_c", "斩仙飞刀·仿", ArtifactForm.Gourd,
+                ArtifactFunction.Attack, ArtifactGrade.ProfoundSky, QualityTier.Common, 7, 480,
+                new[] { Modules.FlatPen(70), Modules.Special("duoshe", 4, 0, "斩仙·仿") },
+                secFunc: ArtifactFunction.Snatch, rarity: EffectRarity.Rare,
+                flavor: "葫芦口出白光一线，定住元神即斩。仿品已具真品三分威能。");
+
+            // 上品(576)
+            yield return A("art_ps_heavenly_dao_wheel_s", "天道轮盘", ArtifactForm.Mirror,
+                ArtifactFunction.Support, ArtifactGrade.ProfoundSky, QualityTier.Superior, 7, 576,
+                new[] { Modules.Special("reverseStack", 4, 0, "逆演回滚"),
+                    new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 2, "道心权重+2阶"),
+                    Modules.FlatDR(30) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "天道轮盘，逆转因果。以道心驱动，可回滚一回合。");
+            yield return A("art_ps_spacetime_mirror_s", "时空万象镜", ArtifactForm.Mirror,
+                ArtifactFunction.Escape, ArtifactGrade.ProfoundSky, QualityTier.Superior, 7, 576,
+                new[] { Modules.Evade(70), Modules.Control("time_lock", 2) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "时空镜中映万象，一瞬千年。大乘期顶级遁宝。");
+            yield return A("art_ps_myriad_calamity_bell_s", "万劫不灭钟", ArtifactForm.Bell,
+                ArtifactFunction.Defense, ArtifactGrade.ProfoundSky, QualityTier.Superior, 7, 576,
+                new[] { Modules.FlatDR(70), Modules.Reflect(2, 3), Modules.Evade(40) },
+                rarity: EffectRarity.Rare,
+                flavor: "历经万劫而不灭的护体玄钟，钟声所在即为不可侵犯之域。");
+
+            // 极品(720)
+            yield return A("art_ps_jade_disc_fragment_m", "造化玉碟·残", ArtifactForm.Mirror,
+                ArtifactFunction.Support, ArtifactGrade.ProfoundSky, QualityTier.Supreme, 7, 720,
+                new[] { new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 3, "道心权重+3阶"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 80, "mana上限+80"),
+                    Modules.FlatDR(35) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "造化玉碟残片，虽残仍含三千大道之精华。悟道至宝。");
+            yield return A("art_ps_sky_open_orb_m", "开天珠", ArtifactForm.Orb,
+                ArtifactFunction.Attack, ArtifactGrade.ProfoundSky, QualityTier.Supreme, 7, 720,
+                new[] { Modules.FlatPen(90), Modules.AoePerTarget(50), Modules.CounterMul("void", 4, 2) },
+                rarity: EffectRarity.Rare,
+                flavor: "先天灵宝开天珠，蕴含开天辟地之力。一击可碎星辰。");
+            yield return A("art_ps_earth_split_orb_m", "辟地珠", ArtifactForm.Orb,
+                ArtifactFunction.Trap, ArtifactGrade.ProfoundSky, QualityTier.Supreme, 7, 720,
+                new[] { Modules.Control("earth_split", 5), Modules.Dot("earth_collapse", 30, 3) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Rare,
+                flavor: "与开天珠并称先天双珠，可裂地成渊、陷万物于无间。");
+
+            // ===== 先天/混沌至宝 Primordial (9品, itemTier=8, basePower=680) =====
+            // 下品(544)
+            yield return A("art_prm_god_slayer_spear_i", "弑神枪", ArtifactForm.Spear,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Inferior, 8, 544,
+                new[] { Modules.FlatPen(80), Modules.PenFromResource("shaCharge", 8), Modules.CounterMul("god", 4, 1) },
+                rarity: EffectRarity.Rare,
+                flavor: "混沌至宝·弑神枪，专克神性。枪出则神明陨落。");
+            yield return A("art_prm_world_grinder_i", "灭世大磨", ArtifactForm.Cauldron,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Inferior, 8, 544,
+                new[] { Modules.Control("grind", 4), Modules.Dot("world_grind", 35, 4), Modules.Drain("manaPool", 10) },
+                rarity: EffectRarity.Rare,
+                flavor: "混沌至宝·灭世大磨，磨盘转动则天地反复、万物归墟。");
+            yield return A("art_prm_universe_cauldron_i", "乾坤鼎·残", ArtifactForm.Cauldron,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Inferior, 8, 544,
+                new[] { new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 100, "mana上限+100"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "qixue", 60, "血气上限+60"),
+                    new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 2, "道心+2阶") },
+                rarity: EffectRarity.Rare,
+                flavor: "乾坤鼎残片，可炼化万物返本归元。虽是残鼎，犹含创世之威。");
+            yield return A("art_prm_chaos_lotus_frag_i", "混沌青莲·残", ArtifactForm.Lotus,
+                ArtifactFunction.Defense, ArtifactGrade.Primordial, QualityTier.Inferior, 8, 544,
+                new[] { Modules.FlatDR(70), Modules.Evade(40),
+                    new EffectOp(EffectOpKind.AddResource, "qixue", 30, "回血气+30") },
+                secFunc: ArtifactFunction.Heal, rarity: EffectRarity.Rare,
+                flavor: "混沌青莲残瓣，防御无双且可源源不断回复生机。");
+
+            // 中品(680)
+            yield return A("art_prm_pangu_banner_c", "盘古幡", ArtifactForm.Banner,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Common, 8, 680,
+                new[] { Modules.FlatPen(100), Modules.AoePerTarget(60), Modules.CounterMul("void", 5, 2) },
+                rarity: EffectRarity.Rare,
+                flavor: "混沌至宝中品·盘古幡，开天辟地之无上攻伐至宝。幡动混沌裂。");
+            yield return A("art_prm_sky_open_axe_fake_c", "开天斧·仿", ArtifactForm.Axe,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Common, 8, 680,
+                new[] { Modules.FlatPen(105), Modules.PenFromResource("qixie", 5), Modules.Backlash("burnGate", 40) },
+                rarity: EffectRarity.Rare,
+                flavor: "仿盘古开天斧而制，一斧开天、一击灭界。反噬极大。");
+            yield return A("art_prm_taiji_scroll_c", "太极图", ArtifactForm.Scroll,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Common, 8, 680,
+                new[] { Modules.Control("trap", 5), Modules.Dot("yin_yang_grind", 40, 4), Modules.FlatDR(45) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "混沌至宝中品·太极图，阴阳二气化金桥。可定地水风火。");
+            yield return A("art_prm_chaos_bell_c", "混沌钟", ArtifactForm.Bell,
+                ArtifactFunction.Defense, ArtifactGrade.Primordial, QualityTier.Common, 8, 680,
+                new[] { Modules.FlatDR(80), Modules.Reflect(3, 4), Modules.Control("stun", 3), Modules.Evade(35) },
+                rarity: EffectRarity.Rare,
+                flavor: "混沌至宝中品·混沌钟，镇压鸿蒙。钟声一响，万界静止。");
+
+            // 上品(816)
+            yield return A("art_prm_jade_disc_s", "造化玉碟", ArtifactForm.Mirror,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Superior, 8, 816,
+                new[] { new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 4, "道心+4阶"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 120, "mana上限+120"),
+                    Modules.Special("reverseStack", 5, 0, "逆演回滚·造化") },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "混沌至宝上品·造化玉碟，含三千大道。悟道者可窥天道本源。");
+            yield return A("art_prm_36_chaos_lotus_s", "三十六品混沌青莲", ArtifactForm.Lotus,
+                ArtifactFunction.Defense, ArtifactGrade.Primordial, QualityTier.Superior, 8, 816,
+                new[] { Modules.FlatDR(90), Modules.Reflect(3, 4), Modules.Evade(45),
+                    new EffectOp(EffectOpKind.AddResource, "qixue", 40, "回血+40") },
+                secFunc: ArtifactFunction.Heal, rarity: EffectRarity.Rare,
+                flavor: "三十六品混沌青莲，万法不侵、不死不灭。防御无双。");
+            yield return A("art_prm_hongmeng_orb_s", "鸿蒙珠", ArtifactForm.Orb,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Superior, 8, 816,
+                new[] { Modules.FlatPen(110), Modules.PenFromResource("manaPool", 3), Modules.AoePerTarget(55) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Rare,
+                flavor: "混沌至宝上品·鸿蒙珠，一珠一世界。珠中演化真实宇宙。");
+
+            // 极品(1020)
+            yield return A("art_prm_open_sky_axe_m", "盘古斧", ArtifactForm.Axe,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 8, 1020,
+                new[] { Modules.FlatPen(140), Modules.PenFromResource("qixie", 8), Modules.AoePerTarget(70),
+                    Modules.CounterMul("void", 5, 1) },
+                rarity: EffectRarity.Rare,
+                flavor: "混沌至宝极品·盘古斧，开天辟地第一至宝。一斧分混沌、定乾坤。");
+            yield return A("art_prm_chaos_creation_m", "混沌至宝·开天", ArtifactForm.Banner,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 8, 1020,
+                new[] { Modules.FlatPen(130), Modules.AoePerTarget(65), Modules.CounterMul("void", 5, 1),
+                    Modules.FlatDR(40) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "开天辟地之威具象化的混沌至宝，攻伐与创世并存。");
+            yield return A("art_prm_hongmeng_creation_m", "鸿蒙至宝·造化", ArtifactForm.Cauldron,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 8, 1020,
+                new[] { new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 5, "道心+5阶"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 150, "mana+150"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "qixue", 80, "血气+80"),
+                    Modules.FlatDR(50) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "鸿蒙至宝·造化，蕴含创世之初的本源大道。得之可窥造化。");
+            yield return A("art_prm_great_dao_source_m", "大道本源", ArtifactForm.Orb,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 8, 1020,
+                new[] { Modules.Special("reverseStack", 6, 0, "逆演·本源"),
+                    new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 4, "道心+4阶"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 130, "mana+130"),
+                    Modules.FlatDR(45) },
+                rarity: EffectRarity.Rare,
+                flavor: "大道本源·混沌至宝极品，万道归一、演化无穷。非真仙不可执。");
+
+            // —— 补充：通天灵宝 额外 ——
+            yield return A("art_hr_sky_patrol_x1", "巡天鉴", ArtifactForm.Mirror,
+                ArtifactFunction.Support, ArtifactGrade.HeavenReaching, QualityTier.Common, 6, 340,
+                new[] { Modules.CounterMul("ghost", 4, 2), Modules.FlatDR(30), Modules.Evade(20) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "巡天鉴，可查三界、监察万灵。");
+            yield return A("art_hr_demon_suppress_tower_x2", "镇魔浮屠塔", ArtifactForm.Tower,
+                ArtifactFunction.Trap, ArtifactGrade.HeavenReaching, QualityTier.Superior, 6, 408,
+                new[] { Modules.Control("suppress", 4), Modules.CounterMul("evil", 3, 2), Modules.FlatDR(40) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Rare,
+                flavor: "七层浮屠镇万魔，邪魔入塔永世难出。");
+
+            // —— 补充：玄天之宝 额外 ——
+            yield return A("art_ps_blood_cauldron_x1", "血契炼天鼎", ArtifactForm.Cauldron,
+                ArtifactFunction.Support, ArtifactGrade.ProfoundSky, QualityTier.Common, 7, 480,
+                new[] { Modules.PenFromResource("qixue", 4), Modules.Drain("qixie", 8),
+                    new EffectOp(EffectOpKind.AddResourceCap, "qixue", 60, "血气+60") },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Rare,
+                flavor: "以血为契、炼化诸天。玄天级血炼至宝。");
+            yield return A("art_ps_soul_anchor_lamp_x2", "定魂长明灯", ArtifactForm.Lamp,
+                ArtifactFunction.Heal, ArtifactGrade.ProfoundSky, QualityTier.Superior, 7, 576,
+                new[] { new EffectOp(EffectOpKind.AddResource, "qixue", 50, "回血+50"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "qixue", 70, "血气上限+70"),
+                    Modules.FlatDR(30) },
+                rarity: EffectRarity.Rare,
+                flavor: "长明灯不灭，则神魂不散。大乘期最强愈宝之一。");
+            yield return A("art_ps_myriad_sword_pearl_x3", "万剑归宗珠", ArtifactForm.Orb,
+                ArtifactFunction.Attack, ArtifactGrade.ProfoundSky, QualityTier.Superior, 7, 576,
+                new[] { Modules.AoePerTarget(55), Modules.PenFromResource("swordWill", 10), Modules.FlatPen(65) },
+                rarity: EffectRarity.Rare,
+                flavor: "一剑化万剑，万剑归宗。剑修梦寐以求的玄天之宝。");
+
+            // —— 补充：混沌至宝 额外 ——
+            yield return A("art_prm_blood_trans_mirror_x1", "血海轮回镜", ArtifactForm.Mirror,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Common, 8, 680,
+                new[] { Modules.Control("blood_trap", 4), Modules.Dot("blood_corrode", 35, 3),
+                    Modules.Drain("qixue", 10) },
+                rarity: EffectRarity.Rare,
+                flavor: "混沌至宝·血海轮回镜，镜中血海无边、入者永堕轮回。");
+            yield return A("art_prm_star_river_scroll_x2", "周天星斗图", ArtifactForm.Scroll,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Common, 8, 680,
+                new[] { Modules.Control("star_trap", 5), Modules.Dot("star_burn", 30, 4),
+                    Modules.AoePerTarget(50) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Rare,
+                flavor: "周天星斗大阵化为图卷，三百六十五星斗齐辉，困杀一切。");
+            yield return A("art_prm_heavenly_net_orb_x3", "天网恢恢珠", ArtifactForm.Orb,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Superior, 8, 816,
+                new[] { Modules.Control("net", 5), Modules.Drain("manaPool", 15), Modules.FlatDR(35) },
+                rarity: EffectRarity.Rare,
+                flavor: "天网恢恢疏而不漏，混沌级困宝。因果之网无可逃脱。");
+        }
+
+        // ------- 唯一档: 21路镇派+散落+遗迹 (batch4) -------
+        static IEnumerable<ArtifactDef> UniqueArtifacts()
+        {
+            // ===== 剑修镇派 =====
+            yield return A("art_unq_sword_zhu_xian", "诛仙剑", ArtifactForm.Sword,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("explodeArray", 9, 0, "诛仙剑意"), Modules.FlatPen(80), Modules.CounterMul("evil", 3, 1) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "诛仙四剑之首，剑修至高剑道化身。非剑心圆满者不可执。", src: "古道宗遗迹·诛仙台");
+            yield return A("art_unq_sword_azure_violet", "青索紫郢双剑", ArtifactForm.Sword,
+                ArtifactFunction.Attack, ArtifactGrade.ProfoundSky, QualityTier.Supreme, 8, 960,
+                new[] { Modules.PenFromResource("swordWill", 10), Modules.AoePerTarget(40) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "紫青双剑合一，剑修镇派至宝。", src: "剑修·剑阁祖传");
+
+            // ===== 刀修镇派 =====
+            yield return A("art_unq_blade_heaven_slayer", "天斩", ArtifactForm.Blade,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.PenFromResource("shaCharge", 8), Modules.FlatPen(90), Modules.AoePerTarget(50) },
+                rarity: EffectRarity.Unique,
+                flavor: "刀修至高天斩，一刀之下天亦两断。舍刀之外再无他物。", src: "刀修·霸刀山庄");
+
+            // ===== 枪修镇派 =====
+            yield return A("art_unq_spear_dragon_breaker", "破龙霸王枪", ArtifactForm.Spear,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.FlatPen(95), Modules.CounterMul("dragon", 4, 1), Modules.PenFromResource("qixue", 5) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "枪修镇派至宝，一枪破龙、万军辟易。", src: "枪修·霸王枪宗");
+
+            // ===== 器修镇派 =====
+            yield return A("art_unq_qixiu_sky_tower", "混元玲珑塔", ArtifactForm.Tower,
+                ArtifactFunction.Defense, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("luobao", 5, 0, "万宝归塔"), Modules.FlatDR(60), Modules.Reflect(1, 2) },
+                secFunc: ArtifactFunction.Snatch, rarity: EffectRarity.Unique,
+                flavor: "器修至高杰作，可同时困+夺+防。一件至宝压一境。", src: "器修·百炼总坛");
+
+            // ===== 阵修镇派 =====
+            yield return A("art_unq_array_formation_disk", "诛仙阵图", ArtifactForm.ArrayDisk,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("explodeArray", 9, 0, "诛仙剑阵"), Modules.Control("trap", 5) },
+                rarity: EffectRarity.Unique,
+                flavor: "诛仙四剑配诛仙阵图，布下诛仙剑阵，圣人亦不敢轻入。", src: "阵修·古道宗遗迹");
+
+            // ===== 体修镇派 =====
+            yield return A("art_unq_body_golden_armor", "不灭金甲", ArtifactForm.Shield,
+                ArtifactFunction.Defense, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("goldenBodyMax", 3, 0, "金身不灭"), Modules.FlatDR(80), Modules.Reflect(1, 2) },
+                rarity: EffectRarity.Unique,
+                flavor: "体修至高金身甲，濒死复活、不灭不破。", src: "体修·横练宗祖传");
+
+            // ===== 佛修镇派 =====
+            yield return A("art_unq_bud_12_lotus", "十二品功德金莲", ArtifactForm.Lotus,
+                ArtifactFunction.Defense, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("goldenBodyMax", 5, 0, "金身不灭·佛"), Modules.FlatDR(60) },
+                secFunc: ArtifactFunction.Heal, rarity: EffectRarity.Unique,
+                flavor: "佛门至高莲台，万法不侵、功德无量。", src: "佛修·大日如来寺");
+
+            // ===== 鬼修镇派 =====
+            yield return A("art_unq_ghost_soul_banner", "万魂幡", ArtifactForm.Banner,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.PenFromResource("ghostSoldierPower", 5), Modules.Drain("shaCharge", 10) },
+                rarity: EffectRarity.Unique,
+                flavor: "收万魂于一幡，鬼兵如潮，吞天噬地。", src: "鬼修·噬魂魔宫");
+
+            // ===== 雷修镇派 =====
+            yield return A("art_unq_lei_thunder_seal", "九天应元雷声普化天尊印", ArtifactForm.Seal,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.PenFromResource("thunderCharge", 5), Modules.CounterMul("evil", 3, 1), Modules.AoePerTarget(50) },
+                rarity: EffectRarity.Unique,
+                flavor: "雷修至高天尊印，执掌天劫雷霆。", src: "雷修·天劫峰");
+
+            // ===== 命修镇派 =====
+            yield return A("art_unq_ming_life_death_book", "生死簿", ArtifactForm.Scroll,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("reverseStack", 3, 0, "逆演回滚"), Modules.Control("fate", 5) },
+                rarity: EffectRarity.Unique,
+                flavor: "命修至高冥书，可定生死、判因果、逆演时空。", src: "命修·因果时空殿");
+
+            // ===== 魔修镇派 =====
+            yield return A("art_unq_mo_heart_devour_blade", "噬心魔刃", ArtifactForm.Blade,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.PenFromResource("MoGong", 5), Modules.Drain("MoGong", 10), Modules.Backlash("burnGate", 30) },
+                rarity: EffectRarity.Unique,
+                flavor: "以心魔淬刃，每斩必夺一魂。噬主之刃，魔修至宝。", src: "魔修·血河魔宫");
+
+            // ===== 血修镇派 =====
+            yield return A("art_unq_xue_blood_cauldron", "血神鼎", ArtifactForm.Cauldron,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.PenFromResource("qixie", 5), Modules.Drain("qixie", 8), Modules.FlatDR(40) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "以血炼鼎，燃血成神。血修至高血祭至宝。", src: "血修·血煞原祖坛");
+
+            // ===== 音修镇派 =====
+            yield return A("art_unq_yin_dragon_phoenix_qin", "龙吟凤鸣琴", ArtifactForm.Instrument,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.AoePerTarget(60), Modules.Control("stun", 4), Modules.Dot("soul_shock", 30, 3) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Unique,
+                flavor: "音修至高琴器，一曲龙吟凤鸣、万灵俯首。", src: "音修·天音阁");
+
+            // ===== 丹修镇派 =====
+            yield return A("art_unq_dan_nine_revolution_cauldron", "九转金丹鼎", ArtifactForm.Cauldron,
+                ArtifactFunction.Heal, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddResource, "qixue", 80, "九转回血气+80"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "qixue", 100, "血气上限+100"),
+                    Modules.FlatDR(40) },
+                secFunc: ArtifactFunction.Support, rarity: EffectRarity.Unique,
+                flavor: "丹修至高神鼎，九转金丹可起死回生。", src: "丹修·丹霞圣宗");
+
+            // ===== 傀儡修镇派 =====
+            yield return A("art_unq_kuilei_god_puppet_core", "神机百炼核心", ArtifactForm.Orb,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddResourceCap, "bond", 30, "bond上限+30"),
+                    Modules.PenFromResource("bond", 4), Modules.AoePerTarget(45) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "傀儡修至高核心，可同时操控百具神机傀儡。", src: "傀儡修·神机城");
+
+            // ===== 法修镇派 =====
+            yield return A("art_unq_fa_myriad_spell_book", "万法归宗典", ArtifactForm.Scroll,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 150, "mana上限+150"),
+                    Modules.PenFromResource("manaPool", 3), Modules.FlatDR(40) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "法修至高典籍，万法归一、言出法随。", src: "法修·万法殿");
+
+            // ===== 毒修镇派 =====
+            yield return A("art_unq_du_ten_thousand_poison_gourd", "万毒至尊葫芦", ArtifactForm.Gourd,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Dot("supreme_poison", 40, 5), Modules.Control("paralyze", 4) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "毒修至高毒宝，万毒归一、触之即亡。", src: "毒修·万毒窟");
+
+            // ===== 冰修镇派 =====
+            yield return A("art_unq_bing_absolute_zero_mirror", "玄冰封天镜", ArtifactForm.Mirror,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Control("freeze", 5), Modules.Dot("frost_bite", 30, 4), Modules.FlatDR(30) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Unique,
+                flavor: "冰修至高玄冰镜，镜光所至万物冰封。", src: "冰修·极寒冰宫");
+
+            // ===== 火修镇派 =====
+            yield return A("art_unq_huo_sun_true_flame_lamp", "太阳真火灯", ArtifactForm.Lamp,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.FlatPen(100), Modules.Dot("true_fire", 35, 4), Modules.AoePerTarget(55) },
+                rarity: EffectRarity.Unique,
+                flavor: "火修至高真火至宝，太阳真火燃尽万物。", src: "火修·太阳神宫");
+
+            // ===== 风修镇派 =====
+            yield return A("art_unq_feng_nine_heaven_gale_fan", "九天罡风扇", ArtifactForm.Fan,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.AoePerTarget(65), Modules.Evade(50), Modules.FlatPen(60) },
+                secFunc: ArtifactFunction.Escape, rarity: EffectRarity.Unique,
+                flavor: "风修至高罡风扇，一扇九天罡风起、万军飞灰。", src: "风修·罡风崖");
+
+            // ===== 咒修镇派 =====
+            yield return A("art_unq_zhou_god_curse_talisman", "神咒天书", ArtifactForm.Talisman,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Control("curse", 5), Modules.Dot("curse_decay", 35, 4), Modules.Drain("manaPool", 12) },
+                rarity: EffectRarity.Unique,
+                flavor: "咒修至高咒书，一言成谶、诅咒成真。", src: "咒修·咒渊");
+
+            // ===== 江湖散落 =====
+            yield return A("art_unq_world_dinghai_orb", "定海神珠", ArtifactForm.Orb,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Control("flood", 4), Modules.Dot("drown", 20, 4) },
+                rarity: EffectRarity.Unique,
+                flavor: "先天灵宝，二十四颗定海神珠，可演化诸天。散落于四海。", src: "江湖散落·东海遗迹");
+            yield return A("art_unq_world_sky_net", "天罗地网", ArtifactForm.Scroll,
+                ArtifactFunction.Trap, ArtifactGrade.HeavenReaching, QualityTier.Supreme, 7, 680,
+                new[] { Modules.Control("net", 5) },
+                rarity: EffectRarity.Unique,
+                flavor: "天庭遗落之宝，可网罗天地。", src: "江湖散落·天庭废墟");
+            yield return A("art_unq_world_sun_bow", "后羿射日弓", ArtifactForm.Spear,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.FlatPen(120), Modules.CounterMul("fire", 3, 1) },
+                rarity: EffectRarity.Unique,
+                flavor: "后羿射日之神弓，一箭可落星辰。", src: "江湖散落·远古战场");
+            yield return A("art_unq_world_immortal_slayer", "斩仙飞刀", ArtifactForm.Gourd,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("duoshe", 5, 0, "斩仙·定神"), Modules.FlatPen(85) },
+                secFunc: ArtifactFunction.Snatch, rarity: EffectRarity.Unique,
+                flavor: "\"请宝贝转身\"——葫芦口出白光，定住元神即斩。无物不斩。", src: "江湖散落·西昆仑");
+            yield return A("art_unq_world_mountain_river_scroll", "山河社稷图", ArtifactForm.Scroll,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Control("trap", 5), Modules.Dot("world_pressure", 40, 4), Modules.FlatDR(50) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Unique,
+                flavor: "山河社稷图，图中自成一界。入图者如陷真实山河，永生难出。", src: "江湖散落·女娲庙");
+            yield return A("art_unq_world_yellow_tower", "天地玄黄玲珑塔", ArtifactForm.Tower,
+                ArtifactFunction.Defense, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.FlatDR(90), Modules.Reflect(3, 4), Modules.Evade(40) },
+                rarity: EffectRarity.Unique,
+                flavor: "天地玄黄玲珑塔，万法不侵、功德护体。玄黄之气凝为至坚。", src: "江湖散落·三十三天");
+
+            // ===== 遗迹出土 =====
+            yield return A("art_unq_ruin_bronze_halberd", "青铜神戟", ArtifactForm.Spear,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.FlatPen(100), Modules.CounterMul("body", 3, 1) },
+                rarity: EffectRarity.Unique,
+                flavor: "上古遗迹中出土的青铜神兵，刻满天铭文。", src: "遗迹出土·三星堆古战场");
+            yield return A("art_unq_ruin_jade_armor", "金缕玉甲", ArtifactForm.Shield,
+                ArtifactFunction.Defense, ArtifactGrade.ProfoundSky, QualityTier.Supreme, 8, 960,
+                new[] { Modules.FlatDR(70), Modules.Reflect(1, 3), Modules.Evade(20) },
+                rarity: EffectRarity.Unique,
+                flavor: "古墓出土金缕玉衣，万线织成、刀枪不入。", src: "遗迹出土·马王堆古墓");
+            yield return A("art_unq_ruin_ancient_stele", "远古天书碑文", ArtifactForm.Scroll,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 5, "道心+5阶"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 100, "mana+100") },
+                rarity: EffectRarity.Unique,
+                flavor: "远古遗迹中发现的碑文拓片，记载失传的大道法则。", src: "遗迹出土·不周山废墟");
+            yield return A("art_unq_ruin_star_hourglass", "星辰沙漏", ArtifactForm.Instrument,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("reverseStack", 4, 0, "逆演·星辰"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 80, "mana+80") },
+                rarity: EffectRarity.Unique,
+                flavor: "上古星相师遗物，沙漏翻转可逆转时光片刻。", src: "遗迹出土·星辰古殿");
+            yield return A("art_unq_ruin_god_seal_array", "神纹阵盘", ArtifactForm.ArrayDisk,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("explodeArray", 8, 0, "神纹爆破"), Modules.Control("trap", 5), Modules.FlatDR(30) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Unique,
+                flavor: "上古神纹阵盘，刻录失传的远古大阵。", src: "遗迹出土·殷墟祭坛");
+
+            // ===== 天道奇物 =====
+            yield return A("art_unq_legend_god_beating_whip", "打神鞭", ArtifactForm.Whip,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.FlatPen(110), Modules.CounterMul("god", 5, 1), Modules.Control("stun", 3) },
+                secFunc: ArtifactFunction.Trap, rarity: EffectRarity.Unique,
+                flavor: "打神鞭，专打神明。一鞭出则神明辟易。", src: "天道奇物·封神台");
+            yield return A("art_unq_legend_god_seal_list", "封神榜", ArtifactForm.Scroll,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddResourceCap, "soulBond", 20, "soulBond+20"),
+                    new EffectOp(EffectOpKind.AddTermWeightStep, "soulBondStep", 4, "soulBond+4阶"),
+                    Modules.FlatDR(40) },
+                rarity: EffectRarity.Unique,
+                flavor: "封神榜，可敕封神位、掌控神权。得之可号令诸神。", src: "天道奇物·封神台");
+            yield return A("art_unq_legend_he_luo_book", "河图洛书", ArtifactForm.Scroll,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("reverseStack", 5, 0, "逆演·河洛"),
+                    new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 4, "道心+4阶"),
+                    Modules.Evade(40) },
+                secFunc: ArtifactFunction.Escape, rarity: EffectRarity.Unique,
+                flavor: "河图洛书，先天八卦之源。可推演天机、逆转因果。", src: "天道奇物·黄河龙马");
+            yield return A("art_unq_legend_five_element_flag", "五行旗·真", ArtifactForm.Banner,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.CounterMul("fire", 4, 2), Modules.CounterMul("ice", 4, 2),
+                    Modules.CounterMul("void", 4, 2), Modules.FlatDR(45), Modules.FlatPen(60) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "五行旗真品，掌握五行生克之极致。五旗齐出，天下无敌。", src: "天道奇物·五行山");
+            yield return A("art_unq_legend_sky_mend_stone", "补天石", ArtifactForm.Orb,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddResourceCap, "qixue", 120, "血气上限+120"),
+                    new EffectOp(EffectOpKind.AddResource, "qixue", 50, "回血+50"),
+                    Modules.FlatDR(60) },
+                secFunc: ArtifactFunction.Heal, rarity: EffectRarity.Unique,
+                flavor: "女娲补天遗留的五色石，蕴含创世生机。", src: "天道奇物·不周山");
+            yield return A("art_unq_legend_kunlun_mirror", "昆仑镜", ArtifactForm.Mirror,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("reverseStack", 6, 0, "逆演·昆仑"),
+                    Modules.Evade(60), Modules.FlatDR(35) },
+                secFunc: ArtifactFunction.Escape, rarity: EffectRarity.Unique,
+                flavor: "昆仑镜，可穿梭时空、逆演因果。上古天帝遗宝。", src: "天道奇物·昆仑仙境");
+
+            // —— 补充：更多路径镇派 ——
+            yield return A("art_unq_qiankun_sleeve", "乾坤袖", ArtifactForm.Rope,
+                ArtifactFunction.Snatch, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("luobao", 6, 0, "袖里乾坤"), Modules.Drain("itemTier", 8) },
+                rarity: EffectRarity.Unique,
+                flavor: "袖里乾坤大，可纳天地万物。镇派至宝。", src: "空间道·乾坤洞天");
+            yield return A("art_unq_dream_butterfly_fan", "蝶梦扇", ArtifactForm.Fan,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Control("dream", 5), Modules.Dot("dream_drain", 25, 4) },
+                rarity: EffectRarity.Unique,
+                flavor: "庄周梦蝶，蝶梦庄周。入梦者不知己身何在。", src: "幻修·蝶梦谷");
+            yield return A("art_unq_void_devour_cauldron", "吞虚鼎", ArtifactForm.Cauldron,
+                ArtifactFunction.Snatch, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Drain("manaPool", 20), Modules.Drain("qixue", 15), Modules.FlatDR(40) },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Unique,
+                flavor: "吞虚鼎，可吞噬虚空、炼化万法。入鼎者法力尽失。", src: "吞噬道·虚渊");
+
+            // —— 补充：更多散落 ——
+            yield return A("art_unq_world_samsara_plate", "六道轮回盘", ArtifactForm.ArrayDisk,
+                ArtifactFunction.Trap, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.Special("reverseStack", 4, 0, "轮回逆转"), Modules.Control("fate", 4) },
+                rarity: EffectRarity.Unique,
+                flavor: "六道轮回盘，可逆转轮回、改写命运。", src: "江湖散落·冥界之门");
+            yield return A("art_unq_world_dragon_ball", "祖龙珠", ArtifactForm.Orb,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddResourceCap, "qixue", 100, "血气+100"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 100, "mana+100"),
+                    Modules.CounterMul("dragon", 5, 1) },
+                secFunc: ArtifactFunction.Attack, rarity: EffectRarity.Unique,
+                flavor: "祖龙陨落所化龙珠，蕴含祖龙全部精华。", src: "江湖散落·龙墓");
+            yield return A("art_unq_world_phoenix_feather", "凤凰涅槃羽", ArtifactForm.Fan,
+                ArtifactFunction.Heal, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddResource, "qixue", 60, "涅槃回血+60"),
+                    Modules.Special("goldenBodyMax", 2, 0, "涅槃金身") },
+                secFunc: ArtifactFunction.Defense, rarity: EffectRarity.Unique,
+                flavor: "凤凰涅槃时落下的尾羽，蕴含重生之力。", src: "江湖散落·梧桐神树");
+
+            // —— 补充：更多遗迹 ——
+            yield return A("art_unq_ruin_void_compass", "归墟罗盘", ArtifactForm.Instrument,
+                ArtifactFunction.Escape, ArtifactGrade.ProfoundSky, QualityTier.Supreme, 8, 960,
+                new[] { Modules.Evade(80), Modules.Control("space_lock", 2) },
+                rarity: EffectRarity.Unique,
+                flavor: "上古航海遗迹中的归墟罗盘，指针所指即为出路。", src: "遗迹出土·归墟深渊");
+            yield return A("art_unq_ruin_god_bone_blade", "神骨刀", ArtifactForm.Blade,
+                ArtifactFunction.Attack, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { Modules.FlatPen(115), Modules.PenFromResource("shaCharge", 10),
+                    Modules.Backlash("burnGate", 35) },
+                rarity: EffectRarity.Unique,
+                flavor: "以远古神魔之骨锻造的邪刀，每斩必噬一魂。", src: "遗迹出土·神魔战场");
+            yield return A("art_unq_ruin_origin_seed", "本源种", ArtifactForm.Orb,
+                ArtifactFunction.Support, ArtifactGrade.Primordial, QualityTier.Supreme, 9, 1360,
+                new[] { new EffectOp(EffectOpKind.AddTermWeightStep, "daoHeartStep", 5, "道心+5阶"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "manaPool", 150, "mana+150"),
+                    new EffectOp(EffectOpKind.AddResourceCap, "qixue", 80, "血气+80") },
+                rarity: EffectRarity.Unique,
+                flavor: "混沌初开时遗留的创世之种，蕴含演化世界的本源力量。", src: "遗迹出土·混沌深渊");
+        }
 
         // helper factory
         static ArtifactDef A(string id, string name, ArtifactForm form,

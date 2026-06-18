@@ -1,7 +1,8 @@
 # Story 004: batch5 — 法宝配套战斗效果
 
 > **Epic**: combat-r2
-> **Status**: Not Started
+> **Status**: Complete
+> **Last Updated**: 2026-06-18
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 中
