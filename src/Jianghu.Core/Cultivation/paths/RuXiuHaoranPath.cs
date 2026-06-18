@@ -206,7 +206,7 @@ namespace Jianghu.Cultivation
                 // 微言诛心·断罪：对心术不正者宣读其罪,按目标 innerDemon×3 真伤+引动其心魔走火;对德全/正道几无伤。浩然≥18+文胆透支3。
                 // B5扫尾 defer(红线A.8): 伤害按目标 innerDemon×3 缩放,innerDemon 属 A.2 道心轴(B1 解耦:战斗期不读 innerDemon)→A.2 道心层 defer,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_ru_zhuxin", "微言诛心·断罪", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "按目标 innerDemon×3 真伤(innerDemon→A.2 道心层 defer)+引动其心魔本回合走火打折;对德全/正道者几乎无伤(诛不义不诛义)") },
+                    new[] { Modules.PenFromResource("innerDemon", 3, note: "按目标innerDemon×3真伤;对德全/正道者几乎无伤(诛不义不诛义)") },
                     new Dictionary<string, int> { { "haoran", 18 }, { "wenDan", 3 } }),
                 // 文宫鼓舞·阵词：开群战增益词,在场同阵营攻+12%、护神 DR+5、士气+1档共3回合;wenGong 当回合翻倍——群战开团核心。浩然≥15。
                 new CombatSkillDef("sk_ru_zhenci", "文宫鼓舞·阵词", 2,

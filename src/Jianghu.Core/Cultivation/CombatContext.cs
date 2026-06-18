@@ -33,10 +33,15 @@ namespace Jianghu.Cultivation
         private CultivationState StateOf(Side s) => s == Side.Attacker ? _attacker : _defender;
         private CultivationPathDef PathOf(Side s) => s == Side.Attacker ? _attackerPath : _defenderPath;
 
-        /// <summary>读该方资源（无该 key → 0）。</summary>
+        /// <summary>读该方资源（无该 key → 0）。A.2 伪资源: daoHeart/innerDemon/comprehension 读 CultivationState 字段。</summary>
         public int ReadResource(Side s, string key)
         {
-            StateOf(s).Resources.TryGetValue(key, out int v);
+            // A.2 伪资源: 读道心/心魔/悟道值（不进 EffectivePower, R3）
+            var st = StateOf(s);
+            if (key == "daoHeart") return st.DaoHeart;
+            if (key == "innerDemon") return st.InnerDemon;
+            if (key == "comprehension") return st.Comprehension;
+            st.Resources.TryGetValue(key, out int v);
             return v;
         }
 
