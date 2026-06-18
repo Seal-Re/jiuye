@@ -99,10 +99,14 @@ namespace Jianghu.Cultivation
         public static EffectOp ModifyStat(string statKind, int delta, string? note = null)
             => new EffectOp(EffectOpKind.ModifyStat, statKind, delta, note, Rarity: EffectRarity.Rare);
 
-        /// <summary>改EP%: Key=resource, Amount=num, Amount2=den. 防方PE×=(1+Amount×res(Key)/den/100). 命修削EP/因果夺定数。</summary>
+        /// <summary>改EP%: Key=resource, Amount=num, Amount2=den. 防方PE×=(1+Amount×res(Key)/den/100).</summary>
         public static EffectOp ModifyEP(string resourceKey, int num, int den = 1, string? note = null)
             => new EffectOp(EffectOpKind.ModifyEffectivePower, resourceKey, num, note,
                 Amount2: den < 1 ? 1 : den, Rarity: EffectRarity.Rare);
+
+        /// <summary>造关系边: Key=delta(正=正边/负=负边). 经CombatContext→SparAction→IWorldMutator.AdjustRelation.</summary>
+        public static EffectOp RelationAdjust(int delta, string? note = null)
+            => new EffectOp(EffectOpKind.RelationAdjust, delta.ToString(), delta, note, Rarity: EffectRarity.Rare);
 
         /// <summary>
         /// 唯一档签名机制（§7 M3 逃逸口）：Key=handlerId，<see cref="ModuleResolver"/> 派发

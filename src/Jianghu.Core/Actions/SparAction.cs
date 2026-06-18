@@ -56,6 +56,12 @@ namespace Jianghu.Actions
                 ApplyStatDeltas(w, a, result.AttackerStatDeltas);
                 ApplyStatDeltas(w, target, result.DefenderStatDeltas);
 
+                // Apply relation deltas (RelationAdjust 算子累积的关系边修改)
+                if (result.AttackerRelationDelta != 0)
+                    w.AdjustRelation(target.Id, a.Id, result.AttackerRelationDelta);
+                if (result.DefenderRelationDelta != 0)
+                    w.AdjustRelation(a.Id, target.Id, result.DefenderRelationDelta);
+
                 int wToL = w.AdjustRelation(winner.Id, loser.Id, +3);
                 int lToW = w.AdjustRelation(loser.Id, winner.Id, margin > 20 ? -4 : +2);
                 return new DomainEvent[]

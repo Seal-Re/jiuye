@@ -195,7 +195,7 @@ namespace Jianghu.Cultivation.Paths
                 // 施丹结契（资源枢纽·造网）：非战斗主动技,向目标赠突破/疗伤丹,造依附正边+15(L1)并登记『丹债』;把战力弱转成关系网中心。
                 // 消耗1枚高阶丹(pillStock),无战斗消耗。
                 new CombatSkillDef("sk_da_jieqi", "施丹结契", 3,
-                    new[] { new EffectOp(EffectOpKind.AddSituationalAdj, null, 0, "非战斗主动:向目标赠突破/疗伤丹造依附正边+15(L1造边)并登记丹债,把战力弱转成关系网中心(黄枫谷索丹=依附链)") },
+                    new[] { Modules.RelationAdjust(15, "赠突破/疗伤丹造依附正边+15"), new EffectOp(EffectOpKind.AddResource, "pillStock", -1, "消耗1枚高阶丹") },
                     new Dictionary<string, int> { { "pillStock", 1 } }),
                 // 聚丹换酬（economic 维度）：卖丹换灵石/积分推进 realm 与资源(白小纯卖丹十万积分升阶);造化产出直接转修为,本路独有非武力晋升通道。
                 // 出让成品丹库存(pillStock)。

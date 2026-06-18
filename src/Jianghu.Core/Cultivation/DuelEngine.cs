@@ -25,7 +25,9 @@ namespace Jianghu.Cultivation
             CharacterId Winner, CharacterId Loser, int Margin,
             bool WasAutoWin, int AttackerHpRemaining, int DefenderHpRemaining,
             IReadOnlyDictionary<string, int>? AttackerStatDeltas = null,
-            IReadOnlyDictionary<string, int>? DefenderStatDeltas = null);
+            IReadOnlyDictionary<string, int>? DefenderStatDeltas = null,
+            int AttackerRelationDelta = 0,
+            int DefenderRelationDelta = 0);
 
         /// <summary>
         /// 双方经模块系统战斗（story-003 batch4）。
@@ -166,7 +168,9 @@ namespace Jianghu.Cultivation
                 AttackerHpRemaining: hpA,
                 DefenderHpRemaining: hpB,
                 AttackerStatDeltas: ctx.GetStatDeltas(Side.Attacker),
-                DefenderStatDeltas: ctx.GetStatDeltas(Side.Defender));
+                DefenderStatDeltas: ctx.GetStatDeltas(Side.Defender),
+                AttackerRelationDelta: ctx.GetRelationDelta(Side.Attacker),
+                DefenderRelationDelta: ctx.GetRelationDelta(Side.Defender));
         }
 
         /// <summary>

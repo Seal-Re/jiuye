@@ -19,6 +19,7 @@ namespace Jianghu.Cultivation
         private readonly CultivationPathDef _defenderPath;
         private readonly Dictionary<Side, Dictionary<string, int>> _statDeltas = new();
         private readonly Dictionary<Side, List<(string ResourceKey, int Num, int Den)>> _epModifiers = new();
+        private readonly Dictionary<Side, int> _relationDeltas = new();
 
         public CombatContext(
             CultivationState attacker, CultivationPathDef attackerPath,
@@ -86,6 +87,17 @@ namespace Jianghu.Cultivation
                 _epModifiers[target] = list = new List<(string, int, int)>();
             list.Add((resourceKey, num, den));
         }
+
+        /// <summary>累积关系边修改（RelationAdjust 算子用）。</summary>
+        public void AccumulateRelationDelta(Side s, int delta)
+        {
+            _relationDeltas.TryGetValue(s, out int cur);
+            _relationDeltas[s] = cur + delta;
+        }
+
+        /// <summary>提取指定方 relation delta。</summary>
+        public int GetRelationDelta(Side s)
+            => _relationDeltas.TryGetValue(s, out int d) ? d : 0;
 
         /// <summary>应用所有 EP 修改器到给定 PE 值，返回修正后 PE。</summary>
         public int ApplyEPModifiers(Side s, int basePE)

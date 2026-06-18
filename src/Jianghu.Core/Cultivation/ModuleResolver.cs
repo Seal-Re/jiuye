@@ -58,8 +58,12 @@ namespace Jianghu.Cultivation
                 }
 
                 case EffectOpKind.ModifyEffectivePower:
-                    // Key=resource, Amount=num, Amount2=den. EP×(1+num×res(Key)/den/100).
                     ctx.AccumulateEPModifier(Side.Defender, m.Key!, m.Amount, Den(m));
+                    return dmg;
+
+                case EffectOpKind.RelationAdjust:
+                    // Key=delta. 累积关系边修改, 战后 SparAction 落地.
+                    ctx.AccumulateRelationDelta(Side.Defender, m.Amount);
                     return dmg;
 
                 case EffectOpKind.Special:
