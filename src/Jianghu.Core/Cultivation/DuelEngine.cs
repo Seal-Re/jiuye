@@ -316,15 +316,28 @@ namespace Jianghu.Cultivation
             return best;
         }
 
-        /// <summary>Validate skill: tier≤realm & TryPayCost; returns null if invalid (downgrade to bare attack).</summary>
+        /// <summary>Validate skill: tier≤realm & TryPayCost & artifact gate; returns null if invalid.</summary>
         private static CombatSkillDef? ValidateSkill(CombatSkillDef? skill, CultivationState st, CultivationPathDef path)
         {
             if (skill == null) return null;
-            if (skill.Tier > st.RealmIndex) return null; // tier gate
-            // TryPayCost: 全或无扣资源
+            if (skill.Tier > st.RealmIndex) return null;
             if (skill.Cost.Count > 0 && !EffectInterpreter.TryPayCost(skill.Cost, st))
                 return null;
+            // Artifact gate (AC 5.2): artifact-related skills require artifact arts
+            if (IsArtifactSkill(skill) && !HasArtifactArt(path, st))
+                return null;
             return skill;
+        }
+
+        /// <summary>Check if skill uses artifact-related modules (itemTier resource or luobao special).</summary>
+        private static bool IsArtifactSkill(CombatSkillDef skill)
+        {
+            foreach (var op in skill.OnUse)
+            {
+                if (op.Key == "itemTier") return true;
+                if (op.Kind == EffectOpKind.Special && op.Key == "luobao") return true;
+            }
+            return false;
         }
 
         /// <summary>检查防方是否修了轻功/身法类功法（门控闪避）。</summary>
@@ -333,6 +346,21 @@ namespace Jianghu.Cultivation
             foreach (var cat in path.ArtCategories)
             {
                 if (cat.Role == "movement")
+                {
+                    foreach (var art in cat.Arts)
+                        if (ListHas(st.ChosenArtIds, art.Id))
+                            return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>检查是否修了御器/法宝类功法（门控法宝技能）。</summary>
+        private static bool HasArtifactArt(CultivationPathDef path, CultivationState st)
+        {
+            foreach (var cat in path.ArtCategories)
+            {
+                if (cat.Role == "core_forge" || cat.Role == "channel_mind" || cat.Role == "named_artifacts")
                 {
                     foreach (var art in cat.Arts)
                         if (ListHas(st.ChosenArtIds, art.Id))

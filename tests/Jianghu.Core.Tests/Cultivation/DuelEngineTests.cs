@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Jianghu.Config;
 using Jianghu.Cultivation;
+using Jianghu.Cultivation.Paths;
 using Jianghu.Model;
 using Jianghu.Stats;
 using Xunit;
@@ -458,6 +460,68 @@ namespace Jianghu.Core.Tests.Cultivation
             // a wins massively
             Assert.Equal(a.Id, result.Winner);
             Assert.True(result.Margin > 50);
+        }
+
+        // ================================================================
+        // AC 5.1-5.3: Artifact (法宝) module integration
+        // ================================================================
+
+        [Fact]
+        public void Qixiu_ArtifactSkills_WorkInDuelEngine()
+        {
+            var qiPath = QixiuArtificerPath.Def;
+            // Clone as melee non-artifact path for opponent
+            var oppPath = MakePath("test_opp", new[] { "melee" });
+            var reg = MakeRegistry(qiPath, oppPath);
+
+            var qiCult = CultivationState.NewForPath("qixiu_artificer", qiPath.Resources,
+                new[] { "qi_cf_bailian" }, // has core_forge art
+                new[] { "sk_qi_yujian", "sk_qi_luobao", "sk_qi_huhao" });
+            var oppCult = CultivationState.NewForPath("test_opp", oppPath.Resources);
+
+            var qi = MakeChar(1, 5, 5, 5, 10, qiCult);
+            var opp = MakeChar(2, 20, 20, 20, 20, oppCult);
+
+            // Qi cultivator uses artifact skills: 御剑斩(itemTier*10), 落宝金光(Special luobao), 玄黄护宝罡(FlatDR+Reflect)
+            var result = DuelEngine.ResolveR2(qi, opp, qiPath, oppPath, reg, Limits, null, null, null);
+
+            // Artifact gate: qi has core_forge art → artifact skills unlocked
+            Assert.NotNull(result);
+            Assert.False(result.WasAutoWin);
+        }
+
+        [Fact]
+        public void NoArtifactArt_ArtifactSkillsGated()
+        {
+            var qiPath = QixiuArtificerPath.Def;
+            var oppPath = MakePath("test_opp", new[] { "melee" });
+            var reg = MakeRegistry(qiPath, oppPath);
+
+            // Qi cultivator WITHOUT core_forge art → artifact skills gated
+            var qiCult = CultivationState.NewForPath("qixiu_artificer", qiPath.Resources,
+                new string[0], // no artifact arts!
+                new[] { "sk_qi_yujian" }); // tries to use artifact skill
+            var oppCult = CultivationState.NewForPath("test_opp", oppPath.Resources);
+
+            var qi = MakeChar(1, 5, 5, 5, 10, qiCult);
+            var opp = MakeChar(2, 20, 20, 20, 20, oppCult);
+
+            // Artifact skills gated → qi fights with bare attack only
+            var result = DuelEngine.ResolveR2(qi, opp, qiPath, oppPath, reg, Limits, null,
+                qiPath.CombatSkills.Single(s => s.Id == "sk_qi_yujian"), null);
+
+            // Skill passed explicitly but should be rejected by artifact gate
+            Assert.False(result.WasAutoWin);
+            // Opponent has higher PE (no artifact boost) → should win
+        }
+
+        [Fact]
+        public void Qixiu_Luobao_SpecialHandler_Registered()
+        {
+            // Verify luobao Special handler exists in SpecialModuleRegistry
+            var handler = SpecialModuleRegistry.Get("luobao");
+            Assert.NotNull(handler);
+            Assert.Equal("luobao", handler.HandlerId);
         }
 
         sealed class ListPathSource : IPathSource

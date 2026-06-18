@@ -181,14 +181,19 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_qi_wanbao", "万宝齐发", 4,
                     new[] { Modules.PenFromResource("itemTier", 8, note: "所驱使法宝itemTier*8一次性倾泻(本批自身itemTier;真Σ多宝聚合deferred FULLSTRUCT),高方差发动后转虚弱") },
                     new Dictionary<string, int> { { "soulBond", 5 } }),
-                // 落宝金光：经济维核心,判定(本路power+落纹加成)过门槛则夺/打落对手1件法宝→对手该宝itemTier/法术power本战清零;命中后自身借用1回合。soulBond≥3。
-                // B5批2: 唯一档签名机制(夺器清零+借用) → 批3 Special(luobao) handler(§10覆盖账器=已结构化·签名Special批3);本批保 Note 占位。
+                // 落宝金光：经济维核心,判定过门槛夺/打落对手1件法宝→对手该宝itemTier本战清零。soulBond≥3。
+                // B5批5: 唯一档签名机制 → Special(luobao) handler（批3已注册,夺器清零+借用）。
                 new CombatSkillDef("sk_qi_luobao", "落宝金光", 3,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 30, "判定过门槛夺/打落对手1件法宝→其itemTier或法术power本战清零(克剑修飞剑/法修符),命中后借用1回合(批3 Special luobao)") },
+                    new[] { Modules.Special("luobao", 3, 0, "夺/打落对手1件法宝→其itemTier本战清零(批3 Special luobao handler)") },
                     new Dictionary<string, int> { { "soulBond", 3 } }),
-                // 玄黄护宝罡：防御/反夺器,开'御'罩本战免疫一次落宝/缚器,并把对手落宝反弹(谁夺器谁被夺)。soulBond≥4。
+                // 玄黄护宝罡：防御/反夺器,开'御'罩本战免疫一次落宝,并把对手落宝反弹(谁夺器谁被夺)。soulBond≥4。
+                // B5批5: OnDefend FlatDR+Reflect — 护体罡气减伤+反震。
                 new CombatSkillDef("sk_qi_huhao", "玄黄护宝罡", 3,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 20, "开'御'罩本战免疫一次落宝/缚器,并把对手的落宝反弹(谁夺器谁被夺)") },
+                    new[]
+                    {
+                        Modules.FlatDR(20, "开'御'罩:护体罡气减伤20"),
+                        Modules.Reflect(1, 3, "反弹落宝:来袭伤害1/3反震攻方(谁夺器谁被夺)"),
+                    },
                     new Dictionary<string, int> { { "soulBond", 4 } }),
                 // 缚锋锁器：压制非夺取,令对手itemTier与所选功法power各-2(持续2回合),配'缚/困'纹连锁;对装备依附者结构性克制。soulBond≥2。
                 // B5批2: → Drain(itemTier,2) 夺压对手itemTier(经chokepoint,攻方借得;法术power-2 debuff 批4接)。
