@@ -1,7 +1,8 @@
 # Story 007: 结算回滚栈（因果逆演/夺舍续命/分魂挡刀）
 
 > **Epic**: combat-fullstruct
-> **Status**: Backlog
+> **Status**: In Progress
+> **Last Updated**: 2026-06-21
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 中 (1d)
