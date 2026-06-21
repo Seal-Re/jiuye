@@ -32,11 +32,11 @@ stories:
     name: "结构化 Gate 字段 + 唯一档签名逐路全迁"
     file: "production/epics/combat-fullstruct/story-006-gate-field-unique-migration.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 1
-    blocker: ""
-    completed: ""
+    blocker: "AC 6.5 22处B.9违规未迁 → known_issue追踪"
+    completed: "2026-06-21"
   - id: "balance-001"
     name: "BalanceMatrixDump harness: 全21路×UT0-12 战力矩阵dump"
     file: "production/epics/balance-cross/story-001-balance-matrix-dump.md"
