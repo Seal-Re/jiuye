@@ -51,7 +51,11 @@ stories:
     name: "结算回滚栈 (因果逆演/夺舍续命/分魂挡刀)"
     file: "production/epics/combat-fullstruct/story-007-rollback-stack.md"
     priority: should-have
-    status: in-progress
+    status: done
+    owner: ""
+    estimate_days: 1
+    blocker: ""
+    completed: "2026-06-21"
     owner: ""
     estimate_days: 1
     blocker: ""
