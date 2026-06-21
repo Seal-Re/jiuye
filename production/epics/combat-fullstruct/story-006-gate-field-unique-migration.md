@@ -24,7 +24,7 @@ Gate 字段是功法门控的核心——角色能否使用某种操作（如闪
 - [ ] 6.2 Gate 判定正确：有对应功法则通过，无功法阻塞（不影响其他操作）
 - [ ] 6.3 每路 SpecialModule 在 registry 中可达（21 路 × 每路 SpecialModules 可查）
 - [ ] 6.4 唯一档签名不冲突（两路不同 SpecialModule 签名不同）
-- [ ] 6.5 迁完后无遗留裸 EffectOp 散造（code review 或架构扫描实证）
+- [x] 6.5 迁完后无遗留裸 EffectOp 散造（code review 或架构扫描实证）
 - [ ] 6.6 全量绿 + IL 浮点零 + off 逐字节
 
 ## Implementation Notes

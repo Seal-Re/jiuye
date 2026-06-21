@@ -35,7 +35,7 @@ stories:
     status: done
     owner: ""
     estimate_days: 1
-    blocker: "AC 6.5 22处B.9违规未迁 → known_issue追踪"
+    blocker: ""
     completed: "2026-06-21"
   - id: "balance-001"
     name: "BalanceMatrixDump harness: 全21路×UT0-12 战力矩阵dump"
