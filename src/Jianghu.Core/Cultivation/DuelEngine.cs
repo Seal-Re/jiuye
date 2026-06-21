@@ -233,6 +233,12 @@ namespace Jianghu.Cultivation
                 }
             }
 
+            // 负向压制矩阵检查（PostMul — 在 FlatPen/FlatDR 之后、软情境之前乘算）
+            int suppressionRatio = SuppressionMatrix.GetSuppressionRatio(
+                attackerPath.SituationalTags, defenderPath?.SituationalTags ?? Array.Empty<string>());
+            if (suppressionRatio != 10)
+                dmg = dmg * suppressionRatio / 10;
+
             // 软情境修正
             if (resolver != null)
             {

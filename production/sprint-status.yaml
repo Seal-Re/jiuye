@@ -15,7 +15,7 @@ goal: "combat-fullstruct 收尾 (PostMul/负向压制/Gate字段/回滚栈) + ba
 start: "2026-06-22"
 end: "2026-06-28"
 generated: "2026-06-21"
-updated: "2026-06-21"
+updated: "2026-06-21T15:00"
 
 stories:
   # —— Must Have ——
@@ -23,7 +23,7 @@ stories:
     name: "PostMul ModKind + 负向压制 (LawSuppress/化形态/文宫/天道压制)"
     file: "production/epics/combat-fullstruct/story-005-postmul-suppression.md"
     priority: must-have
-    status: ready-for-dev
+    status: in-progress
     owner: ""
     estimate_days: 1.5
     blocker: ""

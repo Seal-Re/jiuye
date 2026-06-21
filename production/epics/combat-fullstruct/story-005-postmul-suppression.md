@@ -7,6 +7,7 @@
 > **Estimate**: 中 (1.5d)
 > **Depends**: fullstruct-001 (derived 真求和)
 > **ADR**: adr-0002-module-factory-effect-system
+> **Last Updated**: 2026-06-21
 > **GDD**: combat-system.md §模块化效果 / legacy specs B5-模块化效果系统-design.md §2-5
 
 ## Context
@@ -34,6 +35,7 @@ PostMul ModKind 是战斗效果链中的乘法修正层——在 FlatPen/FlatDR 
 ## Test Evidence
 
 **Required**: `tests/Jianghu.Core.Tests/Cultivation/PostMulTests.cs` — ~10 tests
+**Performance**: PostMul 为整数乘法，每 Evaluate <1ms overhead，无性能影响
 **QA ref**: `production/qa/qa-plan-sprint-3.md` § fullstruct-005
 
 ## Out of Scope

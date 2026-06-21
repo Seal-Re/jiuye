@@ -109,6 +109,15 @@ namespace Jianghu.Cultivation
             => new EffectOp(EffectOpKind.RelationAdjust, delta.ToString(), delta, note, Rarity: EffectRarity.Rare);
 
         /// <summary>
+        /// 乘法修正（ratio-Kind，在 FlatPen/FlatDR 之后乘算）：dmg *= ratio/10。
+        /// <paramref name="kind"/> = PostMul 种类（LawSuppress/Transform/Literati/HeavenSuppress），
+        /// <paramref name="ratio"/> = 整数×10 比例（12=×1.2, 8=×0.8）。钳 [0,20]。
+        /// OnUse: 攻方放大/缩小自身伤害；OnDefend: 防方削减来袭伤害（如化形态/文宫防护）。
+        /// </summary>
+        public static EffectOp PostMul(string kind, int ratio, string? note = null)
+            => new EffectOp(EffectOpKind.PostMul, kind, ratio, note, Rarity: EffectRarity.Rare);
+
+        /// <summary>
         /// 唯一档签名机制（§7 M3 逃逸口）：Key=handlerId，<see cref="ModuleResolver"/> 派发
         /// <see cref="SpecialModuleRegistry"/>[handlerId].Apply(ctx,op) → 伤害 delta + chokepoint 副作用。
         /// 落宝/炸阵/夺舍/金身态/律场总门等独门机制。handler 纪律：纯整数 / 不读 daoHeart / 不掷随机 / 副作用经 chokepoint。

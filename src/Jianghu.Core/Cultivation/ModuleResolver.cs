@@ -15,6 +15,14 @@ namespace Jianghu.Cultivation
         /// <summary>§15.4 tag 克制联合上界：dmg×Amount/Den 与 dmg×3/2 取小。</summary>
         private static int CapCounter(int dmg, EffectOp m) => Math.Min(dmg * m.Amount / Den(m), dmg * 3 / 2);
 
+        /// <summary>PostMul 倍数钳 [0,20]：ratio=10 为 ×1.0，ratio<0 钳 0（禁反转），ratio>20 钳 20（×2.0 上限）。</summary>
+        private static int ClampPostMul(int value, int ratio)
+        {
+            if (ratio < 0) ratio = 0;
+            if (ratio > 20) ratio = 20;
+            return value * ratio / 10;
+        }
+
         /// <summary>OnUse 算子施加于本次伤害，返回修正后整数 dmg。</summary>
         public static int ApplyOnUse(int dmg, EffectOp m, CombatContext ctx)
         {
@@ -66,6 +74,10 @@ namespace Jianghu.Cultivation
                     ctx.AccumulateRelationDelta(Side.Defender, m.Amount);
                     return dmg;
 
+                case EffectOpKind.PostMul:
+                    // 乘法修正（在 FlatPen 之后乘算）：dmg *= ratio/10。钳 [0,20] 防反转/过乘。
+                    return ClampPostMul(dmg, m.Amount);
+
                 case EffectOpKind.Special:
                     // 唯一档逃逸口(§7 M3)：派发 SpecialModuleRegistry[Key]，handler 经 chokepoint 落副作用、返伤害 delta。
                     // 缺失 handlerId 注册期/查询期抛(不静默)；handler 纪律纯整数/不读 daoHeart/不掷随机。
@@ -108,6 +120,11 @@ namespace Jianghu.Cultivation
                     reflectDmg = incomingDmg * m.Amount / den;
                     return incomingDmg; // 反伤不减来袭伤害
                 }
+
+                case EffectOpKind.PostMul:
+                    // 乘法修正（在 FlatDR 之后乘算，防方削减来袭伤害）：dmg *= ratio/10。钳 [0,20]。
+                    reflectDmg = 0;
+                    return ClampPostMul(incomingDmg, m.Amount);
 
                 default:
                     return incomingDmg;
