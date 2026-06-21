@@ -64,7 +64,11 @@ stories:
     name: "INV-CROSS 对拍胜率实证 (同UT胜率∈[40,60]% gate)"
     file: "production/epics/balance-cross/story-002-inv-cross-duel-gate.md"
     priority: should-have
-    status: in-progress
+    status: done
+    owner: ""
+    estimate_days: 1
+    blocker: "C1 known_issues: ~20对极端失衡, RealmMultipliers收敛→balance-003"
+    completed: "2026-06-21"
     owner: ""
     estimate_days: 1
     blocker: "依赖 balance-001"
