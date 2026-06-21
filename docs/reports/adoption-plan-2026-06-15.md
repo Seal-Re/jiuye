@@ -41,7 +41,7 @@
 - 问题：technical-preferences.md 含 `[TO BE CONFIGURED]`，ADR/engine 类 skill 失效，detect-gaps 误判 fresh。
 - 修复：诚实填 `.NET 8 (custom headless simulation)` / C# / Rendering·Physics=N/A。
 - 时间：5 min。**归属 hazy-rolling-valley 计划 P6。**
-- [ ] technical-preferences.md engine 配置完成
+- [x] technical-preferences.md engine 配置完成
 
 ### 2b. tr-registry.yaml 缺失
 - 问题：无稳定 TR-ID，story 无法引用需求。
@@ -69,7 +69,7 @@
 
 ### 3c. 创建 sprint-status.yaml
 - **归属 P4**（手工迁 TASKS.md 时一并建，WIP=combat-r2 doing=1）。
-- [ ] sprint-status.yaml 创建（P4）
+- [x] sprint-status.yaml 创建（P4）
 
 ### 3d. stage.txt 权威写入
 - **已于 P2 预播种** = Production。后续阶段转换由 /gate-check 写。
@@ -81,13 +81,13 @@
 
 > 策略=迁骨架+增量补文档。combat（活跃 WIP）先补，其余 defer 到各自 epic 转 doing。**归属 P8。**
 
-- [ ] design/gdd/game-concept.md（从 WorldBible canonical 逆向）
-- [ ] design/gdd/systems-index.md（系统总表，Status 无括号）
-- [ ] design/gdd/combat-system.md（从 B5-R2 + 模块化 spec 逆向，8 段式，Status: Designed）— **最高优先（活跃 WIP）**
-- [ ] design/gdd/cultivation-system.md（从 A.0/A.1 spec 逆向）
-- [ ] ADR adr-0001-integer-determinism（B.2）
-- [ ] ADR adr-0002-module-factory-effect-system（B.9，直接治理 combat-r2）
-- [ ] ADR adr-0003-cultivation-off-byte-identical（B.3）
+- [x] design/gdd/game-concept.md（从 WorldBible canonical 逆向）
+- [x] design/gdd/systems-index.md（系统总表，Status 无括号）
+- [x] design/gdd/combat-system.md（从 B5-R2 + 模块化 spec 逆向，8 段式，Status: Designed）— **最高优先（活跃 WIP）**
+- [x] design/gdd/cultivation-system.md（从 A.0/A.1 spec 逆向）
+- [x] ADR adr-0001-integer-determinism（B.2）
+- [x] ADR adr-0002-module-factory-effect-system（B.9，直接治理 combat-r2）
+- [x] ADR adr-0003-cultivation-off-byte-identical（B.3）
 
 ### DEFER（显式·红线 A.8 不静默）— 待各 epic 转 doing 再补 GDD/ADR
 - [ ] drama-engine GDD（EPIC.md 已指向 docs/legacy-specs/specs/...B-戏剧引擎...）

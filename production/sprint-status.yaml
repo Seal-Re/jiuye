@@ -15,57 +15,57 @@ goal: "全量机制结构化: derived真求和+克制矩阵+恩怨基础"
 start: "2026-06-19"
 end: "2026-06-25"
 generated: "2026-06-18"
-updated: "2026-06-18"
+updated: "2026-06-21"
 
 stories:
   # —— combat-fullstruct (Must Have) ——
   - id: "fullstruct-001"
     name: "derived:* per-entity真求和 (fleetWeighted/rosterPower/ghostSoldierPower/guSwarmPower)"
-    file: ""
+    file: "production/epics/combat-fullstruct/story-001-derived-per-entity.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 2
     blocker: ""
-    completed: ""
+    completed: "2026-06-20"
   - id: "fullstruct-002"
     name: "SituationalEdges 克制矩阵完整 (灭阴×3/克邪×2/元素相生克)"
-    file: ""
+    file: "production/epics/combat-fullstruct/story-002-situational-edges.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-20"
   # —— drama-engine (Must Have) ——
   - id: "drama-001"
     name: "恩怨/复仇基础 + RelationAdjust跨路协议"
-    file: ""
+    file: "production/epics/drama-engine/story-001-relation-adjust.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-20"
   # —— Should Have ——
   - id: "fullstruct-003"
     name: "辅助路UT锚锁终定 (丹/阵/器)"
-    file: ""
+    file: "production/epics/combat-fullstruct/story-003-aux-ut-anchor.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-21"
   - id: "fullstruct-004"
     name: "dot完整时序 + Control selectMove失效"
-    file: ""
+    file: "production/epics/combat-fullstruct/story-004-dot-control.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 1
     blocker: "依赖 fullstruct-001"
-    completed: ""
+    completed: "2026-06-21"
   # —— Nice to Have ——
   - id: "a2-001"
     name: "道心系统MVP (daoHeart/InnerDemon)"

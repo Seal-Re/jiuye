@@ -3,15 +3,15 @@
 > 单一可读真相源。日期 2026-06-14。诚实标注：**已建 / 在建(半成) / 已设计未建 / 漏洞**。
 
 ## 0. 一句话现状
-确定性整数模拟内核 **v1.0 + 修炼 A.0(21 路)已建并合 master(204 测试绿)**；A.1 境界层**在建(半成，feat/jianghu-v1.2-A1 分支)**；其余深度层 + 戏剧/地图/门派 + LLM 脑 + 可视化 **均已设计或部分设计、未建**。**最大缺口：跨路平衡(INV-CROSS)未实现 + 原始愿景"LLM 黑盒 API 多智能体"未建 + 系统集成(各系统如何合成一局江湖)未设计**。
+确定性整数模拟内核 **v1.0 + 修炼 A.0(21 路)已建并合 master(410 测试绿)**；A.1 境界层**已合 master Done**（A1.4 → combat-r2/cultivation-a1-rest）；其余深度层 + 戏剧/地图/门派 + LLM 脑 + 可视化 **均已设计或部分设计、未建**。**最大缺口：跨路平衡(INV-CROSS)未实现 + 原始愿景"LLM 黑盒 API 多智能体"未建 + 系统集成(各系统如何合成一局江湖)未设计**。
 
 ## 1. 模块状态总表
 
 | 模块 | 状态 | 测试/分支 | 备注 |
 |---|---|---|---|
 | v1.0 内核(事件驱动/Pcg32/RuleBrain/生老死) | ✅ 已建合 master | 38 测试 | 确定性竖切 |
-| 修炼 A.0(引擎 + **21 路全入册** + 软情境战斗 + 基础 realm + CLI) | ✅ 已建合 master | 204 测试,审计无 blocker | walking-skeleton |
-| 修炼 A.1 境界(大小境界双层/三轴/UT 平衡) | 🔨 **在建半成** | feat/jianghu-v1.2-A1,224 绿 | A1.0-1.2 ✅ / A1.3-1.6 + A1.4 ❌(见 §3) |
+| 修炼 A.0(引擎 + **21 路全入册** + 软情境战斗 + 基础 realm + CLI) | ✅ 已建合 master | 410 测试,审计无 blocker | walking-skeleton |
+| 修炼 A.1 境界(大小境界双层/三轴/UT 平衡) | ✅ **Done 合 master** | `3ea18da` → master，A1.4→combat-r2/cultivation-a1-rest | 竖切完成，余项入后续 epic |
 | 修炼 A.1 余项(10态流程/4劫/5失败/寿元) | 📐 设计完未建 | A2-FINAL + A123 | 依赖 A1.4(见 §4) |
 | 修炼 A.2(道心/破单调/奇遇/闭关) | 📐 设计完未建 | A3-FINAL + A123 | 奇遇自建最小 storylet |
 | 修炼 A.3(转职/觉醒/双修 + **平衡标定 INV-CROSS**) | 📐 设计完未建 | A123 | **标定=最大功能缺口** |
@@ -48,8 +48,8 @@
 ## 3. Done-but-incomplete / 静默漏项（用户重点问，诚实列）
 
 1. **A1.4 辅助路 UT 战斗当量重锚 — 计划列为境界竖切 task，实际我 defer 了**（"到标定阶段"），但**未在 plan 标注**。后果：境界竖切被当作推进中，实则一个 planned task 悄悄移走 + **它是 §4 寿元/劫的前置**。→ 必须显式：要么补做，要么在 plan 标 defer + 标依赖。
-2. **pixel v2 (icon_gen.py) — broken 未跑通**：`disk()` 收原始 RGB 元组致 KeyError，修复因工具调用 malformed 未落；"v2 升级"呈现为进行中实则未成功渲染。未提交。
-3. **任务清单 #14-22 全 stale**：是最初 v1.2 spec 阶段的，与实际工作(A.0/A.1/pixel)完全脱节；#18/#22 in_progress 永挂。非"假打勾"，是"从未更新"。→ 本次重置。
+2. ~~pixel v2 (icon_gen.py)~~ ✅ 已迁 `tools/pixel-pipeline/`（脚本+规则文档），与境界解耦。`icon_gen.py` 已提交。
+3. ~~任务清单 #14-22~~ ✅ 已重置。TASKS.md 降级为派生指针，真相迁 `production/`（13 epic，CCGS 制式）。
 4. **A.0 deferred 项**(战技参战/大小境界/道心/标定)是**诚实文档化的 defer**(收尾说明 doc)，非假完成——但要警惕被遗忘。
 
 ## 4. MVP 漏洞点（walking-skeleton 留的深度坑，集中清算）
@@ -80,7 +80,7 @@
 ## 6. 仓库整理（本次动作）
 
 - [x] 建本 `PROJECT-STATUS.md`(单一可读真相 + 文档地图)
-- [ ] 清 `_research/raw3/`(抓取 html，版权+垃圾) → .gitignore + 移出跟踪
-- [ ] 重置任务清单(#14-22 stale → 当前现实)
-- [ ] pixel/ 决断：独立分支 or 提交(与境界无关，不该混 A1 分支)
-- [ ] (建议)backlog 已消解项标 resolved；A2/A3-FINAL 标"机制源，对齐以 A123 为准"
+- [x] 清 `_research/raw3/`(抓取 html，版权+垃圾) → .gitignore 已覆盖 `_research/raw3/`，目录不在磁盘
+- [x] 重置任务清单(#14-22 stale → 当前现实) → TASKS.md 降级派生指针，真相迁 production/
+- [x] pixel/ 决断 → 已迁 `tools/pixel-pipeline/`（脚本+规则），assets/art/pixel/（产物）
+- [x] (建议)backlog 已消解项标 resolved；A2/A3-FINAL 标"机制源，对齐以 A123 为准"

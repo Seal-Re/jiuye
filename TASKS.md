@@ -10,12 +10,16 @@
 - **看 sprint 进度**：`/sprint-status`（读 sprint-status.yaml）
 - **采用路线图**：`docs/adoption-plan-2026-06-15.md`（增量补 GDD/ADR）
 - **设计深度源**：`docs/legacy-specs/`（18 spec/4 plan/3 research，原地保留）
+- **GDD（新建）**：`design/gdd/game-concept.md` / `systems-index.md` / `combat-system.md` / `cultivation-system.md`
+- **ADR（新建）**：`docs/architecture/adr-0001`(整数确定性) / `adr-0002`(Modules工厂) / `adr-0003`(off逐字节)
 
 ## 当前状态（派生快照，权威以 production/ 为准）
 
 - **阶段**（stage.txt）：**Production**
-- **WIP**（A.5 doing≤2）：**doing=1** = epic `combat-r2` / story-001（batch2 普通稀有档全路迁，6/21 done，**282 绿**）
-- A.1 竖切已合（232 绿，`3ea18da`）；A1.4 辅助路 UT 重锚 = blocked，并入 `combat-r2/story-005`（依赖 `balance-cross`，红线 A.8 不静默）
+- **测试绿**：**410 passed, 0 failed, 0 skipped**（2026-06-21 `dotnet test` 主控独立核验）
+- **当前 sprint**：Sprint 2 **已完成**（5/5 stories done，`a607638` retro committed）
+- **WIP**（A.5 doing≤2）：**doing=0**（sprint 2 收尾，待开 sprint 3）
+- A.1 竖切已合 master（232 绿，`3ea18da`）；A1.4 辅助路 UT 重锚 = deferred 入 `combat-r2/story-005`（依赖 `balance-cross`，红线 A.8 不静默）
 
 ---
 

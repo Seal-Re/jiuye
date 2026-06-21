@@ -50,3 +50,72 @@
 **协作协议（CCGS）**：每个任务遵循 **Question → Options → Decision → Draft → Approval**；写文件前先问"May I write to [filepath]?"；多文件变更需全集显式批准；**无用户指示不提交**。— *此协议与红线 A.1（每回给选项+决策点交用户）一致并强化之。*
 
 > 注：jiuye 非游戏引擎项目（.NET 8 headless 模拟），故省略 CCGS 的 `@docs/engine-reference/godot/VERSION.md` 导入与 `/start` 新手引导（用 `/adopt` brownfield 路径，见 Section C 路线图）。
+
+## E. 构建 / 测试 / 运行
+
+```bash
+# 构建（全 solution）
+dotnet build
+
+# 全量测试（410+ 绿，零失败）
+dotnet test
+
+# 单个测试文件
+dotnet test --filter "FullyQualifiedName~DuelEngineTests"
+
+# 单个测试方法
+dotnet test --filter "FullyQualifiedName~DuelEngineTests.Resolve_NullModules_UsesLegacyFormula"
+
+# 覆盖率收集
+dotnet test --collect:"XPlat Code Coverage"
+
+# 运行 CLI（legacy 模式，绝对确定性）
+dotnet run --project src/Jianghu.Cli -- 42 100
+
+# 运行 CLI（cultivation 模式）
+dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
+```
+
+**BannedApiAnalyzers**（`.editorconfig` RS0030=error）：Core 层禁 `System.Random`/`System.Console`/`System.DateTime`/`System.Threading.Thread`。违反 = 编译错误。
+
+## F. 架构概览
+
+### 程序集（3 个）
+
+| 程序集 | TFM | 职责 |
+|---|---|---|
+| `Jianghu.Core` | netstandard2.1 | **纯逻辑库**——全部模拟机制。零引擎依赖（后期直接 Unity 引用） |
+| `Jianghu.Cli` | net8.0 | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory` → `World.Advance` |
+| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（410+），含确定性/off 逐字节/21 路独立/战斗差分 |
+
+### 执行模型（事件驱动 + 确定性 PRNG）
+
+1. `WorldFactory.CreateInitial(seed, limits, count, cultivation)` → 生成世界（角色/宗门/关系）
+2. `World.Advance(budget)` → 主循环：Scheduler 弹事件 → Action 执行 → Cultivation 推进 → Lifecycle 计时 → 可能创生
+3. 所有事件入 `Chronicle`（追加日志）→ CLI 打印快照
+4. **确定性保证**：`Pcg32`（种子驱动），`RngStreamIds.Cultivation = Split(5)` 隔离修炼流
+
+### "off" 模式 = 铁律（红线 B.3）
+
+`cultivation=false` 时输出必须与 v1.0 逐字节一致。修炼走独立随机流，不改 legacy 路径。38+ 回归守。
+
+### 核心命名空间
+
+| 命名空间 | 关键类型 | 职责 |
+|---|---|---|
+| `Jianghu.Model` | `Character`(聚合根), `Persona`, `MemoryStore`, `Relations`, `Sect`, `WorldNode` | 领域模型 |
+| `Jianghu.Sim` | `World`, `WorldFactory`, `Lifecycle`, `Scheduler`, `StateSnapshot` | 世界模拟主循环 |
+| `Jianghu.Actions` | `ActionSystem`, `SparAction`, `TrainAction`, `TravelAction` | 角色动作执行 |
+| `Jianghu.Cultivation` | `PowerEngine`, `DuelEngine`, `Modules`(工厂), `EffectOp`, `ModuleResolver`, `PathRegistry`, `RealmCurve` | 21 路完整修为系统 |
+| `Jianghu.Cultivation.paths` | `SwordImmortalPath`…共 21 文件 | 具体修炼路径定义（`CodePathSource` 注册） |
+| `Jianghu.Cultivation.special` | `BrokenChainModule`…共 8 文件 | 唯一稀有度特殊模块 |
+| `Jianghu.Cultivation.Artifacts` | `ArtifactData`, `ArtifactRegistry` | 法宝系统 |
+| `Jianghu.Decide` | `IBrain`, `RuleBrain`(当前), `DecisionContext` | AI 决策（LLM 脑未建） |
+| `Jianghu.Events` | `Chronicle`, `DomainEvent` 子类型 | 事件溯源 |
+| `Jianghu.Random` | `IRandom`, `Pcg32`, `RngStreamIds` | 确定性 PRNG |
+| `Jianghu.Stats` | `StatBlock`(力/内/体/识), `StatGenerator` | 角色属性 |
+| `Jianghu.Config` | `LimitsConfig` | 配置边界 |
+
+### Modules 工厂模式（红线 B.9）
+
+所有战斗效果 → `Modules` 静态工厂（`Modules.FlatPen(…）`，`Modules.Dot(…）` 等）。封 `ratio`/`Kind`/`Amount2≥1`/`Trigger`/`Rarity` 等易漏参。唯一档 → `SpecialModuleRegistry` 注册式插件。**禁裸写 `new EffectOp(七参)**`。新算子 = 1 工厂方法 + `ModuleResolver` 1 分支。
