@@ -136,6 +136,32 @@ namespace Jianghu.Cultivation
                     reflectDmg = 0;
                     return ClampPostMul(incomingDmg, m.Amount);
 
+                case EffectOpKind.SoulSplit:
+                {
+                    // 分魂挡刀（story fullstruct-007）：ratio% 的伤害转移到魂资源，本体只承受剩余部分。
+                    // Key = 魂资源键（如 "soulHp"），Amount = 转移比例（0-100%）。
+                    string soulKey = m.Key ?? "soulHp";
+                    int ratio = m.Amount;
+                    int soulAbsorb = incomingDmg * ratio / 100;
+                    // 从防方魂资源扣除（经 chokepoint 钳 [Min,Cap]，缺该 key 则空转）
+                    if (ctx.HasResource(defenderSide, soulKey))
+                        ctx.ApplyResource(defenderSide, soulKey, -soulAbsorb);
+                    reflectDmg = 0;
+                    return Math.Max(0, incomingDmg - soulAbsorb);
+                }
+
+                case EffectOpKind.Special:
+                {
+                    // OnDefend 特殊模块派发（story fullstruct-007：未来 OnDefend 唯一档扩展口）。
+                    // 经 SpecialModuleRegistry[Key] 派发 handler，副作用经 chokepoint 落。
+                    var handler = SpecialModuleRegistry.Get(m.Key!);
+                    var result = handler.Apply(ctx, m);
+                    reflectDmg = 0;
+                    if (result.DamageDelta != 0)
+                        return Math.Max(0, incomingDmg + result.DamageDelta);
+                    return incomingDmg;
+                }
+
                 default:
                     return incomingDmg;
             }

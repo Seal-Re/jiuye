@@ -6,6 +6,12 @@ namespace Jianghu.Cultivation
     public enum Side { Attacker, Defender }
 
     /// <summary>
+    /// 回滚信号枚举（story fullstruct-007）。特殊模块（逆演/夺舍）在 OnUse 中设置此信号，
+    /// DuelEngine 在扣血后读取并执行对应回滚操作。None 表示无回滚请求。
+    /// </summary>
+    internal enum RollbackSignal { None, ReverseRequested, PossessionRequested }
+
+    /// <summary>
     /// 单挑战斗上下文（spec §15.3 chokepoint）。持双方 <see cref="CultivationState"/> 与各自 path
     /// （HasTag 读 path.SituationalTags）。**不暴露裸 Dictionary**：资源只经
     /// <see cref="ReadResource"/>/<see cref="ApplyResource"/>，改资源必经
@@ -21,6 +27,9 @@ namespace Jianghu.Cultivation
         private readonly Dictionary<Side, List<(string ResourceKey, int Num, int Den)>> _epModifiers = new();
         private readonly Dictionary<Side, int> _relationDeltas = new();
 
+        /// <summary>回滚信号（story fullstruct-007）。特殊模块设置，DuelEngine 读取后执行回滚并清零。</summary>
+        internal RollbackSignal PendingRollback { get; set; }
+
         public CombatContext(
             CultivationState attacker, CultivationPathDef attackerPath,
             CultivationState defender, CultivationPathDef defenderPath)
@@ -29,6 +38,7 @@ namespace Jianghu.Cultivation
             _attackerPath = attackerPath;
             _defender = defender;
             _defenderPath = defenderPath;
+            PendingRollback = RollbackSignal.None;
         }
 
         internal CultivationState StateOf(Side s) => s == Side.Attacker ? _attacker : _defender;

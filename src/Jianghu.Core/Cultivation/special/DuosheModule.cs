@@ -1,11 +1,15 @@
 namespace Jianghu.Cultivation
 {
     /// <summary>
-    /// 夺舍 夺舍续命（鬼/魂/魔·阴邪系 唯一档签名，impl plan 3.5）：濒死强夺新躯**续命**——确定性条件（**无掷骰**），
-    /// 触发即做资源清算续命。效果是续命资源清算，非直接伤害 → <see cref="SpecialResult.DamageDelta"/>=0。
+    /// 夺舍 夺舍续命（鬼/魂/魔·阴邪系 唯一档签名，story fullstruct-007）：濒死强夺新躯**续命**——确定性条件（**无掷骰**），
+    /// 触发即做资源清算 + 设置回滚信号让 DuelEngine 恢复 HP。效果是续命资源清算 + HP 回滚，非直接伤害
+    /// → <see cref="SpecialResult.DamageDelta"/>=0。
     ///
-    /// <para>真「濒死判定」依赖 HP/濒死态（属批4 回合 state，尚未建）。本批保守实现：只对**该路存在**的「续命相关」资源做
-    /// 确定性清算续命，经 chokepoint 落地——
+    /// <para><b>Wired (fullstruct-007)</b>：濒死判定由 DuelEngine 在扣血后执行（hpA &lt;= 0 且
+    /// PendingRollback==PossessionRequested → pop RollbackStack 还原 HP）。Gate 检查：对手含
+    /// thunder/pure_yang/buddha_light 标签则夺舍被压制。handler 做资源清算 + 设信号。</para>
+    ///
+    /// <para>资源清算（确定性，无掷骰）：
     /// 魂修 soul_divine_sense：<c>seaIntegrity</c>（识海完整度 [0,100]）→ 回满（夺舍成功识海回满 100，+100 由 chokepoint 钳顶）；
     /// 鬼修 gui_xiu_yang_hun：<c>devourMeter</c>（噬主度 [0,100]）→ 清零（夺舍成功噬主度清零，-100 由 chokepoint 钳底）。
     /// 两键各自 ReadResource 探测「是否存在于本路」（无该 key→0，delta 后仍 0，空转无害），故同一 handler 跨魂/鬼路皆安全。
@@ -15,7 +19,6 @@ namespace Jianghu.Cultivation
     /// <see cref="CombatContext.ApplyResource"/>（钳 [Min,Cap]），不直写 dict。</para>
     ///
     /// 资源键：<c>seaIntegrity</c>（魂修，回满续命）/ <c>devourMeter</c>（鬼修，清零续命）。
-    /// 注：夺舍续命真濒死判定→批4 HP；本批 handler 落确定性资源清算续命占位。
     /// </summary>
     internal sealed class DuosheModule : ISpecialModule
     {
@@ -37,7 +40,12 @@ namespace Jianghu.Cultivation
                 int devourMeter = ctx.ReadResource(Side.Attacker, "devourMeter");
                 ctx.ApplyResource(Side.Attacker, "devourMeter", -devourMeter);
             }
-            // 效果=续命资源清算，非直伤 → delta 0。
+
+            // 设置回滚信号：DuelEngine 在扣血后检查濒死（hpA<=0）→ pop RollbackStack 还原 HP。
+            // Gate（对手含 thunder/pure_yang/buddha_light）由 DuelEngine 检查。
+            ctx.PendingRollback = RollbackSignal.PossessionRequested;
+
+            // 效果=续命资源清算 + HP 回滚，非直伤 → delta 0。
             return new SpecialResult(0);
         }
     }

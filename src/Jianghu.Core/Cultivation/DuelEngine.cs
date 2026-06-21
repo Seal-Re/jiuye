@@ -6,8 +6,9 @@ using Jianghu.Model;
 namespace Jianghu.Cultivation
 {
     /// <summary>
-    /// R2 战斗结算引擎（story-003 batch4）。接模块系统：HP=pe、选招经 tier/cost/gate、
-    /// OnUse→OnDefend→软情境同时扣血。纯整数、确定性、无 RNG。
+    /// R2 战斗结算引擎（story-003 batch4 + fullstruct-007 rollback stack）。接模块系统：HP=pe、选招经 tier/cost/gate、
+    /// OnUse→OnDefend→软情境同时扣血。回合间 push RollbackStack 快照，支持因果逆演/夺舍续命的
+    /// 结算回滚。纯整数、确定性、无 RNG。
     /// off（无 Cultivation）不入本引擎，由 SparAction 走 legacy（红线 B.3）。
     /// </summary>
     public static class DuelEngine
@@ -84,11 +85,12 @@ namespace Jianghu.Cultivation
             aSkill = ValidateSkill(aSkill, attacker.Cultivation, attackerPath);
             dSkill = ValidateSkill(dSkill, defender.Cultivation, defenderPath);
 
-            // —— AC 4.2：回合循环，双方同时互攻 ——
+            // —— AC 4.2：回合循环，双方同时互攻。每回合 push RollbackStack 快照（fullstruct-007）——
             int roundLimit = MaxRounds;
             long totalDmgToB = 0, totalDmgToA = 0;
             var pendingDots = new List<DotEntry>();
             var pendingControls = new List<ControlEntry>();
+            var rollbackStack = new RollbackStack();
             for (int round = 0; round < roundLimit && hpA > 0 && hpB > 0; round++)
             {
                 // 被控方 selectMove 失效: skill→null, dmg=0, 不施dot/control
@@ -114,11 +116,47 @@ namespace Jianghu.Cultivation
                     pendingDots, pendingControls);
                 if (defenderControlled) dmgToA = 0;
 
+                // —— fullstruct-007：push 交锋前快照到回滚栈 ——
+                rollbackStack.Push(new ExchangeSnapshot(
+                    hpA, hpB, dmgToB, dmgToA, reflectToB, reflectToA,
+                    totalDmgToB, totalDmgToA));
+
                 // 同时扣血（读 pre-HP）：反伤加到对应方向
                 hpB = Math.Max(0, hpB - dmgToB - reflectToB);
                 hpA = Math.Max(0, hpA - dmgToA - reflectToA);
                 totalDmgToB += dmgToB + reflectToB;
                 totalDmgToA += dmgToA + reflectToA;
+
+                // —— fullstruct-007：检查回滚信号 ——
+                if (ctx.PendingRollback == RollbackSignal.ReverseRequested)
+                {
+                    // 因果逆演：撤销刚结算的一次交锋（伤害/夺运/胜负回滚）
+                    var prev = rollbackStack.Pop();
+                    if (prev.HasValue)
+                    {
+                        hpA = prev.Value.AttackerHpBefore;
+                        hpB = prev.Value.DefenderHpBefore;
+                        totalDmgToB = prev.Value.TotalDmgToBBefore;
+                        totalDmgToA = prev.Value.TotalDmgToABefore;
+                    }
+                }
+                else if (ctx.PendingRollback == RollbackSignal.PossessionRequested && hpA <= 0)
+                {
+                    // 夺舍续命：濒死触发 → 回滚上次致命伤害 → HP 恢复
+                    // Gate：对手含 thunder/pure_yang/buddha_light 标签 → 夺舍被压制
+                    if (!CheckPossessionGate(defenderPath))
+                    {
+                        var prev = rollbackStack.Pop();
+                        if (prev.HasValue)
+                        {
+                            hpA = prev.Value.AttackerHpBefore;
+                            hpB = prev.Value.DefenderHpBefore;
+                            totalDmgToB = prev.Value.TotalDmgToBBefore;
+                            totalDmgToA = prev.Value.TotalDmgToABefore;
+                        }
+                    }
+                }
+                ctx.PendingRollback = RollbackSignal.None;
 
                 // —— AC 4.3：dot/control 回合间结算 ——
                 TickDots(pendingDots, pendingControls, ref hpA, ref hpB);
@@ -407,6 +445,20 @@ namespace Jianghu.Cultivation
         {
             foreach (var x in list)
                 if (x == item) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// 夺舍 gate 检查（story fullstruct-007）：对手路径含 thunder/pure_yang/buddha_light 标签
+        /// → 夺舍被压制（return true=blocked）。雷电/纯阳/佛光克制阴邪夺舍。
+        /// </summary>
+        private static bool CheckPossessionGate(CultivationPathDef opponentPath)
+        {
+            foreach (var tag in opponentPath.SituationalTags)
+            {
+                if (tag == "thunder" || tag == "pure_yang" || tag == "buddha_light")
+                    return true; // gate blocked
+            }
             return false;
         }
     }

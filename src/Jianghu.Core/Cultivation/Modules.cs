@@ -138,5 +138,17 @@ namespace Jianghu.Cultivation
         public static EffectOp Special(string handlerId, int amount = 0, int amount2 = 0, string? note = null)
             => new EffectOp(EffectOpKind.Special, handlerId, amount, note,
                 Amount2: amount2, Rarity: EffectRarity.Unique);
+
+        /// <summary>
+        /// 分魂挡刀（OnDefend, ratio-Kind, story fullstruct-007）：将 incoming 伤害的 ratio%（Amount）转移到
+        /// 魂资源（Key=soulResourceKey），本体 HP 仅承受剩余 (100-ratio)% 伤害。ratio=100 则本体 HP 不减。
+        /// 魂资源经 CombatContext.ApplyResource 扣除（chokepoint 钳 [Min,Cap]）。
+        /// 功法门控：<see cref="GateType.HasMovementArt"/>（分魂挡刀需身法/分魂秘术类功法）。
+        /// </summary>
+        /// <param name="ratio">转移比例（0-100，= 伤害转入魂资源的百分比）</param>
+        /// <param name="soulResourceKey">魂资源键（默认 "soulHp"）</param>
+        public static EffectOp SoulSplit(int ratio, string soulResourceKey = "soulHp", string? note = null)
+            => new EffectOp(EffectOpKind.SoulSplit, soulResourceKey, ratio, note,
+                Trigger: EffectTrigger.OnDefend, Rarity: EffectRarity.Rare);
     }
 }
