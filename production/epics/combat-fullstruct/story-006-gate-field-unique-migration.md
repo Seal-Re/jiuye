@@ -1,7 +1,8 @@
 # Story 006: 结构化 Gate 字段 + 唯一档签名逐路全迁
 
 > **Epic**: combat-fullstruct
-> **Status**: Ready
+> **Status**: In Progress
+> **Last Updated**: 2026-06-21
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 中 (1d)

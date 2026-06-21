@@ -81,17 +81,29 @@ namespace Jianghu.Cultivation
         /// <summary>
         /// 反伤（ratio-Kind，OnDefend）：攻方受 incoming × num/den（读扣血前/不递归，§15.5；时序结算批4 接）。
         /// <paramref name="den"/> 自动钳 ≥1，Trigger 固定 OnDefend。铁山靠/护宝罡等反震积木。
+        /// 功法门控：<see cref="GateType.HasBodyArt"/>（需横练/护体类功法，story fullstruct-006）。
         /// </summary>
         public static EffectOp Reflect(int num, int den = 1, string? note = null)
             => new EffectOp(EffectOpKind.ReflectDamage, null, num, note,
-                Amount2: den < 1 ? 1 : den, Trigger: EffectTrigger.OnDefend, Rarity: EffectRarity.Rare);
+                Amount2: den < 1 ? 1 : den, Trigger: EffectTrigger.OnDefend, Rarity: EffectRarity.Rare,
+                Gate: GateType.HasBodyArt);
 
         /// <summary>
         /// 闪避（OnDefend，连续缩放）：减伤 = clamp((身法-命中+amount)×k, 0, maxReduce)（§15.2）。
-        /// 功法门控防御积木（无功法→能力 0，M5）。
+        /// 功法门控防御积木：<see cref="GateType.HasMovementArt"/>（需身法/轻功类功法，story fullstruct-006）。
         /// </summary>
         public static EffectOp Evade(int amount, string? note = null)
-            => new EffectOp(EffectOpKind.Evade, null, amount, note, Trigger: EffectTrigger.OnDefend);
+            => new EffectOp(EffectOpKind.Evade, null, amount, note, Trigger: EffectTrigger.OnDefend,
+                Gate: GateType.HasMovementArt);
+
+        // —— 稀有档 情境修正 ——
+
+        /// <summary>
+        /// 情境修正（OnUse/OnDefend 两用）：百分比修正，由 <see cref="SituationalResolver"/> 在 Phase 3 结算。
+        /// <paramref name="pct"/> = 整数百分比（可为负）。疾风遁符/钢令贯链/万象归符周天搬运等泛用辅助积木。
+        /// </summary>
+        public static EffectOp SituationalAdj(int pct, string? note = null)
+            => new EffectOp(EffectOpKind.AddSituationalAdj, null, pct, note);
 
         // —— 唯一档（Unique）签名机制走 SpecialModuleRegistry 注册式插件 ——
 

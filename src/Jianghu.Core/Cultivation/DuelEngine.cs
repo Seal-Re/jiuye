@@ -75,10 +75,6 @@ namespace Jianghu.Cultivation
             int peB = PowerEngine.Evaluate(defender.Cultivation, defender.Stats, defenderPath, limits);
             int hpA = peA, hpB = peB;
 
-            // —— AC 4.5：功法门控防御检查 ——
-            bool defCanEvade = HasMovementArt(defenderPath, defender.Cultivation);
-            bool defCanReflect = HasBodyArt(defenderPath, defender.Cultivation);
-
             // —— 造 CombatContext ——
             var ctx = new CombatContext(attacker.Cultivation, attackerPath, defender.Cultivation, defenderPath);
 
@@ -107,7 +103,7 @@ namespace Jianghu.Cultivation
                 var (dmgToB, reflectToA) = ResolveExchange(
                     activeASkill, effPeA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
-                    Side.Attacker, Side.Defender, defCanEvade, defCanReflect,
+                    Side.Attacker, Side.Defender,
                     pendingDots, pendingControls);
                 if (attackerControlled) dmgToB = 0;
 
@@ -115,8 +111,6 @@ namespace Jianghu.Cultivation
                     activeDSkill, effPeB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
-                    HasMovementArt(attackerPath, attacker.Cultivation),
-                    HasBodyArt(attackerPath, attacker.Cultivation),
                     pendingDots, pendingControls);
                 if (defenderControlled) dmgToA = 0;
 
@@ -185,7 +179,6 @@ namespace Jianghu.Cultivation
             CultivationPathDef attackerPath, CultivationPathDef defenderPath,
             CombatContext ctx, LimitsConfig limits, SituationalResolver? resolver,
             Side attackerSide, Side defenderSide,
-            bool defCanEvade, bool defCanReflect,
             List<DotEntry> pendingDots, List<ControlEntry> pendingControls)
         {
             const int Scale = 100;
@@ -224,8 +217,7 @@ namespace Jianghu.Cultivation
                 foreach (var op in defSkill.OnUse)
                 {
                     if (op.Trigger != EffectTrigger.OnDefend) continue;
-                    if (op.Kind == EffectOpKind.Evade && !defCanEvade) continue;
-                    if (op.Kind == EffectOpKind.ReflectDamage && !defCanReflect) continue;
+                    // Gate check now in ModuleResolver.ApplyOnDefend via op.Gate field
                     int dmgUnscaled = (int)(dmg / Scale);
                     int result = ModuleResolver.ApplyOnDefend(dmgUnscaled, op, ctx, defenderSide, out int reflectDmg);
                     dmg = (long)result * Scale + (dmg % Scale);

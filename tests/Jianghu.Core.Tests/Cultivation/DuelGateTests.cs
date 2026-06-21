@@ -85,7 +85,9 @@ namespace Jianghu.Core.Tests.Cultivation
         [Fact]
         public void G1_ReflectDamage_ReducesOnIncoming()
         {
-            var ctx = Ctx();
+            var bodyArt = new ArtDef("iron_skin", "铁骨", 1, "body", Array.Empty<EffectOp>());
+            var bodyCat = new ArtCategoryDef("body", "body", 1, 1, new[] { bodyArt });
+            var ctx = Ctx(defArts: new[] { bodyCat });
             var op = Modules.Reflect(1, 2);
             int result = ModuleResolver.ApplyOnDefend(100, op, ctx, Side.Defender, out int reflectDmg);
             Assert.Equal(100, result); // 反伤不减来袭
@@ -95,7 +97,9 @@ namespace Jianghu.Core.Tests.Cultivation
         [Fact]
         public void G1_Evade_ReducesDamage()
         {
-            var ctx = Ctx();
+            var moveArt = new ArtDef("shadow_step", "暗影步", 1, "movement", Array.Empty<EffectOp>());
+            var moveCat = new ArtCategoryDef("movement", "movement", 1, 1, new[] { moveArt });
+            var ctx = Ctx(defArts: new[] { moveCat });
             var op = Modules.Evade(40);
             int result = ModuleResolver.ApplyOnDefend(100, op, ctx, Side.Defender, out int _);
             Assert.True(result < 100, "Evade should reduce incoming damage");
@@ -283,7 +287,9 @@ namespace Jianghu.Core.Tests.Cultivation
         [Fact]
         public void S15_5_ReflectDamage_ReadsIncomingBeforeDeduct()
         {
-            var ctx = Ctx();
+            var bodyCat = new ArtCategoryDef("body", "body", 1, 1,
+                new[] { new ArtDef("steel_guard", "钢卫", 1, "body", Array.Empty<EffectOp>()) });
+            var ctx = Ctx(defArts: new[] { bodyCat });
             var op = Modules.Reflect(1, 2);
             // ApplyOnDefend reads incoming=100 (pre-HP deduct)
             int result = ModuleResolver.ApplyOnDefend(100, op, ctx, Side.Defender, out int reflectDmg);
@@ -332,18 +338,26 @@ namespace Jianghu.Core.Tests.Cultivation
         static CombatContext Ctx(
             (string Key, int Val)? atkRes = null,
             (string Key, int Val)? defRes = null,
-            string[]? defTags = null)
+            string[]? defTags = null,
+            ArtCategoryDef[]? defArts = null)
         {
-            static CultivationState MakeSt(string pathId, (string Key, int Val)? res)
+            static CultivationState MakeSt(string pathId, (string Key, int Val)? res,
+                ArtCategoryDef[]? arts = null)
             {
                 var defs = new List<ResourceDef>();
                 if (res is { } r) defs.Add(new ResourceDef(r.Key, 0, 1000, r.Val));
-                return CultivationState.NewForPath(pathId, defs);
+                // Collect first art ID from each category so gate checks pass
+                var chosenArtIds = new List<string>();
+                if (arts != null)
+                    foreach (var cat in arts)
+                        if (cat.Arts.Count > 0)
+                            chosenArtIds.Add(cat.Arts[0].Id);
+                return CultivationState.NewForPath(pathId, defs, chosenArtIds, Array.Empty<string>());
             }
             var atk = MakeSt("atk", atkRes);
-            var def = MakeSt("def", defRes);
+            var def = MakeSt("def", defRes, defArts);
             var atkPath = MinPath("atk", arts: Array.Empty<ArtCategoryDef>());
-            var defPath = MinPath("def", arts: Array.Empty<ArtCategoryDef>());
+            var defPath = MinPath("def", arts: defArts ?? Array.Empty<ArtCategoryDef>());
             // patch tags
             if (defTags != null)
                 defPath = defPath with { SituationalTags = defTags };

@@ -23,9 +23,14 @@ namespace Jianghu.Cultivation
             return value * ratio / 10;
         }
 
-        /// <summary>OnUse 算子施加于本次伤害，返回修正后整数 dmg。</summary>
+        /// <summary>OnUse 算子施加于本次伤害，返回修正后整数 dmg。
+        /// 门控检查（story fullstruct-006）：若 EffectOp.Gate != None 且攻方不满足门控，静默跳过（dmg 不变）。</summary>
         public static int ApplyOnUse(int dmg, EffectOp m, CombatContext ctx)
         {
+            // 功法门控检查：攻方不满足门控 → 跳过操作（dmg 不变，不抛异常）
+            if (m.Gate != GateType.None && !ctx.CheckGate(Side.Attacker, m.Gate))
+                return dmg;
+
             switch (m.Kind)
             {
                 case EffectOpKind.AddPenInteger:
@@ -103,6 +108,11 @@ namespace Jianghu.Cultivation
         public static int ApplyOnDefend(int incomingDmg, EffectOp m, CombatContext ctx, Side defenderSide, out int reflectDmg)
         {
             reflectDmg = 0;
+
+            // 功法门控检查（story fullstruct-006）：防方不满足门控 → 跳过操作（dmg 不变，不抛异常）
+            if (m.Gate != GateType.None && !ctx.CheckGate(defenderSide, m.Gate))
+                return incomingDmg;
+
             switch (m.Kind)
             {
                 case EffectOpKind.AddFlatDR:

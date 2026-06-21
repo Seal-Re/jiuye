@@ -54,13 +54,15 @@ namespace Jianghu.Cultivation
     /// <see cref="Amount"/> = 整数量；<see cref="Note"/> = flavor，不参与结算。
     /// <see cref="Amount2"/> = 次参/分母（den），默认 0；
     /// <see cref="Trigger"/> = 战斗期何时 fire，默认 OnUse；
-    /// <see cref="Rarity"/> = 稀有度，默认 Common。
+    /// <see cref="Rarity"/> = 稀有度，默认 Common；
+    /// <see cref="Gate"/> = 功法门控（story fullstruct-006），默认 None（无门控）。
     /// </summary>
     public sealed record EffectOp(
         EffectOpKind Kind, string? Key, int Amount, string? Note,
         int Amount2 = 0,
         EffectTrigger Trigger = EffectTrigger.OnUse,
-        EffectRarity Rarity = EffectRarity.Common);
+        EffectRarity Rarity = EffectRarity.Common,
+        GateType Gate = GateType.None);
 
     /// <summary>
     /// 有限算子集解释器（spec §7），确定性纯整数。

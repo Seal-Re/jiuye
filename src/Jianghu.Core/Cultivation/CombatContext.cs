@@ -31,8 +31,8 @@ namespace Jianghu.Cultivation
             _defenderPath = defenderPath;
         }
 
-        private CultivationState StateOf(Side s) => s == Side.Attacker ? _attacker : _defender;
-        private CultivationPathDef PathOf(Side s) => s == Side.Attacker ? _attackerPath : _defenderPath;
+        internal CultivationState StateOf(Side s) => s == Side.Attacker ? _attacker : _defender;
+        internal CultivationPathDef PathOf(Side s) => s == Side.Attacker ? _attackerPath : _defenderPath;
 
         /// <summary>读该方资源（无该 key → 0）。A.2 伪资源: daoHeart/innerDemon/comprehension 读 CultivationState 字段。</summary>
         public int ReadResource(Side s, string key)
@@ -98,6 +98,107 @@ namespace Jianghu.Cultivation
         /// <summary>提取指定方 relation delta。</summary>
         public int GetRelationDelta(Side s)
             => _relationDeltas.TryGetValue(s, out int d) ? d : 0;
+
+        // —— 功法门控（story fullstruct-006）——
+
+        /// <summary>
+        /// 检查指定方是否满足门控条件。所有 flag 位必须全部满足（AND 语义）。
+        /// GateType.None 始终返回 true。
+        /// role-based gate（movement/swordwill/body/core_forge 等）直接查 ArtCategoryDef.Role；
+        /// resource-based gate（formation/alchemy）据 path 专属资源判定。
+        /// </summary>
+        public bool CheckGate(Side side, GateType gate)
+        {
+            if (gate == GateType.None) return true;
+
+            var state = StateOf(side);
+            var path = PathOf(side);
+
+            if (gate.HasFlag(GateType.HasMovementArt) && !HasRoleArt(path, state, "movement"))
+                return false;
+            if (gate.HasFlag(GateType.HasSwordIntent) && !HasRoleArt(path, state, "swordwill"))
+                return false;
+            if (gate.HasFlag(GateType.HasBodyArt) && !CheckBodyGate(path, state))
+                return false;
+            if (gate.HasFlag(GateType.HasArtifactArts) && !CheckArtifactGate(path, state))
+                return false;
+            if (gate.HasFlag(GateType.HasFormation) && !CheckFormationGate(path, state))
+                return false;
+            if (gate.HasFlag(GateType.HasAlchemy) && !CheckAlchemyGate(path, state))
+                return false;
+
+            return true;
+        }
+
+        private static bool HasRoleArt(CultivationPathDef path, CultivationState state, string role)
+        {
+            foreach (var cat in path.ArtCategories)
+            {
+                if (cat.Role != role) continue;
+                if (HasAnyChosenArt(state, cat)) return true;
+            }
+            return false;
+        }
+
+        private static bool CheckBodyGate(CultivationPathDef path, CultivationState state)
+        {
+            if (HasRoleArt(path, state, "body")) return true;
+            if (HasResourceDef(path, "qixue") || HasResourceDef(path, "henglian"))
+                return HasAnyArtInPath(state, path);
+            return false;
+        }
+
+        private static bool CheckArtifactGate(CultivationPathDef path, CultivationState state)
+        {
+            if (HasRoleArt(path, state, "core_forge")) return true;
+            if (HasRoleArt(path, state, "channel_mind")) return true;
+            if (HasRoleArt(path, state, "named_artifacts")) return true;
+            return false;
+        }
+
+        private static bool CheckFormationGate(CultivationPathDef path, CultivationState state)
+        {
+            bool isFormationPath = HasResourceDef(path, "stones")
+                || HasResourceDef(path, "setupProgress")
+                || HasResourceDef(path, "compute");
+            return isFormationPath && HasAnyArtInPath(state, path);
+        }
+
+        private static bool CheckAlchemyGate(CultivationPathDef path, CultivationState state)
+        {
+            bool isAlchemyPath = HasResourceDef(path, "flameTier")
+                || HasResourceDef(path, "recipeCount")
+                || HasResourceDef(path, "pillStock");
+            return isAlchemyPath && HasAnyArtInPath(state, path);
+        }
+
+        private static bool HasResourceDef(CultivationPathDef path, string key)
+        {
+            foreach (var r in path.Resources)
+                if (r.Key == key) return true;
+            return false;
+        }
+
+        private static bool HasAnyArtInPath(CultivationState state, CultivationPathDef path)
+        {
+            foreach (var cat in path.ArtCategories)
+                if (HasAnyChosenArt(state, cat)) return true;
+            return false;
+        }
+
+        private static bool HasAnyChosenArt(CultivationState state, ArtCategoryDef cat)
+        {
+            foreach (var art in cat.Arts)
+                if (ListContains(state.ChosenArtIds, art.Id)) return true;
+            return false;
+        }
+
+        private static bool ListContains(System.Collections.Generic.IReadOnlyList<string> list, string item)
+        {
+            foreach (var x in list)
+                if (x == item) return true;
+            return false;
+        }
 
         /// <summary>应用所有 EP 修改器到给定 PE 值，返回修正后 PE。</summary>
         public int ApplyEPModifiers(Side s, int basePE)

@@ -1,7 +1,7 @@
 # Story 005: PostMul ModKind + 负向压制
 
 > **Epic**: combat-fullstruct
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 中 (1.5d)
@@ -18,12 +18,12 @@ PostMul ModKind 是战斗效果链中的乘法修正层——在 FlatPen/FlatDR 
 
 ## Acceptance Criteria
 
-- [ ] 5.1 PostMul ModKind ≥ 3 种（LawSuppress/化形态/文宫/天道压制）各自独立生效
-- [ ] 5.2 负向压制 ≥ 2 种（压制方对特定目标类型的战力衰减）
-- [ ] 5.3 PostMul 在 FlatPen/FlatDR 之后乘算（乘法序验证）
-- [ ] 5.4 压制值钳位 [Min,Max]（不过压、不反转）
-- [ ] 5.5 全 UT 0-12 带上 PostMul 后 pe 仍收敛在合理范围
-- [ ] 5.6 全量绿 + IL 浮点零 + off 逐字节
+- [x] 5.1 PostMul ModKind ≥ 3 种（LawSuppress/化形态/文宫/天道压制）各自独立生效
+- [x] 5.2 负向压制 ≥ 2 种（压制方对特定目标类型的战力衰减）
+- [x] 5.3 PostMul 在 FlatPen/FlatDR 之后乘算（乘法序验证）
+- [x] 5.4 压制值钳位 [Min,Max]（不过压、不反转）
+- [x] 5.5 全 UT 0-12 带上 PostMul 后 pe 仍收敛在合理范围
+- [x] 5.6 全量绿 + IL 浮点零 + off 逐字节
 
 ## Implementation Notes
 
