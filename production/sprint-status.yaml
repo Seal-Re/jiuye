@@ -21,7 +21,7 @@ stories:
   # —— Must Have ——
   - id: "fullstruct-005"
     name: "PostMul ModKind + 负向压制 (LawSuppress/化形态/文宫/天道压制)"
-    file: ""
+    file: "production/epics/combat-fullstruct/story-005-postmul-suppression.md"
     priority: must-have
     status: ready-for-dev
     owner: ""
@@ -30,7 +30,7 @@ stories:
     completed: ""
   - id: "fullstruct-006"
     name: "结构化 Gate 字段 + 唯一档签名逐路全迁"
-    file: ""
+    file: "production/epics/combat-fullstruct/story-006-gate-field-unique-migration.md"
     priority: must-have
     status: ready-for-dev
     owner: ""
@@ -39,7 +39,7 @@ stories:
     completed: ""
   - id: "balance-001"
     name: "BalanceMatrixDump harness: 全21路×UT0-12 战力矩阵dump"
-    file: ""
+    file: "production/epics/balance-cross/story-001-balance-matrix-dump.md"
     priority: must-have
     status: ready-for-dev
     owner: ""
@@ -49,7 +49,7 @@ stories:
   # —— Should Have ——
   - id: "fullstruct-007"
     name: "结算回滚栈 (因果逆演/夺舍续命/分魂挡刀)"
-    file: ""
+    file: "production/epics/combat-fullstruct/story-007-rollback-stack.md"
     priority: should-have
     status: backlog
     owner: ""
@@ -58,7 +58,7 @@ stories:
     completed: ""
   - id: "balance-002"
     name: "INV-CROSS 对拍胜率实证 (同UT胜率∈[40,60]% gate)"
-    file: ""
+    file: "production/epics/balance-cross/story-002-inv-cross-duel-gate.md"
     priority: should-have
     status: backlog
     owner: ""
@@ -68,7 +68,7 @@ stories:
   # —— Nice to Have ——
   - id: "fullstruct-008"
     name: "非战斗机制 (丹改四维 + 卖丹经济晋升)"
-    file: ""
+    file: "production/epics/combat-fullstruct/story-008-noncombat-mechanics.md"
     priority: nice-to-have
     status: backlog
     owner: ""
@@ -77,7 +77,7 @@ stories:
     completed: ""
   - id: "cultivation-a1-001"
     name: "10态流程状态机 (CultivationPhase 骨架)"
-    file: ""
+    file: "production/epics/cultivation-a1-rest/story-001-cultivation-phase-fsm.md"
     priority: nice-to-have
     status: backlog
     owner: ""
