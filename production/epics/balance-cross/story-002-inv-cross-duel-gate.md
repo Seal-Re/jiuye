@@ -1,7 +1,7 @@
 # Story 002: INV-CROSS 对拍胜率实证 gate
 
 > **Epic**: balance-cross
-> **Status**: Backlog
+> **Status**: Review
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 中 (1d)
@@ -19,13 +19,13 @@ balance-001 dump 暴露全路战力矩阵后，本 story 做 INV-CROSS 对拍胜
 
 ## Acceptance Criteria
 
-- [ ] 2.1 全路组合对拍 ≥ 50 场/对（同 UT 内随机取样 K 对）
-- [ ] 2.2 首轮 gate：同 UT 胜率分布 ∈ [35,65]%（可接受带，非最终 [40,60]%）
-- [ ] 2.3 C2 碾压单调性：UT 差 ≥ 2 → 高 UT 胜率 ≥ 80%
-- [ ] 2.4 C3 辅助路豁免：Dan/Array/Qixiu 同锚锁 UT 在合理 power 带（非战斗路不强求 50%）
-- [ ] 2.5 跨 3 UT 以上碾压 → 胜率 ≥ 95%
-- [ ] 2.6 胜率矩阵可复现（同种子同矩阵）
-- [ ] 2.7 全量绿 + IL 浮点零 + off 逐字节
+- [x] 2.1 全路组合对拍 ≥ 50 场/对（同 UT 内随机取样 K 对）
+- [x] 2.2 首轮 gate：同 UT 胜率分布 ∈ [35,65]%（可接受带，非最终 [40,60]%）
+- [x] 2.3 C2 碾压单调性：UT 差 ≥ 2 → 高 UT 胜率 ≥ 80%
+- [x] 2.4 C3 辅助路豁免：Dan/Array/Qixiu 同锚锁 UT 在合理 power 带（非战斗路不强求 50%）
+- [x] 2.5 跨 3 UT 以上碾压 → 胜率 ≥ 95%
+- [x] 2.6 胜率矩阵可复现（同种子同矩阵）
+- [x] 2.7 全量绿 + IL 浮点零 + off 逐字节
 
 ## Implementation Notes
 
