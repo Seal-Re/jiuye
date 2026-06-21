@@ -178,12 +178,12 @@ namespace Jianghu.Cultivation.Paths
                 // 护身丹爆（自保）：战斗中吞服储备丹,directPower 临时+realm×2 维持3结算步;纯自卫不增杀伤(丹修无主动杀招写照)。
                 // 消耗1枚成品丹(pillStock)。
                 new CombatSkillDef("sk_da_hushen", "护身丹爆", 1,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 12, "吞服储备丹,directPower临时+realm×2维持3结算步,纯自卫不增杀伤(丹修无主动杀招)") },
+                    new[] { Modules.FlatDR(12, "吞服储备丹,directPower临时+realm×2维持3结算步,纯自卫不增杀伤(丹修无主动杀招)") },
                     new Dictionary<string, int> { { "pillStock", 1 } }),
                 // 回元急救（资源克制·正边）：对濒死友方即时灌服回元丹,根骨+3拉回战力并造强恩义正边+12(L1);把疗伤变人情债。
                 // 消耗1枚回元丹(pillStock)。
                 new CombatSkillDef("sk_da_huiyuan", "回元急救", 2,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 10, "对濒死友方即时灌服回元丹:根骨+3拉回战力并造强恩义正边+12(L1造边),把疗伤变人情债(资源克制造网)") },
+                    new[] { Modules.FlatDR(10, "对濒死友方即时灌服回元丹:根骨+3拉回战力并造强恩义正边+12(L1造边),把疗伤变人情债(资源克制造网)") },
                     new Dictionary<string, int> { { "pillStock", 1 } }),
                 // 毒烟丹·撒豆（毒丹暗杀分支）：投掷毒烟丹,对当前节点全体非己目标内力-2并降其受击战力1步;造群体微负边(一念发情丹乱军式)。
                 // 消耗1枚毒丹(pillStock),暴露概率低。
@@ -200,7 +200,7 @@ namespace Jianghu.Cultivation.Paths
                 // 聚丹换酬（economic 维度）：卖丹换灵石/积分推进 realm 与资源(白小纯卖丹十万积分升阶);造化产出直接转修为,本路独有非武力晋升通道。
                 // 出让成品丹库存(pillStock)。
                 new CombatSkillDef("sk_da_huanchou", "聚丹换酬", 1,
-                    new[] { new EffectOp(EffectOpKind.AddSituationalAdj, null, 0, "卖丹换灵石/积分推进realm与资源(L1 economic 晋升通道),造化产出直接转修为(白小纯卖丹十万积分升阶)") },
+                    new[] { Modules.SituationalAdj(0, "卖丹换灵石/积分推进realm与资源(L1 economic 晋升通道),造化产出直接转修为(白小纯卖丹十万积分升阶)") },
                     new Dictionary<string, int> { { "pillStock", 2 } }),
             };
 

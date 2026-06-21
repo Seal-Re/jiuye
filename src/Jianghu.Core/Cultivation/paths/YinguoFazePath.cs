@@ -207,7 +207,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "retributionDebt", 8 } }),
                 // 须弥遁影[escape]：'缩地'瞬移脱战/接战择一,遁后下一法则技 RetributionDebt 消耗-4。本体太脆时的活路(破'近身快攻'天敌)。
                 new CombatSkillDef("sk_yg_dunying", "须弥遁影", 2,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 8, "缩地瞬移脱战/接战择一,遁后下一法则技 RetributionDebt 消耗-4,本体太脆时的活路(破近身快攻天敌)") },
+                    new[] { Modules.FlatDR(8, "缩地瞬移脱战/接战择一,遁后下一法则技 RetributionDebt 消耗-4,本体太脆时的活路(破近身快攻天敌)") },
                     new Dictionary<string, int> { { "retributionDebt", 3 } }),
                 // 承负清债·了断[brake]：主动以一回合无为不施 + 渡化场上一条恩怨边,换 RetributionDebt-15。本路核心刹车(强制对冲'越用越虚')。
                 new CombatSkillDef("sk_yg_qingzhai", "承负清债·了断", 3,

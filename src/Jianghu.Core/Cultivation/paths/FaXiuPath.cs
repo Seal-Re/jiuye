@@ -184,7 +184,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "manaPool", 10 } }),
                 // 灵犀御空：御风飞遁,身法折算闪避+6,规避物理近身一回合。manaPool≥8,消耗8。
                 new CombatSkillDef("sk_fa_lingxi", "灵犀御空", 2,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 6, "御风飞遁,身法折算闪避+6,规避物理近身一回合(对抗近战)") },
+                    new[] { Modules.FlatDR(6, "御风飞遁,身法折算闪避+6,规避物理近身一回合(对抗近战)") },
                     new Dictionary<string, int> { { "manaPool", 8 } }),
                 // 符印护体·闪：符印遁形闪避（OnDefend）。需符印→门控。manaPool≥6,消耗6。
                 // B5扩21: Evade — 法修符印护体闪避,Amount=30→30%来袭减免。

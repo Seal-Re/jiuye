@@ -204,16 +204,16 @@ namespace Jianghu.Cultivation.Paths
                 // 强令催动 [t2]：超频驱动指定傀,该傀constructPower×150/100持续3tick,结束后机括过载constructTier临时−1(透支构件换爆发)。
                 // B5扫尾 defer(红线A.8): constructPower×倍率=逐傀派生量(非聚合 fleetWeighted 资源),真 per-construct derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_kl_qiangling", "强令催动", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 24, "指定傀constructPower×150/100持续3tick(constructPower derived→FULLSTRUCT defer),后机括过载constructTier临时−1(透支构件换爆发,死物不喊累会损耗)") },
+                    new[] { Modules.FlatPen(24, "指定傀constructPower×150/100持续3tick(constructPower derived→FULLSTRUCT defer),后机括过载constructTier临时−1(透支构件换爆发,死物不喊累会损耗)") },
                     new Dictionary<string, int> { { "fleetWeighted", 6 } }),
                 // 机枢自爆·焚甲 [t4]：引爆一具傀造constructPower×300/100一次性范围爆发,该傀永久移出名册(资源换斩杀,消耗战收尾);不损其余傀。
                 // B5扫尾 defer(红线A.8): constructPower×倍率=逐傀派生量(非聚合 fleetWeighted 资源),真 per-construct derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_kl_jishuzibao", "机枢自爆·焚甲", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "引爆一具傀constructPower×300/100一次性范围爆发(constructPower derived→FULLSTRUCT defer),该傀永久移出名册(资源换斩杀);不损其余傀(死物无纽带网震荡)") },
+                    new[] { Modules.FlatPen(36, "引爆一具傀constructPower×300/100一次性范围爆发(constructPower derived→FULLSTRUCT defer),该傀永久移出名册(资源换斩杀);不损其余傀(死物无纽带网震荡)") },
                     new Dictionary<string, int> { { "fleetWeighted", 12 } }),
                 // 镇魂不乱·钢令 [t3]：被音修乱兽/精神扰动笼罩时,钢令贯链——死物本免疫心智,本技额外把范围内被乱己方活体援军/契约兽拉回钢令节奏并清除被乱状态(反·乱兽)。
                 new CombatSkillDef("sk_kl_zhenhun", "镇魂不乱·钢令", 3,
-                    new[] { new EffectOp(EffectOpKind.AddSituationalAdj, null, 10, "钢令贯链:把范围内被乱己方活体援军/契约兽拉回节奏并清除被乱状态(死物路独有心智净土反制)") },
+                    new[] { Modules.SituationalAdj(10, "钢令贯链:把范围内被乱己方活体援军/契约兽拉回节奏并清除被乱状态(死物路独有心智净土反制)") },
                     new Dictionary<string, int> { { "fleetWeighted", 4 } }),
                 // 断链应急·影替傀 [t4]：本体将受致命/斩首打击时触发,指定影替傀代受并把本体瞬移出阵,阻止本体斩首→全军失令一次(保命技;与残命惯性大法联动彻底化解一次断链)。
                 // B5 批2：断链应急(影替代受致命/瞬移本体/commandSevered 复位)是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,

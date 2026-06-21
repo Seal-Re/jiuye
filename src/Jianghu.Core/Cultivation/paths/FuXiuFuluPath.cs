@@ -189,17 +189,17 @@ namespace Jianghu.Cultivation.Paths
                 //   本路 Resources 仅 talismanStore/fuPotency）→ PenFromResource 锚不到资源 → 显式 deferred FULLSTRUCT
                 //   （红线 A.8 不静默,真 stockFirepower 派生求和 L1 IDerivedProvider 后接）,保 FlatPen 占位破防量。
                 new CombatSkillDef("sk_fu_qishe", "符海齐射", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 36, "一次性引爆多张攻符覆盖全场,对每邻近敌stockFirepower/8+悟性/2(stockFirepower=derived非资源→FULLSTRUCT defer),敌越多总伤越高") },
+                    new[] { Modules.FlatPen(36, "一次性引爆多张攻符覆盖全场,对每邻近敌stockFirepower/8+悟性/2(stockFirepower=derived非资源→FULLSTRUCT defer),敌越多总伤越高") },
                     new Dictionary<string, int> { { "talismanStore", 2 } }),
                 // 护身金光符（防·一次性挡）t2:即贴护身符吸收gradeFirepower[t2]×2+内力伤害并免一次穿透,可贴己/贴1友军;
                 //   castWindow=1。耗 talismanStore×1。
                 new CombatSkillDef("sk_fu_hushen", "护身金光符", 2,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 18, "即贴护身符吸收gradeFirepower[t2]×2+内力伤害并免疫一次穿透,可贴己或1友军(扛剑修/体修一击)") },
+                    new[] { Modules.FlatDR(18, "即贴护身符吸收gradeFirepower[t2]×2+内力伤害并免疫一次穿透,可贴己或1友军(扛剑修/体修一击)") },
                     new Dictionary<string, int> { { "talismanStore", 1 } }),
                 // 疾风遁符（辅/逃·放风筝）t3:贴疾风符强制位移拉距,规避当回合一次必杀并使下回合对近战敌攻符判定+5;
                 //   castWindow=0(应急0起手)。耗 talismanStore×1。
                 new CombatSkillDef("sk_fu_jifeng", "疾风遁符", 3,
-                    new[] { new EffectOp(EffectOpKind.AddSituationalAdj, null, 5, "贴疾风符强制位移/拉开距离,规避当回合一次必杀,下回合对近战敌攻符判定+5(放风筝克近战起手)") },
+                    new[] { Modules.SituationalAdj(5, "贴疾风符强制位移/拉开距离,规避当回合一次必杀,下回合对近战敌攻符判定+5(放风筝克近战起手)") },
                     new Dictionary<string, int> { { "talismanStore", 1 } }),
                 // 破阵焚符（控·破被动防御）t3:对敌方阵法/被动防御流/护盾引爆破阵符,使其一张在场阵归0或护盾power清零;
                 //   castWindow=1。耗 talismanStore×1。
@@ -225,7 +225,7 @@ namespace Jianghu.Cultivation.Paths
                 // 纸人金蝉（保命·反斩首）t5:被斩首/濒死时一次性纸人替身硬抗致死伤并原地脱战(每境界1次);缓役使物断线斩首脆性。
                 //   耗 talismanStore×1(被动触发,高品符为引)。
                 new CombatSkillDef("sk_fu_jinchan", "纸人金蝉", 5,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 0, "被斩首/濒死时一次性纸人替身硬抗致死伤并原地脱战(每境界1次),缓操控者被斩首→役使物断线脆性(被动触发)") },
+                    new[] { Modules.FlatDR(0, "被斩首/濒死时一次性纸人替身硬抗致死伤并原地脱战(每境界1次),缓操控者被斩首→役使物断线脆性(被动触发)") },
                     new Dictionary<string, int> { { "talismanStore", 1 } }),
             };
 

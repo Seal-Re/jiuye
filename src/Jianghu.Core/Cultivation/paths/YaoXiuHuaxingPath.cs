@@ -216,11 +216,11 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "yaoDan", 6 } }),
                 // 兽躯硬抗·铜筋：1回合内 根骨态减免×2,把整段攻势硬扛成擦伤(妖修版铁山靠);专破被放风筝前的接战窗口。妖丹15。(保命/扛接战类)
                 new CombatSkillDef("sk_yx_tongjin", "兽躯硬抗·铜筋", 2,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 12, "1回合内根骨态减免×2,把整段攻势硬扛成擦伤(类体修铁山靠妖修版),专破被放风筝前的接战窗口") },
+                    new[] { Modules.FlatDR(12, "1回合内根骨态减免×2,把整段攻势硬扛成擦伤(类体修铁山靠妖修版),专破被放风筝前的接战窗口") },
                     new Dictionary<string, int> { { "yaoDan", 15 } }),
                 // 化形遁影：化形度≥阈入人形态瞬遁/拟人混入,脱战或规避斩妖/非人锁定一次;遁后本场斩妖类counterKey对己按0计1回合。妖丹8。(规避斩妖/保命类)
                 new CombatSkillDef("sk_yx_dunying", "化形遁影", 2,
-                    new[] { new EffectOp(EffectOpKind.AddSituationalAdj, null, 0, "化形度≥阈入人形态瞬遁/拟人混入,脱战或规避斩妖/非人类锁定一次;遁后本场斩妖类counterKey对己按0计1回合(规避正道斩妖保命术)") },
+                    new[] { Modules.SituationalAdj(0, "化形度≥阈入人形态瞬遁/拟人混入,脱战或规避斩妖/非人类锁定一次;遁后本场斩妖类counterKey对己按0计1回合(规避正道斩妖保命术)") },
                     new Dictionary<string, int> { { "yaoDan", 8 } }),
                 // 噬妖回元：扑杀/重伤目标后掠夺精血妖气,回妖丹+4、本场根骨+2;击杀妖类额外妖丹+4(轻量噬妖无返祖反噬)。妖丹2。
                 new CombatSkillDef("sk_yx_huiyuan", "噬妖回元", 1,
@@ -232,7 +232,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "yaoDan", 6 } }),
                 // 玄煞兽鳞罩：起妖煞护体抵下次伤害=妖丹×2;被纯阳/雷法/佛光攻击时该护罩仅减半失效(兼防天克的刹车)。妖丹5。(防天克/保命类)
                 new CombatSkillDef("sk_yx_linzhao", "玄煞兽鳞罩", 2,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 10, "起妖煞护体抵下次伤害=妖丹×2;被纯阳/雷法/佛光攻击时该护罩仅减半失效而非全失(兼防本路天克的刹车之一)") },
+                    new[] { Modules.FlatDR(10, "起妖煞护体抵下次伤害=妖丹×2;被纯阳/雷法/佛光攻击时该护罩仅减半失效而非全失(兼防本路天克的刹车之一)") },
                     new Dictionary<string, int> { { "yaoDan", 5 } }),
                 // 妖兽铠·反震：妖兽鳞甲反震（OnDefend）。yaoDan≥8,消耗8。
                 // B5扩21: ReflectDamage — 妖修妖兽鳞甲反震,Amount=1/Amount2=4→1/4来袭伤害反震攻方。

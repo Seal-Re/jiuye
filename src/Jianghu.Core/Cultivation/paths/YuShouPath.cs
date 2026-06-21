@@ -190,19 +190,19 @@ namespace Jianghu.Cultivation.Paths
                 // 嗜血催狂：催动指定灵兽狂化,该兽 beastPower×150/100 持续3 tick,结束后 bond−20(透支纽带换爆发)。门槛 bond≥20。
                 // B5扫尾 defer(红线A.8): beastPower×倍率=逐兽派生量(非聚合 rosterPower 资源),真 per-beast derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_yu_cuikuang", "嗜血催狂", 2,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 18, "指定兽 beastPower×150/100 狂化3 tick(beastPower derived→FULLSTRUCT defer);透支纽带,结束 bond−20") },
+                    new[] { Modules.FlatPen(18, "指定兽 beastPower×150/100 狂化3 tick(beastPower derived→FULLSTRUCT defer);透支纽带,结束 bond−20") },
                     new Dictionary<string, int> { { "bond", 20 } }),
                 // 万兽齐鸣·镇魂：全在役兽齐吼,反制范围内音修乱兽/精神扰动并清我方被乱,bond 全体回+10(反·乱兽)。内力高。
                 new CombatSkillDef("sk_yu_zhenhun", "万兽齐鸣·镇魂", 3,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddSituationalAdj, null, 0, "反制音修乱兽/精神扰动并清我方被乱状态"),
+                        Modules.SituationalAdj(0, "反制音修乱兽/精神扰动并清我方被乱状态"),
                         new EffectOp(EffectOpKind.AddResource, "bond", 10, "全体灵兽 bond 回+10(反·乱兽稳纽带)"),
                     },
                     new Dictionary<string, int>()),
                 // 断线应急·影替：本体将受致命/斩首打击时触发,指定护主兽代受并瞬移本体出阵,阻止「斩首→全兽崩散」一次。门槛 bond≥15(护主兽当场脱契)。
                 new CombatSkillDef("sk_yu_yingti", "断线应急·影替", 4,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 999, "护主兽代受致命/斩首一次并瞬移本体出阵(克斩首脆性的保命技,近似全免一次)") },
+                    new[] { Modules.FlatDR(999, "护主兽代受致命/斩首一次并瞬移本体出阵(克斩首脆性的保命技,近似全免一次)") },
                     new Dictionary<string, int> { { "bond", 15 } }),
                 // 灵兽献祭·爆体：献祭一只契约灵兽,造成等于其 beastPower×300/100 的一次性范围爆发,该兽永久移出栏位。bond≥5(纽带网震荡−5)。
                 // B5 批2：本招伤害=单兽 beastPower×300/100（逐兽派生量,非聚合 rosterPower）+ 多算子(loss rosterPower) →
@@ -210,7 +210,7 @@ namespace Jianghu.Cultivation.Paths
                 new CombatSkillDef("sk_yu_xianji", "灵兽献祭·爆体", 4,
                     new[]
                     {
-                        new EffectOp(EffectOpKind.AddPenInteger, null, 45, "献祭一兽,等于其 beastPower×300/100 范围爆发(beastPower×300=逐兽derived→FULLSTRUCT defer,该兽永久移出栏位)"),
+                        Modules.FlatPen(45, "献祭一兽,等于其 beastPower×300/100 范围爆发(beastPower×300=逐兽derived→FULLSTRUCT defer,该兽永久移出栏位)"),
                         new EffectOp(EffectOpKind.AddResource, "rosterPower", -10, "永久损失一只灵兽,兽群强度回落"),
                     },
                     new Dictionary<string, int> { { "bond", 5 } }),

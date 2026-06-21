@@ -159,12 +159,12 @@ namespace Jianghu.Cultivation.Paths
                 // 算尽·叠杀：本步将在场所有阵 power 之和额外计一次入伤害(多阵叠加总爆发);需 compute≥30 撑联动 + 在场阵≥3 + stones-40。
                 // B5批2: Σ阵 power 聚合 = derived provider(现全返0,未建)→ 显式 deferred EPIC-COMBAT-FULLSTRUCT(红线A.8);本批保 AddPenInteger 占位。
                 new CombatSkillDef("sk_ar_suanjin", "算尽·叠杀", 5,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 60, "在场所有阵power之和额外计一次入伤害(多阵叠加总爆发),需在场阵≥3(Σ阵 derived→FULLSTRUCT)") },
+                    new[] { Modules.FlatPen(60, "在场所有阵power之和额外计一次入伤害(多阵叠加总爆发),需在场阵≥3(Σ阵 derived→FULLSTRUCT)") },
                     new Dictionary<string, int> { { "compute", 30 }, { "stones", 40 } }),
                 // 引爆·焚阵：主动炸毁己方一张在场阵,对阵内全体造成该阵power×2一次性真伤(弃阵换爆发/同归手段);牺牲1张已布阵 + 该阵供能 stones 清。
                 // B5批2: 炸阵唯一档签名(炸己方阵→power×2一次性)→ 批3 Special(explodeArray);本批保 AddPenInteger 占位标注。
                 new CombatSkillDef("sk_ar_yinbao", "引爆·焚阵", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 40, "炸毁己方一张在场阵,对阵内全体造成该阵power×2一次性真伤(弃阵换爆发,批3 Special explodeArray)") },
+                    new[] { Modules.FlatPen(40, "炸毁己方一张在场阵,对阵内全体造成该阵power×2一次性真伤(弃阵换爆发,批3 Special explodeArray)") },
                     new Dictionary<string, int> { { "stones", 30 } }),
                 // 破阵·反制：反向解析敌方阵修,命中使其一张在场阵arrayed_flag归0(阵修内战/拆台手),命中率随双方悟性差;消耗compute-12。
                 new CombatSkillDef("sk_ar_pozhen", "破阵·反制", 4,

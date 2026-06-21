@@ -196,7 +196,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "karma", 3 } }),
                 // 趋吉闪命：预知闪避,消Fortune-4使敌本回合先手tempo削减/截命对己全部失效(算到对方走位)。被集火时的活路。
                 new CombatSkillDef("sk_mi_quji", "趋吉闪命", 2,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 8, "敌本回合先手tempo削减/截命对己全部失效(预知闪避,算到对方走位)") },
+                    new[] { Modules.FlatDR(8, "敌本回合先手tempo削减/截命对己全部失效(预知闪避,算到对方走位)") },
                     new Dictionary<string, int> { { "netFortune", 4 }, { "karma", 1 } }),
                 // 断生死·绝命：终结技,仅己净气运>0且>目标时可发——清零目标本场tempo并夺其NetFortune的1/3,几乎必杀已被压制者;条件不满足则发动反噬全额入己。
                 new CombatSkillDef("sk_mi_jueming", "断生死·绝命", 5,

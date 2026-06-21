@@ -175,7 +175,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "qixue", 25 } }),
                 // 金钟落锁(封罩门)：1回合彻底封闭自身罩门,免疫'罩门×2'与直击罩门类战技。血气≥20,消耗20。
                 new CombatSkillDef("sk_ti_jinzhongluosuo", "金钟落锁", 3,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 20, "1回合封闭自身罩门,免疫'罩门×2'与直击罩门类战技(专破打罩门套路)") },
+                    new[] { Modules.FlatDR(20, "1回合封闭自身罩门,免疫'罩门×2'与直击罩门类战技(专破打罩门套路)") },
                     new Dictionary<string, int> { { "qixue", 20 } }),
                 // 横练护体(铁山靠)：1回合内henglian×2,把整段攻势硬扛成擦伤;结束后复原。血气≥15,消耗15。
                 // B5批2: → ReflectDamage(OnDefend,÷2) 铁山靠硬扛反震(入伤的1/2反弹攻方;时序读扣血前/不递归批4接,本轮ApplyOnUse不改入伤)。
@@ -189,7 +189,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "qixue", 8 } }),
                 // 不灭金身(被动·濒死自启)：realm≥6每场首次濒死自动燃尽血气复活并回50%体力;血气=0不触发。无血气门槛(被动)。
                 new CombatSkillDef("sk_ti_bumiejinshen", "不灭金身", 6,
-                    new[] { new EffectOp(EffectOpKind.AddFlatDR, null, 0, "realm≥6每场首次濒死自动燃尽血气复活并回50%体力(克制点:血气=0不触发,被动)") },
+                    new[] { Modules.FlatDR(0, "realm≥6每场首次濒死自动燃尽血气复活并回50%体力(克制点:血气=0不触发,被动)") },
                     new Dictionary<string, int>()),
             };
 

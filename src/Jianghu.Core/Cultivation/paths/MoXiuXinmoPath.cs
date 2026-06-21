@@ -191,7 +191,7 @@ namespace Jianghu.Cultivation
                 // B5 批2：渡心魔劫(moHeart/innerDemon 双向杠杆,借魔入道洗白 vs 堕魔淬魔)纯属 A.2 道心层 → 保持原样,
                 //   显式标注（红线 A.8 不静默）：moHeart/innerDemon 不在 A.0 落算子,双变体收束 A.2 道心层后接。
                 new CombatSkillDef("mo_sk_dujie", "渡心魔劫·证道", 4,
-                    new[] { new EffectOp(EffectOpKind.AddPenInteger, null, 0, "双变体收束:moHeart≥60 引心魔劫自炼,过则 moHeart+10、innerDemon-20(洗白);fallenDevil 态则强制 innerDemon+10 换永久 power+8(堕魔淬魔,均 A.2 道心层 defer)") },
+                    new[] { Modules.FlatPen(0, "双变体收束:moHeart≥60 引心魔劫自炼,过则 moHeart+10、innerDemon-20(洗白);fallenDevil 态则强制 innerDemon+10 换永久 power+8(堕魔淬魔,均 A.2 道心层 defer)") },
                     new Dictionary<string, int> { { "MoGong", 10 } }),
             };
 

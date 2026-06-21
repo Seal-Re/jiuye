@@ -210,7 +210,7 @@ namespace Jianghu.Cultivation
                     new Dictionary<string, int> { { "haoran", 18 }, { "wenDan", 3 } }),
                 // 文宫鼓舞·阵词：开群战增益词,在场同阵营攻+12%、护神 DR+5、士气+1档共3回合;wenGong 当回合翻倍——群战开团核心。浩然≥15。
                 new CombatSkillDef("sk_ru_zhenci", "文宫鼓舞·阵词", 2,
-                    new[] { new EffectOp(EffectOpKind.AddSituationalAdj, null, 12, "在场同阵营攻+12%、护神 DR+5、士气+1档共3回合;wenGong 派生项当回合翻倍(群战开团)") },
+                    new[] { Modules.SituationalAdj(12, "在场同阵营攻+12%、护神 DR+5、士气+1档共3回合;wenGong 派生项当回合翻倍(群战开团)") },
                     new Dictionary<string, int> { { "haoran", 15 } }),
                 // 王法镇压·律狱：以律条布律狱困范围失德/阴邪,被困者每步受固定正气灼伤,且无法借煞/遁走/施幻。浩然≥16+1道律条敕牒。
                 // B5 批2 招牌招迁移：占位 AddPenInteger(14) → Modules.Control(lawPrison,1)（控场困范围,selectMove 失效；
