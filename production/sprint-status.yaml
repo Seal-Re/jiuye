@@ -41,9 +41,7 @@ stories:
     name: "BalanceMatrixDump harness: 全21路×UT0-12 战力矩阵dump"
     file: "production/epics/balance-cross/story-001-balance-matrix-dump.md"
     priority: must-have
-    status: ready-for-dev
-    owner: ""
-    estimate_days: 1.5
+    status: in-progress
     blocker: ""
     completed: ""
   # —— Should Have ——

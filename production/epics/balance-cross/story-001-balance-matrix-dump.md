@@ -1,7 +1,8 @@
 # Story 001: BalanceMatrixDump harness — 全 21 路 × UT 战力矩阵 dump
 
 > **Epic**: balance-cross
-> **Status**: Ready
+> **Status**: In Progress
+> **Last Updated**: 2026-06-21
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 中 (1.5d)
