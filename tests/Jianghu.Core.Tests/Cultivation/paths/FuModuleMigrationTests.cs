@@ -16,6 +16,15 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
         static CombatSkillDef Skill(string id) =>
             FuXiuFuluPath.Def.CombatSkills.Single(s => s.Id == id);
 
+        static CombatContext Ctx()
+        {
+            var atk = CultivationState.NewForPath("fu_xiu_fulu",
+                new[] { new ResourceDef("talismanStore", 0, 12, 0), new ResourceDef("fuPotency", 0, 30, 0) });
+            var def = CultivationState.NewForPath("def_path", new List<ResourceDef>());
+            var path = FuXiuFuluPath.Def;
+            return new CombatContext(atk, path, def, path);
+        }
+
         static int Resolve(CombatSkillDef sk, int baseDmg, CombatContext ctx)
         {
             int dmg = baseDmg;
@@ -39,6 +48,24 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             var sk = Skill("sk_fu_xuefu");
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Backlash && o.Key == "bloodCast");
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger); // FlatPen 基线
+        }
+
+        // —— 五雷轰顶符：FlatPen(60) 基线破防量 ——
+        [Fact]
+        public void WuLei_IsFlatPen_DamageCalc()
+        {
+            var sk = Skill("sk_fu_wulei");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
+            int dmg = Resolve(sk, 0, Ctx());
+            Assert.Equal(60, dmg);
+        }
+
+        // —— 护身金光符：FlatDR(18) 减免积木 ——
+        [Fact]
+        public void HuShen_IsFlatDR()
+        {
+            var sk = Skill("sk_fu_hushen");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddFlatDR && o.Amount == 18);
         }
 
         [Fact]

@@ -52,6 +52,49 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Backlash);
         }
 
+        // —— 舍身雷爆：PenFromResource(thunderCharge,2)。全槽雷力×2 折算自爆,雷力越满越痛（真差分）——
+        [Fact]
+        public void SheShen_ScalesWithThunderCharge()
+        {
+            var sk = Skill("sk_le_sheshen");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource && o.Key == "thunderCharge");
+
+            var ctxFull = new CombatContext(
+                CultivationState.NewForPath("lei_xiu",
+                    new[] { new ResourceDef("thunderCharge", 0, 1000, 30) }),
+                LeiXiuPath.Def,
+                CultivationState.NewForPath("def_path", new List<ResourceDef>()),
+                LeiXiuPath.Def);
+            var ctxEmpty = new CombatContext(
+                CultivationState.NewForPath("lei_xiu",
+                    new[] { new ResourceDef("thunderCharge", 0, 1000, 0) }),
+                LeiXiuPath.Def,
+                CultivationState.NewForPath("def_path", new List<ResourceDef>()),
+                LeiXiuPath.Def);
+
+            int full = Resolve(sk, 0, ctxFull);   // 30×2 = 60
+            int empty = Resolve(sk, 0, ctxEmpty); // 0
+            Assert.Equal(30 * 2, full);
+            Assert.Equal(0, empty);
+            Assert.True(full > empty, "舍身雷爆未随 thunderCharge 缩放（仍是占位定值）");
+        }
+
+        // —— 辟邪斩魂：FlatPen(32) 纯阳雷刃对魂体/幻身真伤——
+        [Fact]
+        public void ZhanHun_IsFlatPen()
+        {
+            var sk = Skill("sk_le_zhanhun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 32);
+        }
+
+        // —— 雷遁·闪：Evade(20) 雷遁闪避 20% 减免——
+        [Fact]
+        public void LeiDun_IsEvade()
+        {
+            var sk = Skill("sk_le_leidun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Evade && o.Amount == 20);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

@@ -58,6 +58,31 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "reverseStack");
         }
 
+        // —— 一念断因果：ModifyEP(tempo,-1,16) + Drain(netFortune,5)。按tempo档削EP + 夺气运——
+        [Fact]
+        public void YiNian_IsModifyEPAndDrain()
+        {
+            var sk = Skill("sk_mi_yinian");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.ModifyEffectivePower && o.Key == "tempo");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.DrainResource && o.Key == "netFortune");
+        }
+
+        // —— 因果锁命：Control(suoming,2) 控场2回合——
+        [Fact]
+        public void SuoMing_IsControl()
+        {
+            var sk = Skill("sk_mi_suoming");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Control && o.Key == "suoming");
+        }
+
+        // —— 断生死·绝命：FlatPen(50) 终结技斩杀基线——
+        [Fact]
+        public void JueMing_IsFlatPen()
+        {
+            var sk = Skill("sk_mi_jueming");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 50);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

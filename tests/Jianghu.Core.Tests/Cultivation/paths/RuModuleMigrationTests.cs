@@ -55,6 +55,46 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Control && o.Key == "lawPrison");
         }
 
+        // —— 舍身取义·浩然爆发：PenFromResource(haoran,2)。全槽浩然×2 折算（真差分）——
+        [Fact]
+        public void SheShen_ScalesWithHaoran()
+        {
+            var sk = Skill("sk_ru_sheshen");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource && o.Key == "haoran");
+
+            var ctxFull = new CombatContext(
+                CultivationState.NewForPath("ru_xiu_haoran",
+                    new[] { new ResourceDef("haoran", 0, 1000, 40) }),
+                RuXiuHaoranPath.Def,
+                CultivationState.NewForPath("def_path", new List<ResourceDef>()),
+                RuXiuHaoranPath.Def);
+            var ctxEmpty = new CombatContext(
+                CultivationState.NewForPath("ru_xiu_haoran",
+                    new[] { new ResourceDef("haoran", 0, 1000, 0) }),
+                RuXiuHaoranPath.Def,
+                CultivationState.NewForPath("def_path", new List<ResourceDef>()),
+                RuXiuHaoranPath.Def);
+
+            int full = Resolve(sk, 0, ctxFull);   // 40×2 = 80
+            int empty = Resolve(sk, 0, ctxEmpty); // 0
+            Assert.Equal(40 * 2, full);
+            Assert.Equal(0, empty);
+            Assert.True(full > empty, "舍身取义未随 haoran 缩放（仍是占位定值）");
+        }
+
+        // —— 浩然正气·天地一统：FlatPen(60)+CounterMul(evil,2)。对 evil 克邪倍乘——
+        [Fact]
+        public void TianDiYiTong_CounterMul_VsEvil()
+        {
+            var sk = Skill("sk_ru_tiandiyitong");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.CounterMul && o.Key == "evil");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger); // FlatPen 基线
+
+            int vsEvil = Resolve(sk, 0, Ctx(defenderEvil: true));  // 60→×2 联合上界钳 ×3/2 = 90
+            int vsNorm = Resolve(sk, 0, Ctx(defenderEvil: false)); // 60
+            Assert.True(vsEvil > vsNorm, "天地一统对 evil 未触发正气克邪倍乘");
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

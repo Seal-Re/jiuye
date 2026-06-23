@@ -56,6 +56,30 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource);
         }
 
+        // —— 强令催动：FlatPen(24) 超频驱动指定傀（逐傀派生defer）——
+        [Fact]
+        public void QiangLing_IsFlatPen()
+        {
+            var sk = Skill("sk_kl_qiangling");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 24);
+        }
+
+        // —— 机枢自爆·焚甲：FlatPen(36) 引爆单傀范围爆发（逐傀派生defer）——
+        [Fact]
+        public void JiShuZiBao_IsFlatPen()
+        {
+            var sk = Skill("sk_kl_jishuzibao");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 36);
+        }
+
+        // —— 镇魂不乱·钢令：SituationalAdj(10) 钢令贯链反·乱兽——
+        [Fact]
+        public void ZhenHun_IsSituationalAdj()
+        {
+            var sk = Skill("sk_kl_zhenhun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddSituationalAdj);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

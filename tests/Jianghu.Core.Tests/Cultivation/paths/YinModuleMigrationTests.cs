@@ -71,6 +71,30 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
         }
 
+        // —— 迷魂引：Control(mihun,1) 控场1回合——
+        [Fact]
+        public void MiHun_IsControl()
+        {
+            var sk = Skill("sk_yin_mihun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Control && o.Key == "mihun");
+        }
+
+        // —— 万籁齐鸣·镇场：FlatPen(12) 全律场共振——
+        [Fact]
+        public void WanLai_IsFlatPen()
+        {
+            var sk = Skill("sk_yin_wanlai");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 12);
+        }
+
+        // —— 乐韵遁形·闪：Evade(28) 乐韵遁形闪避 28% 减免——
+        [Fact]
+        public void YueDun_IsEvade()
+        {
+            var sk = Skill("sk_yin_yuedun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Evade && o.Amount == 28);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

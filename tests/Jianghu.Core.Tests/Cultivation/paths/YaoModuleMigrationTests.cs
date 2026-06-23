@@ -16,7 +16,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
         static CombatSkillDef Skill(string id) =>
             YaoXiuHuaxingPath.Def.CombatSkills.Single(s => s.Id == id);
 
-        static CombatContext Ctx(int yaoDan)
+        static CombatContext Ctx(int yaoDan = 0)
         {
             var atk = CultivationState.NewForPath("yao_xiu_huaxing",
                 new[] { new ResourceDef("yaoDan", 0, 1000, yaoDan) });
@@ -45,6 +45,40 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Equal(20 * 3, full);
             Assert.Equal(0, empty);
             Assert.True(full > empty, "撼天扑未随 yaoDan 缩放（仍是占位定值）");
+        }
+
+        // —— 妖毒噬体：Dot(yaoDu,2,3) 持续伤积木 ——
+        [Fact]
+        public void YaoDu_IsDot()
+        {
+            var sk = Skill("sk_yx_yaodu");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Dot && o.Key == "yaoDu" && o.Amount == 2);
+        }
+
+        // —— 妖兽铠·反震：Reflect(1,4) 反震积木 ——
+        [Fact]
+        public void YaoShouKai_IsReflect()
+        {
+            var sk = Skill("sk_yx_yaoshou_kai");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.ReflectDamage);
+        }
+
+        // —— 兽躯硬抗·铜筋：FlatDR(12) 减免积木 ——
+        [Fact]
+        public void TongJin_IsFlatDR()
+        {
+            var sk = Skill("sk_yx_tongjin");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddFlatDR && o.Amount == 12);
+        }
+
+        // —— 镇群：FlatPen(15) 破防量 ——
+        [Fact]
+        public void ZhenQun_IsFlatPen_DamageCalc()
+        {
+            var sk = Skill("sk_yx_zhenqun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
+            int dmg = Resolve(sk, 0, Ctx());
+            Assert.Equal(15, dmg);
         }
 
         [Fact]

@@ -82,6 +82,22 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "duoshe");
         }
 
+        // —— 燃心狂魔：AddResource(burnGate,3) 拉满燃心阀档位——
+        [Fact]
+        public void RanXin_SetsBurnGate()
+        {
+            var sk = Skill("mo_sk_ranxin");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddResource && o.Key == "burnGate" && o.Amount == 3);
+        }
+
+        // —— 渡心魔劫·证道：FlatPen(0) 双变体收束（moHeart/innerDemon 纯 A.2 道心层）——
+        [Fact]
+        public void DuJie_IsFlatPenZero()
+        {
+            var sk = Skill("mo_sk_dujie");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 0);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

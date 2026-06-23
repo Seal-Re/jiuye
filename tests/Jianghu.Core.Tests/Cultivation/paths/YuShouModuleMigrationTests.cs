@@ -56,6 +56,30 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.DoesNotContain(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource);
         }
 
+        // —— 兽遁·闪：Evade(22) 兽遁闪避 22% 减免——
+        [Fact]
+        public void ShouDun_IsEvade()
+        {
+            var sk = Skill("sk_yu_shoudun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Evade && o.Amount == 22);
+        }
+
+        // —— 万兽齐鸣·镇魂：SituationalAdj(0) 反制音修乱兽——
+        [Fact]
+        public void ZhenHun_IsSituationalAdj()
+        {
+            var sk = Skill("sk_yu_zhenhun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddSituationalAdj);
+        }
+
+        // —— 召兽归阵：AddResource(rosterPower,6) 召回调整兽群强度回补——
+        [Fact]
+        public void GuiZhen_UsesAddResource()
+        {
+            var sk = Skill("sk_yu_guizhen");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddResource && o.Key == "rosterPower" && o.Amount == 6);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

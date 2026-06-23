@@ -50,6 +50,30 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "reverseStack");
         }
 
+        // —— 一念抹因：FlatPen(36) 法则先手抹除counterAdj/先手——
+        [Fact]
+        public void MoYin_IsFlatPen()
+        {
+            var sk = Skill("sk_yg_moyin");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 36);
+        }
+
+        // —— 承负清债·了断：AddResource(retributionDebt,-15) 主动还天谴债——
+        [Fact]
+        public void QingZhai_UsesAddResource()
+        {
+            var sk = Skill("sk_yg_qingzhai");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddResource && o.Key == "retributionDebt" && o.Amount == -15);
+        }
+
+        // —— 一指定数·绝命：FlatPen(50) 终结技斩杀基线——
+        [Fact]
+        public void JueMing_IsFlatPen()
+        {
+            var sk = Skill("sk_yg_jueming");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 50);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

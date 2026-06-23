@@ -55,6 +55,24 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "goldenBodyMax");
         }
 
+        // —— 韦驮献杵：FlatPen(24) 基线破防量 ——
+        [Fact]
+        public void WeiTuo_IsFlatPen_DamageCalc()
+        {
+            var sk = Skill("sk_bd_weituo");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
+            int dmg = Resolve(sk, 0, Ctx(defenderEvil: false));
+            Assert.Equal(24, dmg);
+        }
+
+        // —— 金刚反震：Reflect(1,3) 反震积木 ——
+        [Fact]
+        public void JingangFanZhen_IsReflect()
+        {
+            var sk = Skill("sk_bd_jingang_fanzhen");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.ReflectDamage);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

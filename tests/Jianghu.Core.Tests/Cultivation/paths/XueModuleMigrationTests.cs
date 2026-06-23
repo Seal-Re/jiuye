@@ -56,6 +56,36 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Key == "qixie" && o.Amount == 8);
         }
 
+        // —— 血祭·焚身爆：PenFromResource(qixie,2)。全槽血气×2 自爆（真差分）——
+        [Fact]
+        public void FenShen_ScalesWithQixie_x2()
+        {
+            var sk = Skill("sk_xue_fenshen");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource && o.Key == "qixie");
+
+            int full = Resolve(sk, 0, Ctx(qixie: 30)); // 30×2 = 60
+            int empty = Resolve(sk, 0, Ctx(qixie: 0)); // 0
+            Assert.Equal(30 * 2, full);
+            Assert.Equal(0, empty);
+            Assert.True(full > empty, "血祭·焚身爆未随 qixie 缩放");
+        }
+
+        // —— 噬血反哺：FlatPen(16) 近敌抽血一击——
+        [Fact]
+        public void FanBu_IsFlatPen()
+        {
+            var sk = Skill("sk_xue_fanbu");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 16);
+        }
+
+        // —— 血河漫卷：AoePerTarget(30) 对每邻近敌群攻——
+        [Fact]
+        public void ManJuan_IsAoePerTarget()
+        {
+            var sk = Skill("sk_xue_manjuan");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AoePerTarget && o.Amount == 30);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {

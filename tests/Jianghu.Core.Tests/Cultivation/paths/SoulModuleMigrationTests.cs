@@ -16,7 +16,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
         static CombatSkillDef Skill(string id) =>
             SoulDivineSensePath.Def.CombatSkills.Single(s => s.Id == id);
 
-        static CombatContext Ctx(int soulForce)
+        static CombatContext Ctx(int soulForce = 0)
         {
             var atk = CultivationState.NewForPath("soul_divine_sense",
                 new[] { new ResourceDef("soulForce", 0, 1000, soulForce) });
@@ -43,6 +43,32 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Equal(30 * 2, full);
             Assert.Equal(0, empty);
             Assert.True(full > empty, "焚魂自爆未随 soulForce 缩放");
+        }
+
+        // —— 神识奇袭·夺魂一击：FlatPen(60) 基线破防量 ——
+        [Fact]
+        public void QiXi_IsFlatPen_DamageCalc()
+        {
+            var sk = Skill("sk_so_qixi");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger);
+            int dmg = Resolve(sk, 0, Ctx());
+            Assert.Equal(60, dmg);
+        }
+
+        // —— 万魂幡·群体摄神：AoePerTarget(28) 群体积木 ——
+        [Fact]
+        public void WanHun_IsAoePerTarget()
+        {
+            var sk = Skill("sk_so_wanhun");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AoePerTarget && o.Amount == 28);
+        }
+
+        // —— 夺舍·借尸：B5消化 → Special(duoshe) handler 已激活 ——
+        [Fact]
+        public void JieShi_UpgradedToSpecial()
+        {
+            var sk = Skill("sk_so_jieshi");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "duoshe");
         }
 
         [Fact]

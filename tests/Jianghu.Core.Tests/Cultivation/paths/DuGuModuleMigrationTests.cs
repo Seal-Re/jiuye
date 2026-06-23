@@ -64,6 +64,41 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.Special && o.Key == "duoxin");
         }
 
+        // —— 百毒朝天：PenFromResource(venomCharge,2)。百毒值越满倾泻越痛（真差分）——
+        [Fact]
+        public void ChaoTian_ScalesWithVenomCharge()
+        {
+            var sk = Skill("sk_du_chaotian");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.PenFromResource && o.Key == "venomCharge");
+
+            var ctxFull = new CombatContext(
+                CultivationState.NewForPath("du_gu_xiu",
+                    new[] { new ResourceDef("venomCharge", 0, 1000, 20) }),
+                DuGuXiuPath.Def,
+                CultivationState.NewForPath("def_path", new List<ResourceDef>()),
+                DuGuXiuPath.Def);
+            var ctxEmpty = new CombatContext(
+                CultivationState.NewForPath("du_gu_xiu",
+                    new[] { new ResourceDef("venomCharge", 0, 1000, 0) }),
+                DuGuXiuPath.Def,
+                CultivationState.NewForPath("def_path", new List<ResourceDef>()),
+                DuGuXiuPath.Def);
+
+            int full = Resolve(sk, 0, ctxFull);   // 20×2 = 40
+            int empty = Resolve(sk, 0, ctxEmpty); // 0
+            Assert.Equal(20 * 2, full);
+            Assert.Equal(0, empty);
+            Assert.True(full > empty, "百毒朝天未随 venomCharge 缩放（仍是占位定值）");
+        }
+
+        // —— 淬毒一击：FlatPen(12) 淬毒暗器/兵刃渗透伤害——
+        [Fact]
+        public void CuiDu_IsFlatPen()
+        {
+            var sk = Skill("sk_du_cuidu");
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 12);
+        }
+
         [Fact]
         public void Def_StillValidAfterMigration()
         {
