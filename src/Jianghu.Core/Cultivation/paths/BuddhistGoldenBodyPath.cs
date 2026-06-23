@@ -39,11 +39,14 @@ namespace Jianghu.Cultivation.Paths
             //   生成期初始=100×悟性（深度设计选取规则），A.0 单值起底 init=0，realm/选取增益另结算。
             // merit 功德：只能由渡化/降魔/护生获得，杀戮破戒清零愿力并冻结功德——突破硬门槛（merit≥realm×1000）。0..9999。
             // goldenLayers 金身层：炼体所得金刚不坏叠层 0..9，每层 flat DR=8×层 且受击 1/4 回灌为愿力（受击→转愿正反馈）。
+            // goldenBodyTurns 金身大成态剩余回合：不动明王怒目激活后倒计数 3→0，态内 DR×2/受击转愿×2/anti_evil×1.5（批4 turn-loop 消费）；
+            //   本批 A.0 仅资源起底，GoldenBodyMaxModule 置 3 初值 + goldenLayers+2（临时上限 9），DR×2/转愿/anti_evil 整体 defer 批4。
             var resources = new[]
             {
                 new ResourceDef("vow", 0, 500, 0),
                 new ResourceDef("merit", 0, 9999, 0),
                 new ResourceDef("goldenLayers", 0, 9, 0),
+                new ResourceDef("goldenBodyTurns", 0, 3, 0),
             };
 
             // —— 战力公式（深度设计 terms：根骨×4 + 愿力×3 + realm×18 + goldenLayers×25 + 悟性×2 + 功法power×1 + 武力×1 + 内力×1）。

@@ -98,18 +98,49 @@ namespace Jianghu.Core.Tests.Cultivation
         // ——————————————————————— 金身态 goldenBodyMax（佛，3.3）———————————————————————
 
         [Fact]
-        public void test_special_goldenBodyMax_returns_zero_marker_deferred_to_batch4()
+        public void test_special_goldenBodyMax_sets_turns_and_boosts_goldenLayers()
         {
-            // Arrange：佛修资源 goldenLayers/vow 在场（验 handler 不污染它们）。
-            var ctx = MakeCtx(attackerRes: new[] { ("goldenLayers", 0, 9, 3), ("vow", 0, 9999, 1500) });
+            // Arrange：佛修资源 goldenBodyTurns/goldenLayers/vow 在场。goldenLayers 初始 3。
+            var ctx = MakeCtx(attackerRes: new[] {
+                ("goldenBodyTurns", 0, 3, 0),
+                ("goldenLayers", 0, 9, 3),
+                ("vow", 0, 9999, 1500) });
 
-            // Act：不动明王怒目 Special（金身大成态 DR×2/3 回合标记 → 批4 回合循环消费）。
+            // Act：不动明王怒目 Special（金身大成态 3 回合 + 金身层+2 临时强化）。
             int dmg = ModuleResolver.ApplyOnUse(100, Modules.Special("goldenBodyMax"), ctx);
 
-            // Assert：占位返 0 delta（dmg 不变），且不写 goldenLayers/vow（炼体层语义不被污染，红线 A.8）。
+            // Assert：goldenBodyTurns 置 3（大成态剩余回合初值）；goldenLayers 3+2=5（钳 9）；dmg 不变（delta 0）。
+            Assert.Equal(3, ctx.ReadResource(Side.Attacker, "goldenBodyTurns"));
+            Assert.Equal(5, ctx.ReadResource(Side.Attacker, "goldenLayers"));
+            Assert.Equal(1500, ctx.ReadResource(Side.Attacker, "vow")); // 不受污染
             Assert.Equal(100, dmg);
-            Assert.Equal(3, ctx.ReadResource(Side.Attacker, "goldenLayers"));
-            Assert.Equal(1500, ctx.ReadResource(Side.Attacker, "vow"));
+        }
+
+        [Fact]
+        public void test_special_goldenBodyMax_capped_at_9_layers()
+        {
+            // Arrange：goldenLayers 初始 8（近上限），goldenBodyTurns=0。
+            var ctx = MakeCtx(attackerRes: new[] {
+                ("goldenBodyTurns", 0, 3, 0),
+                ("goldenLayers", 0, 9, 8) });
+
+            // Act
+            ModuleResolver.ApplyOnUse(100, Modules.Special("goldenBodyMax"), ctx);
+
+            // Assert：goldenLayers 8+2=10→钳 9（不溢出）。
+            Assert.Equal(9, ctx.ReadResource(Side.Attacker, "goldenLayers"));
+            Assert.Equal(3, ctx.ReadResource(Side.Attacker, "goldenBodyTurns"));
+        }
+
+        [Fact]
+        public void test_special_goldenBodyMax_noop_on_non_buddhist_path()
+        {
+            // Arrange：非佛修路径，无 goldenBodyTurns 资源。
+            var ctx = MakeCtx(attackerRes: new[] { ("vow", 0, 500, 100) });
+            int dmg = ModuleResolver.ApplyOnUse(100, Modules.Special("goldenBodyMax"), ctx);
+
+            // Assert：HasResource 守→空转，dmg 不变（无 resource dict 污染）。
+            Assert.Equal(100, dmg);
         }
 
         // ——————————————————————— 律场总门 fieldActive（音，3.4）———————————————————————

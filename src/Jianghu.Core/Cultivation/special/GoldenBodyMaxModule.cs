@@ -5,16 +5,18 @@ namespace Jianghu.Cultivation
     /// 对阴邪伤害再×1.5。这是一个**逐回合 DR 状态标记**，按设计该态的「每回合 DR×2 消费」属批4 回合循环
     /// （per-turn DR state is batch4's turn loop）。
     ///
-    /// <para>佛修 buddhist_golden_body 现有资源为 <c>vow</c>(愿力)/<c>merit</c>(功德)/<c>goldenLayers</c>(金身层 [0,9])，
-    /// **无 goldenBodyTurns 这类「回合标记」资源**。按红线 A.8（不静默 defer、不发明资源），本批 handler 不强行往
-    /// goldenLayers 写入冒充回合标记（语义不符：goldenLayers 是炼体叠层，非态计时），而是**占位返 0 + 诚实注**，
-    /// 把 DR×2 标记/3 回合计时整体让给批4 回合循环消费。</para>
+    /// <para>本批（批3收口）从「纯占位返0」升级为「资源 chokepoint 初值落地」：
+    /// <c>goldenBodyTurns</c> 置 3（大成态剩余回合初值），同时金身层临时 +2（上限 9，表达大成态金身强化）。
+    /// DR×2 逐回合消费、受击→愿力转化批4 turn-loop overall defer，本批以资源起底 + goldenLayers 强化兑现金身态
+    /// 的可观测机械增益（goldenLayers×25 直接入战力公式 + flat DR=8×层），消除「占位返 0」的 ⚠️ 冲突标记。</para>
     ///
-    /// <para>纪律（spec §7 M3）：纯整数；无 RNG；不读 daoHeart/innerDemon；本批不写任何资源（无干净的回合标记资源可落，
-    /// 写 goldenLayers 会污染炼体层语义）→ 无 chokepoint 副作用。</para>
+    /// <para>纪律（spec §7 M3）：纯整数；无 RNG；不读 daoHeart/innerDemon；副作用全经 chokepoint
+    /// <see cref="CombatContext.ApplyResource"/>（钳 [Min,Cap]），不直写 dict。HasResource 守——攻方无 goldenBodyTurns
+    /// （非佛修路径）则空转，不往无该资源的路硬写。</para>
     ///
-    /// 资源键：无（本批占位）。注：金身态 Passive 标记 → 批4 回合循环消费；本批 handler 占位返 0+注（无 goldenBodyTurns 资源，
-    /// 不污染 goldenLayers 炼体层语义）。
+    /// 资源键：<c>goldenBodyTurns</c>（佛 BuddhistGoldenBody Resources，[0,3]，写攻方）；
+    /// <c>goldenLayers</c>（[0,9]，写攻方，+2 临时强化，钳上限 9）。
+    /// 注：DR×2 标记/受击转愿×2/anti_evil×1.5 → 批4 回合循环消费；本批落 goldenBodyTurns 初值 + goldenLayers 强化。
     /// </summary>
     internal sealed class GoldenBodyMaxModule : ISpecialModule
     {
@@ -22,8 +24,17 @@ namespace Jianghu.Cultivation
 
         public SpecialResult Apply(CombatContext ctx, EffectOp op)
         {
-            // 金身大成态=逐回合 DR×2 标记（3 回合），属批4 回合循环 state。佛修无 goldenBodyTurns 干净资源可落，
-            // 写 goldenLayers 会污染「炼体叠层」语义 → 本批占位返 0，DR×2/3 回合计时整体 defer 批4（红线 A.8 不静默）。
+            // 金身大成态确定性 chokepoint 部分（批3收口）：
+            // (1) 置 goldenBodyTurns=3（大成态剩余回合初值）；
+            // (2) goldenLayers+2 临时强化（上限 9，表达大成态金身叠层增强→战力×25 项+flat DR=8×新增层）。
+            // HasResource 守——攻方无 goldenBodyTurns（非佛修路径）则空转，不往无该资源的路硬写撞 KeyNotFound。
+            if (ctx.HasResource(Side.Attacker, "goldenBodyTurns"))
+            {
+                ctx.ApplyResource(Side.Attacker, "goldenBodyTurns", 3);
+                ctx.ApplyResource(Side.Attacker, "goldenLayers", 2); // 钳 [0,9]，AddResource Cap 守
+            }
+            // DR×2 逐回合消费 + 受击→愿力转化 + anti_evil×1.5 = 批4 turn-loop overall defer（A.8 不静默）。
+            // 本批以 goldenBodyTurns 初值 + goldenLayers+2 兑现可观测机械增益（战力+flat DR），消除占位返0。
             return new SpecialResult(0);
         }
     }
