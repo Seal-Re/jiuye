@@ -203,6 +203,99 @@ namespace Jianghu.Core.Tests.Sim
             Assert.True(ledger.FactionCount >= 0);
         }
 
+        // ================================================================
+        // Faction territory + phase + treasury (§3)
+        // ================================================================
+
+        [Fact]
+        public void Faction_Territory_ControlSite()
+        {
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "剑宗", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            ledger.InitPhase(1, 0);
+
+            ledger.ControlSite(1, new NodeId(5));
+            ledger.ControlSite(1, new NodeId(7));
+
+            var sites = ledger.ControlledSites(1);
+            Assert.Equal(2, sites.Count);
+            Assert.Equal(1, ledger.OwnerOf(new NodeId(5)));
+            Assert.Equal(0, ledger.OwnerOf(new NodeId(99))); // unowned
+        }
+
+        [Fact]
+        public void Faction_LoseSite()
+        {
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "剑宗", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            ledger.InitPhase(1, 0);
+            ledger.ControlSite(1, new NodeId(3));
+            ledger.LoseSite(1, new NodeId(3));
+            Assert.Empty(ledger.ControlledSites(1));
+            Assert.Equal(0, ledger.OwnerOf(new NodeId(3)));
+        }
+
+        [Fact]
+        public void Faction_Phase_Transitions()
+        {
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "剑宗", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            ledger.InitPhase(1, 0);
+            Assert.Equal(FactionPhase.Founding, ledger.PhaseOf(1));
+
+            // Add members → Growth
+            ledger.Join(new CharacterId(10), 1, 0);
+            ledger.Join(new CharacterId(20), 1, 0);
+            ledger.Pump(201, null); // age > 200, members >= 2
+            Assert.Equal(FactionPhase.Growth, ledger.PhaseOf(1));
+        }
+
+        [Fact]
+        public void Faction_Treasury_Revenue()
+        {
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "剑宗", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            ledger.InitPhase(1, 0);
+            ledger.ControlSite(1, new NodeId(5));
+
+            // Create a stub geo for revenue testing
+            var geo = new StubGeoQuery();
+            ledger.Pump(50, geo);
+
+            Assert.True(ledger.TreasuryOf(1) > 100, "Treasury should grow from revenue");
+        }
+
+        [Fact]
+        public void Faction_Disband_ClearsEverything()
+        {
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "剑宗", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            ledger.InitPhase(1, 0);
+            ledger.ControlSite(1, new NodeId(5));
+            ledger.Join(new CharacterId(10), 1, 0);
+
+            ledger.Disband(1);
+
+            Assert.Empty(ledger.ControlledSites(1));
+            Assert.Empty(ledger.MembersOf(1));
+            Assert.Equal(0, ledger.TreasuryOf(1));
+        }
+
+        // ================================================================
+        // Stub geo for territory testing
+        // ================================================================
+
+        sealed class StubGeoQuery : IGeoQuery
+        {
+            public int RegionOf(NodeId node) => node.Value / 3;
+            public IReadOnlyList<NodeId> SitesInRegion(int regionId) => new[] { new NodeId(0) };
+            public IReadOnlyList<NodeId> AdjacentTo(NodeId node) => new[] { new NodeId(node.Value + 1) };
+            public int SiteType(NodeId node) => 0;
+            public int ResourceAt(NodeId node) => node.Value == 5 ? 100 : 0;
+            public int NodeCount => 9;
+            public int RegionCount => 3;
+        }
+
         [Fact]
         public void Faction_RegisterAndJoin()
         {

@@ -19,9 +19,12 @@ namespace Jianghu.Sim
                 var result = Generator.Generate(config, rng, nodeCount);
                 var ledger = new SectLedger();
 
-                // Register factions
+                // Register factions + init phases
                 foreach (var f in result.Factions)
+                {
                     ledger.RegisterFaction(f);
+                    ledger.InitPhase(f.Id, 0);
+                }
 
                 // Set alignment-based relations
                 var factions = result.Factions;

@@ -4,13 +4,16 @@ using Jianghu.Model;
 
 namespace Jianghu.Sim
 {
+    /// <summary>门派生命周期阶段。</summary>
+    public enum FactionPhase { Founding = 0, Growth = 1, Peak = 2, Decline = 3, Fallen = 4 }
+
     /// <summary>门派定义。</summary>
     public sealed record FactionDef(
         int Id,
         string Name,
         int HomeRegion,
         NodeId HomeSite,
-        int AlignmentAxis,  // 0=neutral, +1=righteous, -1=evil
+        int AlignmentAxis,
         IReadOnlyList<string> EntryRequirements
     );
 
@@ -100,6 +103,109 @@ namespace Jianghu.Sim
             foreach (var (id, (fid, _, _)) in _members)
                 if (fid == factionId) toRemove.Add(id);
             foreach (var id in toRemove) _members.Remove(id);
+            _phases.Remove(factionId);
+            _territories.Remove(factionId);
+            _treasuries.Remove(factionId);
+        }
+
+        // ================================================================
+        // Territory control (§3.2)
+        // ================================================================
+
+        private readonly Dictionary<int, HashSet<NodeId>> _territories = new(); // factionId → controlled sites
+
+        /// <summary>门派控制站点列表。</summary>
+        public IReadOnlyList<NodeId> ControlledSites(int factionId)
+            => _territories.TryGetValue(factionId, out var s)
+                ? new List<NodeId>(s) : Array.Empty<NodeId>();
+
+        /// <summary>占领站点。</summary>
+        public void ControlSite(int factionId, NodeId site)
+        {
+            if (!_territories.TryGetValue(factionId, out var s))
+                _territories[factionId] = s = new HashSet<NodeId>();
+            s.Add(site);
+        }
+
+        /// <summary>失去站点。</summary>
+        public void LoseSite(int factionId, NodeId site)
+        {
+            if (_territories.TryGetValue(factionId, out var s))
+                s.Remove(site);
+        }
+
+        /// <summary>站点归属门派（0=无主）。</summary>
+        public int OwnerOf(NodeId site)
+        {
+            foreach (var (fid, sites) in _territories)
+                if (sites.Contains(site)) return fid;
+            return 0;
+        }
+
+        // ================================================================
+        // Faction phase + lifecycle (§3)
+        // ================================================================
+
+        private readonly Dictionary<int, FactionPhase> _phases = new(); // factionId → phase
+        private readonly Dictionary<int, long> _foundedAt = new();      // factionId → founding tick
+        private readonly Dictionary<int, int> _treasuries = new();      // factionId → treasury
+
+        /// <summary>门派阶段。</summary>
+        public FactionPhase PhaseOf(int factionId)
+            => _phases.TryGetValue(factionId, out var p) ? p : FactionPhase.Founding;
+
+        /// <summary>门派金库。</summary>
+        public int TreasuryOf(int factionId)
+            => _treasuries.TryGetValue(factionId, out var t) ? t : 0;
+
+        /// <summary>Add treasury.</summary>
+        public void AddTreasury(int factionId, int amount)
+        {
+            if (!_treasuries.TryGetValue(factionId, out var t)) t = 0;
+            _treasuries[factionId] = Math.Max(0, t + amount);
+        }
+
+        /// <summary>初始化门派阶段（注册时调用）。</summary>
+        public void InitPhase(int factionId, long tick)
+        {
+            _phases[factionId] = FactionPhase.Founding;
+            _foundedAt[factionId] = tick;
+            _treasuries[factionId] = 100; // 初始金库
+        }
+
+        /// <summary>
+        /// 门派 Pump——每 Clock tick 调用一次（§3 节流）。
+        /// 处理阶段转换 + 税收 + 衰落。
+        /// </summary>
+        public void Pump(long clock, IGeoQuery? geo = null)
+        {
+            foreach (var (fid, phase) in _phases)
+            {
+                long age = clock - (_foundedAt.TryGetValue(fid, out var ft) ? ft : clock);
+                int memberCount = MembersOf(fid).Count;
+                int siteCount = ControlledSites(fid).Count;
+
+                // —— Phase transitions ——
+                FactionPhase newPhase = phase;
+                if (phase == FactionPhase.Founding && age > 200 && memberCount >= 2)
+                    newPhase = FactionPhase.Growth;
+                else if (phase == FactionPhase.Growth && memberCount >= 5 && siteCount >= 2)
+                    newPhase = FactionPhase.Peak;
+                else if (phase == FactionPhase.Peak && (memberCount < 3 || siteCount == 0))
+                    newPhase = FactionPhase.Decline;
+                else if (phase == FactionPhase.Decline && memberCount == 0)
+                    newPhase = FactionPhase.Fallen;
+
+                if (newPhase != phase)
+                    _phases[fid] = newPhase;
+
+                // —— Revenue: controlled sites generate treasury ——
+                if (newPhase != FactionPhase.Fallen && geo != null && clock % 50 == 0)
+                {
+                    foreach (var site in ControlledSites(fid))
+                        AddTreasury(fid, Math.Max(1, geo.ResourceAt(site) / 10));
+                }
+            }
         }
 
         public SectLedger Clone()
@@ -108,6 +214,10 @@ namespace Jianghu.Sim
             foreach (var kv in _factions) clone._factions[kv.Key] = kv.Value;
             foreach (var kv in _members) clone._members[kv.Key] = kv.Value;
             foreach (var kv in _relations) clone._relations[kv.Key] = kv.Value;
+            foreach (var kv in _territories) clone._territories[kv.Key] = new HashSet<NodeId>(kv.Value);
+            foreach (var kv in _phases) clone._phases[kv.Key] = kv.Value;
+            foreach (var kv in _foundedAt) clone._foundedAt[kv.Key] = kv.Value;
+            foreach (var kv in _treasuries) clone._treasuries[kv.Key] = kv.Value;
             return clone;
         }
     }
