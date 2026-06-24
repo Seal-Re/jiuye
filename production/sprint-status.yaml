@@ -11,11 +11,11 @@
 #   blocked        ↔  Blocked
 
 sprint: 3
-goal: "combat-fullstruct 收尾 (PostMul/负向压制/Gate字段/回滚栈) + balance-cross 启动 (BalanceMatrixDump harness)"
+goal: "combat-fullstruct 收尾 + balance-cross 启动 + cultivation-a1-rest 启动 (FSM/三劫/寿元)"
 start: "2026-06-22"
 end: "2026-06-28"
 generated: "2026-06-21"
-updated: "2026-06-21T15:00"
+updated: "2026-06-24"
 
 stories:
   # —— Must Have ——
@@ -87,8 +87,26 @@ stories:
     name: "10态流程状态机 (CultivationPhase 骨架)"
     file: "production/epics/cultivation-a1-rest/story-001-cultivation-phase-fsm.md"
     priority: nice-to-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 1
-    blocker: "依赖 balance-001"
-    completed: ""
+    blocker: ""
+    completed: "2026-06-24"
+  - id: "cultivation-a1-002"
+    name: "数据驱动三劫系统 (TribulationDef + Resolver)"
+    file: "production/epics/cultivation-a1-rest/story-002-tribulation-def.md"
+    priority: nice-to-have
+    status: done
+    owner: ""
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-06-24"
+  - id: "cultivation-a1-003"
+    name: "寿元系统 + 5失败模式补完 (LifespanAndFailure)"
+    file: "production/epics/cultivation-a1-rest/story-003-lifespan-failure.md"
+    priority: nice-to-have
+    status: done
+    owner: ""
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-06-24"

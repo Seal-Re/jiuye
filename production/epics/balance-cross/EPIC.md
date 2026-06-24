@@ -1,7 +1,7 @@
 # Epic: 平衡标定 INV-CROSS
 
 **Layer**: Core
-**Status**: Designed
+**Status**: Done
 **GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 docs/legacy-specs/specs/2026-06-14-v1.2-B5-平衡标定INV-CROSS-design.md
 **Governing ADRs**: None yet（P8 增量补）
 **Engine Risk**: LOW（.NET 8 纯整数）

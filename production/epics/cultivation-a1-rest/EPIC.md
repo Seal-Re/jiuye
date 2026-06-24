@@ -1,7 +1,7 @@
 # Epic: 修炼 A.1 余项
 
 **Layer**: Core
-**Status**: Designed
+**Status**: In Progress
 **GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源 A2-FINAL/A123 spec
 **Governing ADRs**: None yet（P8 增量补）
 **Engine Risk**: LOW（.NET 8 纯整数）

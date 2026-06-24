@@ -1,7 +1,7 @@
 # Epic: 战斗系统 R2 + 平衡（模块化效果系统）
 
 **Layer**: Core
-**Status**: In Progress
+**Status**: Done
 **GDD**: design/gdd/combat-system.md ✅（已建，306fb64：操作分类学+速度序列+即时窗口模型）；深度源 docs/legacy-specs/specs/2026-06-14-v1.2-B5-R2战斗系统重设计-design.md + ...模块化效果系统-design.md
 **Architecture Module**: Jianghu.Core/Cultivation（EffectOp/ModuleResolver/Modules/CombatContext/SpecialModuleRegistry）
 **Governing ADRs**: adr-0002-module-factory-effect-system（P8 补）、adr-0001-integer-determinism、adr-0003-cultivation-off-byte-identical
