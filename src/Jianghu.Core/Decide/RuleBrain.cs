@@ -52,7 +52,9 @@ namespace Jianghu.Decide
                 {
                     long goalW = ctx.Goal.Kind == GoalKind.Wander ? 1400 : 700;
                     long lonely = ctx.Nearby.Count == 0 ? 800 : 0;
-                    int to = ctx.Node.Value + 1;
+                    // Map-on: use Reachable[0] (weighted neighbor); Map-off: Node+1 (backward compatible)
+                    int to = (ctx.Reachable != null && ctx.Reachable.Count > 0)
+                        ? ctx.Reachable[0].Value : ctx.Node.Value + 1;
                     return (goalW + lonely, new TravelChoice(new NodeId(to)));
                 }
                 case ActionType.Spar:

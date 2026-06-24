@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Jianghu.Actions;
 using Jianghu.Decide;
 using Jianghu.Events;
 using Jianghu.Model;
+using Jianghu.Random;
 using Jianghu.Sim;
 using Jianghu.Stats;
 using Xunit;
@@ -125,6 +127,45 @@ namespace Jianghu.Core.Tests.Sim
             var fac = new StubFactionQuery();
             Assert.Equal(0, fac.FactionOf(new CharacterId(1))); // 散修
             Assert.Equal(0, fac.FactionCount);
+        }
+
+        // ================================================================
+        // RuleBrain map-off backward compatibility (§0)
+        // ================================================================
+
+        [Fact]
+        public void RuleBrain_MapOff_ByteIdentical()
+        {
+            // When Reachable=null (Map off), Travel destination must be Node+1
+            // — byte-identical to pre-Map behavior.
+            var ctx1 = new DecisionContext(
+                new CharacterId(1),
+                new StatBlock(new[] { 20, 10, 10, 10 }),
+                new Goal(GoalKind.Wander, 0),
+                new NodeId(5),
+                System.Array.Empty<NearbyActor>(),
+                new[] { Actions.ActionType.Travel },
+                System.Array.Empty<MemoryEntry>(),
+                Reachable: null); // Map off
+
+            var ctx2 = new DecisionContext(
+                new CharacterId(1),
+                new StatBlock(new[] { 20, 10, 10, 10 }),
+                new Goal(GoalKind.Wander, 0),
+                new NodeId(5),
+                System.Array.Empty<NearbyActor>(),
+                new[] { Actions.ActionType.Travel },
+                System.Array.Empty<MemoryEntry>(),
+                Reachable: new[] { new NodeId(7), new NodeId(3) }); // Map on
+
+            // Map off → expect Node+1 = 6
+            // Map on → expect Reachable[0] = 7 (weighted best neighbor)
+            var brain = new RuleBrain(new Pcg32(42, 0), ArchetypeKind.Martial);
+            var choice1 = brain.DecideAsync(ctx1, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+            var choice2 = brain.DecideAsync(ctx2, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+
+            Assert.Equal(5 + 1, ((Actions.TravelChoice)choice1).To.Value); // backward compatible
+            Assert.Equal(7, ((Actions.TravelChoice)choice2).To.Value);      // uses Reachable
         }
 
         // ================================================================

@@ -21,6 +21,12 @@ namespace Jianghu.Sim
         public Sect Sect { get; }
         public List<Character> Deceased { get; }
 
+        /// <summary>地图系统（C）。off=null——不激活，零性能影响。</summary>
+        public WorldMap? Map { get; private set; }
+
+        /// <summary>门派系统（D）。off=null——不激活，零性能影响。</summary>
+        public SectLedger? Faction { get; private set; }
+
         private readonly Dictionary<long, Character> _alive;
         private readonly Scheduler _sched;
         private readonly ActionSystem _actions;
@@ -141,7 +147,23 @@ namespace Jianghu.Sim
                 int power = other.Stats.Get(StatKind.Force) * 2 + other.Stats.Get(StatKind.Internal) + other.Stats.Get(StatKind.Constitution);
                 nearby.Add(new NearbyActor(other.Id, power, Relations.Affinity(a.Id, other.Id)));
             }
-            return new DecisionContext(a.Id, a.Stats, a.Goal, a.Node, nearby, _actions.Types, a.RecallMemory());
+
+            // Map-on: Reachable nodes from current position
+            System.Collections.Generic.IReadOnlyList<NodeId>? reachable = null;
+            if (Map != null)
+                reachable = Map.ReachableFrom(a.Node);
+
+            // Faction-on: faction context
+            int factionId = 0, factionRank = 0, factionRep = 0;
+            if (Faction != null)
+            {
+                factionId = Faction.FactionOf(a.Id);
+                factionRank = Faction.RankOf(a.Id);
+                factionRep = 0; // reputation not tracked yet
+            }
+
+            return new DecisionContext(a.Id, a.Stats, a.Goal, a.Node, nearby, _actions.Types, a.RecallMemory(),
+                Reachable: reachable, FactionId: factionId, FactionRank: factionRank, FactionReputation: factionRep);
         }
 
         private void Project(Character actor, DomainEvent e)
@@ -235,8 +257,11 @@ namespace Jianghu.Sim
             var deceased = new List<Character>(Deceased);
             var nodes = new List<WorldNode>(Nodes);
             var sched = new Scheduler(); sched.LoadFrom(_sched.Snapshot());
-            return new World(Limits, CloneRng(_domainRng), CloneRng(SpawnRng), CloneRngOrNull(_cultRng), _registry, Sect, _lifecycle.Clone(),
+            var w = new World(Limits, CloneRng(_domainRng), CloneRng(SpawnRng), CloneRngOrNull(_cultRng), _registry, Sect, _lifecycle.Clone(),
                              Clock, Chronicle.Clone(), Relations.Clone(), nodes, deceased, alive, brains, sched);
+            if (Map != null) w.Map = Map.Clone();           // 拓扑不可变，浅拷安全
+            if (Faction != null) w.Faction = Faction.Clone(); // 深拷成员+关系
+            return w;
         }
 
         private static IRandom CloneRng(IRandom r) { var p = new Pcg32(0, 1); p.SetState(r.GetState()); return p; }
