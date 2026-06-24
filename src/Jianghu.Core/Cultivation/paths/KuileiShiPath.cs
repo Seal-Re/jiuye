@@ -46,7 +46,7 @@ namespace Jianghu.Cultivation.Paths
             // residualOrder 残命惯性 [0,100]（断链存量，commandChain 断时由操偶术置初值、每 tick 衰减；为 0 则军团彻底僵死）。
             var resources = new[]
             {
-                new ResourceDef("fleetWeighted", 0, 40, 6), // INV-CROSS fix: enter combat with modest fleet power
+                new ResourceDef("fleetWeighted", 0, 40, 20), // INV-CROSS: enter combat with significant fleet power
                 new ResourceDef("mindBandwidth", 0, 16, 0),
                 new ResourceDef("craftScore", 0, 100, 0),
                 new ResourceDef("residualOrder", 0, 100, 0),

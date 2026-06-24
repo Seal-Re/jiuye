@@ -36,7 +36,7 @@ namespace Jianghu.Cultivation
             // seaIntegrity 识海完整度 0..100：魂力上限乘子来源 / 被反震·夺舍失败扣减 / 闭关炼神回升；initial=100（识海起始完整）。
             var resources = new[]
             {
-                new ResourceDef("soulForce", 0, 30, 20), // INV-CROSS fix: enter combat with charged soulForce
+                new ResourceDef("soulForce", 0, 30, 8), // INV-CROSS: enter combat with modest soulForce (balance: 20→8, avoid overshoot)
                 new ResourceDef("seaIntegrity", 0, 100, 100),
             };
 
