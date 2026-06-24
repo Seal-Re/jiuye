@@ -13,7 +13,7 @@
 | 2 | 真·全量机制结构化 | `combat-fullstruct` | Core | Deferred | 依赖 combat-r2 done；derived 求和/克制矩阵/召唤物/唯一签名全迁 |
 | 3 | 平衡标定 INV-CROSS | `balance-cross` | Core | Designed | 🔴 最大功能缺口；设计 `336280d` |
 | 4 | 修炼 A.1 余项（10 态/4 劫/5 失败/寿元） | `cultivation-a1-rest` | Core | Designed | 设计完；含 A1.4 blocked（依赖 balance-cross） |
-| 5 | 修炼 A.2（道心/破单调/奇遇/闭关） | `cultivation-a2` | Feature | Designed | A2-FINAL/A123 |
+| 5 | 修炼 A.2（道心/破单调/奇遇/闭关） | `cultivation-a2` | Feature | **In Progress** | 25 故事已拆解 (f37838d)，Sprint 4 |
 | 6 | 修炼 A.3（转职/觉醒/双修） | `cultivation-a3` | Feature | Designed | A3-FINAL |
 | 7 | 戏剧引擎 B | `drama-engine` | Feature | Designed (0 code) | spec 完，零代码 |
 | 8 | 地图系统 C | `map-system` | Feature | Designed (0 code) | spec 完，零代码 |
