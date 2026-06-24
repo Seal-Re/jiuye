@@ -197,6 +197,13 @@ namespace Jianghu.Core.Tests.Sim
         // ================================================================
 
         [Fact]
+        public void Faction_Factory_CreatesLedger()
+        {
+            var ledger = SectLedgerFactory.Create(FactionConfig.Default, new Pcg32(42, 0), 20);
+            Assert.True(ledger.FactionCount >= 0);
+        }
+
+        [Fact]
         public void Faction_RegisterAndJoin()
         {
             var ledger = new SectLedger();
