@@ -10,7 +10,7 @@ namespace Jianghu.Cultivation
     /// </summary>
     public sealed class CultivationState
     {
-        public string PathId { get; init; } = string.Empty;
+        public string PathId { get; set; } = string.Empty;
 
         /// <summary>A.0 单层 flatIndex（A.1 投影双层，不存额外字段）。</summary>
         public int RealmIndex { get; set; }
