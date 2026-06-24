@@ -285,11 +285,21 @@ namespace Jianghu.Core.Tests.Cultivation
                 foreach (var v in violationsList)
                     _out.WriteLine("  " + v);
                 _out.WriteLine("\nNote: C1 violations indicate RealmMultipliers need tuning (balance-002 first gate).");
-                _out.WriteLine("Advisory only — not blocking sprint. See balance-003 for convergence pass.");
             }
 
-            // Advisory gate: always passes. Violations are diagnostic.
-            Assert.True(true, "C1 advisory gate complete.");
+            // §15.7 frozen baseline (story-005 batch6): prevent balance regression.
+            // Known state 2026-06-24: 48 pairs, 47 violations. Source: module scaling (Scale=100)
+            // amplifies PenFromResource/other modules to one-shot magnitudes.
+            // Convergence to [40,60]% deferred to balance-003.
+            const int KnownViolationBaseline = 47;
+            const int KnownTestedBaseline = 48;
+
+            Assert.True(tested == KnownTestedBaseline,
+                $"C1 pair count changed: expected {KnownTestedBaseline}, got {tested}. " +
+                "Path count change — update KnownTestedBaseline.");
+            Assert.True(violations <= KnownViolationBaseline,
+                $"C1 violations increased: baseline {KnownViolationBaseline}, got {violations}. " +
+                "Balance REGRESSION detected — check recent RealmMultipliers changes.");
         }
 
         // ================================================================
