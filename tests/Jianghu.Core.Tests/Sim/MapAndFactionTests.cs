@@ -18,8 +18,8 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Map_Generated_Deterministic()
         {
-            var m1 = new WorldMap(new Pcg32(42, 0));
-            var m2 = new WorldMap(new Pcg32(42, 0));
+            var m1 = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
+            var m2 = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
 
             Assert.Equal(m1.NodeCount, m2.NodeCount);
             Assert.Equal(m1.RegionCount, m2.RegionCount);
@@ -37,7 +37,7 @@ namespace Jianghu.Core.Tests.Sim
         {
             for (int seed = 0; seed < 10; seed++)
             {
-                var m = new WorldMap(new Pcg32((ulong)seed, 0));
+                var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32((ulong)seed, 0));
                 // If INV-MAP-CONNECTED fails, constructor throws — test passes if no exception
                 Assert.True(m.NodeCount > 0);
             }
@@ -46,7 +46,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Map_Has_Regions_6To9()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             Assert.True(m.RegionCount >= 6 && m.RegionCount <= 9,
                 $"Expected 6-9 regions, got {m.RegionCount}");
         }
@@ -54,7 +54,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Map_Regions_HaveTerrain()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             foreach (var region in m.Regions)
             {
                 Assert.False(string.IsNullOrWhiteSpace(region.Name));
@@ -67,7 +67,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Map_Adjacency_HasAtLeast2Neighbors()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             for (int i = 0; i < m.NodeCount; i++)
             {
                 var adj = m.AdjacentTo(new NodeId(i));
@@ -78,7 +78,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Map_Adjacency_Sorted()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             for (int i = 0; i < m.NodeCount; i++)
             {
                 var adj = m.AdjacentTo(new NodeId(i));
@@ -90,7 +90,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Map_SitesPerRegion_3To5()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             int sitesPerRegion = m.NodeCount / m.RegionCount;
             Assert.True(sitesPerRegion >= 3 && sitesPerRegion <= 5,
                 $"Expected 3-5 sites/region, got {sitesPerRegion}");
@@ -103,7 +103,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Harvest_AtResourceNode_ReturnsAmount()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             // Find a resource node
             NodeId? resNode = null;
             for (int i = 0; i < m.NodeCount; i++)
@@ -123,7 +123,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Harvest_AtNormalNode_ReturnsZero()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             // Find a normal node
             for (int i = 0; i < m.NodeCount; i++)
             {
@@ -138,7 +138,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void EnterSecret_Success_WithHighInsight()
         {
-            var m = new WorldMap(new Pcg32(100, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(100, 0));
             // Find a secret node with low danger
             for (int i = 0; i < m.NodeCount; i++)
             {
@@ -159,7 +159,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void EnterSecret_Fails_WithLowInsight()
         {
-            var m = new WorldMap(new Pcg32(100, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(100, 0));
             for (int i = 0; i < m.NodeCount; i++)
             {
                 if (m.SiteType(new NodeId(i)) == 2)
@@ -173,7 +173,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void BestNeighbor_PrefersResourceNode()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             var best = m.BestNeighbor(new NodeId(0));
             Assert.True(best.Value >= 0 && best.Value < m.NodeCount);
         }
@@ -185,7 +185,7 @@ namespace Jianghu.Core.Tests.Sim
         [Fact]
         public void Map_ImplementsIGeoQuery()
         {
-            var m = new WorldMap(new Pcg32(42, 0));
+            var m = WorldMapFactory.Create(MapConfig.Default, new Pcg32(42, 0));
             IGeoQuery q = m;
             Assert.True(q.NodeCount > 0);
             Assert.True(q.RegionCount > 0);
