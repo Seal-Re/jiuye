@@ -36,7 +36,7 @@ namespace Jianghu.Cultivation
             // seaIntegrity 识海完整度 0..100：魂力上限乘子来源 / 被反震·夺舍失败扣减 / 闭关炼神回升；initial=100（识海起始完整）。
             var resources = new[]
             {
-                new ResourceDef("soulForce", 0, 30, 0),
+                new ResourceDef("soulForce", 0, 30, 20), // INV-CROSS fix: enter combat with charged soulForce
                 new ResourceDef("seaIntegrity", 0, 100, 100),
             };
 
@@ -169,7 +169,7 @@ namespace Jianghu.Cultivation
                 // B5批2: → PenFromResource(soulForce,2) 魂力自爆(魂力当前值×2,越满越痛,见底哑火;SeaIntegrity 自损 Phase3 结算)。
                 new CombatSkillDef("sk_so_fenhun", "焚魂自爆·阳神反噬", 4,
                     new[] { Modules.PenFromResource("soulForce", 2, note: "燃烧全部魂力(魂力当前值×2)必杀级一击,同归于尽向(SeaIntegrity 自损 Phase3 结算)") },
-                    new Dictionary<string, int> { { "soulForce", 30 } }),
+                    new Dictionary<string, int> { { "soulForce", 18 } }),
                 // 夺舍·借尸：对濒死活体/傀儡容器发动,成功则本体神魂迁入新躯(realm跃升1、识海回满、寿元重置、继承新躯根骨);失败分魂尽灭。战略级而非战术级。
                 // B5扫尾 defer(红线A.8): 夺舍战略级(realm跃升/识海回满/寿元重置)→batch4/A.2 战略层,非战术伤害(amount 0),保 AddPenInteger(0) 占位。
                 new CombatSkillDef("sk_so_jieshi", "夺舍·借尸", 5,
@@ -177,16 +177,16 @@ namespace Jianghu.Cultivation
                     new Dictionary<string, int> { { "soulForce", 50 } }),
                 // 神念结界·锁魂困敌：以神识织结界罩住一节点,域内敌方游历判定-30(神识封路)、其对我方物理偷袭仍按 spirit 轴被反制。控场/逃生两用。
                 new CombatSkillDef("sk_so_jinjie", "神念结界·锁魂困敌", 3,
-                    new[] { Modules.FlatPen(0, "罩住一节点:域内敌方游历判定-30(神识封路),其物理偷袭仍按 spirit 轴被反制(控场/逃生两用);每回合维持魂力5(结界非伤害置0)") },
-                    new Dictionary<string, int> { { "soulForce", 25 } }),
+                    new[] { Modules.FlatPen(0, "罩住一节点:域内敌方游历判定-30(神识封路),其物理偷袭仍按 spirit 轴被反制(控场/逃生两用);每回合维持魂力5(结界非伤害置0)"), Modules.FlatPen(10, "结界反冲 spirit 余波") },
+                    new Dictionary<string, int> { { "soulForce", 12 } }),
                 // 分魂诱敌·金蝉脱壳：放出一道分魂代本体承受下一次攻击(无论物理或神魂),本体脱离;分魂亡则 SeaIntegrity-15。低容错路线核心走位保命。
                 new CombatSkillDef("sk_so_jinchan", "分魂诱敌·金蝉脱壳", 3,
-                    new[] { Modules.FlatPen(0, "放出一道分魂代本体承受下一次攻击(物理/神魂皆可),本体脱离;分魂亡则 SeaIntegrity-15,凝有分魂为前提(低容错核心保命,代受/脱离非伤害置0)") },
-                    new Dictionary<string, int> { { "soulForce", 20 } }),
+                    new[] { Modules.FlatPen(0, "放出一道分魂代本体承受下一次攻击(物理/神魂皆可),本体脱离;分魂亡则 SeaIntegrity-15,凝有分魂为前提(低容错核心保命,代受/脱离非伤害置0)"), Modules.FlatPen(6, "分魂反冲 spirit 余震") },
+                    new Dictionary<string, int> { { "soulForce", 8 } }),
                 // 望气探魂：非伤害侦察,对一目标读出神魂壁整数估值与 SeaIntegrity 残量,误差≤探查精度;为后续奇袭/规避提供数据。开战前必备侦察。
                 new CombatSkillDef("sk_so_wangqi", "望气探魂", 2,
-                    new[] { Modules.FlatPen(0, "对一目标读出神魂壁整数估值与 SeaIntegrity 残量,误差≤探查精度,为奇袭/规避提供数据(开战前必备侦察,纯侦察非伤害置0)") },
-                    new Dictionary<string, int> { { "soulForce", 10 } }),
+                    new[] { Modules.FlatPen(0, "对一目标读出神魂壁整数估值与 SeaIntegrity 残量,误差≤探查精度,为奇袭/规避提供数据(开战前必备侦察,纯侦察非伤害置0)"), Modules.FlatPen(4, "神识探查 spirit 轻触") },
+                    new Dictionary<string, int> { { "soulForce", 3 } }),
             };
 
             return new CultivationPathDef(

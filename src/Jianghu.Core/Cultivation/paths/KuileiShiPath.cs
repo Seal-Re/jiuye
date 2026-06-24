@@ -46,7 +46,7 @@ namespace Jianghu.Cultivation.Paths
             // residualOrder 残命惯性 [0,100]（断链存量，commandChain 断时由操偶术置初值、每 tick 衰减；为 0 则军团彻底僵死）。
             var resources = new[]
             {
-                new ResourceDef("fleetWeighted", 0, 40, 0),
+                new ResourceDef("fleetWeighted", 0, 40, 6), // INV-CROSS fix: enter combat with modest fleet power
                 new ResourceDef("mindBandwidth", 0, 16, 0),
                 new ResourceDef("craftScore", 0, 100, 0),
                 new ResourceDef("residualOrder", 0, 100, 0),
@@ -195,17 +195,17 @@ namespace Jianghu.Cultivation.Paths
                 //   带宽乘子全额=fleetWeighted 全额转伤,军团越强越痛、空册哑火真差分；Amount2=1 工厂保证 §15.6）。
                 new CombatSkillDef("sk_kl_wankuiqi", "万傀齐攻", 1,
                     new[] { Modules.PenFromResource("fleetWeighted", 1, note:"傀儡军团集火单一目标,带宽乘子全额=fleetWeighted 全额计入一次集火伤害(死物军团集火)") },
-                    new Dictionary<string, int> { { "fleetWeighted", 8 } }),
+                    new Dictionary<string, int> { { "fleetWeighted", 2 } }),
                 // 傀附本体·临阵 [t2]：一具高品阶傀机括之力暂附本体,本体指挥项临时+悟性×3,弥补藏阵脆皮(近身自保/脱困;该傀本回合退出名册)。
                 // B5扫尾 defer(红线A.8): 改本体自身 stat(指挥项+悟性×3)需 ApplyStatDelta(未建)→改stat→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
-                new CombatSkillDef("sk_kl_kuifu", "傀附本体·临阵", 2,
-                    new[] { Modules.ModifyStat("self:Insight", 3, "本体指挥项+悟性×3(近身自保)") },
-                    new Dictionary<string, int> { { "fleetWeighted", 6 } }),
+                new CombatSkillDef("sk_kl_kuifu", "傀附本体·临阵", 1,
+                    new[] { Modules.ModifyStat("self:Insight", 3, "本体指挥项+悟性×3(近身自保)"), Modules.FlatPen(6, "傀附余力物理撞击") },
+                    new Dictionary<string, int> { { "fleetWeighted", 2 } }),
                 // 强令催动 [t2]：超频驱动指定傀,该傀constructPower×150/100持续3tick,结束后机括过载constructTier临时−1(透支构件换爆发)。
                 // B5扫尾 defer(红线A.8): constructPower×倍率=逐傀派生量(非聚合 fleetWeighted 资源),真 per-construct derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_kl_qiangling", "强令催动", 2,
                     new[] { Modules.FlatPen(24, "指定傀constructPower×150/100持续3tick(constructPower derived→FULLSTRUCT defer),后机括过载constructTier临时−1(透支构件换爆发,死物不喊累会损耗)") },
-                    new Dictionary<string, int> { { "fleetWeighted", 6 } }),
+                    new Dictionary<string, int> { { "fleetWeighted", 2 } }),
                 // 机枢自爆·焚甲 [t4]：引爆一具傀造constructPower×300/100一次性范围爆发,该傀永久移出名册(资源换斩杀,消耗战收尾);不损其余傀。
                 // B5扫尾 defer(红线A.8): constructPower×倍率=逐傀派生量(非聚合 fleetWeighted 资源),真 per-construct derived 未建→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_kl_jishuzibao", "机枢自爆·焚甲", 4,
@@ -213,8 +213,8 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "fleetWeighted", 12 } }),
                 // 镇魂不乱·钢令 [t3]：被音修乱兽/精神扰动笼罩时,钢令贯链——死物本免疫心智,本技额外把范围内被乱己方活体援军/契约兽拉回钢令节奏并清除被乱状态(反·乱兽)。
                 new CombatSkillDef("sk_kl_zhenhun", "镇魂不乱·钢令", 3,
-                    new[] { Modules.SituationalAdj(10, "钢令贯链:把范围内被乱己方活体援军/契约兽拉回节奏并清除被乱状态(死物路独有心智净土反制)") },
-                    new Dictionary<string, int> { { "fleetWeighted", 4 } }),
+                    new[] { Modules.SituationalAdj(10, "钢令贯链:把范围内被乱己方活体援军/契约兽拉回节奏并清除被乱状态(死物路独有心智净土反制)"), Modules.FlatPen(10, "钢令音波物理冲击") },
+                    new Dictionary<string, int> { { "fleetWeighted", 2 } }),
                 // 断链应急·影替傀 [t4]：本体将受致命/斩首打击时触发,指定影替傀代受并把本体瞬移出阵,阻止本体斩首→全军失令一次(保命技;与残命惯性大法联动彻底化解一次断链)。
                 // B5 批2：断链应急(影替代受致命/瞬移本体/commandSevered 复位)是唯一档签名机制(SpecialModuleRegistry 派发) → batch3 Special,
                 //   显式 deferred（红线 A.8 不静默,待批3 wiring 后补 Special 构造）,保 AddFlatDR(999)/SetFlag 占位。
@@ -230,6 +230,7 @@ namespace Jianghu.Cultivation.Paths
                     new[]
                     {
                         new EffectOp(EffectOpKind.AddResource, "residualOrder", 10, "散落/惯性僵立/被打断的傀强制召回重置阵位,恢复带宽乘子触发条件(被破阵纹打散后重整)"),
+                        Modules.FlatPen(6, "召回傀归位冲击"),
                     },
                     new Dictionary<string, int>()),
             };
