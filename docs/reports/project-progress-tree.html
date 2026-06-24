@@ -221,12 +221,12 @@ const treeData = {
                 { name: '✅ 金身态 (GoldenBodyMaxModule)', _files: 'special/GoldenBodyMaxModule.cs — goldenBodyTurns=3 + goldenLayers+2(钳9) + HasResource守', _docs: 'B5-design.md §6.3; BuddhistGoldenBodyPath 新增goldenBodyTurns资源[0,3]', _conflict: '已消除：批3收口从占位返0→资源chokepoint落地。置goldenBodyTurns=3(大成态计时)+goldenLayers+2(战力×25+flat DR增益)。DR×2逐回合/受击转愿/anti_evil×1.5 defer批4 turn-loop。' },
                 { name: '✅ 律场总门 (FieldActiveModule)', _files: 'special/FieldActiveModule.cs — 音修gate-by-flag', _docs: 'B5-design.md §6.4' },
                 { name: '✅ 夺舍 (DuosheModule)', _files: 'special/DuosheModule.cs — 鬼/魂/魔濒死夺躯 接RollbackStack', _docs: 'B5-design.md §6.5' },
-                { name: '⚠️ 夺心 (DuoxinModule)', _files: 'special/DuoxinModule.cs', _docs: 'B5-design.md §6.6', _conflict: '偏差：文档描述target本回合反噬阵营。代码仅guRevolt抬升(chokepoint)，真阵营反噬/行动重定向属批4 defer。' },
-                { name: '⚠️ 断链 (BrokenChainModule)', _files: 'special/BrokenChainModule.cs', _docs: 'B5-design.md §6.7', _conflict: '偏差：文档描述傀儡师被斩首后residualOrder决定军团。代码仅初值chokepoint，衰减+僵死判定defer批4。' },
+                { name: '✅ 夺心 (DuoxinModule)', _files: 'special/DuoxinModule.cs — guRevolt≥50阵营反噬重定向, TickTurnState逐回合-20衰减', _docs: 'B5-design.md §6.6; DuelEngine.TickTurnState + IsGuRevoltRedirected', _conflict: '已消除：批4 turn-loop落地。guRevolt≥50→伤害重定向到自身(阵营反噬)。逐回合-20衰减。全量506绿。' },
+                { name: '✅ 断链 (BrokenChainModule)', _files: 'special/BrokenChainModule.cs — residualOrder逐回合-25衰减, 耗尽→军团僵死', _docs: 'B5-design.md §6.7; DuelEngine.TickTurnState + HasResidualOrder', _conflict: '已消除：批4 turn-loop落地。residualOrder逐回合-25衰减。耗尽→军团僵死(该方无法行动)。全量506绿。' },
                 { name: '✅ 逆演栈 (ReverseStackModule)', _files: 'special/ReverseStackModule.cs — 命修/因果撤销交锋 接RollbackStack', _docs: 'B5-design.md §6.8' }
               ]},
             { name: '✅ 21路模块迁移 (全21路完成)', _files: 'paths/*.cs — 21路全验:107迁移测试(从80→+27), 全部经PathValidator + 伤害计算验证', _docs: 'epics/combat-r2/EPIC.md story-001 batch2收尾', _conflict: '已消除：15路迁移测试已扩充至SwordImmortalPath基准水平。每路含PenFromResource缩放/CounterMul tag门控/FlatPen伤害计算/PathValidator校验。全量492绿。' },
-            { name: '🔄 跨路平衡校准 INV-CROSS v2', _files: 'tests/.../BalanceMatrixDumpTests.cs, InvCrossDuelTests.cs; 20路RealmMultipliers校准', _docs: 'B5-平衡标定INV-CROSS-design.md; commit 3063111', _conflict: 'v2进展：UT8 spread从[0.39x,4.13x]压缩至[0.59x,2.39x]。14/19战斗路在[0.9x,1.65x] sword基线内。C1/C2/C3门控全部通过(492绿)。遗留：lei/ming/fa/ti四路需模块级审计(单独story)——multiplier无法修复战斗技能系数/模块失衡。yinguo_faze仍0%胜率(合道前地板过低,需UT10前早发期力峰)。' }
+            { name: '✅ 跨路平衡校准 INV-CROSS v3', _files: '20路RealmMultipliers校准 + lei/ming/fa/ti 模块级技能系数审计 + Fa manaPool×3→×2 + Ti UT7+ Curve boost', _docs: 'B5-平衡标定INV-CROSS-design.md; commits 3063111/42ea0dc/497a495', _conflict: 'v3闭环：multiplier校准(20路)+模块系数调优(4路: Lei解锁旗舰招+增伤, Ming加FlatPen, Fa降manaPool权, Ti Curve后段boost)。全量506绿。yinguo_faze仍0%胜率(合道前地板过低,需UT10前早发期力峰——独立story)。' }
           ]},
         { name: '✅ 法宝系统 (Artifacts)', _files: 'Cultivation/Artifacts/ArtifactDef.cs, ArtifactData.cs, ArtifactRegistry.cs', _docs: 'cultivation-system.md §8',
           children: [
