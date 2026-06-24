@@ -40,10 +40,9 @@ namespace Jianghu.Cultivation.Paths
                 new ResourceDef("spellBreadth", 0, 4, 1),
             };
 
-            // —— 战力公式（深度设计 P0=内力×5+悟性×3+武力×2+根骨×1+realm×8+Σ法术power×1+spellBreadth×4+manaPool×3）。
-            //    内力权重全路最高(法力本源)、根骨垫底(与体修对立)；唯一含 spellBreadth×4 百搭项与 manaPool×3 续航项；
-            //    无 daoHeart、无 ×0（R3/R6）。manaPool 项深度设计 raw×3，照剑修范式取 res×3 占位(Initial=0 起底)，
-            //    续航惩罚(manaPool/cost=0 →×3/4)属 Phase 3 战斗结算，A.0 不落 Modifier，Note 留痕。——
+            // —— 战力公式（P0=内力×5+悟性×3+武力×2+根骨×1+realm×8+Σ法术power×1+spellBreadth×4+manaPool×2）。
+            //    内力权重全路最高(法力本源)、根骨垫底(与体修对立)；含 spellBreadth×4 百搭项与 manaPool×2 续航项；
+            //    无 daoHeart、无 ×0（R3/R6）。manaPool v3 权重 3→2（INV-CROSS 模块审计: ×3 致 EP 1.6x sword, 技能系数保守不补）。——
             var power = new PowerFormulaDef(
                 new[]
                 {
@@ -54,7 +53,7 @@ namespace Jianghu.Cultivation.Paths
                     new PowerTerm("realm", 8, null),             // 境界：整数基底倍率锚
                     new PowerTerm("sumArtPower", 1, null),       // 所选法术/符印/心法各功法 tier 之和
                     new PowerTerm("res:spellBreadth", 4, null),  // 法术库广度：百搭核心，多系线性叠战力
-                    new PowerTerm("res:manaPool", 3, null),      // 灵力池续航（raw 占位，续航惩罚 Phase 3 接）
+                    new PowerTerm("res:manaPool", 2, null),      // 灵力池续航 v3: 3→2 (INV-CROSS 模块审计: ×3 致 EP 1.59x sword, 技能系数保守不补)
                 },
                 System.Array.Empty<PowerMod>(),
                 null);
