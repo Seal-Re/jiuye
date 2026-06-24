@@ -13,41 +13,49 @@
 
 ## Prerequisites
 
+- [x] Create cultivation-a3 stories — 15 stories created (`fcb43cf`)
 - [ ] Push pending commits (GitHub currently unreachable)
 - [ ] Merge feat/cultivation-a2 → master
-- [ ] Create cultivation-a3 stories (epic has EPIC.md only, no stories yet)
 
 ---
 
 ## Stories
 
-### Must Have
+### Must Have (5.0d)
 
 | ID | Story | Epic | Est | Depends |
 |----|-------|------|:--:|---------|
-| a3-001 | 转职系统数据模型 | cultivation-a3 | 0.5d | **需先创建故事** |
-| a3-002 | 觉醒系统数据模型 | cultivation-a3 | 0.5d | **需先创建故事** |
-| a3-003 | 双修系统数据模型 | cultivation-a3 | 0.5d | **需先创建故事** |
-| a3-004 | 转职/觉醒/双修注册表+RNG | cultivation-a3 | 0.5d | a3-001..003 |
-| a3-005 | A.3 全不变量硬化 | cultivation-a3 | 0.5d | a3-004 |
+| a3-001 | TransitionDef 数据模型 | cultivation-a3 | 0.3d | — |
+| a3-002 | PathId 迁移+CultivationState 改造 | cultivation-a3 | 0.3d | a3-001 |
+| a3-004 | AwakeningDef 数据模型 | cultivation-a3 | 0.3d | a3-001 |
+| a3-005 | 觉醒触发器（濒死/秘境/血统法器） | cultivation-a3 | 0.3d | a3-004 |
+| a3-007 | DualPathDef 数据模型+slotCap | cultivation-a3 | 0.3d | a3-001 |
+| a3-008 | 双修兼容矩阵+bandwidth | cultivation-a3 | 0.3d | a3-007 |
+| a3-010 | RiskModifier 反噬系统 | cultivation-a3 | 0.3d | a3-001 |
+| a3-014 | A.3 不变量硬化+确定性 | cultivation-a3 | 0.5d | a3-002, a3-010 |
+| a3-015 | A.3 审计员终验 | cultivation-a3 | 0.3d | a3-014 |
 | drama-002 | 戏剧 storylet 引擎 | drama-engine | 0.5d | drama-001 |
-| drama-003 | 复仇链 | drama-engine | 0.5d | drama-002 |
 | content-001 | 奇遇内容批1 (20 storylets) | cultivation-a2 | 0.3d | a2-013 |
 
-### Should Have
+### Should Have (1.5d)
 
 | ID | Story | Epic | Est |
 |----|-------|------|:--:|
-| drama-004 | 恩怨系统 | drama-engine | 0.5d |
+| a3-003 | 标准转职路线数据 | cultivation-a3 | 0.3d |
+| a3-006 | 觉醒→功法/战力解锁 | cultivation-a3 | 0.3d |
+| a3-011 | RiskModifier 数据+cooldown | cultivation-a3 | 0.2d |
+| a3-012 | 正邪分叉框架 | cultivation-a3 | 0.3d |
+| drama-003 | 复仇链 | drama-engine | 0.5d |
 | content-002 | 奇遇内容批2 (20 storylets) | cultivation-a2 | 0.3d |
-| repo-tidy | 仓库整理 | repo-tidy | 0.3d |
 
 ### Nice to Have
 
 | ID | Story | Epic | Est |
 |----|-------|------|:--:|
-| a3-006 | 转职→A.2 日课交互 | cultivation-a3 | 0.5d |
+| a3-009 | 双修战力公式+反噬 | cultivation-a3 | 0.5d |
+| a3-013 | 正邪→天劫强化/正道围剿 | cultivation-a3 | 0.3d |
 | content-003 | 奇遇内容批3 (14 storylets→总量60) | cultivation-a2 | 0.2d |
+| repo-tidy | 仓库整理 | repo-tidy | 0.3d |
 
 ---
 
