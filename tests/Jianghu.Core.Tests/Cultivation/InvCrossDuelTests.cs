@@ -279,27 +279,30 @@ namespace Jianghu.Core.Tests.Cultivation
 
             _out.WriteLine(string.Format("C1 gate: {0} pairs tested, {1} violations", tested, violations));
 
-            if (violations > 0)
+            // balance-003: dump violations to temp file for recalibration
+            try
             {
-                _out.WriteLine(string.Format("\nC1 VIOLATIONS ({0}/{1}):", violations, tested));
-                foreach (var v in violationsList)
-                    _out.WriteLine("  " + v);
-                _out.WriteLine("\nNote: C1 violations indicate RealmMultipliers need tuning (balance-002 first gate).");
+                var diagFile = System.IO.Path.Combine(
+                    System.IO.Path.GetTempPath(), "c1-violations-balance-003.txt");
+                var lines = new System.Collections.Generic.List<string>();
+                lines.Add($"C1 gate: {tested} pairs tested, {violations} violations");
+                lines.Add($"Module cap: PE/2 (balance-003 prong1)");
+                lines.Add("");
+                foreach (var v in violationsList) lines.Add(v);
+                System.IO.File.WriteAllLines(diagFile, lines);
+                _out.WriteLine($"Diagnostic dump: {diagFile}");
             }
+            catch { /* best-effort */ }
 
             // §15.7 frozen baseline (story-005 batch6): prevent balance regression.
-            // Known state 2026-06-24: 48 pairs, 47 violations. Source: module scaling (Scale=100)
-            // amplifies PenFromResource/other modules to one-shot magnitudes.
-            // Convergence to [40,60]% deferred to balance-003.
+            // Post module-cap state (balance-003 prong1).
             const int KnownViolationBaseline = 47;
             const int KnownTestedBaseline = 48;
 
             Assert.True(tested == KnownTestedBaseline,
-                $"C1 pair count changed: expected {KnownTestedBaseline}, got {tested}. " +
-                "Path count change — update KnownTestedBaseline.");
+                $"C1 pair count changed: expected {KnownTestedBaseline}, got {tested}.");
             Assert.True(violations <= KnownViolationBaseline,
-                $"C1 violations increased: baseline {KnownViolationBaseline}, got {violations}. " +
-                "Balance REGRESSION detected — check recent RealmMultipliers changes.");
+                $"C1 violations: baseline {KnownViolationBaseline}, got {violations}. REGRESSION.");
         }
 
         // ================================================================
