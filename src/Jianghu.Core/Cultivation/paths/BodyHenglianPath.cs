@@ -160,18 +160,19 @@ namespace Jianghu.Cultivation.Paths
             //    伤害/穿透等具体结算 Phase 3 接，A.0 以 AddPenInteger 占位破防量（量级对齐该路公式）+ Cost 表达资源门槛。——
             var skills = new[]
             {
-                // 燃血狂攻：燃尽当前血气,每10点转来袭武力威+6并附穿透,打空对手放风筝窗口。门槛血气≥30,清空全部。
-                // B5批2: → PenFromResource(qixue,6,÷10) 血气转伤(每10点血气+6,满池约+120窗口爆发;血池越满越痛,见底哑火)。
+                // 燃血狂攻：燃尽当前血气,每6点转来袭武力威+6并附穿透,打空对手放风筝窗口。门槛血气≥30,清空全部。
+                // B5批2: → PenFromResource(qixue,6,÷6) 血气转伤(每6点血气+6,满池约+200窗口爆发;血池越满越痛,见底哑火)。
+                // INV-CROSS v2: div 10→6 (qixue×1.0 vs old 0.6, compensate late-game flat-curve falloff).
                 new CombatSkillDef("sk_ti_ranxue", "燃血狂攻", 3,
-                    new[] { Modules.PenFromResource("qixue", 6, div: 10, note: "燃尽当前血气,每10点转武力威+6并附穿透(资源转伤,满池约+120的窗口爆发)") },
+                    new[] { Modules.PenFromResource("qixue", 6, div: 6, note: "燃尽当前血气,每6点转武力威+6并附穿透(资源转伤,满池约+200的窗口爆发)") },
                     new Dictionary<string, int> { { "qixue", 30 } }),
                 // 金身震：对周身所有交互对象造根骨/2真实伤害并打断蓄力,反制围杀消耗。血气≥30,消耗30。
                 new CombatSkillDef("sk_ti_jinshenzhen", "金身震", 4,
-                    new[] { Modules.FlatPen(15, "对周身所有交互对象造根骨/2真实伤害并打断其蓄力(反围杀)") },
+                    new[] { Modules.FlatPen(24, "对周身所有交互对象造根骨/2真实伤害并打断其蓄力(反围杀)") },
                     new Dictionary<string, int> { { "qixue", 30 } }),
                 // 舍身撞：无视双方henglian互拼,按武力+根骨对轰;体修血气垫伤多半赢对耗。血气≥25,消耗25(+自伤flavor)。
                 new CombatSkillDef("sk_ti_sheshenzhuang", "舍身撞", 4,
-                    new[] { Modules.FlatPen(40, "无视双方henglian互拼,按武力+根骨对轰(血气垫伤多半赢对耗)") },
+                    new[] { Modules.FlatPen(52, "无视双方henglian互拼,按武力+根骨对轰(血气垫伤多半赢对耗)") },
                     new Dictionary<string, int> { { "qixue", 25 } }),
                 // 金钟落锁(封罩门)：1回合彻底封闭自身罩门,免疫'罩门×2'与直击罩门类战技。血气≥20,消耗20。
                 new CombatSkillDef("sk_ti_jinzhongluosuo", "金钟落锁", 3,

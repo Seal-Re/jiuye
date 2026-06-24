@@ -74,7 +74,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
 
             int full = Resolve(sk, 0, ctxFull);   // 30×2 = 60
             int empty = Resolve(sk, 0, ctxEmpty); // 0
-            Assert.Equal(30 * 2, full);
+            Assert.Equal(30 * 3, full);
             Assert.Equal(0, empty);
             Assert.True(full > empty, "舍身雷爆未随 thunderCharge 缩放（仍是占位定值）");
         }
@@ -84,7 +84,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
         public void ZhanHun_IsFlatPen()
         {
             var sk = Skill("sk_le_zhanhun");
-            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 32);
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 48);
         }
 
         // —— 雷遁·闪：Evade(20) 雷遁闪避 20% 减免——

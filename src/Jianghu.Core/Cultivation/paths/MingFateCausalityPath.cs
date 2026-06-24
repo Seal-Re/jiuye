@@ -168,13 +168,13 @@ namespace Jianghu.Cultivation.Paths
                 // 一念断因果：开战即结算,按tempo档削对方本回合EP并截其下一动作,夺其Fortune-5入己。决战起手最强先手技。
                 // B5扫尾 defer(红线A.8): 主效=削对方 EffectivePower×tempo/16(改敌EP%通道未建)+截动作,改EP%→EPIC-COMBAT-FULLSTRUCT,保 AddPenInteger 占位。
                 new CombatSkillDef("sk_mi_yinian", "一念断因果", 5,
-                    new[] { Modules.ModifyEP("tempo", -1, 16, "削EP×tempo/16(整除)"), Modules.Drain("netFortune", 5, "夺Fortune-5") },
+                    new[] { Modules.FlatPen(30, "因果断命:基础伤害+30"), Modules.ModifyEP("tempo", -1, 16, "削EP×tempo/16(整除)"), Modules.Drain("netFortune", 5, "夺Fortune-5") },
                     new Dictionary<string, int> { { "karma", 5 }, { "lifespanDebt", 3 }, { "netFortune", 4 } }),
                 // 夺运截命·一击：对单体夺Fortune-8→己+5;目标气运>己则reflect全额入己LifespanDebt+Karma(强夺命大者自险),命中则其tempo-2。
                 // B5 批2 招牌招迁移：占位 AddPenInteger(24) → Modules.Drain(netFortune,8)（夺运=经 chokepoint 防方 netFortune-8、
                 //   攻方 +8,各按 [Min,Cap] 钳；dmg 不变,本轮断言 chokepoint 移动）。reflect/tempo-2 等细则批3/4 接。
                 new CombatSkillDef("sk_mi_duoyun", "夺运截命·一击", 4,
-                    new[] { Modules.Drain("netFortune", 8, "夺单体 netFortune-8→己+8(夺运截命,经chokepoint钳);气运>己则reflect入己/命中其tempo-2 批3/4接") },
+                    new[] { Modules.FlatPen(20, "夺运一击:基础伤害+20"), Modules.Drain("netFortune", 8, "夺单体 netFortune-8→己+8(夺运截命,经chokepoint钳);气运>己则reflect入己/命中其tempo-2 批3/4接") },
                     new Dictionary<string, int> { { "karma", 4 }, { "lifespanDebt", 2 } }),
                 // 逆演重开：本场限一次,撤销刚结算的一次交锋(伤害/夺运/胜负回滚),但Karma不回滚。以信息优势重来一手纠错。
                 // B5 批2：逆演栈回滚是唯一档签名机制(SpecialModuleRegistry 派发,栈回滚结算) → batch3 Special,
@@ -184,7 +184,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "netFortune", 10 }, { "lifespanDebt", 3 } }),
                 // 移祸天下：群体转嫁,把自身Karma一半(整除)平摊场上所有敌方(各NetFortune同步降),顺带各夺Fortune-2。多打一时摊薄天谴。
                 new CombatSkillDef("sk_mi_yihuo", "移祸天下", 3,
-                    new[] { Modules.FlatPen(12, "把自身Karma一半(整除)平摊全场敌方(各NetFortune同步降),各夺Fortune-2(群体转嫁/derived摊薄 Phase3)") },
+                    new[] { Modules.FlatPen(28, "把自身Karma一半(整除)平摊全场敌方(各NetFortune同步降),各夺Fortune-2(群体转嫁/derived摊薄 Phase3)") },
                     new Dictionary<string, int> { { "netFortune", 6 } }),
                 // 借寿演天：瞬间满算,tempo直升当前realm上限并netFortune+4。以折寿换此刻全知。
                 new CombatSkillDef("sk_mi_jieshou", "借寿演天", 3,
@@ -200,7 +200,7 @@ namespace Jianghu.Cultivation.Paths
                     new Dictionary<string, int> { { "netFortune", 4 }, { "karma", 1 } }),
                 // 断生死·绝命：终结技,仅己净气运>0且>目标时可发——清零目标本场tempo并夺其NetFortune的1/3,几乎必杀已被压制者;条件不满足则发动反噬全额入己。
                 new CombatSkillDef("sk_mi_jueming", "断生死·绝命", 5,
-                    new[] { Modules.FlatPen(50, "清零目标本场tempo并夺其NetFortune的1/3(几乎必杀已被压制者);仅己净气运>0且>目标可发,否则反噬全额入己(执行斩杀基线;条件/反噬 Phase3/批4)") },
+                    new[] { Modules.FlatPen(72, "清零目标本场tempo并夺其NetFortune的1/3(几乎必杀已被压制者);仅己净气运>0且>目标可发,否则反噬全额入己(执行斩杀基线;条件/反噬 Phase3/批4)") },
                     new Dictionary<string, int> { { "netFortune", 15 }, { "karma", 6 }, { "lifespanDebt", 6 } }),
                 // 因果锁命[control]：控场—目标下2回合无法行动。netFortune≥10,消耗10。
                 // B5扩21: Control — 命修因果锁命控场代表招。

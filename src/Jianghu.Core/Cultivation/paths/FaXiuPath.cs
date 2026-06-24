@@ -145,12 +145,14 @@ namespace Jianghu.Cultivation.Paths
             var skills = new[]
             {
                 // 混元一气·万法归宗：需spellBreadth=4,融四系一击,伤害=40+realm×3,无视相克与护盾。manaPool≥40(几近清池)。
-                new CombatSkillDef("sk_fa_hunyuan", "混元一气·万法归宗", 7,
+                // INV-CROSS v2: tier 7→5 unlock at UT8 (was gated behind realm≥7, unreachable in mid-game).
+                new CombatSkillDef("sk_fa_hunyuan", "混元一气·万法归宗", 5,
                     new[] { Modules.FlatPen(40, "需spellBreadth=4,融四系一击40+realm×3,无视相克与护盾") },
                     new Dictionary<string, int> { { "manaPool", 40 } }),
                 // 五雷正法：召天雷,雷系伤害+28;对tag:ghost/tag:demon额外+10。manaPool≥20,消耗20。
                 // B5批2: → AddPenInteger(28基线)+CounterMul(evil,3/2) 破阴邪(对evil敌联合上界×3/2,非evil不变)。
-                new CombatSkillDef("sk_fa_wulei", "五雷正法", 5,
+                // INV-CROSS v2: tier 5→4 unlock at UT8.
+                new CombatSkillDef("sk_fa_wulei", "五雷正法", 4,
                     new[]
                     {
                         Modules.FlatPen(28, "召天雷雷系伤害+28(基线)"),
@@ -158,7 +160,8 @@ namespace Jianghu.Cultivation.Paths
                     },
                     new Dictionary<string, int> { { "manaPool", 20 } }),
                 // 焚天燎原阵：火系AoE每敌16伤;命中木属性敌每个额外+5。manaPool≥22,消耗22。
-                new CombatSkillDef("sk_fa_fentian", "焚天燎原阵", 5,
+                // INV-CROSS v2: tier 5→4 unlock at UT8.
+                new CombatSkillDef("sk_fa_fentian", "焚天燎原阵", 4,
                     new[] { Modules.FlatPen(16, "火系AoE每敌16伤;命中木属性敌每个额外+5") },
                     new Dictionary<string, int> { { "manaPool", 22 } }),
                 // 万剑诀·御物千刃：御使飞剑/法宝群攻,伤害=12+2×spellBreadth。manaPool≥15,消耗15。

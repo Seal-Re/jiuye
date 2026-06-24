@@ -43,7 +43,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
 
             int full = Resolve(sk, 0, Ctx(qixue: 100)); // 满池：100×6/10 = 60
             int empty = Resolve(sk, 0, Ctx(qixue: 0));  // 见底：0
-            Assert.Equal(100 * 6 / 10, full);
+            Assert.Equal(100 * 6 / 6, full);
             Assert.Equal(0, empty);
             Assert.True(full > empty, "燃血狂攻未随 qixue 缩放（仍是占位定值）");
         }

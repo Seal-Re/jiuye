@@ -43,8 +43,8 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
             Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.DrainResource && o.Key == "netFortune");
 
             var ctx = Ctx(atkNF: 10, defNF: 20);
-            int dmg = Resolve(sk, 100, ctx); // Drain 不改 dmg
-            Assert.Equal(100, dmg);
+            int dmg = Resolve(sk, 100, ctx); // Drain 不改 dmg, FlatPen(+20) 新增→基线 100+20
+            Assert.Equal(120, dmg);
             // 防方 -8、攻方 +8（经 [Min,Cap] 钳，未触界故全额移动）。
             Assert.Equal(10 + 8, ctx.ReadResource(Side.Attacker, "netFortune"));
             Assert.Equal(20 - 8, ctx.ReadResource(Side.Defender, "netFortune"));
@@ -80,7 +80,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
         public void JueMing_IsFlatPen()
         {
             var sk = Skill("sk_mi_jueming");
-            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 50);
+            Assert.Contains(sk.OnUse, o => o.Kind == EffectOpKind.AddPenInteger && o.Amount == 72);
         }
 
         [Fact]
