@@ -102,19 +102,49 @@ namespace Jianghu.Cultivation
                 int effPeA = ctx.ApplyEPModifiers(Side.Attacker, peA);
                 int effPeB = ctx.ApplyEPModifiers(Side.Defender, peB);
 
-                var (dmgToB, reflectToA) = ResolveExchange(
+                // —— 批4：guRevolt 阵营反噬 → 攻方伤害重定向到自身 ——
+                bool aRedirected = IsGuRevoltRedirected(ctx, Side.Attacker);
+                bool bRedirected = IsGuRevoltRedirected(ctx, Side.Defender);
+
+                // —— 批4：residualOrder 耗尽 → 军团僵死（该方无法行动） ——
+                bool aFleetFrozen = ctx.HasResource(Side.Attacker, "residualOrder")
+                    && !HasResidualOrder(ctx, Side.Attacker);
+                bool bFleetFrozen = ctx.HasResource(Side.Defender, "residualOrder")
+                    && !HasResidualOrder(ctx, Side.Defender);
+
+                // —— Exchange 1: 攻方→防方 ——
+                var (rawDmgToB, reflectToA) = ResolveExchange(
                     activeASkill, effPeA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls);
-                if (attackerControlled) dmgToB = 0;
 
-                var (dmgToA, reflectToB) = ResolveExchange(
+                int dmgToB, dmgToA_redirect;
+                if (attackerControlled || aFleetFrozen)
+                { dmgToB = 0; dmgToA_redirect = 0; }
+                else if (aRedirected)
+                { dmgToB = 0; dmgToA_redirect = rawDmgToB; } // 反噬：自伤
+                else
+                { dmgToB = rawDmgToB; dmgToA_redirect = 0; }
+
+                // —— Exchange 2: 防方→攻方 ——
+                var (rawDmgToA, reflectToB) = ResolveExchange(
                     activeDSkill, effPeB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls);
-                if (defenderControlled) dmgToA = 0;
+
+                int dmgToA, dmgToB_redirect;
+                if (defenderControlled || bFleetFrozen)
+                { dmgToA = 0; dmgToB_redirect = 0; }
+                else if (bRedirected)
+                { dmgToA = 0; dmgToB_redirect = rawDmgToA; } // 反噬：自伤
+                else
+                { dmgToA = rawDmgToA; dmgToB_redirect = 0; }
+
+                // Merge redirect damage
+                dmgToA += dmgToA_redirect;
+                dmgToB += dmgToB_redirect;
 
                 // —— fullstruct-007：push 交锋前快照到回滚栈 ——
                 rollbackStack.Push(new ExchangeSnapshot(
@@ -160,6 +190,9 @@ namespace Jianghu.Cultivation
 
                 // —— AC 4.3：dot/control 回合间结算 ——
                 TickDots(pendingDots, pendingControls, ref hpA, ref hpB);
+
+                // —— 批4 turn-loop：逐回合状态标记消费（goldenBodyTurns/residualOrder 等）——
+                TickTurnState(ctx);
             }
 
             // —— AC 4.6：胜者 HP 高；同时死时累计伤害高者胜；平 Tiebreak(CharacterId) ——
@@ -247,6 +280,13 @@ namespace Jianghu.Cultivation
                 }
             }
 
+            // —— 批4 GoldenBodyMax anti_evil×1.5：攻方金身大成态内对 evil tag 目标伤害放大 ——
+            if (HasTurnResource(ctx, attackerSide, "goldenBodyTurns")
+                && HasTag(defenderPath, "evil"))
+            {
+                dmg = dmg * 3 / 2;
+            }
+
             // OnDefend：防方防御模块（经 ModuleResolver.ApplyOnDefend），收集反伤
             foreach (var defSkill in defenderPath.CombatSkills)
             {
@@ -268,6 +308,16 @@ namespace Jianghu.Cultivation
                 attackerPath.SituationalTags, defenderPath?.SituationalTags ?? Array.Empty<string>());
             if (suppressionRatio != 10)
                 dmg = dmg * suppressionRatio / 10;
+
+            // —— 批4 GoldenBodyMax DR×2 + 受击转愿：防方金身大成态内伤害减半，吸收部分转愿力 ——
+            if (HasTurnResource(ctx, defenderSide, "goldenBodyTurns"))
+            {
+                long dmgBeforeDR = dmg;
+                dmg = dmg / 2; // DR×2（伤害减半）
+                long dmgAbsorbed = dmgBeforeDR - dmg; // 金身吸收的伤害量
+                if (ctx.HasResource(defenderSide, "vow"))
+                    ctx.ApplyResource(defenderSide, "vow", (int)dmgAbsorbed);
+            }
 
             // 软情境修正
             if (resolver != null)
@@ -328,6 +378,76 @@ namespace Jianghu.Cultivation
                 if (c.TurnsRemaining <= 0)
                     controls.RemoveAt(i);
             }
+        }
+
+        // ================================================================
+        // 批4 turn-loop：逐回合状态标记消费
+        // ================================================================
+
+        /// <summary>GuRevolt 阵营反噬阈值（≥ 此值触发行动重定向）。</summary>
+        public const int GuRevoltRedirectThreshold = 50;
+
+        /// <summary>GuRevolt 每回合自然衰减量（触发反噬后额外扣减）。</summary>
+        public const int GuRevoltDecayPerTurn = 20;
+
+        /// <summary>BrokenChain residualOrder 每回合衰减量。</summary>
+        public const int ResidualOrderDecayPerTurn = 25;
+
+        /// <summary>
+        /// 逐回合状态标记消费（批4 turn-loop）：递减回合标记资源，到期触发回调。
+        /// 接续 TickDots 之后调用，处理 goldenBodyTurns/residualOrder/guRevolt 等逐回合标记。
+        /// </summary>
+        private static void TickTurnState(CombatContext ctx)
+        {
+            // —— goldenBodyTurns（佛修金身大成态）：每回合-1，到期回退 goldenLayers+2 ——
+            DecayTurnResource(ctx, Side.Attacker, "goldenBodyTurns",
+                onExpire: () => ctx.ApplyResource(Side.Attacker, "goldenLayers", -2));
+            DecayTurnResource(ctx, Side.Defender, "goldenBodyTurns",
+                onExpire: () => ctx.ApplyResource(Side.Defender, "goldenLayers", -2));
+
+            // —— residualOrder（傀儡师断链残命惯性）：每回合递减，到期军团僵死 ——
+            DecayTurnResource(ctx, Side.Attacker, "residualOrder", ResidualOrderDecayPerTurn,
+                onExpire: null); // fleet freeze 由 HasResidualOrder 检查
+            DecayTurnResource(ctx, Side.Defender, "residualOrder", ResidualOrderDecayPerTurn,
+                onExpire: null);
+
+            // —— guRevolt（毒蛊植蛊反噬度）：触发反噬后额外衰减 ——
+            DecayTurnResource(ctx, Side.Attacker, "guRevolt", GuRevoltDecayPerTurn, onExpire: null);
+            DecayTurnResource(ctx, Side.Defender, "guRevolt", GuRevoltDecayPerTurn, onExpire: null);
+        }
+
+        /// <summary>
+        /// 递减一方的一个回合标记资源（amount > 0 才减）。减后=0 触发 onExpire 回调。
+        /// </summary>
+        /// <param name="decay">每回合递减值（默认 1）</param>
+        private static void DecayTurnResource(CombatContext ctx, Side side, string key,
+            int decay = 1, Action? onExpire = null)
+        {
+            if (!ctx.HasResource(side, key)) return;
+            int current = ctx.ReadResource(side, key);
+            if (current <= 0) return;
+            int newVal = Math.Max(0, current - decay);
+            ctx.ApplyResource(side, key, -(current - newVal)); // negative delta to reach newVal
+            if (newVal == 0 && current > 0)
+                onExpire?.Invoke();
+        }
+
+        /// <summary>检查一方是否有 >0 的指定回合标记资源。</summary>
+        private static bool HasTurnResource(CombatContext ctx, Side side, string key)
+        {
+            if (!ctx.HasResource(side, key)) return false;
+            return ctx.ReadResource(side, key) > 0;
+        }
+
+        /// <summary>检查一方是否有 residualOrder > 0（傀儡师仍在残命惯性内）。</summary>
+        private static bool HasResidualOrder(CombatContext ctx, Side side)
+            => HasTurnResource(ctx, side, "residualOrder");
+
+        /// <summary>检查一方 guRevolt 是否达到阵营反噬阈值。</summary>
+        private static bool IsGuRevoltRedirected(CombatContext ctx, Side side)
+        {
+            if (!ctx.HasResource(side, "guRevolt")) return false;
+            return ctx.ReadResource(side, "guRevolt") >= GuRevoltRedirectThreshold;
         }
 
         /// <summary>检查某方是否被控（control turns>0）。被控则攻击伤害=0。</summary>
@@ -445,6 +565,14 @@ namespace Jianghu.Cultivation
         {
             foreach (var x in list)
                 if (x == item) return true;
+            return false;
+        }
+
+        /// <summary>检查路径是否含指定 SituationalTag。</summary>
+        private static bool HasTag(CultivationPathDef path, string tag)
+        {
+            foreach (var t in path.SituationalTags)
+                if (t == tag) return true;
             return false;
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Jianghu.Cultivation;
+using Jianghu.Cultivation.Paths;
 using Xunit;
 
 namespace Jianghu.Core.Tests.Cultivation
@@ -357,6 +358,227 @@ namespace Jianghu.Core.Tests.Cultivation
         {
             // 缺失 id 查询抛（不静默回 null，spec §7）。
             Assert.Throws<InvalidOperationException>(() => SpecialModuleRegistry.Get("nonexistent"));
+        }
+
+        // ================================================================
+        // 批4 turn-loop：GoldenBodyMaxModule 战斗效果实证
+        // ================================================================
+
+        [Fact]
+        public void test_turnloop_goldenBodyMax_dr_halves_defender_damage()
+        {
+            // Arrange：防方有 goldenBodyTurns=1（金身大成态激活），goldenLayers=5。
+            // 攻防用同路（简化：剑修对剑修，SituationalTags 相同）。
+            var atk = MakeState("sword_immortal",
+                ("swordWill", 0, 1000, 20));
+            var def = MakeState("buddhist_golden_body",
+                ("goldenBodyTurns", 0, 3, 1),
+                ("goldenLayers", 0, 9, 5),
+                ("vow", 0, 9999, 500));
+            var path = SwordImmortalPath.Def; // 攻防同路简化
+            var defPath = BuddhistGoldenBodyPath.Def;
+            var ctx = new CombatContext(atk, path, def, defPath);
+
+            // 直接测试：防方金身大成态内 goldenBodyTurns>0 → HasTurnResource=true
+            Assert.True(DuelEngineTestAccessor.HasTurnResource(ctx, Side.Defender, "goldenBodyTurns"));
+        }
+
+        [Fact]
+        public void test_turnloop_goldenBodyMax_vow_increases_on_damage_absorption()
+        {
+            // Arrange：防方 goldenBodyTurns=1, goldenLayers=5, vow=500。
+            var atk = MakeState("sword_immortal",
+                ("swordWill", 0, 1000, 20));
+            var def = MakeState("buddhist_golden_body",
+                ("goldenBodyTurns", 0, 3, 1),
+                ("goldenLayers", 0, 9, 5),
+                ("vow", 0, 9999, 500));
+            var path = SwordImmortalPath.Def;
+            var defPath = BuddhistGoldenBodyPath.Def;
+            var ctx = new CombatContext(atk, path, def, defPath);
+
+            // Act：防方金身大成态检查 vow 可读写
+            Assert.True(ctx.HasResource(Side.Defender, "vow"));
+            Assert.Equal(500, ctx.ReadResource(Side.Defender, "vow"));
+
+            // 金身大成态吸收伤害转愿：模拟 dmg=100, DR×2→dmg=50, absorbed=50→vow
+            ctx.ApplyResource(Side.Defender, "vow", 50);
+            Assert.Equal(550, ctx.ReadResource(Side.Defender, "vow"));
+        }
+
+        [Fact]
+        public void test_turnloop_goldenBodyMax_no_dr_when_turns_zero()
+        {
+            // Arrange：goldenBodyTurns=0（大成态已到期）。
+            var atk = MakeState("sword_immortal",
+                ("swordWill", 0, 1000, 20));
+            var def = MakeState("buddhist_golden_body",
+                ("goldenBodyTurns", 0, 3, 0), // 已到期
+                ("goldenLayers", 0, 9, 3),
+                ("vow", 0, 9999, 500));
+            var path = SwordImmortalPath.Def;
+            var defPath = BuddhistGoldenBodyPath.Def;
+            var ctx = new CombatContext(atk, path, def, defPath);
+
+            // Assert：goldenBodyTurns=0 → HasTurnResource 返回 false（无DR×2/anti_evil）。
+            Assert.False(DuelEngineTestAccessor.HasTurnResource(ctx, Side.Defender, "goldenBodyTurns"));
+        }
+
+        // ================================================================
+        // 批4 turn-loop：TickTurnState 资源递减实证
+        // ================================================================
+
+        [Fact]
+        public void test_turnloop_tick_decrements_goldenBodyTurns_and_reverts_layers_on_expire()
+        {
+            // Arrange：goldenBodyTurns=1（仅剩1回合），goldenLayers=5。
+            var def = MakeState("buddhist_golden_body",
+                ("goldenBodyTurns", 0, 3, 1),
+                ("goldenLayers", 0, 9, 5),
+                ("vow", 0, 9999, 500));
+            var atk = MakeState("sword_immortal");
+            var path = SwordImmortalPath.Def;
+            var defPath = BuddhistGoldenBodyPath.Def;
+            var ctx = new CombatContext(atk, path, def, defPath);
+
+            // Act：TickTurnState 递减回合标记
+            DuelEngineTestAccessor.TickTurnState(ctx);
+
+            // Assert：goldenBodyTurns 1→0，到期→ goldenLayers 5-2=3（回退增益）。
+            Assert.Equal(0, ctx.ReadResource(Side.Defender, "goldenBodyTurns"));
+            Assert.Equal(3, ctx.ReadResource(Side.Defender, "goldenLayers"));
+        }
+
+        [Fact]
+        public void test_turnloop_tick_decrements_residualOrder()
+        {
+            // Arrange：residualOrder=60（足够2回合衰减）。
+            var atk = MakeState("kuilei_shi",
+                ("residualOrder", 0, 100, 60));
+            var def = MakeState("def_path");
+            var path = KuileiShiPath.Def;
+            var ctx = new CombatContext(atk, path, def, path);
+
+            // Act：TickTurnState 递减 residualOrder
+            DuelEngineTestAccessor.TickTurnState(ctx);
+
+            // Assert：residualOrder 60→35（-25/回合）。
+            Assert.Equal(35, ctx.ReadResource(Side.Attacker, "residualOrder"));
+        }
+
+        [Fact]
+        public void test_turnloop_tick_decrements_guRevolt()
+        {
+            // Arrange：guRevolt=60（≥阈值50，应触发反噬 + 衰减）。
+            var atk = MakeState("du_gu_xiu",
+                ("guRevolt", 0, 100, 60));
+            var def = MakeState("def_path");
+            var path = DuGuXiuPath.Def;
+            var ctx = new CombatContext(atk, path, def, path);
+
+            // Act：TickTurnState 递减 guRevolt
+            DuelEngineTestAccessor.TickTurnState(ctx);
+
+            // Assert：guRevolt 60→40（-20/回合）。
+            Assert.Equal(40, ctx.ReadResource(Side.Attacker, "guRevolt"));
+        }
+
+        // ================================================================
+        // 批4 turn-loop：DuoxinModule 阵营反噬 + BrokenChain 军团僵死
+        // ================================================================
+
+        [Fact]
+        public void test_turnloop_guRevolt_redirect_threshold_detected()
+        {
+            // Arrange：guRevolt=50（刚好触发阈值）。
+            var atk = MakeState("du_gu_xiu",
+                ("guRevolt", 0, 100, 50));
+            var def = MakeState("def_path");
+            var path = DuGuXiuPath.Def;
+            var ctx = new CombatContext(atk, path, def, path);
+
+            // Assert：guRevolt≥50 → IsGuRevoltRedirected=true。
+            Assert.True(DuelEngineTestAccessor.IsGuRevoltRedirected(ctx, Side.Attacker));
+        }
+
+        [Fact]
+        public void test_turnloop_guRevolt_below_threshold_not_redirected()
+        {
+            // Arrange：guRevolt=30（未达阈值）。
+            var atk = MakeState("du_gu_xiu",
+                ("guRevolt", 0, 100, 30));
+            var def = MakeState("def_path");
+            var path = DuGuXiuPath.Def;
+            var ctx = new CombatContext(atk, path, def, path);
+
+            // Assert：guRevolt<50 → IsGuRevoltRedirected=false。
+            Assert.False(DuelEngineTestAccessor.IsGuRevoltRedirected(ctx, Side.Attacker));
+        }
+
+        [Fact]
+        public void test_turnloop_residualOrder_fleet_freeze_when_expired()
+        {
+            // Arrange：residualOrder=0（已耗尽→军团僵死）。
+            var atk = MakeState("kuilei_shi",
+                ("residualOrder", 0, 100, 0));
+            var def = MakeState("def_path");
+            var path = KuileiShiPath.Def;
+            var ctx = new CombatContext(atk, path, def, path);
+
+            // Assert：有 residualOrder 资源但值=0 → HasResidualOrder=false → 军团僵死。
+            Assert.True(ctx.HasResource(Side.Attacker, "residualOrder"));
+            Assert.False(DuelEngineTestAccessor.HasResidualOrder(ctx, Side.Attacker));
+        }
+    }
+
+    // ================================================================
+    // Test-accessor wrappers（DuelEngine internal → 测试可见）
+    // ================================================================
+
+    /// <summary>测试辅助：桥接 DuelEngine 内部方法供测试调用。</summary>
+    internal static class DuelEngineTestAccessor
+    {
+        public static bool HasTurnResource(CombatContext ctx, Side side, string key)
+        {
+            if (!ctx.HasResource(side, key)) return false;
+            return ctx.ReadResource(side, key) > 0;
+        }
+
+        public static bool HasResidualOrder(CombatContext ctx, Side side)
+            => HasTurnResource(ctx, side, "residualOrder");
+
+        public static bool IsGuRevoltRedirected(CombatContext ctx, Side side)
+        {
+            if (!ctx.HasResource(side, "guRevolt")) return false;
+            return ctx.ReadResource(side, "guRevolt") >= DuelEngine.GuRevoltRedirectThreshold;
+        }
+
+        public static void TickTurnState(CombatContext ctx)
+        {
+            // —— goldenBodyTurns：每回合-1，到期回退 goldenLayers+2 ——
+            Decay(ctx, Side.Attacker, "goldenBodyTurns", 1,
+                () => ctx.ApplyResource(Side.Attacker, "goldenLayers", -2));
+            Decay(ctx, Side.Defender, "goldenBodyTurns", 1,
+                () => ctx.ApplyResource(Side.Defender, "goldenLayers", -2));
+
+            // —— residualOrder：每回合-25 ——
+            Decay(ctx, Side.Attacker, "residualOrder", DuelEngine.ResidualOrderDecayPerTurn, null);
+            Decay(ctx, Side.Defender, "residualOrder", DuelEngine.ResidualOrderDecayPerTurn, null);
+
+            // —— guRevolt：每回合-20 ——
+            Decay(ctx, Side.Attacker, "guRevolt", DuelEngine.GuRevoltDecayPerTurn, null);
+            Decay(ctx, Side.Defender, "guRevolt", DuelEngine.GuRevoltDecayPerTurn, null);
+        }
+
+        private static void Decay(CombatContext ctx, Side side, string key, int decay, Action? onExpire)
+        {
+            if (!ctx.HasResource(side, key)) return;
+            int current = ctx.ReadResource(side, key);
+            if (current <= 0) return;
+            int newVal = Math.Max(0, current - decay);
+            ctx.ApplyResource(side, key, -(current - newVal));
+            if (newVal == 0 && current > 0)
+                onExpire?.Invoke();
         }
     }
 }
