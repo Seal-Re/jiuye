@@ -1,7 +1,7 @@
 # Story 003: C1 收敛 [40,60]% 硬闸门 + 模块伤害钳制
 
 > **Epic**: balance-cross
-> **Status**: Not Started
+> **Status**: Deferred
 > **Last Updated**: 2026-06-25
 > **Layer**: Core
 > **Type**: Integration
