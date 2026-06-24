@@ -226,13 +226,20 @@ const treeData = {
                 { name: '✅ 逆演栈 (ReverseStackModule)', _files: 'special/ReverseStackModule.cs — 命修/因果撤销交锋 接RollbackStack', _docs: 'B5-design.md §6.8' }
               ]},
             { name: '✅ 21路模块迁移 (全21路完成)', _files: 'paths/*.cs — 21路全验:107迁移测试(从80→+27), 全部经PathValidator + 伤害计算验证', _docs: 'epics/combat-r2/EPIC.md story-001 batch2收尾', _conflict: '已消除：15路迁移测试已扩充至SwordImmortalPath基准水平。每路含PenFromResource缩放/CounterMul tag门控/FlatPen伤害计算/PathValidator校验。全量492绿。' },
-            { name: '✅ 跨路平衡校准 INV-CROSS v3', _files: '20路RealmMultipliers校准 + lei/ming/fa/ti 模块级技能系数审计 + Fa manaPool×3→×2 + Ti UT7+ Curve boost', _docs: 'B5-平衡标定INV-CROSS-design.md; commits 3063111/42ea0dc/497a495', _conflict: 'v3闭环：multiplier校准(20路)+模块系数调优(4路: Lei解锁旗舰招+增伤, Ming加FlatPen, Fa降manaPool权, Ti Curve后段boost)。全量506绿。yinguo_faze仍0%胜率(合道前地板过低,需UT10前早发期力峰——独立story)。' }
+            { name: '✅ 跨路平衡校准 INV-CROSS v4', _files: '20路RealmMultipliers + 8路模块级审计(lei/ming/fa/ti/soul/kuilei/yin/yinguo) + Fa manaPool×3→×2 + Ti Curve boost', _docs: 'B5-平衡标定INV-CROSS-design.md; 86 intermediate cells(28%)', _conflict: 'v4闭环：86/342 intermediate cells(会话前~20)。multiplier(20路)+模块系数(8路)+Formula/Curve深入修复。yin/yinguo标注：需招数重构(non-quick-fix)。全量551绿。' }
           ]},
         { name: '✅ 法宝系统 (Artifacts)', _files: 'Cultivation/Artifacts/ArtifactDef.cs, ArtifactData.cs, ArtifactRegistry.cs', _docs: 'cultivation-system.md §8',
           children: [
             { name: '✅ 法宝定义Schema', _files: 'Artifacts/ArtifactDef.cs — 九品阶梯 四档品质 24形态', _docs: 'cultivation-system.md §8.1' },
             { name: '✅ 法宝全量数据库', _files: 'Artifacts/ArtifactData.cs — 100+件 凡器→混沌至宝', _docs: 'cultivation-system.md §8.2' },
             { name: '✅ 法宝注册表', _files: 'Artifacts/ArtifactRegistry.cs — 按id/grade/form/function索引', _docs: 'cultivation-system.md §8.3' }
+          ]},
+        { name: '🔄 A.1 余项 (CultivationPhase/劫/寿元)', _files: 'Cultivation/CultivationPhase.cs, TribulationResolver.cs, LifespanAndFailure.cs', _docs: 'v1.2-A2-全流程-FINAL-design.md §3-5; cultivation-a1-rest EPIC',
+          children: [
+            { name: '✅ 10态CultivationPhase FSM', _files: 'Cultivation/CultivationPhase.cs — Mortal→QiInduction→…→Fallen, 22条转移+9触发+整数守卫', _docs: 'A2-FINAL §3.1-3.3' },
+            { name: '✅ 数据驱动三劫系统', _files: 'Cultivation/TribulationResolver.cs — TribulationDef+ResistTerms+FailBranches, 渡劫/天劫/心魔劫', _docs: 'A2-FINAL §3.6' },
+            { name: '✅ 寿元+5失败模式', _files: 'Cultivation/LifespanAndFailure.cs — LIFESPAN_TABLE, DeathLine/跌境/瓶颈解困/走火自救/Setback恢复', _docs: 'A2-FINAL §4-5' },
+            { name: '❌ 破障四法 (BreakAid)', _files: '(待建)', _docs: 'A2-FINAL §3.5 — 闭关/顿悟/资源/外力' },
           ]}
       ]},
     {
