@@ -23,7 +23,15 @@ RAMP = {
     "dark":   [(20,16,24),(48,40,56),(82,70,92),(120,106,134),(160,148,176)],
     "azure":  [(22,40,70),(40,84,140),(72,134,200),(126,182,228),(190,222,248)],
 }
-def ramp(m): return RAMP[m]
+def ramp(m):
+    if isinstance(m, tuple):  # raw RGB tuple → simple 5-tone ramp (balance-003 fix: KeyError on disk())
+        r, g, b = m
+        return [(max(0, r*3//10), max(0, g*3//10), max(0, b*3//10)),
+                (max(0, r*5//10), max(0, g*5//10), max(0, b*5//10)),
+                (r, g, b),
+                (min(255, r*15//10), min(255, g*15//10), min(255, b*15//10)),
+                (min(255, r*20//10), min(255, g*20//10), min(255, b*20//10))]
+    return RAMP[m]
 
 # —— Sprite 缓冲 + 光影原语 ——
 class Spr:
