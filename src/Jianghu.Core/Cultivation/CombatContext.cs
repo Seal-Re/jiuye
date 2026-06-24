@@ -30,6 +30,9 @@ namespace Jianghu.Cultivation
         /// <summary>回滚信号（story fullstruct-007）。特殊模块设置，DuelEngine 读取后执行回滚并清零。</summary>
         internal RollbackSignal PendingRollback { get; set; }
 
+        /// <summary>模块伤害上限（balance-003）。OnUse 模块每操作伤害增量钳至此值（未缩放空间）。0=无限制。</summary>
+        public int ModuleDamageCap { get; set; }
+
         public CombatContext(
             CultivationState attacker, CultivationPathDef attackerPath,
             CultivationState defender, CultivationPathDef defenderPath)
@@ -39,6 +42,7 @@ namespace Jianghu.Cultivation
             _defender = defender;
             _defenderPath = defenderPath;
             PendingRollback = RollbackSignal.None;
+            ModuleDamageCap = 0; // 0=no cap (backward compatible)
         }
 
         internal CultivationState StateOf(Side s) => s == Side.Attacker ? _attacker : _defender;

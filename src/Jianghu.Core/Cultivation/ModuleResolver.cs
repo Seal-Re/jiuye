@@ -12,6 +12,10 @@ namespace Jianghu.Cultivation
         /// <summary>§15.6 防除零/双义：分母取 Amount2，<1 退化为 1。</summary>
         private static int Den(EffectOp m) => m.Amount2 >= 1 ? m.Amount2 : 1;
 
+        /// <summary>balance-003: 模块伤害增量钳制。cap=0 表示无限制（向后兼容）。</summary>
+        private static int CapDelta(int delta, int cap)
+            => cap > 0 ? Math.Min(delta, cap) : delta;
+
         /// <summary>§15.4 tag 克制联合上界：dmg×Amount/Den 与 dmg×3/2 取小。</summary>
         private static int CapCounter(int dmg, EffectOp m) => Math.Min(dmg * m.Amount / Den(m), dmg * 3 / 2);
 
@@ -34,15 +38,15 @@ namespace Jianghu.Cultivation
             switch (m.Kind)
             {
                 case EffectOpKind.AddPenInteger:
-                    return dmg + m.Amount;
+                    return dmg + CapDelta(m.Amount, ctx.ModuleDamageCap);
 
                 case EffectOpKind.PenFromResource:
-                    // 资源转伤：delta += res(Key)*Amount/Den
-                    return dmg + ctx.ReadResource(Side.Attacker, m.Key!) * m.Amount / Den(m);
+                    // 资源转伤：delta += res(Key)*Amount/Den，钳 [0, ModuleDamageCap]（balance-003）
+                    return dmg + CapDelta(ctx.ReadResource(Side.Attacker, m.Key!) * m.Amount / Den(m), ctx.ModuleDamageCap);
 
                 case EffectOpKind.AoePerTarget:
-                    // R2 单挑退化×1：等价 dmg + Amount
-                    return dmg + m.Amount;
+                    // R2 单挑退化×1：等价 dmg + Amount，钳 [0, ModuleDamageCap]
+                    return dmg + CapDelta(m.Amount, ctx.ModuleDamageCap);
 
                 case EffectOpKind.CounterMul:
                     // 防方带 tag(Key) → 联合上界倍乘；否则不变

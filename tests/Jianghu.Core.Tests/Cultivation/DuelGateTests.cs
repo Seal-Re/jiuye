@@ -425,24 +425,28 @@ namespace Jianghu.Core.Tests.Cultivation
         [Fact]
         public void G4_MultipleSignatureMoves_ProduceDifferentOutcomes()
         {
-            // Two skills with different PenFromResource amounts → different results
-            var resQi = new ResourceDef("qi", 0, 2000, 200);
-            var skill1 = Skill("s1", 0, new[] { Modules.PenFromResource("qi", 4, 1) }); // +800 raw
-            var skill2 = Skill("s2", 0, new[] { Modules.PenFromResource("qi", 1, 1) }); // +200 raw
+            // Two skills with different PenFromResource amounts → different results.
+            // With cap=PE/2, deltas must be below cap to differ. PE=800 (Force=200) → cap=400.
+            // skill1: qi=100×2=200 (<400). skill2: qi=100×1=100 (<400). Both below cap, distinct.
+            var resQi = new ResourceDef("qi", 0, 2000, 100);
+            var skill1 = Skill("s1", 0, new[] { Modules.PenFromResource("qi", 2, 1) }); // +200 raw (<cap)
+            var skill2 = Skill("s2", 0, new[] { Modules.PenFromResource("qi", 1, 1) }); // +100 raw (<cap)
             var path = MinPath("test3", resources: new[] { resQi }, skills: new[] { skill1, skill2 });
             var reg = new PathRegistry(new ListPathSource(new[] { path }));
 
-            var aCult = CultivationState.NewForPath("test3", path.Resources, Array.Empty<string>(), new[] { "s1", "s2" });
+            var aCult1 = CultivationState.NewForPath("test3", path.Resources, Array.Empty<string>(), new[] { "s1" });
+            var aCult2 = CultivationState.NewForPath("test3", path.Resources, Array.Empty<string>(), new[] { "s2" });
             var bCult = CultivationState.NewForPath("test3", path.Resources);
-            var a = MakeChar(1, 60, 0, 0, 0, aCult);
-            var b = MakeChar(2, 60, 0, 0, 0, bCult);
+            var a1 = MakeChar(1, 200, 0, 0, 0, aCult1); // PE=800, cap=400
+            var a2 = MakeChar(3, 200, 0, 0, 0, aCult2);
+            var b = MakeChar(2, 200, 0, 0, 0, bCult);
 
-            var r1 = DuelEngine.ResolveR2(a, b, path, path, reg, LimitsConfig.Default, null, skill1, null);
-            var r2 = DuelEngine.ResolveR2(a, b, path, path, reg, LimitsConfig.Default, null, skill2, null);
+            var r1 = DuelEngine.ResolveR2(a1, b, path, path, reg, LimitsConfig.Default, null, skill1, null);
+            var r2 = DuelEngine.ResolveR2(a2, b, path, path, reg, LimitsConfig.Default, null, skill2, null);
 
-            // skill1 (x4 multiplier) should have larger margin than skill2 (x1 multiplier)
+            // skill1 (×2, 200 dmg) should have larger margin than skill2 (×1, 100 dmg)
             Assert.True(r1.Margin > r2.Margin,
-                $"skill1 (PenFromResource x4) should have larger margin than skill2 (x1). " +
+                $"skill1 (PenFromResource x2=200) should have larger margin than skill2 (x1=100). " +
                 $"r1.Margin={r1.Margin}, r2.Margin={r2.Margin}");
         }
 

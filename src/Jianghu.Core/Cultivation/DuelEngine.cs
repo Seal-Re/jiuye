@@ -263,6 +263,9 @@ namespace Jianghu.Cultivation
             long dmg = (long)attackerPe * Scale / BaseDamageDivisor;
             long totalReflect = 0;
 
+            // balance-003: 模块伤害增量上限 = PE/2（未缩放空间）。防 PenFromResource 等一击必杀。
+            ctx.ModuleDamageCap = attackerPe / 2;
+
             // OnUse：经 ModuleResolver 逐模块修正
             if (skill != null)
             {
