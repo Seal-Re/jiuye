@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>九野·江湖涌现模拟 — 项目开发进度树</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#e0e0e0;font-family:"Microsoft YaHei","PingFang SC",sans-serif;overflow:hidden;user-select:none}
+#header{background:#16213e;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0f3460;flex-shrink:0}
+#header h1{font-size:18px;color:#e94560;letter-spacing:2px}
+#header .hint{font-size:11px;color:#666}
+#main{display:flex;height:calc(100vh - 48px)}
+#chart{flex:1;min-width:0;cursor:grab}
+#chart:active{cursor:grabbing}
+#detail-panel{width:440px;background:#16213e;overflow-y:auto;padding:0;border-left:2px solid #0f3460;font-size:13px;line-height:1.6;display:flex;flex-direction:column}
+#detail-panel .pad{padding:14px}
+#detail-panel h3{color:#e94560;margin-bottom:6px;font-size:15px;word-break:break-all}
+#detail-panel .section{margin-bottom:12px;padding:10px;background:#1a1a2e;border-radius:8px;border-left:3px solid #0f3460}
+#detail-panel .section.conflict{border-left-color:#e94560}
+#detail-panel .label{color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+#detail-panel .value{color:#e0e0e0;font-size:12px}
+#detail-panel .conflict-text{color:#ff6b6b;background:#2a1a1a;padding:8px;border-radius:4px;margin-top:4px;font-size:11px;line-height:1.5}
+/* Interactive evaluation area */
+#eval-area{border-top:2px solid #0f3460;padding:14px;background:#111827;flex-shrink:0}
+#eval-area h4{color:#f0a500;font-size:13px;margin-bottom:10px}
+.eval-item{background:#1a1a2e;padding:10px;border-radius:6px;margin-bottom:8px;border-left:3px solid #0f3460;font-size:12px}
+.eval-item .eval-meta{display:flex;justify-content:space-between;color:#666;font-size:10px;margin-bottom:4px}
+.eval-item .eval-body{color:#ccc;white-space:pre-wrap;word-break:break-word}
+.eval-item .eval-rating{color:#f0a500;font-size:11px}
+#eval-input-area{margin-top:10px}
+#eval-text{width:100%;min-height:60px;background:#1a1a2e;border:1px solid #0f3460;border-radius:6px;color:#e0e0e0;padding:8px 10px;font-size:12px;font-family:inherit;resize:vertical;outline:none}
+#eval-text:focus{border-color:#e94560}
+#eval-toolbar{display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px}
+.rating-stars{display:flex;gap:2px}
+.rating-stars button{background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:0 1px;transition:color 0.15s}
+.rating-stars button.active,.rating-stars button:hover{color:#f0a500}
+#eval-submit{padding:6px 16px;background:#e94560;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold;transition:background 0.2s}
+#eval-submit:hover{background:#c0392b}
+#eval-submit:disabled{background:#555;cursor:not-allowed}
+.eval-empty{color:#555;font-size:12px;text-align:center;padding:16px 0}
+.eval-count{color:#888;font-size:11px}
+#legend-float{position:absolute;bottom:16px;left:20px;display:flex;gap:16px;font-size:11px;background:#16213eb0;padding:8px 14px;border-radius:8px;pointer-events:none;z-index:5}
+.legend-item{display:flex;align-items:center;gap:4px}
+#search{position:absolute;top:10px;right:460px;z-index:10;display:flex;gap:4px}
+#search input{padding:6px 12px;border-radius:16px;border:1px solid #0f3460;background:#1a1a2e;color:#e0e0e0;width:200px;font-size:12px;outline:none}
+#search input:focus{border-color:#e94560}
+#search .reset-btn{padding:6px 12px;border-radius:16px;border:1px solid #0f3460;background:#1a1a2e;color:#888;cursor:pointer;font-size:11px;display:none}
+#search .reset-btn:hover{color:#e94560;border-color:#e94560}
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#4ecca3;color:#1a1a2e;padding:8px 20px;border-radius:20px;font-size:12px;font-weight:bold;z-index:100;opacity:0;transition:opacity 0.3s;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="header">
+<h1>⚔️ 九野 · 江湖涌现模拟 — 开发进度全景树</h1>
+<div class="hint">🖱 拖拽平移 | 滚轮缩放 | 点击节点查看详情 | 右侧面板可评价/提问</div>
+</div>
+<div id="main">
+<div id="chart"></div>
+<div id="detail-panel">
+<div class="pad" id="node-info">
+<h3>📋 节点详情</h3>
+<p style="color:#666;font-size:12px">点击左侧树节点查看详细信息<br>选中后可在此评价/提问</p>
+</div>
+<div id="eval-area">
+<h4>💬 节点评价与提问</h4>
+<div id="eval-list"><div class="eval-empty">← 请先点击左侧树节点</div></div>
+<div id="eval-input-area" style="display:none">
+<textarea id="eval-text" placeholder="输入你的评价、问题或审查意见...&#10;例如：这个模块的测试覆盖率是否充分？&#10;或者：建议补充边界条件测试。"></textarea>
+<div id="eval-toolbar">
+<div class="rating-stars" id="rating-stars">
+<button data-r="1" title="严重问题">🔴</button>
+<button data-r="2" title="需关注">🟡</button>
+<button data-r="3" title="一般">⚪</button>
+<button data-r="4" title="良好">🟢</button>
+<button data-r="5" title="优秀">⭐</button>
+</div>
+<div style="display:flex;gap:8px;align-items:center">
+<span class="eval-count" id="eval-count"></span>
+<button id="eval-submit" disabled>提交评价</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="search">
+<input type="text" placeholder="🔍 搜索节点..." oninput="searchNode(this.value)" id="search-input">
+<button class="reset-btn" id="search-reset" onclick="resetSearch()">✕ 清除</button>
+</div>
+<div id="legend-float">
+<div class="legend-item">✅ 已完成</div>
+<div class="legend-item">🔄 开发中</div>
+<div class="legend-item">❌ 未开始</div>
+<div class="legend-item">⚠️ 冲突/偏差</div>
+</div>
+<div id="toast"></div>
+
+<script>
+// ==================== DATA ====================
+const treeData = {
+  name: '九野·江湖涌现模拟',
+  itemStyle: { color: '#e94560' },
+  children: [
+    {
+      name: '✅ 基础框架层\n(Foundation)', itemStyle: { color: '#4ecca3' }, collapsed: false,
+      _files: 'src/Jianghu.Core/Sim/, Model/, Actions/, Decide/, Events/, Random/, Stats/, Config/',
+      _docs: 'design/gdd/game-concept.md §2-4; WorldBible §1-3',
+      children: [
+        { name: '✅ 世界模拟内核', _files: 'Sim/World.cs, Sim/WorldFactory.cs', _docs: 'WorldBible §2; game-concept.md §2',
+          children: [
+            { name: '✅ 世界聚合根 (World)', _files: 'Sim/World.cs — Advance(), Clone(), TryAssignCultivation()', _docs: 'game-concept.md §2.1 主循环' },
+            { name: '✅ 世界工厂 (WorldFactory)', _files: 'Sim/WorldFactory.cs — CreateInitial(), Spawn(), CreateTypicalChar()', _docs: 'game-concept.md §2.2' },
+            { name: '✅ 状态快照序列化', _files: 'Sim/StateSnapshot.cs — 覆盖Clock/alive/Relations/Scheduler/CultivationState', _docs: 'ADR-0003 off逐字节' }
+          ]},
+        { name: '✅ 确定性随机数生成器', _files: 'Random/Pcg32.cs, Random/RngStreamIds.cs', _docs: 'ADR-0001; WorldBible §9 INV-FLOAT',
+          children: [
+            { name: '✅ PCG-XSH-RR 32', _files: 'Random/Pcg32.cs — NextUInt(), Split(), GetState()/SetState()', _docs: 'ADR-0001 §2' },
+            { name: '✅ RNG子流编号 (8流)', _files: 'Random/RngStreamIds.cs — Gen/Domain/Spawn/Brain/Cultivation/Drama/Map/Faction', _docs: 'ADR-0003 §3' },
+            { name: '✅ 随机扩展 (Fisher-Yates)', _files: 'Random/RandomExtensions.cs — Shuffle()', _docs: 'ADR-0001 §4' }
+          ]},
+        { name: '✅ 角色与属性系统', _files: 'Model/Character.cs, Model/Persona.cs, Stats/StatBlock.cs, Stats/StatGenerator.cs', _docs: 'game-concept.md §3-4; WorldBible §4',
+          children: [
+            { name: '✅ 角色聚合根 (Character)', _files: 'Model/Character.cs — Id/Persona/Stats/Node/Goal/Age/Alive/CultivationState', _docs: 'game-concept.md §3.1' },
+            { name: '✅ 角色人设 (Persona)', _files: 'Model/Persona.cs — Name/Title/Origin/ArchetypeKind/Tags/SectId', _docs: 'WorldBible §4.1' },
+            { name: '✅ 四维属性容器 (StatBlock)', _files: 'Stats/StatBlock.cs — Force/Internal/Constitution/Insight 钳制[0,StatCap]', _docs: 'game-concept.md §3.3' },
+            { name: '✅ 偏中庸属性生成器', _files: 'Stats/StatGenerator.cs — Σ=80 Concentration集中度', _docs: 'game-concept.md §3.4; CLAUDE.md B.6' }
+          ]},
+        { name: '✅ 关系与记忆系统', _files: 'Model/Relations.cs, Model/MemoryStore.cs', _docs: 'WorldBible §4.2; drama-engine spec',
+          children: [
+            { name: '✅ 有向好感图 (Relations)', _files: 'Model/Relations.cs — Affinity/Adjust 钳制[-100,100]', _docs: 'WorldBible §4.2' },
+            { name: '✅ 聚合根私有记忆 (MemoryStore)', _files: 'Model/MemoryStore.cs — 按|Valence|淘汰', _docs: 'drama-engine spec §3' }
+          ]},
+        { name: '✅ 事件驱动调度器', _files: 'Sim/Scheduler.cs, Events/Chronicle.cs, Events/DomainEvent.cs', _docs: 'game-concept.md §2.3; WorldBible §5',
+          children: [
+            { name: '✅ 最小堆调度器 (Scheduler)', _files: 'Sim/Scheduler.cs — Push/PopMin (At,Id)排序', _docs: 'game-concept.md §2.3' },
+            { name: '✅ 事件史册 (Chronicle)', _files: 'Events/Chronicle.cs — 武侠味模板 追加PathEntered/RealmBreakthrough', _docs: 'WorldBible §5.2' },
+            { name: '✅ 8种领域事件', _files: 'Events/DomainEvent.cs — Born/Trained/Traveled/DuelResolved/RelationChanged/Died/PathEntered/RealmBreakthrough', _docs: 'game-concept.md §2.3' }
+          ]},
+        { name: '✅ 行动系统', _files: 'Actions/ActionSystem.cs, SparAction.cs, TrainAction.cs, TravelAction.cs', _docs: 'game-concept.md §5; combat-system.md',
+          children: [
+            { name: '✅ 行动分发器 (ActionSystem)', _files: 'Actions/ActionSystem.cs — legacy/cultivation双模式', _docs: 'game-concept.md §5.1' },
+            { name: '✅ 切磋行动 (SparAction)', _files: 'Actions/SparAction.cs — ON→DuelEngine.ResolveR2, OFF→legacy', _docs: 'combat-system.md §2-4' },
+            { name: '✅ 修炼行动 (TrainAction)', _files: 'Actions/TrainAction.cs — 增益=Base+(Insight×Δ)/30', _docs: 'game-concept.md §5.2' },
+            { name: '✅ 游历行动 (TravelAction)', _files: 'Actions/TravelAction.cs — Node移动+事件', _docs: 'game-concept.md §5.3' }
+          ]},
+        { name: '✅ 规则大脑决策引擎', _files: 'Decide/RuleBrain.cs, Decide/DecisionContext.cs', _docs: 'game-concept.md §6; WorldBible §7',
+          children: [
+            { name: '✅ 目标驱动效用机 (RuleBrain)', _files: 'Decide/RuleBrain.cs — 纯整数效用 ArchetypeKind偏置', _docs: 'game-concept.md §6.1' },
+            { name: '✅ 决策上下文', _files: 'Decide/DecisionContext.cs — 不含World Brain无法越权', _docs: 'game-concept.md §6.2 R-NF1' }
+          ]},
+        { name: '✅ 生命周期管理', _files: 'Sim/Lifecycle.cs, Config/LimitsConfig.cs', _docs: 'game-concept.md §4; cultivation-system.md §5',
+          children: [
+            { name: '✅ 衰老/死亡/人口涌现 (Lifecycle)', _files: 'Sim/Lifecycle.cs — Tick推进 MaybeSpawn补人', _docs: 'game-concept.md §4.1-4.2' },
+            { name: '✅ 全局限制配置', _files: 'Config/LimitsConfig.cs — 12项参数+Validate', _docs: 'game-concept.md §8 TuningKnobs' }
+          ]}
+      ]},
+    {
+      name: '🔄 修炼核心层\n(Cultivation Core)', itemStyle: { color: '#f0a500' }, collapsed: false,
+      _files: 'src/Jianghu.Core/Cultivation/ (40 files)',
+      _docs: 'design/gdd/cultivation-system.md; combat-system.md; v1.2-A*.md',
+      children: [
+        { name: '✅ A.0 21路修炼引擎', _files: 'Cultivation/PathRegistry.cs, PathAssigner.cs, PowerEngine.cs, CultivationSchema.cs, CultivationState.cs', _docs: 'cultivation-system.md §2-4; A-修炼路线注册表-design.md',
+          children: [
+            { name: '✅ 路线注册表 (PathRegistry)', _files: 'Cultivation/PathRegistry.cs — 21路by-id索引 PathValidator门控', _docs: 'A-修炼路线注册表-design.md §3' },
+            { name: '✅ 定路器 (PathAssigner)', _files: 'Cultivation/PathAssigner.cs — 按Tags筛路 确定性加权抽PathId', _docs: 'cultivation-system.md §2.2' },
+            { name: '✅ 修炼Schema定义', _files: 'Cultivation/CultivationSchema.cs — 全套record类型 纯数据禁浮点', _docs: 'cultivation-system.md §3' },
+            { name: '✅ 修炼运行态 (CultivationState)', _files: 'Cultivation/CultivationState.cs — per-path运行期 资源经chokepoint', _docs: 'cultivation-system.md §4' },
+            { name: '✅ 21路完整路径定义', _files: 'Cultivation/paths/*.cs (21 files)', _docs: 'cultivation-system.md §2.1; A123-收敛对齐设计.md §2', collapsed: true,
+              children: [
+                { name: '✅ 剑修·剑仙', _files: 'paths/SwordImmortalPath.cs', _docs: '范式路 高爆发低容错' },
+                { name: '✅ 体修·炼体横世武夫', _files: 'paths/BodyHenglianPath.cs', _docs: '物理耐久 根骨为骨' },
+                { name: '✅ 法修·术法修士', _files: 'paths/FaXiuPath.cs', _docs: '稳健均衡 元素相生克' },
+                { name: '✅ 丹修·炼丹师', _files: 'paths/DanXiuPath.cs', _docs: '经济资源枢纽 弱战力强干预' },
+                { name: '✅ 器修·炼器师', _files: 'paths/QixiuArtificerPath.cs', _docs: '以宝御敌 力在器不在人' },
+                { name: '✅ 符修·符箓师', _files: 'paths/FuXiuFuluPath.cs', _docs: '物理快充火力 一次性引爆' },
+                { name: '✅ 阵修·阵法师', _files: 'paths/ArrayFormationPath.cs', _docs: '物理控制环境依赖 地板极低天花板极高' },
+                { name: '✅ 雷修·天劫雷法', _files: 'paths/LeiXiuPath.cs', _docs: '纯阳破邪 渡劫绑定' },
+                { name: '✅ 佛修·金身道', _files: 'paths/BuddhistGoldenBodyPath.cs', _docs: '厚积晚发 金身层叠flatDR' },
+                { name: '✅ 魔修·夺养噬心道', _files: 'paths/MoXiuXinmoPath.cs', _docs: '速成爆发 最大方差' },
+                { name: '✅ 鬼修·养魂噬煞道', _files: 'paths/GhostYangHunPath.cs', _docs: '高爆发低容错 昼弱夜强' },
+                { name: '✅ 魂修·神识元神道', _files: 'paths/SoulDivineSensePath.cs', _docs: '精神正交 绕物防' },
+                { name: '✅ 儒修·文气浩然道', _files: 'paths/RuXiuHaoranPath.cs', _docs: '正气克邪 群增益枢纽' },
+                { name: '✅ 血修·血煞道', _files: 'paths/XueXiuXueshaPath.cs', _docs: '透支爆发 极凸短窗' },
+                { name: '✅ 妖修·化形道', _files: 'paths/YaoXiuHuaxingPath.cs', _docs: '血脉肉身 寿元绵长' },
+                { name: '✅ 毒蛊修·毒道养蛊', _files: 'paths/DuGuXiuPath.cs', _docs: '物理渗透+寄生役使 最高方差偏门' },
+                { name: '✅ 傀儡师·机关魁儡道', _files: 'paths/KuileiShiPath.cs', _docs: '役使死物 结构性免疫精神/毒' },
+                { name: '✅ 驭兽师·兽灵契主', _files: 'paths/YuShouPath.cs', _docs: '役使群战 怕斩首断线' },
+                { name: '✅ 音修·音律乐道', _files: 'paths/YinXiuYuedaoPath.cs', _docs: '精神范围软控 团队增益' },
+                { name: '✅ 命修·因果时空', _files: 'paths/MingFateCausalityPath.cs', _docs: '气运正交泛克 高方差' },
+                { name: '✅ 因果法则修·大道法则', _files: 'paths/YinguoFazePath.cs', _docs: '转职终点 最陡后置凸曲线' }
+              ]},
+            { name: '✅ 声明式整数战力引擎 (PowerEngine)', _files: 'Cultivation/PowerEngine.cs — BaseSum→Modifiers→RealmMultipliers→Clamp', _docs: 'combat-system.md §3; A1-design.md §4' },
+            { name: '✅ 派生值系统 (DerivedProviders)', _files: 'Cultivation/DerivedProviders.cs, DerivedRegistry.cs — 9个派生值', _docs: 'combat-system.md §3.3' }
+          ]},
+        { name: '✅ A.1 境界系统 (Realm)', _files: 'Cultivation/RealmCurve.cs, RealmProjection.cs, RealmQuery.cs', _docs: 'cultivation-system.md §5-7; A1-统一大小境界-design.md',
+          children: [
+            { name: '✅ 三轴境界编解码 (RealmProjection)', _files: 'Cultivation/RealmProjection.cs — flatIndex↔(Major,Sub)', _docs: 'A1-design.md §3' },
+            { name: '✅ 境界曲线运算 (RealmCurve)', _files: 'Cultivation/RealmCurve.cs — 突破判定 四列等长校验', _docs: 'A1-design.md §4' },
+            { name: '✅ 境界查询 (RealmQuery)', _files: 'Cultivation/RealmQuery.cs — 三轴同时查询', _docs: 'A1-design.md §5' },
+            { name: '✅ 突破判定逻辑', _files: 'Cultivation/RealmCurve.cs — NextIndexIfReady 达阈即升', _docs: 'cultivation-system.md §6' },
+            { name: '✅ UT锚点集 {0,2,4,6,8,9,10,11,12}', _files: 'Cultivation/RealmCurve.cs — UnifiedTierOf非降 武夫UT9封顶', _docs: 'A123-design.md §1' }
+          ]},
+        { name: '🔄 战斗系统 R2 (模块化战斗)', _files: 'Cultivation/EffectOp.cs, Modules.cs, ModuleResolver.cs, CombatContext.cs, DuelEngine.cs', _docs: 'combat-system.md; B5-R2-design.md; B5-模块化效果系统-design.md',
+          children: [
+            { name: '✅ 效果算子框架 (EffectOp)', _files: 'Cultivation/EffectOp.cs — 25种Kind + Trigger + Rarity', _docs: 'B5-模块化-design.md §2-3' },
+            { name: '✅ 模块工厂 (Modules)', _files: 'Cultivation/Modules.cs — FlatPen/Dot/Control/Reflect/Evade/SituationalAdj等', _docs: 'ADR-0002; CLAUDE.md B.9' },
+            { name: '✅ 模块解析器 (ModuleResolver)', _files: 'Cultivation/ModuleResolver.cs — ApplyOnUse/OnDefend switch', _docs: 'B5-模块化-design.md §5' },
+            { name: '✅ 战斗上下文 (CombatContext)', _files: 'Cultivation/CombatContext.cs — 双方State 资源经chokepoint', _docs: 'B5-R2-design.md §4' },
+            { name: '✅ 战斗结算引擎 (DuelEngine)', _files: 'Cultivation/DuelEngine.cs — UT gap→HP=pe→3回合→回滚栈', _docs: 'B5-R2-design.md §5-6' },
+            { name: '✅ 功法门控 (GateField)', _files: 'Cultivation/GateField.cs — 6种GateType', _docs: 'B5-R2-design.md §7' },
+            { name: '✅ 压制矩阵 (SuppressionMatrix)', _files: 'Cultivation/SuppressionMatrix.cs — tag驱动衰减', _docs: 'B5-R2-design.md §8' },
+            { name: '✅ 结算回滚栈 (RollbackStack)', _files: 'Cultivation/RollbackStack.cs — LIFO MaxDepth=10', _docs: 'combat-system.md §4.5' },
+            { name: '✅ 后置乘子 (PostMul)', _files: 'Cultivation/PowerEngine.cs — PostMul modifier', _docs: 'combat-system.md §3.2' },
+            { name: '✅ 软情境战斗 (SituationalEdges)', _files: 'Cultivation/Situational.cs, SituationalEdges.cs — 22边 钳[-P0/4,+P0/4]', _docs: 'combat-system.md §4.3' },
+            { name: '🔄 唯一档特殊模块 (8个)', _files: 'Cultivation/special/*.cs (8 files)', _docs: 'B5-design.md §6', collapsed: true,
+              children: [
+                { name: '✅ 落宝金光 (LuobaoModule)', _files: 'special/LuobaoModule.cs — 器修夺器+借用1回合', _docs: 'B5-design.md §6.1' },
+                { name: '✅ 炸阵/引爆焚阵 (ExplodeArrayModule)', _files: 'special/ExplodeArrayModule.cs — 阵修炸阵换爆发', _docs: 'B5-design.md §6.2' },
+                { name: '✅ 金身态 (GoldenBodyMaxModule)', _files: 'special/GoldenBodyMaxModule.cs — goldenBodyTurns=3 + goldenLayers+2(钳9) + HasResource守', _docs: 'B5-design.md §6.3; BuddhistGoldenBodyPath 新增goldenBodyTurns资源[0,3]', _conflict: '已消除：批3收口从占位返0→资源chokepoint落地。置goldenBodyTurns=3(大成态计时)+goldenLayers+2(战力×25+flat DR增益)。DR×2逐回合/受击转愿/anti_evil×1.5 defer批4 turn-loop。' },
+                { name: '✅ 律场总门 (FieldActiveModule)', _files: 'special/FieldActiveModule.cs — 音修gate-by-flag', _docs: 'B5-design.md §6.4' },
+                { name: '✅ 夺舍 (DuosheModule)', _files: 'special/DuosheModule.cs — 鬼/魂/魔濒死夺躯 接RollbackStack', _docs: 'B5-design.md §6.5' },
+                { name: '⚠️ 夺心 (DuoxinModule)', _files: 'special/DuoxinModule.cs', _docs: 'B5-design.md §6.6', _conflict: '偏差：文档描述target本回合反噬阵营。代码仅guRevolt抬升(chokepoint)，真阵营反噬/行动重定向属批4 defer。' },
+                { name: '⚠️ 断链 (BrokenChainModule)', _files: 'special/BrokenChainModule.cs', _docs: 'B5-design.md §6.7', _conflict: '偏差：文档描述傀儡师被斩首后residualOrder决定军团。代码仅初值chokepoint，衰减+僵死判定defer批4。' },
+                { name: '✅ 逆演栈 (ReverseStackModule)', _files: 'special/ReverseStackModule.cs — 命修/因果撤销交锋 接RollbackStack', _docs: 'B5-design.md §6.8' }
+              ]},
+            { name: '✅ 21路模块迁移 (全21路完成)', _files: 'paths/*.cs — 21路全验:107迁移测试(从80→+27), 全部经PathValidator + 伤害计算验证', _docs: 'epics/combat-r2/EPIC.md story-001 batch2收尾', _conflict: '已消除：15路迁移测试已扩充至SwordImmortalPath基准水平。每路含PenFromResource缩放/CounterMul tag门控/FlatPen伤害计算/PathValidator校验。全量492绿。' },
+            { name: '🔄 跨路平衡校准 INV-CROSS v2', _files: 'tests/.../BalanceMatrixDumpTests.cs, InvCrossDuelTests.cs; 20路RealmMultipliers校准', _docs: 'B5-平衡标定INV-CROSS-design.md; commit 3063111', _conflict: 'v2进展：UT8 spread从[0.39x,4.13x]压缩至[0.59x,2.39x]。14/19战斗路在[0.9x,1.65x] sword基线内。C1/C2/C3门控全部通过(492绿)。遗留：lei/ming/fa/ti四路需模块级审计(单独story)——multiplier无法修复战斗技能系数/模块失衡。yinguo_faze仍0%胜率(合道前地板过低,需UT10前早发期力峰)。' }
+          ]},
+        { name: '✅ 法宝系统 (Artifacts)', _files: 'Cultivation/Artifacts/ArtifactDef.cs, ArtifactData.cs, ArtifactRegistry.cs', _docs: 'cultivation-system.md §8',
+          children: [
+            { name: '✅ 法宝定义Schema', _files: 'Artifacts/ArtifactDef.cs — 九品阶梯 四档品质 24形态', _docs: 'cultivation-system.md §8.1' },
+            { name: '✅ 法宝全量数据库', _files: 'Artifacts/ArtifactData.cs — 100+件 凡器→混沌至宝', _docs: 'cultivation-system.md §8.2' },
+            { name: '✅ 法宝注册表', _files: 'Artifacts/ArtifactRegistry.cs — 按id/grade/form/function索引', _docs: 'cultivation-system.md §8.3' }
+          ]}
+      ]},
+    {
+      name: '❌ 特性层 — 已设计未构建\n(Features — Designed, 0 Code)', itemStyle: { color: '#e94560' }, collapsed: false,
+      _files: '(无代码)', _docs: 'v1.2-A2-*.md, v1.2-A3-*.md, v1.2-B-*.md, v1.2-C-*.md',
+      children: [
+        { name: '❌ A.1 遗留：境界阶段FSM', _files: '(无代码)', _docs: 'v1.2-A2-全流程-FINAL-design.md', _conflict: '缺失：10状态CultivationPhase FSM、3种天劫、5种失败模式、寿命表、飞升归档。被balance-cross阻塞。',
+          children: [
+            { name: '❌ 10状态修炼阶段FSM', _docs: 'v1.2-A2-design.md §2' },
+            { name: '❌ 3种天劫类型', _docs: 'v1.2-A2-design.md §3' },
+            { name: '❌ 5种失败模式', _docs: 'v1.2-A2-design.md §4' },
+            { name: '❌ 寿命系统 (UT0-12)', _docs: 'v1.2-A2-design.md §5' },
+            { name: '❌ 飞升归档', _docs: 'v1.2-A2-design.md §6' }
+          ]},
+        { name: '❌ A.2 道心/反单调/闭关', _files: '(无代码)', _docs: 'v1.2-A3-道心-FINAL-design.md', _conflict: '缺失：4种DailyMode、闭关模型、21路道心表、INV-VARIETY门控。CultivationState预留字段但A.0不读写。',
+          children: [
+            { name: '❌ 4种日常修炼模式', _docs: 'A3-design.md §2' },
+            { name: '❌ 闭关模型', _docs: 'A3-design.md §3' },
+            { name: '❌ 21路道心表', _docs: 'A3-design.md §4' },
+            { name: '❌ 反单调·熵门控', _docs: 'A3-design.md §5' }
+          ]},
+        { name: '❌ A.3 转职/觉醒/双修', _files: '(无代码)', _docs: 'v1.2-A123-收敛对齐设计.md §3', _conflict: '缺失：TransitionDef(3形态)、RiskModifier、双修slotCap/bandwidth。依赖A.2。',
+          children: [
+            { name: '❌ 转职系统', _docs: 'A123-design.md §3.1' },
+            { name: '❌ 觉醒机制', _docs: 'A123-design.md §3.2' },
+            { name: '❌ 双修系统', _docs: 'A123-design.md §3.3' }
+          ]},
+        { name: '❌ 戏剧引擎 (B)', _files: '(无代码,仅RelationAdjust部分)', _docs: 'v1.2-B-戏剧引擎-design.md', _conflict: '缺失：5状态复仇弧FSM、DramaDirector、GrudgeLedger、22+ Storylet库。RelationAdjust在Sprint2部分落地。',
+          children: [
+            { name: '❌ 复仇弧状态机', _docs: 'B-design.md §2' },
+            { name: '❌ 故事导演泵', _docs: 'B-design.md §3' },
+            { name: '❌ 仇恨账本', _docs: 'B-design.md §4' },
+            { name: '❌ 22+ Storylet库', _docs: 'WorldBible-内容补遗 §5' },
+            { name: '🔄 关系调整', _files: 'ModuleResolver.cs — RelationAdjust', _docs: 'B-design.md §5' }
+          ]},
+        { name: '❌ 地图系统 (C)', _files: '(无代码)', _docs: 'v1.2-C-江湖地图-design.md', _conflict: '缺失：3层地理模型、GeoCanon固定骨架(7区19地标)、MapGenerator。仅WorldNode基础类型。',
+          children: [
+            { name: '❌ 3层地理模型', _docs: 'C-design.md §2' },
+            { name: '❌ 地图生成器', _docs: 'C-design.md §3' },
+            { name: '❌ GeoCanon骨架', _docs: 'WorldBible-内容补遗 §2' },
+            { name: '❌ 采集/秘境行动', _docs: 'C-design.md §4' }
+          ]},
+        { name: '❌ 门派系统 (D)', _files: '(无代码)', _docs: 'v1.2-C-design.md §5-8', _conflict: '缺失：统一Faction模型(8类)、FactionLedger、兴衰FSM、领土争夺。仅Sect基础类型。',
+          children: [
+            { name: '❌ 统一门派模型', _docs: 'WorldBible §3' },
+            { name: '❌ 门派账本', _docs: 'C-design.md §5' },
+            { name: '❌ 兴衰状态机', _docs: 'C-design.md §6' },
+            { name: '❌ 领土争夺', _docs: 'C-design.md §7' },
+            { name: '❌ 联盟/附庸/战争', _docs: 'C-design.md §8' }
+          ]}
+      ]},
+    {
+      name: '❌ 未设计层\n(Not Designed)', itemStyle: { color: '#c0392b' }, collapsed: false,
+      children: [
+        { name: '❌ LLM大脑 v1.1', _docs: 'game-concept.md §6; WorldBible §7', _conflict: '缺失：原始核心愿景"黑盒API多智能体涌现"。当前仅RuleBrain。愿景与现实最大差距。',
+          children: [
+            { name: '❌ LLM API集成层', _docs: 'WorldBible §7.1' },
+            { name: '❌ 多智能体涌现协议', _docs: 'game-concept.md §6.3' },
+            { name: '❌ 安全围栏/成本控制', _docs: '无文档' }
+          ]},
+        { name: '❌ 系统集成层', _docs: 'epics/integration/ EPIC.md', _conflict: '缺失：修炼+战斗+戏剧+地图+门派如何合成一个World.Advance循环。各系统独立设计无组合层。',
+          children: [
+            { name: '❌ World.Advance统一循环', _docs: '无文档' },
+            { name: '❌ 跨系统事件路由', _docs: '无文档' },
+            { name: '❌ 状态一致性保证', _docs: '无文档' }
+          ]}
+      ]},
+    {
+      name: '🔄 表现层\n(Presentation)', itemStyle: { color: '#f0a500' }, collapsed: false,
+      children: [
+        { name: '🔄 像素管线 (工具就绪)', _files: 'tools/pixel-pipeline/', _docs: 'CLAUDE.md B.8; PIXEL_RULES.md; AIGEN_TOOL.md',
+          children: [
+            { name: '🔄 像素规则文档', _docs: 'PIXEL_RULES.md' },
+            { name: '🔄 AI生成工具文档', _docs: 'AIGEN_TOOL.md' },
+            { name: '❌ 渲染管线 (未构建)', _docs: '无代码' }
+          ]},
+        { name: '❌ 古风UI (未开始)', _docs: 'CLAUDE.md B.8 — SVG/HTML-CSS 水墨/卷轴',
+          children: [
+            { name: '❌ 水墨UI框架', _docs: '无' },
+            { name: '❌ 卷轴式界面组件', _docs: '无' }
+          ]}
+      ]}
+  ]
+};
+
+// ==================== INIT ====================
+const chartDom = document.getElementById('chart');
+const myChart = echarts.init(chartDom, 'dark');
+
+// Recursively set collapsed defaults
+function setDefaultCollapse(node, depth) {
+  if (!node.children) return;
+  if (depth >= 3) node.collapsed = true;
+  node.children.forEach(c => setDefaultCollapse(c, depth + 1));
+}
+treeData.children.forEach(c => setDefaultCollapse(c, 1));
+
+myChart.setOption({
+  tooltip: {
+    trigger: 'item', triggerOn: 'mousemove', enterable: true, confine: true,
+    backgroundColor: 'rgba(22,33,62,0.97)', borderColor: '#0f3460', borderWidth: 2,
+    padding: [12,16], textStyle: { color:'#e0e0e0', fontSize:12 },
+    extraCssText: 'max-width:460px;white-space:pre-wrap;word-break:break-all;',
+    formatter: function(p) {
+      if (!p.data) return p.name;
+      var d = p.data;
+      var h = '<div style="font-size:14px;font-weight:bold;margin-bottom:8px;color:#e94560">'+p.name.replace(/\n/g,'<br>')+'</div>';
+      if(d._files) h+='<div style="margin-bottom:4px"><span style="color:#888">📁 代码: </span><span style="color:#4ecca3;font-family:Consolas;font-size:11px">'+d._files+'</span></div>';
+      if(d._docs) h+='<div style="margin-bottom:4px"><span style="color:#888">📄 文档: </span><span style="color:#f0a500;font-size:11px">'+d._docs+'</span></div>';
+      if(d._conflict) h+='<div style="margin-top:8px;padding:8px;background:#2a1a1a;border-left:3px solid #e94560;border-radius:4px"><span style="color:#ff6b6b;font-weight:bold">⚠️ 差异:</span><br><span style="color:#ff8888;font-size:11px">'+d._conflict+'</span></div>';
+      return h;
+    }
+  },
+  series: [{
+    type: 'tree', data: [treeData],
+    top: '2%', left: '2%', bottom: '2%', right: '2%',
+    symbol: 'circle', symbolSize: 10, orient: 'LR',
+    roam: true,  // <== DRAG + ZOOM
+    scaleLimit: { min: 0.15, max: 5 },
+    expandAndCollapse: true,
+    animationDuration: 400, animationDurationUpdate: 300,
+    label: {
+      position: 'left', verticalAlign: 'middle', align: 'right',
+      fontSize: 11, color: '#e0e0e0',
+      formatter: function(p) { return p.name.replace(/\n/g,' '); }
+    },
+    leaves: { label: { position:'right', verticalAlign:'middle', align:'left' } },
+    lineStyle: { color:'#0f3460', width:1.5, curviness:0.5 }
+  }]
+});
+
+// ==================== SELECTED NODE STATE ====================
+var selectedNode = null;
+var selectedNodeName = '';
+var currentRating = 0;
+
+// ==================== EVALUATION STORAGE ====================
+function evalKey(nodeName) { return 'jiuye_eval_'+btoa(unescape(encodeURIComponent(nodeName))); }
+function loadEvals(nodeName) {
+  try { return JSON.parse(localStorage.getItem(evalKey(nodeName))||'[]'); }
+  catch(e) { return []; }
+}
+function saveEvals(nodeName, evals) {
+  localStorage.setItem(evalKey(nodeName), JSON.stringify(evals));
+}
+
+// ==================== RENDER EVALUATIONS ====================
+function renderEvals(nodeName) {
+  var list = document.getElementById('eval-list');
+  var evals = loadEvals(nodeName);
+  if (evals.length === 0) {
+    list.innerHTML = '<div class="eval-empty">暂无评价 — 在下方输入第一条评价或提问</div>';
+  } else {
+    var h = '';
+    evals.slice().reverse().forEach(function(e) {
+      var ratingLabels = ['','🔴 严重问题','🟡 需关注','⚪ 一般','🟢 良好','⭐ 优秀'];
+      var rl = e.rating ? ratingLabels[e.rating]||'' : '';
+      h += '<div class="eval-item">'+
+        '<div class="eval-meta"><span>'+e.time+'</span><span class="eval-rating">'+rl+'</span></div>'+
+        '<div class="eval-body">'+escapeHtml(e.text)+'</div>'+
+        '</div>';
+    });
+    list.innerHTML = h;
+  }
+  document.getElementById('eval-count').textContent = evals.length+' 条评价';
+}
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ==================== SHOW TOAST ====================
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(function(){ t.style.opacity = '0'; }, 2000);
+}
+
+// ==================== NODE CLICK HANDLER ====================
+myChart.on('click', function(params) {
+  if (!params.data || !params.name) return;
+  var d = params.data;
+  var name = params.name.replace(/\n/g, ' · ');
+  selectedNode = d;
+  selectedNodeName = name;
+
+  // Determine status
+  var emoji = name.substring(0, 2);
+  var statusText = '';
+  if (emoji.includes('✅')) statusText = '<span style="color:#4ecca3">✅ 已完成 (代码闭环 + 文档一致)</span>';
+  else if (emoji.includes('🔄')) statusText = '<span style="color:#f0a500">🔄 开发中 (部分实现)</span>';
+  else if (emoji.includes('❌')) statusText = '<span style="color:#e94560">❌ 未开始 (仅设计文档)</span>';
+  else if (emoji.includes('⚠️')) statusText = '<span style="color:#ff6b6b">⚠️ 文档冲突/偏差</span>';
+
+  // Build info panel
+  var h = '<h3>📋 '+name+'</h3>';
+  h += '<div class="section"><div class="label">状态</div><div class="value">'+statusText+'</div></div>';
+  if (d._files) {
+    h += '<div class="section"><div class="label">📁 底层代码文件/类名</div><div class="value" style="font-family:Consolas,monospace;font-size:11px;color:#4ecca3">'+d._files+'</div></div>';
+  }
+  if (d._docs) {
+    h += '<div class="section"><div class="label">📄 对应文档章节/编号</div><div class="value" style="color:#f0a500">'+d._docs+'</div></div>';
+  }
+  if (d._conflict) {
+    h += '<div class="section conflict"><div class="label" style="color:#e94560">⚠️ 对账差异描述</div><div class="conflict-text">'+d._conflict+'</div></div>';
+  }
+  if (!d._files && !d._docs && !d._conflict && d.children && d.children.length > 0) {
+    h += '<div class="section"><div style="color:#666;font-size:11px">📎 聚合节点 — '+d.children.length+' 个子节点</div></div>';
+  }
+  document.getElementById('node-info').innerHTML = h;
+
+  // Show eval input
+  document.getElementById('eval-input-area').style.display = 'block';
+  document.getElementById('eval-text').value = '';
+  currentRating = 0;
+  updateStarButtons();
+  document.getElementById('eval-submit').disabled = true;
+  renderEvals(name);
+});
+
+// ==================== RATING STARS ====================
+var starButtons = document.querySelectorAll('#rating-stars button');
+starButtons.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    currentRating = parseInt(this.dataset.r);
+    updateStarButtons();
+    checkEvalReady();
+  });
+});
+function updateStarButtons() {
+  starButtons.forEach(function(b) {
+    if (parseInt(b.dataset.r) <= currentRating) b.classList.add('active');
+    else b.classList.remove('active');
+  });
+}
+
+// ==================== EVAL TEXT INPUT ====================
+var evalText = document.getElementById('eval-text');
+evalText.addEventListener('input', checkEvalReady);
+function checkEvalReady() {
+  document.getElementById('eval-submit').disabled = (evalText.value.trim().length === 0);
+}
+
+// Enter to submit
+evalText.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    submitEval();
+  }
+});
+
+// ==================== SUBMIT EVALUATION ====================
+function submitEval() {
+  var text = evalText.value.trim();
+  if (!text || !selectedNodeName) return;
+  var evals = loadEvals(selectedNodeName);
+  var now = new Date();
+  var ts = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+
+           pad(now.getHours())+':'+pad(now.getMinutes());
+  evals.push({ text:text, rating:currentRating, time:ts, node:selectedNodeName });
+  saveEvals(selectedNodeName, evals);
+  evalText.value = '';
+  currentRating = 0;
+  updateStarButtons();
+  document.getElementById('eval-submit').disabled = true;
+  renderEvals(selectedNodeName);
+  toast('✅ 评价已保存');
+}
+function pad(n) { return n<10?'0'+n:''+n; }
+document.getElementById('eval-submit').addEventListener('click', submitEval);
+
+// ==================== SEARCH ====================
+window.searchNode = function(query) {
+  var resetBtn = document.getElementById('search-reset');
+  if (!query) { resetSearch(); return; }
+  resetBtn.style.display = 'inline-block';
+  var q = query.toLowerCase();
+  function filterTree(node) {
+    if (!node) return null;
+    var nm = node.name.toLowerCase().includes(q);
+    var fm = node._files && node._files.toLowerCase().includes(q);
+    var dm = node._docs && node._docs.toLowerCase().includes(q);
+    var self = nm||fm||dm;
+    var fc = [];
+    if (node.children) {
+      for (var i=0;i<node.children.length;i++) { var r=filterTree(node.children[i]); if(r) fc.push(r); }
+    }
+    if (self || fc.length>0) {
+      var c = JSON.parse(JSON.stringify(node));
+      c.children = fc.length>0 ? fc : (node.children||[]);
+      c.collapsed = false;
+      return c;
+    }
+    return null;
+  }
+  var filtered = { name:'🔍 搜索: '+query, children:[] };
+  if (treeData.children) {
+    treeData.children.forEach(function(c){ var r=filterTree(c); if(r) filtered.children.push(r); });
+  }
+  myChart.setOption({ series:[{ data:[filtered], roam:true, scaleLimit:{min:0.15,max:5} }] });
+  if (filtered.children.length===0) {
+    document.getElementById('node-info').innerHTML = '<h3>🔍 搜索: '+query+'</h3><div class="section"><div style="color:#888">未找到匹配节点</div></div>';
+  }
+};
+window.resetSearch = function() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-reset').style.display = 'none';
+  myChart.setOption({ series:[{ data:[treeData], roam:true, scaleLimit:{min:0.15,max:5} }] });
+};
+
+// ==================== RESIZE ====================
+window.addEventListener('resize', function(){ myChart.resize(); });
+
+// ==================== INITIAL EMPTY STATE ====================
+renderEvals('');
+</script>
+</body>
+</html>
