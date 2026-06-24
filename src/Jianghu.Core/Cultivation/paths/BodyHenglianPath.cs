@@ -60,7 +60,7 @@ namespace Jianghu.Cultivation.Paths
             //    境界名（锻皮→淬肉→淬骨→开窍→伐毛洗髓→铜皮→铁骨→金身→不灭金身→肉身成圣，realm0..9）/
             //    升入阈值（淬炼里程累进，realm0=0 起；耐久路日课锤炼故阈值平滑递增）。——
             var curve = new RealmCurveDef(
-                new[] { 16, 21, 28, 36, 45, 57, 70, 84, 100, 118 }, // INV-CROSS二轮: ×1.62→target 0.85×剑修
+                new[] { 16, 21, 28, 46, 58, 73, 90, 108, 128, 151 }, // INV-CROSS v2: buff +25~28% UT4+; UT8=1.59x sword (was 1.24x); UT12 flat-curve flag
                 // A1.2 迁移（境界稿 §11.1）：偏离 UT1 压偶数主阶并入 UT0（淬肉随锻皮入「炼气」大境界）→
                 //   UnifiedTierOf 全落锚集 {0,2,4,6,8,9,10,11,12}、非降；密度走 SubLevel（决策③）。
                 new[] { 0, 0, 2, 4, 6, 8, 9, 10, 11, 12 },

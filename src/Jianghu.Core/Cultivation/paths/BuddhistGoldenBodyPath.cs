@@ -75,7 +75,7 @@ namespace Jianghu.Cultivation.Paths
             //    境界名（炼气→筑基→金丹→元婴→化神→炼虚→合体→大乘→金身→不坏金身）/
             //    升入阈值（功德为突破货币 merit≥realm×1000，早期积累慢故升境最慢、晚期渡化滚雪球反向加速；realm0=0 起）。——
             var curve = new RealmCurveDef(
-                new[] { 11, 15, 20, 28, 40, 59, 88, 133, 200, 299 }, // INV-CROSS二轮: ×1.33→target 0.85×剑修
+                new[] { 11, 15, 25, 35, 50, 74, 110, 166, 250, 359 }, // INV-CROSS v2: buff +25% UT4+ (goldenBodyTurns boost accounted); UT8=1.09x sword (was 0.87x)
                 // A1.2 顶段 plateau（境界稿 §11.3）：fi8/fi9 都 →UT12（金身/不坏金身共 UT12，mul 150→225），
                 //   合并为「金身」一个大境界（major8）含两小境界；UnifiedTierOf 保留 dup12 不变。
                 new[] { 0, 2, 4, 6, 8, 9, 10, 11, 12, 12 },
