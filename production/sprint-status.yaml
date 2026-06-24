@@ -23,47 +23,47 @@ stories:
     name: "21路道心资源表 (per-path daoHeart_init + 增益/减损来源)"
     file: "production/epics/cultivation-a2/story-001-daoheart-table.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1
     blocker: ""
-    completed: ""
+    completed: "2026-06-24"
   - id: "a2-002"
     name: "道心/心魔伪资源系统 (gain/loss ops, [0,100] clamp, R3实证)"
     file: "production/epics/cultivation-a2/story-002-daoheart-innerdemon-resources.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 1
-    blocker: "依赖 a2-001"
-    completed: ""
+    blocker: ""
+    completed: "2026-06-24"
   - id: "a2-004"
     name: "4路DailyMode枚举+整数倍率表 (Fast/Steady/Comprehend/Roam)"
     file: "production/epics/cultivation-a2/story-004-dailymode-enum-table.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 1
-    blocker: "依赖 a2-001"
-    completed: ""
+    blocker: ""
+    completed: "2026-06-24"
   - id: "a2-005"
     name: "DailyMode贪心算法+迟滞规则 (enter 65/exit 50)"
     file: "production/epics/cultivation-a2/story-005-dailymode-greedy-hysteresis.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 1.5
-    blocker: "依赖 a2-004"
-    completed: ""
+    blocker: ""
+    completed: "2026-06-24"
   - id: "a2-019"
     name: "DailyMode→Phase FSM集成 (日课↔修炼10态)"
     file: "production/epics/cultivation-a2/story-019-dailymode-phase-integration.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 1
-    blocker: "依赖 a2-005"
-    completed: ""
+    blocker: ""
+    completed: "2026-06-24"
 
   # —— Should Have ——
   - id: "a2-003"
