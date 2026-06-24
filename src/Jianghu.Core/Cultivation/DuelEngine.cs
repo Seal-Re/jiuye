@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Jianghu.Config;
+using Jianghu.Cultivation.Artifacts;
 using Jianghu.Model;
 
 namespace Jianghu.Cultivation
@@ -46,12 +47,15 @@ namespace Jianghu.Cultivation
         /// <param name="resolver">软情境结算器（可空=无情境 adj）</param>
         /// <param name="attackerSkill">攻方所选战技（可空=裸攻，无 OnUse 模块）</param>
         /// <param name="defenderSkill">防方所选战技（可空=裸攻，无 OnUse 模块）</param>
+        /// <param name="attackerArtifact">攻方装备法宝（可空）</param>
+        /// <param name="defenderArtifact">防方装备法宝（可空）</param>
         public static Result ResolveR2(
             Character attacker, Character defender,
             CultivationPathDef attackerPath, CultivationPathDef defenderPath,
             PathRegistry registry, LimitsConfig limits,
             SituationalResolver? resolver,
-            CombatSkillDef? attackerSkill, CombatSkillDef? defenderSkill)
+            CombatSkillDef? attackerSkill, CombatSkillDef? defenderSkill,
+            ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null)
         {
             if (attacker.Cultivation == null || defender.Cultivation == null)
                 throw new ArgumentException("DuelEngine.ResolveR2 requires both sides have Cultivation (off→legacy SparAction)");
@@ -117,7 +121,8 @@ namespace Jianghu.Cultivation
                     activeASkill, effPeA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
-                    pendingDots, pendingControls);
+                    pendingDots, pendingControls,
+                    attackerArtifact, defenderArtifact);
 
                 int dmgToB, dmgToA_redirect;
                 if (attackerControlled || aFleetFrozen)
@@ -132,7 +137,8 @@ namespace Jianghu.Cultivation
                     activeDSkill, effPeB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
-                    pendingDots, pendingControls);
+                    pendingDots, pendingControls,
+                    defenderArtifact, attackerArtifact);
 
                 int dmgToA, dmgToB_redirect;
                 if (defenderControlled || bFleetFrozen)
@@ -250,7 +256,8 @@ namespace Jianghu.Cultivation
             CultivationPathDef attackerPath, CultivationPathDef defenderPath,
             CombatContext ctx, LimitsConfig limits, SituationalResolver? resolver,
             Side attackerSide, Side defenderSide,
-            List<DotEntry> pendingDots, List<ControlEntry> pendingControls)
+            List<DotEntry> pendingDots, List<ControlEntry> pendingControls,
+            ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null)
         {
             const int Scale = 100;
             long dmg = (long)attackerPe * Scale / BaseDamageDivisor;
@@ -285,6 +292,32 @@ namespace Jianghu.Cultivation
                 && HasTag(defenderPath, "evil"))
             {
                 dmg = dmg * 3 / 2;
+            }
+
+            // —— 批5 法宝配套：攻方装备法宝 OnUse 效果 ——
+            if (attackerArtifact != null)
+            {
+                foreach (var op in attackerArtifact.Effects)
+                {
+                    if (op.Trigger == EffectTrigger.OnDefend) continue; // OnDefend 效果在防方阶段处理
+                    if (op.Kind == EffectOpKind.Dot || op.Kind == EffectOpKind.Control) continue; // dot/ctrl 非直伤
+                    int dmgUnscaled = (int)(dmg / Scale);
+                    int result = ModuleResolver.ApplyOnUse(dmgUnscaled, op, ctx);
+                    dmg = (long)result * Scale + (dmg % Scale);
+                }
+            }
+
+            // —— 批5 法宝配套：防方装备法宝 OnDefend 效果（盾/护甲等） ——
+            if (defenderArtifact != null)
+            {
+                foreach (var op in defenderArtifact.Effects)
+                {
+                    if (op.Trigger != EffectTrigger.OnDefend) continue;
+                    int dmgUnscaled = (int)(dmg / Scale);
+                    int result = ModuleResolver.ApplyOnDefend(dmgUnscaled, op, ctx, defenderSide, out int artReflect);
+                    dmg = (long)result * Scale + (dmg % Scale);
+                    totalReflect += artReflect;
+                }
             }
 
             // OnDefend：防方防御模块（经 ModuleResolver.ApplyOnDefend），收集反伤

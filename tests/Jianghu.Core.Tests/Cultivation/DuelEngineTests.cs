@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Jianghu.Config;
 using Jianghu.Cultivation;
+using Jianghu.Cultivation.Artifacts;
 using Jianghu.Cultivation.Paths;
 using Jianghu.Model;
 using Jianghu.Stats;
@@ -522,6 +523,125 @@ namespace Jianghu.Core.Tests.Cultivation
             var handler = SpecialModuleRegistry.Get("luobao");
             Assert.NotNull(handler);
             Assert.Equal("luobao", handler.HandlerId);
+        }
+
+        // ================================================================
+        // AC 5.4: Artifact combat effects — FlatPen / FlatDR applied in DuelEngine
+        // ================================================================
+
+        [Fact]
+        public void Artifact_AttackFlatPen_IncreasesDamage()
+        {
+            var path = MakePath("test", new[] { "melee" });
+            var reg = MakeRegistry(path);
+            var aCult = CultivationState.NewForPath("test", path.Resources);
+            var bCult = CultivationState.NewForPath("test", path.Resources);
+            var a = MakeChar(1, 20, 0, 0, 0, aCult);
+            var b = MakeChar(2, 20, 0, 0, 0, bCult);
+
+            // Attack artifact: +50 FlatPen
+            var atkArtifact = new ArtifactDef("test_atk", "测试攻宝", ArtifactForm.Sword,
+                ArtifactFunction.Attack, null, ArtifactGrade.Dharma, QualityTier.Common, 1, 30,
+                new[] { Modules.FlatPen(50) }, EffectRarity.Common, null, null, null);
+
+            // a has artifact, b has none → a deals more damage
+            var result = DuelEngine.ResolveR2(a, b, path, path, reg, Limits, null, null, null,
+                attackerArtifact: atkArtifact);
+
+            Assert.Equal(a.Id, result.Winner);
+            Assert.True(result.Margin > 0);
+        }
+
+        [Fact]
+        public void Artifact_DefenseFlatDR_ReducesDamage()
+        {
+            var aSkill = Skill("a_skill", 0, new[] { Modules.FlatPen(30) });
+            var path = MakePath("test", new[] { "melee" }, skills: new[] { aSkill });
+            var reg = MakeRegistry(path);
+            var aCult = CultivationState.NewForPath("test", path.Resources, Array.Empty<string>(), new[] { "a_skill" });
+            var bCult = CultivationState.NewForPath("test", path.Resources);
+            var a = MakeChar(1, 20, 0, 0, 0, aCult);
+            var b = MakeChar(2, 20, 0, 0, 0, bCult);
+
+            // Defense artifact: -10 FlatDR
+            var defArtifact = new ArtifactDef("test_def", "测试盾", ArtifactForm.Shield,
+                ArtifactFunction.Defense, null, ArtifactGrade.Dharma, QualityTier.Common, 1, 30,
+                new[] { Modules.FlatDR(10) }, EffectRarity.Common, null, null, null);
+
+            // b has def artifact → b takes less damage per round → b survives longer
+            var result = DuelEngine.ResolveR2(a, b, path, path, reg, Limits, null, aSkill, null,
+                defenderArtifact: defArtifact);
+
+            Assert.NotNull(result);
+            Assert.False(result.WasAutoWin);
+        }
+
+        [Fact]
+        public void Artifact_NullArtifact_NoError()
+        {
+            var path = MakePath("test", new[] { "melee" });
+            var reg = MakeRegistry(path);
+            var aCult = CultivationState.NewForPath("test", path.Resources);
+            var bCult = CultivationState.NewForPath("test", path.Resources);
+            var a = MakeChar(1, 20, 0, 0, 0, aCult);
+            var b = MakeChar(2, 20, 0, 0, 0, bCult);
+
+            // Null artifacts → no crash, deterministic result
+            var result = DuelEngine.ResolveR2(a, b, path, path, reg, Limits, null, null, null,
+                attackerArtifact: null, defenderArtifact: null);
+
+            Assert.NotNull(result);
+            Assert.False(result.WasAutoWin);
+        }
+
+        [Fact]
+        public void Artifact_NoEffects_NoError()
+        {
+            var path = MakePath("test", new[] { "melee" });
+            var reg = MakeRegistry(path);
+            var aCult = CultivationState.NewForPath("test", path.Resources);
+            var bCult = CultivationState.NewForPath("test", path.Resources);
+            var a = MakeChar(1, 20, 0, 0, 0, aCult);
+            var b = MakeChar(2, 20, 0, 0, 0, bCult);
+
+            // Artifact with no effects (凡器) → no crash
+            var noFxArtifact = new ArtifactDef("test_nofx", "凡铁剑", ArtifactForm.Sword,
+                ArtifactFunction.Attack, null, ArtifactGrade.Mortal, QualityTier.Inferior, 0, 8,
+                Array.Empty<EffectOp>(), EffectRarity.Common, null, null, null);
+
+            var result = DuelEngine.ResolveR2(a, b, path, path, reg, Limits, null, null, null,
+                attackerArtifact: noFxArtifact);
+
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void Artifact_Deterministic_SameSeed_SameResult()
+        {
+            var skill = Skill("s1", 0, new[] { Modules.FlatPen(10) });
+            var path = MakePath("test", new[] { "melee" }, skills: new[] { skill });
+            var reg = MakeRegistry(path);
+
+            var atkArtifact = new ArtifactDef("test_atk2", "测试攻宝", ArtifactForm.Sword,
+                ArtifactFunction.Attack, null, ArtifactGrade.Dharma, QualityTier.Common, 1, 30,
+                new[] { Modules.FlatPen(25) }, EffectRarity.Common, null, null, null);
+
+            // Run twice with same setup → same result (deterministic)
+            DuelEngine.Result RunOnce()
+            {
+                var aCult = CultivationState.NewForPath("test", path.Resources, Array.Empty<string>(), new[] { "s1" });
+                var bCult = CultivationState.NewForPath("test", path.Resources);
+                var a = MakeChar(1, 20, 0, 0, 0, aCult);
+                var b = MakeChar(2, 20, 0, 0, 0, bCult);
+                return DuelEngine.ResolveR2(a, b, path, path, reg, Limits, null, skill, null,
+                    attackerArtifact: atkArtifact);
+            }
+
+            var r1 = RunOnce();
+            var r2 = RunOnce();
+            Assert.Equal(r1.Winner, r2.Winner);
+            Assert.Equal(r1.AttackerHpRemaining, r2.AttackerHpRemaining);
+            Assert.Equal(r1.DefenderHpRemaining, r2.DefenderHpRemaining);
         }
 
         sealed class ListPathSource : IPathSource
