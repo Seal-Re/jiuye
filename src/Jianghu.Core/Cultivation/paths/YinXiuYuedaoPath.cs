@@ -272,7 +272,7 @@ namespace Jianghu.Cultivation
                 // 迷魂引[control]：控场—目标下1回合无法行动。qiYun≥6,消耗6。
                 // B5扩21: Control — 音修迷魂控场代表招。
                 new CombatSkillDef("sk_yin_mihun", "迷魂引", 2,
-                    new[] { Modules.Control("mihun", 1, "控场:目标下1回合无法行动(迷魂引)") },
+                    new[] { Modules.Control("mihun", 1, "控场:目标下1回合无法行动(迷魂引)"), Modules.FlatPen(8, "迷魂音波 spirit 冲击") },
                     new Dictionary<string, int> { { "qiYun", 6 } }),
             };
 
