@@ -30,10 +30,26 @@ namespace Jianghu.Cultivation
         // 资源边界留存：key→(Min,Cap)，ApplyResource 据此钳制。
         private readonly Dictionary<string, (int Min, int Cap)> _caps;
 
-        // —— A.2 道心层预留（R3/R-A-NF7：A.0 任何代码不读写，严禁进 EffectivePower）——
-        public int DaoHeart { get; init; }      // A.2 才用，禁进 EffectivePower（R3）
-        public int InnerDemon { get; init; }    // A.2 才用，禁进 EffectivePower（R3）
-        public int Comprehension { get; init; } // A.2 才用，禁进 EffectivePower（R3）
+        // —— A.2 道心层（R3/R-A-NF7：严禁进 EffectivePower）——
+        public int DaoHeart { get; set; }       // A.2 才读写，禁进 EffectivePower（R3）
+        public int InnerDemon { get; set; }     // A.2 才读写，禁进 EffectivePower（R3）
+        public int Comprehension { get; set; }  // A.2 才读写，禁进 EffectivePower（R3）
+
+        /// <summary>增益道心（钳 [0,100]）。返回实际增益量（可能小于 delta）。</summary>
+        public int GainDaoHeart(int delta)
+        {
+            int old = DaoHeart;
+            DaoHeart = Math.Max(0, Math.Min(100, DaoHeart + delta));
+            return DaoHeart - old;
+        }
+
+        /// <summary>增益心魔（钳 [0,100]）。返回实际增益量（可能小于 delta）。</summary>
+        public int GainInnerDemon(int delta)
+        {
+            int old = InnerDemon;
+            InnerDemon = Math.Max(0, Math.Min(100, InnerDemon + delta));
+            return InnerDemon - old;
+        }
 
         private CultivationState(
             string pathId, int realmIndex, int cultivationPoints,

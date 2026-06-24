@@ -12,4 +12,6 @@ namespace Jianghu.Events
     public sealed record CharacterDied(long Tick, CharacterId Id, long Age) : DomainEvent(Tick);
     public sealed record PathEntered(long Tick, CharacterId Id, string PathId) : DomainEvent(Tick);
     public sealed record RealmBreakthrough(long Tick, CharacterId Id, int NewRealmIndex) : DomainEvent(Tick);
+    public sealed record DaoHeartChanged(long Tick, CharacterId Id, int OldValue, int NewValue, string Source) : DomainEvent(Tick);
+    public sealed record InnerDemonChanged(long Tick, CharacterId Id, int OldValue, int NewValue, string Source) : DomainEvent(Tick);
 }

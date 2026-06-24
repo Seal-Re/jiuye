@@ -1,7 +1,7 @@
 # Story 002: 道心/心魔伪资源系统
 
 > **Epic**: cultivation-a2
-> **Status**: Not Started
+> **Status**: Complete
 > **Last Updated**: 2026-06-24
 > **Layer**: Core
 > **Type**: Logic
