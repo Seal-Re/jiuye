@@ -1,7 +1,7 @@
 # Epic: 系统集成层
 
 **Layer**: Core
-**Status**: In Progress
+**Status**: Partially wired（001-007 合约建成 + story-008 接线闭 C-1 done；story-009 membership ready-for-dev）
 **Created**: 2026-06-15
 **Updated**: 2026-06-25（设计完成，故事拆解）
 **Governing ADRs**: adr-0001-integer-determinism, adr-0003-cultivation-off-byte-identical
@@ -17,16 +17,17 @@
 
 ## Stories
 
-| # | Story | Phase | Priority | Est |
-|---|-------|-------|----------|:--:|
-| 001 | World.Tick 编排契约 | 核心 | Must Have | 0.3d |
-| 002 | DecisionContext 扩展 (Reachable + FactionInfo) | 核心 | Must Have | 0.3d |
-| 003 | IGeoQuery 接口定义 | 地图 | Must Have | 0.2d |
-| 004 | IFactionQuery 接口定义 | 门派 | Must Have | 0.2d |
-| 005 | 管线阶段注册表 (IPipelineStage) | 核心 | Should Have | 0.3d |
-| 006 | 集成测试——全管线确定性 | 硬化 | Must Have | 0.5d |
-| 007 | 集成层审计员终验 | 硬化 | Must Have | 0.3d |
-| 008 | **Map/Faction 接线进 World 主循环（闭 C-1）** | 接线 | **Must Have** | 1.5d |
+| # | Story | Phase | Priority | Est | Status |
+|---|-------|-------|----------|:--:|--------|
+| 001 | World.Tick 编排契约 | 核心 | Must Have | 0.3d | — |
+| 002 | DecisionContext 扩展 (Reachable + FactionInfo) | 核心 | Must Have | 0.3d | ✅ Built |
+| 003 | IGeoQuery 接口定义 | 地图 | Must Have | 0.2d | ✅ Built |
+| 004 | IFactionQuery 接口定义 | 门派 | Must Have | 0.2d | ✅ Built |
+| 005 | 管线阶段注册表 (IPipelineStage) | 核心 | Should Have | 0.3d | — |
+| 006 | 集成测试——全管线确定性 | 硬化 | Must Have | 0.5d | ✅ story-008 |
+| 007 | 集成层审计员终验 | 硬化 | Must Have | 0.3d | — |
+| 008 | **Map/Faction 接线进 World 主循环（闭 C-1）** | 接线 | **Must Have** | 1.5d | ✅ Done `a05cd8d` |
+| 009 | 角色→门派 membership 接线（派系生命周期端到端） | 接线 | Should Have | 1d | Ready for Dev |
 
 ## Definition of Done
 - [ ] World.Tick 管线合约已文档化 + 测试验证

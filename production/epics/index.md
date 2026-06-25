@@ -1,6 +1,6 @@
 # Epics Index — jiuye（武侠人设生成 / 江湖涌现模拟）
 
-> 真相源（红线 A.2）。由 TASKS.md 迁入（2026-06-15）。状态枚举 = {Planned, In Progress, In Review, Done, Deferred, Blocked, **Built not wired**}。
+> 真相源（红线 A.2）。由 TASKS.md 迁入（2026-06-15）。状态枚举 = {Planned, In Progress, In Review, Done, Deferred, Blocked, **Built not wired**, **Wired**, **Partially wired**}。
 > 机器可读状态在 `production/sprint-status.yaml`；本表为人读总览。WIP(In Progress)≤2，当前=1。
 > **Built not wired** = 代码已建+单测绿，但未接生产主循环（死代码）；属 Deferred 子态，待 wiring story。源 CR-2026-06-25 C-1（R-1(b) 决策）。
 
@@ -17,10 +17,10 @@
 | 5 | 修炼 A.2（道心/破单调/奇遇/闭关） | `cultivation-a2` | Feature | **In Progress** | 25 故事已拆解 (f37838d)，Sprint 4 |
 | 6 | 修炼 A.3（转职/觉醒/双修） | `cultivation-a3` | Feature | Designed | A3-FINAL |
 | 7 | 戏剧引擎 B | `drama-engine` | Feature | Designed (0 code) | spec 完，零代码 |
-| 8 | 地图系统 C | `map-system` | Feature | **Built, not wired** | WorldMap/Kruskal/Factory 已建有测试，**未接 WorldFactory/Advance**（死代码）→ CR C-1 / 接线 integration **story-008** (ready-for-dev) |
-| 9 | 门派 Faction D | `faction` | Feature | **Built, not wired** | SectLedger/Phase/Pump 已建有测试，**Pump 仅测试调用，未接 Advance**（生命周期冻结）→ CR C-1 / 接线 integration **story-008** (ready-for-dev) |
+| 8 | 地图系统 C | `map-system` | Feature | **Wired** | WorldMap/Kruskal/Factory 已接 WorldFactory/Advance（story-008 `a05cd8d`，--map 激活）；懒加载待后续 map story |
+| 9 | 门派 Faction D | `faction` | Feature | **Wired (membership pending)** | SectLedger/Pump 已接 Advance tick（story-008）；但角色→门派分配未接→生命周期未端到端 → **story-009** (ready-for-dev) |
 | 10 | LLM 脑 v1.1（黑盒 API 多智能体涌现） | `llm-brain` | Feature | Not designed | 🔴 原始核心愿景未设计未建（R-5 sync-over-async 全链路 async 绑此 epic） |
-| 11 | 系统集成层 | `integration` | Feature | **Built, not wired** | 合约 001-007 已建（未接线）；**story-008** 接线进 World 主循环闭 C-1（ready-for-dev，未启动）→ CR-2026-06-25 |
+| 11 | 系统集成层 | `integration` | Feature | **Partially wired** | 001-007 合约 + **story-008 接线闭 C-1**（done `a05cd8d`）；**story-009** membership 接线 (ready-for-dev，未启动) |
 | 12 | 可视化（像素 tile / 古风 UI） | `visualization` | Presentation | Spike only | spike + 规则 doc（B.8 分轨） |
 | 13 | 仓库整理 | `repo-tidy` | chore | Todo | _research/raw3、pixel 决断、icon_gen bug |
 
