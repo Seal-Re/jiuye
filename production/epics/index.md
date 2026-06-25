@@ -19,7 +19,7 @@
 | 6 | 修炼 A.3（转职/觉醒/双修） | `cultivation-a3` | Feature | Designed | A3-FINAL |
 | 7 | 戏剧引擎 B | `drama-engine` | Feature | Designed (0 code) | spec 完，零代码 |
 | 8 | 地图系统 C | `map-system` | Feature | **Wired** | WorldMap/Kruskal/Factory 已接 WorldFactory/Advance（story-008 `a05cd8d`，--map 激活）；懒加载待后续 map story |
-| 9 | 门派 Faction D | `faction` | Feature | **Wired** | SectLedger/Pump 接 Advance（story-008）+ 角色→门派 membership 接通、生命周期端到端（story-009）；朝廷/势力扩展待后续 |
+| 9 | 门派 Faction D | `faction` | Feature | **Wired** | C.0 接线+membership 生命周期端到端（story-008/009）；C.0 余项 **story-010 贡献晋升** (ready-for-dev) + story-011 夺地世仇 (planned)；朝廷/经营=C.1 远期 |
 | 10 | LLM 脑 v1.1（黑盒 API 多智能体涌现） | `llm-brain` | Feature | Not designed | 🔴 原始核心愿景未设计未建（R-5 sync-over-async 全链路 async 绑此 epic） |
 | 11 | 系统集成层 | `integration` | Feature | **Partially wired** | 001-007 合约 + **story-008 接线闭 C-1**（done `a05cd8d`）；**story-009** membership 接线 (ready-for-dev，未启动) |
 | 12 | 可视化（像素 tile / 古风 UI） | `visualization` | Presentation | Spike only | spike + 规则 doc（B.8 分轨） |
