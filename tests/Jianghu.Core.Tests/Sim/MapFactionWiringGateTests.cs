@@ -92,5 +92,39 @@ namespace Jianghu.Core.Tests.Sim
                 if (w.Faction.PhaseOf(fid) != FactionPhase.Founding) { anyAdvanced = true; break; }
             Assert.True(anyAdvanced, "membership 接通后至少一门派应脱离 Founding（生命周期端到端）");
         }
+
+        [Fact]
+        public void test_contribution_promotion_end_to_end()
+        {
+            // story-010 AC 10.7：factionOn 长跑后晋升真发生（切磋胜累计贡献→过阈→Rank↑）。
+            // 注：长跑(400×64)中角色因寿元大量死亡（deceased~341），晋升者多已逝——故用 Chronicle
+            // （持久记录，含已逝者晋升）作"晋升发生"的证据，而非查活人 RankOf（活人多为 rank0 新生代）。
+            var w = WorldFactory.CreateInitial(7, LimitsConfig.Default, initialCount: 8,
+                                               cultivation: true, factionOn: true);
+            for (int i = 0; i < 400; i++) w.Advance(64);
+
+            int promotions = 0;
+            foreach (var l in w.Chronicle.Lines) if (l.Contains("晋升")) promotions++;
+            Assert.True(promotions > 0, "长跑后 Chronicle 应含晋升行（切磋胜累计贡献驱动晋升真发生）");
+        }
+
+        [Fact]
+        public void test_promotion_line_follows_duel_line()
+        {
+            // story-010 AC 10.3：晋升行紧随触发它的切磋行（顺序正确，非倒置）。
+            var w = WorldFactory.CreateInitial(7, LimitsConfig.Default, initialCount: 8,
+                                               cultivation: true, factionOn: true);
+            for (int i = 0; i < 400; i++) w.Advance(64);
+
+            var lines = w.Chronicle.Lines;
+            for (int i = 0; i < lines.Count; i++)
+                if (lines[i].Contains("晋升"))
+                {
+                    Assert.True(i > 0 && lines[i - 1].Contains("切磋"),
+                        $"晋升行[{i}]前一行应为触发它的切磋行，实际：{(i > 0 ? lines[i - 1] : "<none>")}");
+                    return;
+                }
+            Assert.Fail("未找到晋升行（长跑应产生晋升）");
+        }
     }
 }

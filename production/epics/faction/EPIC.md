@@ -24,7 +24,7 @@
 |---|-------|------|------|
 | （接线）| Map/Faction 接 World + Pump tick | ✅ Done | integration story-008 `a05cd8d` |
 | （接线）| 角色→门派 membership + 生命周期端到端 | ✅ Done | integration story-009 `2477435` |
-| 010 | C.0 贡献驱动晋升（切磋胜→贡献度→Rank） | Ready for Dev | design §3.3 |
+| 010 | C.0 贡献驱动晋升（切磋胜→贡献度→Rank） | ✅ Done | design §3.3；切磋胜累计贡献过阈晋升 + StateSnapshot 补 Faction |
 | 011 | C.0 非致死夺地兑现世仇 | Planned（未拆） | design §3 |
 
 ## Dependencies
@@ -33,7 +33,7 @@
 
 ## Definition of Done
 - [x] membership + 生命周期端到端（story-009）
-- [ ] 贡献驱动晋升（story-010）
+- [x] 贡献驱动晋升（story-010）
 - [ ] 非致死夺地世仇（story-011）
 - [ ] 被动兴衰 Pump（story-008 已接，C.0 完整待 010/011）
 

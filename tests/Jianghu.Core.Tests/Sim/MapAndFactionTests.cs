@@ -364,5 +364,47 @@ namespace Jianghu.Core.Tests.Sim
             Assert.NotNull(succ);
             Assert.Equal(b, succ.Value);
         }
+
+        // ================================================================
+        // story-010：贡献度累加器（AC 10.1 单元）
+        // ================================================================
+
+        [Fact]
+        public void test_contribution_accumulates_for_member_only()
+        {
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "剑宗", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            var member = new CharacterId(10);
+            var loner = new CharacterId(99); // 散修，未 Join
+            ledger.Join(member, 1, 0);
+
+            ledger.AddContribution(member, 30);
+            ledger.AddContribution(member, 25);
+            ledger.AddContribution(loner, 100); // 散修不累
+
+            Assert.Equal(55, ledger.ContributionOf(member));
+            Assert.Equal(0, ledger.ContributionOf(loner));
+        }
+
+        [Fact]
+        public void test_captured_state_includes_rank_and_contribution()
+        {
+            // AC 10.1：CaptureState 序列化含 Rank/贡献度（补 Faction 快照空白）。
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "剑宗", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            ledger.InitPhase(1, 0);
+            var m = new CharacterId(10); ledger.Join(m, 1, 0);
+
+            var before = ledger.CaptureState();
+            ledger.AddContribution(m, 42);
+            var afterContrib = ledger.CaptureState();
+            ledger.Promote(m);
+            var afterPromote = ledger.CaptureState();
+
+            Assert.NotEqual(before, afterContrib);    // 贡献度变 → 快照变
+            Assert.NotEqual(afterContrib, afterPromote); // Rank 变 → 快照变
+            Assert.Contains(":c42", afterContrib);     // 贡献度入串
+            Assert.Contains(":r1", afterPromote);      // Rank 入串
+        }
     }
 }

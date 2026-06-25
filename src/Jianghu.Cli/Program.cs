@@ -74,6 +74,14 @@ static void RunCultivation(ulong seed, int steps, int budget, bool mapOn, bool f
     Console.WriteLine($"\n--- 切磋录（DuelResolved，共 {duels.Count} 场，节选末 6）---");
     foreach (var l in duels.Skip(Math.Max(0, duels.Count - 6))) Console.WriteLine(l);
 
+    // —— 门派录：FactionPromoted（贡献驱动晋升，story-010）——仅 faction-on 有数据 ——
+    var promos = lines.Where(l => l.Contains("晋升")).ToList();
+    if (promos.Count > 0)
+    {
+        Console.WriteLine($"\n--- 门派录（FactionPromoted，共 {promos.Count} 次晋升，节选末 6）---");
+        foreach (var l in promos.Skip(Math.Max(0, promos.Count - 6))) Console.WriteLine(l);
+    }
+
     // —— 当世修士群像：per-path 战力分化（不同路同四维 → 不同 EffectivePower）——
     var cultivators = world.AliveCharacters().Where(c => c.Cultivation != null).ToList();
     Console.WriteLine($"\n--- 当世修士 {cultivators.Count} 人（per-path 战力分化）---");

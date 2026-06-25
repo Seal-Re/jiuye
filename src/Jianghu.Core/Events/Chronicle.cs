@@ -35,6 +35,12 @@ namespace Jianghu.Events
                         ? $"[{rb.Tick}] {name(rb.Id)} 冲破瓶颈，跻身 {realmDesc(rb.NewRealmIndex)} 之境。"
                         : $"[{rb.Tick}] {name(rb.Id)} 冲破瓶颈，境界精进至第 {rb.NewRealmIndex} 重。";
                     break;
+                case FactionPromoted fp:
+                {
+                    string rank = fp.NewRank switch { 1 => "内门弟子", 2 => "核心长老", 3 => "一派掌门", _ => "外门弟子" };
+                    text = $"[{fp.Tick}] {name(fp.Id)} 因功勋卓著，晋升为 {rank}。";
+                    break;
+                }
                 default: text = $"[{e.Tick}] (未知事件)"; break;
             }
             _lines.Add(text);

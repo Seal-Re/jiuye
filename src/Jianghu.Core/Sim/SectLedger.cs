@@ -27,6 +27,7 @@ namespace Jianghu.Sim
         private readonly Dictionary<int, FactionDef> _factions = new();
         private readonly Dictionary<CharacterId, (int FactionId, int Rank, long JoinedAt)> _members = new();
         private readonly Dictionary<int, int> _relations = new(); // (fA<<16|fB) → affinity
+        private readonly Dictionary<CharacterId, int> _contribution = new(); // 贡献度（story-010：切磋胜累加→过阈晋升）
 
         public int FactionCount => _factions.Count;
 
@@ -61,6 +62,18 @@ namespace Jianghu.Sim
             int newRank = Math.Min(m.Rank + 1, 3); // max rank = 3 (掌门)
             _members[id] = (m.FactionId, newRank, m.JoinedAt);
         }
+
+        /// <summary>累加成员贡献度（story-010：纯整数，仅门派成员有效；散修无操作）。</summary>
+        public void AddContribution(CharacterId id, int amount)
+        {
+            if (!_members.ContainsKey(id)) return; // 散修不累
+            _contribution.TryGetValue(id, out int cur);
+            _contribution[id] = cur + amount;
+        }
+
+        /// <summary>查询成员贡献度（无记录=0）。</summary>
+        public int ContributionOf(CharacterId id)
+            => _contribution.TryGetValue(id, out var v) ? v : 0;
 
         /// <summary>设置两个门派间的关系。</summary>
         public void SetRelation(int factionA, int factionB, int affinity)
@@ -230,7 +243,55 @@ namespace Jianghu.Sim
             foreach (var kv in _phases) clone._phases[kv.Key] = kv.Value;
             foreach (var kv in _foundedAt) clone._foundedAt[kv.Key] = kv.Value;
             foreach (var kv in _treasuries) clone._treasuries[kv.Key] = kv.Value;
+            foreach (var kv in _contribution) clone._contribution[kv.Key] = kv.Value;
             return clone;
+        }
+
+        /// <summary>
+        /// 确定性全状态序列化（story-010：StateSnapshot 接入，补 Faction 快照空白）。
+        /// 显式排序（factionId / CharacterId.Value / 关系键 升序），不依赖字典枚举序。
+        /// 覆盖 members(含 Rank/贡献度) + phases + treasuries + territories + relations。
+        /// </summary>
+        public string CaptureState()
+        {
+            var sb = new System.Text.StringBuilder();
+
+            // factions：按 Id 升序，附 phase + treasury + 领地（排序）。
+            var fids = new List<int>(_factions.Keys); fids.Sort();
+            foreach (var fid in fids)
+            {
+                sb.Append('F').Append(fid)
+                  .Append(":ph").Append((int)PhaseOf(fid))
+                  .Append(":tr").Append(TreasuryOf(fid))
+                  .Append(":founded").Append(_foundedAt.TryGetValue(fid, out var ft) ? ft : 0)
+                  .Append(":sites[");
+                var sites = new List<int>();
+                if (_territories.TryGetValue(fid, out var ts)) { foreach (var s in ts) sites.Add(s.Value); }
+                sites.Sort();
+                for (int i = 0; i < sites.Count; i++) { if (i > 0) sb.Append(','); sb.Append(sites[i]); }
+                sb.Append("]\n");
+            }
+
+            // members：按 CharacterId.Value 升序，附 faction/rank/贡献度。
+            var mids = new List<long>(); foreach (var k in _members.Keys) mids.Add(k.Value);
+            mids.Sort();
+            foreach (var mv in mids)
+            {
+                var cid = new CharacterId(mv);
+                var m = _members[cid];
+                sb.Append('M').Append(mv)
+                  .Append(":f").Append(m.FactionId)
+                  .Append(":r").Append(m.Rank)
+                  .Append(":c").Append(ContributionOf(cid))
+                  .Append('\n');
+            }
+
+            // relations：按键升序。
+            var rkeys = new List<int>(_relations.Keys); rkeys.Sort();
+            foreach (var rk in rkeys)
+                sb.Append('R').Append(rk).Append(':').Append(_relations[rk]).Append('\n');
+
+            return sb.ToString();
         }
     }
 }

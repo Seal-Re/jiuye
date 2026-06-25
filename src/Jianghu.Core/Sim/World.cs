@@ -123,7 +123,13 @@ namespace Jianghu.Sim
                 var ctx = BuildContext(actor);
                 var choice = _brains[actor.Id].DecideAsync(ctx, CancellationToken.None).GetAwaiter().GetResult();
                 var events = _actions.Execute(this, actor, choice);
-                foreach (var e in events) { Project(actor, e); Chronicle.Append(e, NameOf); }
+                foreach (var e in events)
+                {
+                    Project(actor, e);
+                    Chronicle.Append(e, NameOf);
+                    // story-010：DuelResolved 入册后再结算门派贡献/晋升 → 晋升行紧随切磋行（顺序正确）。
+                    if (e is DuelResolved d) ProjectFactionContribution(d);
+                }
 
                 AdvanceCultivation(actor); // on：行动后累加本路修为 + 判突破（off=无操作）
 
@@ -185,6 +191,29 @@ namespace Jianghu.Sim
                 case CharacterTrained t:
                     actor.Remember(new MemoryEntry(t.Tick, "train", t.Id, null, 1));
                     break;
+            }
+        }
+
+        // story-010：门派贡献驱动晋升最薄反馈环（design §3.3）。
+        // 胜方若为门派成员 → 贡献度 +base+margin；过阈 → Promote + FactionPromoted 入 Chronicle。
+        // off/factionOff（Faction==null）→ 整体无操作（保 off 逐字节 B.3）。纯整数确定性。
+        private const int ContribWinBase = 10;      // 每场切磋胜基础贡献
+        private const int ContribPerRankThreshold = 50; // 每升一阶所需累计贡献
+        private void ProjectFactionContribution(DuelResolved d)
+        {
+            if (Faction == null) return;
+            if (Faction.FactionOf(d.Winner) == 0) return; // 散修不累
+            int gain = ContribWinBase + (d.Margin > 0 ? d.Margin : 0);
+            Faction.AddContribution(d.Winner, gain);
+
+            // 过阈晋升：累计贡献 ≥ (当前阶+1)×阈值 且未达 cap(3) → 升一阶 + 发事件。
+            int rank = Faction.RankOf(d.Winner);
+            if (rank < 3 && Faction.ContributionOf(d.Winner) >= (rank + 1) * ContribPerRankThreshold)
+            {
+                Faction.Promote(d.Winner);
+                Chronicle.Append(
+                    new FactionPromoted(d.Tick, d.Winner, Faction.FactionOf(d.Winner), Faction.RankOf(d.Winner)),
+                    NameOf);
             }
         }
 

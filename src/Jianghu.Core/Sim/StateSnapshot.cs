@@ -49,6 +49,14 @@ namespace Jianghu.Sim
                   .Append(it.At).Append('\n');
             }
 
+            // faction：off/factionOff 时 w.Faction==null → 整段省略（保 off 逐字节）。
+            // on 时序列化全门派态（含 Rank/贡献度），补此前 Faction 快照空白（story-010）。
+            if (w.Faction != null)
+            {
+                sb.Append("faction\n");
+                sb.Append(w.Faction.CaptureState());
+            }
+
             return sb.ToString();
         }
 

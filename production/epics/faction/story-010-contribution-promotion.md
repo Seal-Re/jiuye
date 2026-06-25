@@ -1,7 +1,7 @@
 # Story 010: C.0 贡献驱动晋升（切磋胜→贡献度→Rank 最薄反馈环）
 
 > **Epic**: faction
-> **Status**: Ready for Dev
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 中 (1d)
@@ -24,14 +24,14 @@ design §3.3：「晋升判据接角色行为产出（非纯资历+Might roll）
 
 ## Acceptance Criteria
 
-- [ ] 10.1 `SectLedger` 加贡献度累加器（member→contribution，纯整数）：`AddContribution(id, amount)` + 查询。成员状态扩展进 Clone + StateSnapshot（B.2）。
-- [ ] 10.2 `World.Project` 处理 `DuelResolved` 时（factionOn），胜方若为门派成员 → `AddContribution(Winner, +N)`（N 可含 Margin 加成，纯整数确定性）。off/factionOff 不碰。
-- [ ] 10.3 贡献度过阈（如 ≥ RankThreshold）→ 调 `Promote` 升 Rank + 发 `FactionPromoted(Tick, Member, FactionId, NewRank)` 事件入 Chronicle（"弟子因连胜晋升"）。阈值 data-driven（FactionConfig 或常量，避免硬编码）。
-- [ ] 10.4 Rank 单调不超 cap（掌门=3）；晋升后贡献度按设计扣减或保留（择一，确定性）。
-- [ ] 10.5 **off 逐字节铁律（B.3）**：factionOff（默认）Chronicle 与接线前逐字节一致——贡献/晋升仅 factionOn 路径。
-- [ ] 10.6 **确定性（B.2）**：factionOn 同种子两跑晋升序列一致；Clone 续跑 == 不中断（贡献度进快照）。
-- [ ] 10.7 端到端实证：factionOn 长跑后 ≥1 成员 Rank > 0（晋升真发生）；Chronicle 含 FactionPromoted 行。
-- [ ] 10.8 全量绿 + IL 浮点零 + clean rebuild 0 警告。
+- [x] 10.1 `SectLedger` 加贡献度累加器 `AddContribution`/`ContributionOf`（纯整数，散修不累）；进 `Clone` + 新 `CaptureState()`（补 StateSnapshot 此前 Faction 空白，retroactively 守 story-009 membership 确定性）。
+- [x] 10.2 `World.Advance` 循环（DuelResolved 入册后）`ProjectFactionContribution`：胜方为成员→`AddContribution(+10+margin)`；off/factionOff（Faction==null）无操作。
+- [x] 10.3 过阈（累计 ≥ (rank+1)×50）→ `Promote` + `FactionPromoted` 事件入 Chronicle（"因功勋卓著晋升为 内门弟子/核心长老/一派掌门"）；阈值=具名常量。晋升行紧随切磋行（test_promotion_line_follows_duel_line 守序）。
+- [x] 10.4 Rank 单调不超 cap(3)；贡献度保留累加（不扣减，确定性）。
+- [x] 10.5 **off 逐字节（B.3）**：factionOff 默认 Chronicle 一致（CLI 两跑 + determinism 绿）；faction 快照段 null 时省略。
+- [x] 10.6 **确定性（B.2）**：`OnFaction_PromotionState_SameSeedIdentical`（CaptureState + Chronicle 同种子一致）+ OnMapFaction Clone 续跑。
+- [x] 10.7 端到端实证：`test_contribution_promotion_end_to_end`（Chronicle 含晋升行；注：长跑死亡率高，晋升者多已逝，用 Chronicle 持久记录为证）；CLI 门派录可见（seed7 9 次晋升）。
+- [x] 10.8 全量 867 绿 + IL 浮点零（FloatScan 5）+ clean rebuild 0 警告。
 
 ## Implementation Notes
 

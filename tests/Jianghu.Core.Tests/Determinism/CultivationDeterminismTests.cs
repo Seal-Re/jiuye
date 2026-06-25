@@ -150,5 +150,18 @@ namespace Jianghu.Core.Tests.Determinism
                 Assert.Equal(a.Faction!.FactionOf(cid), b.Faction!.FactionOf(cid));
             }
         }
+
+        // —— story-010 AC 10.6：贡献晋升确定性——同种子两跑 faction 全状态快照逐一致（含 Rank/贡献度） ——
+        [Fact]
+        public void OnFaction_PromotionState_SameSeedIdentical()
+        {
+            var a = WorldFactory.CreateInitial(7, LimitsConfig.Default, 8, cultivation: true, factionOn: true);
+            var b = WorldFactory.CreateInitial(7, LimitsConfig.Default, 8, cultivation: true, factionOn: true);
+            for (int i = 0; i < 300; i++) { a.Advance(6); b.Advance(6); }
+            // CaptureState 含 members 的 Rank + 贡献度 → 晋升序列任何分歧都会暴露。
+            Assert.Equal(a.Faction!.CaptureState(), b.Faction!.CaptureState());
+            // Chronicle 晋升行也须逐字节一致。
+            Assert.Equal(Chronicle(a), Chronicle(b));
+        }
     }
 }
