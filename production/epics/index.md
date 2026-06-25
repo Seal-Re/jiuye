@@ -1,8 +1,9 @@
 # Epics Index — jiuye（武侠人设生成 / 江湖涌现模拟）
 
 > 真相源（红线 A.2）。由 TASKS.md 迁入（2026-06-15）。状态枚举 = {Planned, In Progress, In Review, Done, Deferred, Blocked, **Built not wired**, **Wired**, **Partially wired**}。
-> 机器可读状态在 `production/sprint-status.yaml`；本表为人读总览。WIP(In Progress)≤2，当前=1。
+> 机器可读状态在 `production/sprint-status.yaml`；本表为人读总览。WIP(In Progress)≤2，当前=**1**（仅 #5 cultivation-a2；〔A.6 审计 2026-06-25 订正 #1 combat-r2 陈旧 In Progress→Done，WIP 2→1〕）。
 > **Built not wired** = 代码已建+单测绿，但未接生产主循环（死代码）；属 Deferred 子态，待 wiring story。源 CR-2026-06-25 C-1（R-1(b) 决策）。
+> **Wired** = 已接生产主循环可激活；**Partially wired** = 部分接线（如 story-008 接 Map/Faction 但 membership 待 story-009）。
 
 | # | Epic | slug | Layer | Status | 证据/备注 |
 |---|---|---|---|---|---|
@@ -10,7 +11,7 @@
 | — | 修炼 A.0（21 路引擎） | — | Core | Done | 204 测试 master `579659f`（历史） |
 | — | A.1 境界竖切 | — | Core | Done | 232 绿 `3ea18da`，auditor 过（历史；A1.4→combat-r2/cultivation-a1-rest） |
 | — | EPIC-PROCESS 流程红线（CLAUDE.md+台账+审计+记忆） | — | meta | Done | master `8eca0ed`，DoD 全勾（历史；流程纪律本身，现升级为 CCGS 骨架） |
-| 1 | 战斗系统 R2 + 平衡（模块化） | `combat-r2` | Core | **In Progress** | batch1 done `946ea75`，batch2 在制（282 绿，剑/体/法/鬼/丹/器 + Modules 工厂） |
+| 1 | 战斗系统 R2 + 平衡（模块化） | `combat-r2` | Core | **Done** | batch1-6 全落（ResolveR2/法宝/硬化gate）；EPIC header Done @ `7920044`；850 绿。〔A.6 审计 2026-06-25 订正陈旧 In Progress 标记〕 |
 | 2 | 真·全量机制结构化 | `combat-fullstruct` | Core | Deferred | 依赖 combat-r2 done；derived 求和/克制矩阵/召唤物/唯一签名全迁 |
 | 3 | 平衡标定 INV-CROSS | `balance-cross` | Core | Designed | 🔴 最大功能缺口；设计 `336280d` |
 | 4 | 修炼 A.1 余项（10 态/4 劫/5 失败/寿元） | `cultivation-a1-rest` | Core | Designed | 设计完；含 A1.4 blocked（依赖 balance-cross） |
