@@ -27,7 +27,7 @@
 | 006 | 集成测试——全管线确定性 | 硬化 | Must Have | 0.5d | ✅ story-008 |
 | 007 | 集成层审计员终验 | 硬化 | Must Have | 0.3d | — |
 | 008 | **Map/Faction 接线进 World 主循环（闭 C-1）** | 接线 | **Must Have** | 1.5d | ✅ Done `a05cd8d` |
-| 009 | 角色→门派 membership 接线（派系生命周期端到端） | 接线 | Should Have | 1d | Ready for Dev |
+| 009 | 角色→门派 membership 接线（派系生命周期端到端） | 接线 | Should Have | 1d | ✅ Done |
 
 ## Definition of Done
 - [ ] World.Tick 管线合约已文档化 + 测试验证

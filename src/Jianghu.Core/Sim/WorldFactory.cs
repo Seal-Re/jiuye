@@ -46,6 +46,9 @@ namespace Jianghu.Sim
                 w.SetMap(WorldMapFactory.Create(MapConfig.Default, root.Split(RngStreamIds.Map)));
             if (factionOn)
                 w.SetFaction(SectLedgerFactory.Create(FactionConfig.Default, root.Split(RngStreamIds.Faction), w.Nodes.Count));
+            // 成员分配子流（story-009）：仅 factionOn 构造（off 绝不调 → 保 off 逐字节 B.3）。
+            // 从 Faction 流再 Split(1) 派生，不新增 RngStreamIds 编号（承 story-008 流纪律）。
+            var factionAssignRng = factionOn ? root.Split(RngStreamIds.Faction).Split(1) : null;
 
             for (int i = 0; i < initialCount; i++)
             {
@@ -54,6 +57,13 @@ namespace Jianghu.Sim
                 // on：在既有 genRng 消费之后 append 定路（经 _cultRng）；off：_cultRng==null 无操作。
                 if (registry != null)
                     w.TryAssignCultivation(ch, registry);
+                // story-009：factionOn 时确定性分配角色到门派（纯整数，复用 factionAssignRng；off 不调）。
+                if (factionAssignRng != null && w.Faction != null)
+                {
+                    var fids = w.Faction.AllFactionIds;
+                    if (fids.Count > 0)
+                        w.Faction.Join(ch.Id, fids[factionAssignRng.NextInt(fids.Count)], w.Clock);
+                }
             }
             return w;
         }

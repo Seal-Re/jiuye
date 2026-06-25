@@ -131,8 +131,24 @@ namespace Jianghu.Core.Tests.Determinism
             var clone = part.Clone();
             Assert.Equal(StateSnapshot.Capture(part), StateSnapshot.Capture(clone));
             for (int i = 0; i < 60; i++) clone.Advance(6);
-
             Assert.Equal(StateSnapshot.Capture(full), StateSnapshot.Capture(clone));
+        }
+
+        // —— story-009 AC 9.6：membership 分配确定性——同种子两跑角色→门派映射逐一致 ——
+        [Fact]
+        public void OnFaction_MembershipAssignment_SameSeedIdentical()
+        {
+            var a = WorldFactory.CreateInitial(2026, LimitsConfig.Default, 8, cultivation: true, factionOn: true);
+            var b = WorldFactory.CreateInitial(2026, LimitsConfig.Default, 8, cultivation: true, factionOn: true);
+
+            // 构造期（未 Advance）即固定分配：逐角色 FactionOf 必逐一致。
+            var idsA = new List<long>(); foreach (var c in a.AliveCharacters()) idsA.Add(c.Id.Value);
+            idsA.Sort();
+            foreach (var idv in idsA)
+            {
+                var cid = new Jianghu.Model.CharacterId(idv);
+                Assert.Equal(a.Faction!.FactionOf(cid), b.Faction!.FactionOf(cid));
+            }
         }
     }
 }

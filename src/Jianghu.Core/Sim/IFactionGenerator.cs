@@ -62,21 +62,8 @@ namespace Jianghu.Sim
                 homeRegions[i + 1] = homeRegion;
             }
 
-            // Alignment-based relations: righteous vs evil → enemy, same alignment → ally
-            for (int i = 0; i < factions.Count; i++)
-            {
-                for (int j = i + 1; j < factions.Count; j++)
-                {
-                    int alignA = factions[i].AlignmentAxis;
-                    int alignB = factions[j].AlignmentAxis;
-
-                    int relation = alignA == alignB ? (int)FactionRelationKind.Ally
-                        : (alignA * alignB == -1) ? (int)FactionRelationKind.Enemy
-                        : (int)FactionRelationKind.Neutral;
-
-                    // Store bidirectional in ledger after creation — factory just returns defs
-                }
-            }
+            // 注：对齐关系（同盟/敌对/中立）由 SectLedgerFactory.Create 在注册门派后统一 SetRelation
+            // 双向设置（见 SectLedgerFactory:42-43）。此处生成器只产 def，不算关系（story-009 删原死循环）。
 
             return new FactionGenerationResult(factions, homeRegions);
         }

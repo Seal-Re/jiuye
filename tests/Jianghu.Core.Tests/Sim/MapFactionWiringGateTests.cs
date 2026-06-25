@@ -58,5 +58,39 @@ namespace Jianghu.Core.Tests.Sim
             Assert.Null(w.Map);
             Assert.Null(w.Faction);
         }
+
+        [Fact]
+        public void test_membership_assigned_at_construction()
+        {
+            // story-009 AC 9.2：factionOn 时角色被分配到门派 → FactionOf 返非0，部分门派 memberCount≥2。
+            var w = WorldFactory.CreateInitial(2026, LimitsConfig.Default, initialCount: 8,
+                                               cultivation: true, factionOn: true);
+
+            int assigned = 0;
+            foreach (var c in w.AliveCharacters())
+                if (w.Faction!.FactionOf(c.Id) != 0) assigned++;
+            Assert.True(assigned > 0, "应有角色被分配到门派");
+
+            // 8 角色分配到 ≤6 门派 → 鸽笼律保证至少一门派 memberCount≥2
+            bool anyMultiMember = false;
+            foreach (var fid in w.Faction!.AllFactionIds)
+                if (w.Faction.MembersOf(fid).Count >= 2) { anyMultiMember = true; break; }
+            Assert.True(anyMultiMember, "至少一门派应有≥2成员（生命周期 Growth 前提）");
+        }
+
+        [Fact]
+        public void test_faction_lifecycle_advances_end_to_end()
+        {
+            // story-009 AC 9.3：membership 接通后，派系生命周期端到端——跑 200+ 步后
+            // 至少一门派脱离 Founding（age>200 + memberCount≥2 → Growth）。
+            var w = WorldFactory.CreateInitial(2026, LimitsConfig.Default, initialCount: 8,
+                                               cultivation: true, factionOn: true);
+            for (int i = 0; i < 400; i++) w.Advance(64);
+
+            bool anyAdvanced = false;
+            foreach (var fid in w.Faction!.AllFactionIds)
+                if (w.Faction.PhaseOf(fid) != FactionPhase.Founding) { anyAdvanced = true; break; }
+            Assert.True(anyAdvanced, "membership 接通后至少一门派应脱离 Founding（生命周期端到端）");
+        }
     }
 }

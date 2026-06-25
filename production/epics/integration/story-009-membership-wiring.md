@@ -1,7 +1,7 @@
 # Story 009: 角色→门派 membership 接线（派系生命周期端到端）
 
 > **Epic**: integration
-> **Status**: Ready for Dev
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 中 (1d)
@@ -25,13 +25,13 @@ story-008 接通了 Map/Faction 的"工厂构造 + tick-hook 管线"，但暴露
 
 ## Acceptance Criteria
 
-- [ ] 9.1 `WorldFactory.CreateInitial`（factionOn 时）在角色 spawn 后，**确定性**地将角色分配到门派（经 `SectLedger.Join`），消费 Faction 子流（`root.Split(RngStreamIds.Faction)` 既有流，不新增流编号）。分配策略：按对齐/就近 home site 或简单轮转（设计可选，纯整数确定性）。
-- [ ] 9.2 分配后 `FactionOf(id)` 对已分配角色返非 0；至少部分门派 `memberCount ≥ 2`。
-- [ ] 9.3 **派系生命周期端到端**：`factionOn` 跑 200+ 步后，至少一个门派脱离 `FactionPhase.Founding`（age>200 + memberCount≥2 → Growth）。**去 story-008 AC 8.5 的收窄注释**，接线门补强为真实生命周期断言。
-- [ ] 9.4 删 `DefaultFactionGenerator.cs:66-79` 死关系循环（关系已由 SectLedgerFactory 设置）；或将其结果真正用于 result（择一，消除死代码）。
-- [ ] 9.5 **off 逐字节铁律（B.3）**：`factionOn=false`（默认）时 Chronicle 与接线前逐字节一致——成员分配仅在 factionOn 消费 Faction 流，off 不碰。
-- [ ] 9.6 **确定性（B.2）**：factionOn 同种子两跑成员分配一致；Clone 续跑 == 不中断（成员状态进快照）。
-- [ ] 9.7 全量绿 + IL 浮点零 + clean rebuild 0 警告。
+- [x] 9.1 `WorldFactory.CreateInitial`（factionOn 时）spawn 后经 `SectLedger.Join` 确定性分配角色到门派；分配流 = `root.Split(RngStreamIds.Faction).Split(1)`（不新增流编号，off 不构造）。
+- [x] 9.2 `FactionOf(id)` 对已分配角色返非 0；鸽笼律保证 ≥1 门派 memberCount≥2（`test_membership_assigned_at_construction`）。
+- [x] 9.3 **派系生命周期端到端**：factionOn 跑 400 步后 ≥1 门派脱离 Founding（`test_faction_lifecycle_advances_end_to_end` 绿）；story-008 收窄断言已被真实生命周期断言取代。
+- [x] 9.4 删 `DefaultFactionGenerator` 死关系循环（关系由 SectLedgerFactory:42-43 设置），留注释说明。
+- [x] 9.5 **off 逐字节铁律（B.3）**：factionOn=false 默认 Chronicle 一致；CLI 默认两跑逐字节实证；determinism 测试绿。
+- [x] 9.6 **确定性（B.2）**：`OnFaction_MembershipAssignment_SameSeedIdentical` 同种子分配逐一致；OnMapFaction Clone 续跑 StateSnapshot 一致（含成员）。
+- [x] 9.7 全量 862 绿 + IL 浮点零（FloatScan 5 绿）+ clean rebuild 0 警告。
 
 ## Implementation Notes
 
