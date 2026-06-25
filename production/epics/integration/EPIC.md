@@ -26,6 +26,7 @@
 | 005 | 管线阶段注册表 (IPipelineStage) | 核心 | Should Have | 0.3d |
 | 006 | 集成测试——全管线确定性 | 硬化 | Must Have | 0.5d |
 | 007 | 集成层审计员终验 | 硬化 | Must Have | 0.3d |
+| 008 | **Map/Faction 接线进 World 主循环（闭 C-1）** | 接线 | **Must Have** | 1.5d |
 
 ## Definition of Done
 - [ ] World.Tick 管线合约已文档化 + 测试验证
@@ -36,3 +37,5 @@
 
 ## Notes
 LLM 脑是可选的（RuleBrain 默认）。Map + Faction 是可选的（默认 null）。集成层定义"如何编排"——所有系统实现细节仍在各自史诗中。NPC 和世界在不接入 LLM 的情况下也必须正常运转。
+
+> **2026-06-25 复审更新（CR C-1）**：001-007 的合约（IGeoQuery/IFactionQuery/DecisionContext 扩展等）已建 + 单测绿，但**从未接入 `World.Tick`/`CreateInitial`** → 生产中是死代码。**story-008** 为闭 C-1 的接线 story（WorldFactory 构造 + Advance tick-hook + off 逐字节复验 + R-3/R-4 折入）。在 008 完成前，Map/Faction 在 `epics/index.md` 标 "Built, not wired"。
