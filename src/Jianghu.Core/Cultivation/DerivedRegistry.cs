@@ -29,6 +29,13 @@ namespace Jianghu.Cultivation
         /// <summary>注册一个派生提供者（覆盖同 key）。</summary>
         public static void Register(string key, IDerivedProvider provider) => _providers[key] = provider;
 
+        /// <summary>
+        /// 某 derived key 是否已注册（纯查询，无副作用）。
+        /// 供 INV-DERIVED 注册门校验：path 公式引用的每个 <c>derived:&lt;key&gt;</c> 必须已注册，
+        /// 否则 <see cref="Resolve"/> 会静默回 0（恒 0 伤害且无报错）——见 CR-2026-06-25 R-2。
+        /// </summary>
+        public static bool IsRegistered(string key) => _providers.ContainsKey(key);
+
         /// <summary>解析 derived key：已注册→provider 算，未注册→0（A.0 占位）。</summary>
         public static int Resolve(string key, CultivationState st, StatBlock stats)
             => _providers.TryGetValue(key, out var p) ? p.Compute(st, stats) : 0;
