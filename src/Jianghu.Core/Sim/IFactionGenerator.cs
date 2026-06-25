@@ -48,6 +48,7 @@ namespace Jianghu.Sim
 
                 int homeRegion = rng.NextInt(Math.Max(1, nodeCount / 3)); // simplified region mapping
                 var homeSite = new NodeId(homeRegion * 3 + rng.NextInt(3));
+                int ambition = rng.NextInt(101); // story-011：野心 0-100，确定性（消费 Faction 流）
 
                 var faction = new FactionDef(
                     i + 1,
@@ -56,7 +57,7 @@ namespace Jianghu.Sim
                     homeSite,
                     alignment,
                     Array.Empty<string>()  // entry requirements deferred
-                );
+                ) { Ambition = ambition };
 
                 factions.Add(faction);
                 homeRegions[i + 1] = homeRegion;

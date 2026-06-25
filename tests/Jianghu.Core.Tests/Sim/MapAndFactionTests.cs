@@ -341,6 +341,110 @@ namespace Jianghu.Core.Tests.Sim
             public int RegionCount => 3;
         }
 
+        // story-011：夺地结算可控 geo stub——site n 邻接 site n+1（链）。
+        sealed class ChainGeo : IGeoQuery
+        {
+            public int RegionOf(NodeId node) => node.Value;
+            public IReadOnlyList<NodeId> SitesInRegion(int regionId) => new[] { new NodeId(regionId) };
+            public IReadOnlyList<NodeId> AdjacentTo(NodeId node) => new[] { new NodeId(node.Value + 1), new NodeId(node.Value - 1) };
+            public int SiteType(NodeId node) => 0;
+            public int ResourceAt(NodeId node) => 0;
+            public int NodeCount => 100;
+            public int RegionCount => 100;
+        }
+
+        [Fact]
+        public void test_conquest_high_ambition_high_might_takes_adjacent_site()
+        {
+            // story-011 AC 11.3/11.4/11.5：攻方 Ambition 高 + Might 差大 + 相邻 → 夺地 + 关系恶化 + 非致死。
+            var ledger = new SectLedger();
+            // 攻方 f1 Ambition=90（≥60），守方 f2 Ambition 低。
+            ledger.RegisterFaction(new FactionDef(1, "攻", 0, new NodeId(0), 1, System.Array.Empty<string>()) { Ambition = 90 });
+            ledger.RegisterFaction(new FactionDef(2, "守", 1, new NodeId(1), -1, System.Array.Empty<string>()) { Ambition = 10 });
+            ledger.InitPhase(1, 0); ledger.InitPhase(2, 0);
+            ledger.ControlSite(1, new NodeId(0)); // 攻方据 site0
+            ledger.ControlSite(2, new NodeId(1)); // 守方据 site1（与 site0 相邻）
+            var f2Member = new CharacterId(20); ledger.Join(f2Member, 2, 0); // 守方非致死前提：有成员
+
+            // Might：攻方 100 vs 守方 10，差 90 ≥ Gap(30)。clock%50==0 触发。
+            var might = new System.Collections.Generic.Dictionary<int, int> { { 1, 100 }, { 2, 10 } };
+            var changes = ledger.Pump(50, new ChainGeo(), might);
+
+            // 夺地兑现：site1 易主 f2→f1。
+            Assert.Contains(changes, c => c.Site == 1 && c.From == 2 && c.To == 1);
+            Assert.Equal(1, ledger.OwnerOf(new NodeId(1)));    // 攻方得地
+            Assert.DoesNotContain(new NodeId(1), ledger.ControlledSites(2)); // 守方失地
+            // 关系恶化（守方对攻方 ≤ 初始）。
+            Assert.True(ledger.FactionRelation(2, 1) < 0, "守方对攻方关系应恶化");
+            // 非致死：守方成员仍在。
+            Assert.Equal(2, ledger.FactionOf(f2Member));
+        }
+
+        [Fact]
+        public void test_conquest_low_might_gap_no_take()
+        {
+            // Might 差不足 Gap → 不夺地。
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "攻", 0, new NodeId(0), 1, System.Array.Empty<string>()) { Ambition = 90 });
+            ledger.RegisterFaction(new FactionDef(2, "守", 1, new NodeId(1), -1, System.Array.Empty<string>()) { Ambition = 10 });
+            ledger.InitPhase(1, 0); ledger.InitPhase(2, 0);
+            ledger.ControlSite(1, new NodeId(0)); ledger.ControlSite(2, new NodeId(1));
+
+            var might = new System.Collections.Generic.Dictionary<int, int> { { 1, 50 }, { 2, 40 } }; // 差 10 < 30
+            var changes = ledger.Pump(50, new ChainGeo(), might);
+
+            Assert.Empty(changes);
+            Assert.Equal(2, ledger.OwnerOf(new NodeId(1))); // 守方保地
+        }
+
+        [Fact]
+        public void test_conquest_low_ambition_no_take()
+        {
+            // 攻方 Ambition < 阈 → 不夺地（即便 Might 碾压）。
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "攻", 0, new NodeId(0), 1, System.Array.Empty<string>()) { Ambition = 30 }); // <60
+            ledger.RegisterFaction(new FactionDef(2, "守", 1, new NodeId(1), -1, System.Array.Empty<string>()) { Ambition = 10 });
+            ledger.InitPhase(1, 0); ledger.InitPhase(2, 0);
+            ledger.ControlSite(1, new NodeId(0)); ledger.ControlSite(2, new NodeId(1));
+
+            var might = new System.Collections.Generic.Dictionary<int, int> { { 1, 1000 }, { 2, 1 } };
+            var changes = ledger.Pump(50, new ChainGeo(), might);
+
+            Assert.Empty(changes);
+        }
+
+        // INV-PERF 计数 geo：记录 AdjacentTo 调用次数，验证夺地只扫相邻边界（非全图）。
+        sealed class CountingGeo : IGeoQuery
+        {
+            public int AdjacentCalls;
+            public int RegionOf(NodeId n) => n.Value;
+            public IReadOnlyList<NodeId> SitesInRegion(int r) => new[] { new NodeId(r) };
+            public IReadOnlyList<NodeId> AdjacentTo(NodeId n) { AdjacentCalls++; return new[] { new NodeId(n.Value + 1), new NodeId(n.Value - 1) }; }
+            public int SiteType(NodeId n) => 0;
+            public int ResourceAt(NodeId n) => 0;
+            public int NodeCount => 1000; // 大图：若全扫则 AdjacentTo 应 ~O(1000)
+            public int RegionCount => 1000;
+        }
+
+        [Fact]
+        public void test_conquest_scans_only_boundary_not_full_graph()
+        {
+            // story-011 AC 11.8（INV-PERF §3.5）：夺地只扫"攻方领地的相邻 site"，非全图 O(NodeCount)。
+            // 攻方仅控 2 块地 → AdjacentTo 调用应 = 攻方领地数（=2），远小于 NodeCount(1000)。
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "攻", 0, new NodeId(0), 1, System.Array.Empty<string>()) { Ambition = 90 });
+            ledger.InitPhase(1, 0);
+            ledger.ControlSite(1, new NodeId(10));
+            ledger.ControlSite(1, new NodeId(20));
+
+            var geo = new CountingGeo();
+            var might = new System.Collections.Generic.Dictionary<int, int> { { 1, 100 } };
+            ledger.Pump(50, geo, might);
+
+            // 只扫攻方 2 块领地的邻居 → AdjacentTo 恰 2 次（边界扫描），与 NodeCount(1000) 解耦。
+            Assert.Equal(2, geo.AdjacentCalls);
+        }
+
         [Fact]
         public void Faction_RegisterAndJoin()
         {

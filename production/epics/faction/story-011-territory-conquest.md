@@ -1,7 +1,7 @@
 # Story 011: C.0 非致死夺地兑现世仇（territory + relation 联动）
 
 > **Epic**: faction
-> **Status**: Ready for Dev
+> **Status**: Done
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 大 (2d)
@@ -34,16 +34,21 @@ design §3：「C.0 落**非致死最薄夺地结算**——攻方 Ambition 高 
 
 ## Acceptance Criteria
 
-- [ ] 11.1 `FactionDef` 加 `Ambition`（int，0-100，data-driven）；DefaultFactionGenerator 确定性赋值（消费 Faction 流，不新增流编号）；所有构造点更新。
-- [ ] 11.2 `World.Advance` 算 per-faction Might 快照（Σ 在役成员 power，与 RuleBrain.SelfPower 同公式）传入 `Pump`；off/factionOff 不算（null）。
-- [ ] 11.3 `Pump` 夺地结算：对每个门派，**仅扫相邻边界 Site**（经 geo.AdjacentTo + OwnerOf 找邻区敌方 site），若 攻方 Ambition ≥ AmbitionThreshold 且 Might 差 ≥ ConquestGap 且 区域相邻 → 夺地。纯整数确定性，扫描有上界（§3.5 INV-PERF）。
-- [ ] 11.4 夺地兑现：`LoseSite`(守方) + `ControlSite`(攻方) + 发 `TerritoryLost(Tick, Site, FromFaction, ToFaction)` 入 Chronicle；守方对攻方关系恶化（FactionRelation → Rival/Enemy 档，整数下调）。
-- [ ] 11.5 非致死：夺地不杀人、不清成员；门派 site 归零可触 Decline（既有 phase 逻辑），不直接 Fallen（致死灭门留 C.1）。
-- [ ] 11.6 **off 逐字节（B.3）**：factionOff 默认 Chronicle 一致（夺地仅 factionOn + Might!=null 路径）。
-- [ ] 11.7 **确定性（B.2）**：factionOn 同种子两跑夺地序列一致（CaptureState + Chronicle）；Clone 续跑一致。territory 已在 CaptureState（story-010 加），relation 须确认入快照。
-- [ ] 11.8 **INV-PERF（§3.5）**：夺地扫描只扫相邻边界（非全图 O(site²)），加测断言扫描规模上界。
-- [ ] 11.9 端到端：factionOn 长跑后 Chronicle 含 TerritoryLost 行 + 关系恶化可观测；CLI 门派录显示夺地。
-- [ ] 11.10 全量绿 + IL 浮点零 + clean rebuild 0 警告。
+- [x] 11.1 `FactionDef` 加 `Ambition`（init 属性，既有 11 构造点默认 0 不破）；DefaultFactionGenerator `rng.NextInt(101)` 确定性赋值（消费 Faction 流）。
+- [x] 11.2 `World.BuildFactionMight`（Σ 在役成员 Force×2+Int+Con，与 RuleBrain.SelfPower 同公式）注入 `Pump(clock, geo, factionMight)`；off/factionOff 不算（null）。
+- [x] 11.3 `ResolveConquest` 只扫相邻边界（攻方领地的 AdjacentTo 中敌方有主 site）；Ambition≥60 + Might 差≥30 → 夺地。攻方 Id 升序 + 候选 SortedSet 升序裁决（确定性）。
+- [x] 11.4 夺地兑现：`LoseSite`+`ControlSite`+`TerritoryLost` 事件入 Chronicle（"门派#X 攻取门派#Y 的 Z 号地，两派结怨"）+ 双向关系恶化（-40，下限 Enemy）。
+- [x] 11.5 非致死：不杀人/不清成员（test 验守方成员仍在）；site 归零经既有 phase 逻辑可触 Decline，不直接 Fallen。
+- [x] 11.6 **off 逐字节（B.3）**：夺地仅 geo+Might 双非 null 路径；CLI off 两跑一致 + determinism 绿。
+- [x] 11.7 **确定性（B.2）**：`OnMapFaction_ConquestState_SameSeedIdentical`（CaptureState territory+relation + Chronicle 同种子一致）。
+- [x] 11.8 **INV-PERF（§3.5）**：`test_conquest_scans_only_boundary_not_full_graph`——2 领地 → AdjacentTo 恰 2 次，与 NodeCount(1000) 解耦。
+- [x] 11.9 端到端：`test_territory_conquest_end_to_end`（Chronicle 含攻取行）；CLI 门派录·夺地显示（seed7 实证）。
+- [x] 11.10 全量 874 绿 + IL 浮点零（FloatScan 5）+ clean rebuild 0 警告。
+
+## 设计精化（实现期 TDD 催生）
+
+- **夺地仅取敌方有主地**（defender!=0）：初版允许夺无主地，被 `test_conquest_low_might_gap_no_take` 证伪（攻方夺了无主邻居 site-1）。回归 design §3「兑现**世仇**」本义=取敌方地；无主地"拓土"属另一机制，**本 story 不含**（移除"开疆"Chronicle 分支）。
+- **初始领地**：`SectLedgerFactory` 此前不 ControlSite → 门派无地 → 夺地无候选（死代码）。补 `ControlSite(f.Id, f.HomeSite)`（design §3 门派据 HomeSite 占地利），夺地始可触发。
 
 ## Implementation Notes
 

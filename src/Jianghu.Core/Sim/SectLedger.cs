@@ -15,7 +15,11 @@ namespace Jianghu.Sim
         NodeId HomeSite,
         int AlignmentAxis,
         IReadOnlyList<string> EntryRequirements
-    );
+    )
+    {
+        /// <summary>野心（story-011：0-100，夺地侵略性。init 属性，既有构造点默认 0 不破坏）。</summary>
+        public int Ambition { get; init; }
+    }
 
     /// <summary>
     /// 门派帐本（integration + Faction epic D）。
@@ -200,9 +204,13 @@ namespace Jianghu.Sim
 
         /// <summary>
         /// 门派 Pump——每 Clock tick 调用一次（§3 节流）。
-        /// 处理阶段转换 + 税收 + 衰落。
+        /// 处理阶段转换 + 税收 + 衰落 + 夺地（story-011）。
         /// </summary>
-        public void Pump(long clock, IGeoQuery? geo = null)
+        /// <param name="factionMight">per-faction Might 快照（factionId→战力和）；null=不夺地（off 安全）。</param>
+        /// <returns>本次夺地产生的领地易主（World 投影入 Chronicle）；无则空。</returns>
+        public IReadOnlyList<(long Site, int From, int To)> Pump(
+            long clock, IGeoQuery? geo = null,
+            IReadOnlyDictionary<int, int>? factionMight = null)
         {
             foreach (var (fid, phase) in _phases)
             {
@@ -231,6 +239,63 @@ namespace Jianghu.Sim
                         AddTreasury(fid, Math.Max(1, geo.ResourceAt(site) / 10));
                 }
             }
+
+            // —— 夺地兑现世仇（story-011，design §3）：仅 geo+Might 在位时（off/factionOff 不触）——
+            // 节流：与 revenue 同 clock%50 周期；只扫相邻边界 site（非全图）。
+            if (geo != null && factionMight != null && clock % 50 == 0)
+                return ResolveConquest(geo, factionMight, clock);
+
+            return System.Array.Empty<(long, int, int)>();
+        }
+
+        // 夺地阈值（design §3 ConquestGap）：攻方 Ambition≥阈 + Might 差≥Gap + 区域相邻 → 夺地。
+        private const int AmbitionThreshold = 60;
+        private const int ConquestGap = 30;
+
+        /// <summary>
+        /// 非致死夺地结算（story-011）。只扫相邻边界 site（攻方领地的邻居中属敌方者），非全图 O(site²)。
+        /// 纯整数确定性：攻方按 factionId 升序、候选 site 升序裁决；不杀人、不清成员（致死灭门留 C.1）。
+        /// </summary>
+        private IReadOnlyList<(long Site, int From, int To)> ResolveConquest(
+            IGeoQuery geo, IReadOnlyDictionary<int, int> might, long clock)
+        {
+            var changes = new List<(long, int, int)>();
+            // 确定性：攻方按 Id 升序。
+            var attackers = new List<int>(_factions.Keys); attackers.Sort();
+            foreach (var atk in attackers)
+            {
+                if (!_factions.TryGetValue(atk, out var def) || def.Ambition < AmbitionThreshold) continue;
+                if (_phases.TryGetValue(atk, out var ph) && ph == FactionPhase.Fallen) continue;
+                might.TryGetValue(atk, out int atkMight);
+
+                // 候选：攻方每块领地的相邻 site 中，属**敌方门派**者（边界扫描，去重 + 升序裁决）。
+                // design §3 = 夺地兑现世仇（取敌方地）；无主地"拓土"属另一机制，本 story 不含（defender==0 跳过）。
+                var candidates = new SortedSet<int>();
+                foreach (var owned in ControlledSites(atk))
+                    foreach (var nbr in geo.AdjacentTo(owned))
+                    {
+                        int owner = OwnerOf(nbr);
+                        if (owner != atk && owner != 0) candidates.Add(nbr.Value); // 仅敌方有主地
+                    }
+
+                foreach (var siteVal in candidates) // SortedSet 升序 → 确定性
+                {
+                    var site = new NodeId(siteVal);
+                    int defender = OwnerOf(site);
+                    if (defender == 0 || defender == atk) continue; // 已被同轮夺走/无主 → 跳过
+                    might.TryGetValue(defender, out int defMight);
+                    if (atkMight - defMight < ConquestGap) continue;
+
+                    // 夺地兑现：守方失地 + 攻方得地 + 双向关系恶化。
+                    LoseSite(defender, site);
+                    ControlSite(atk, site);
+                    changes.Add((siteVal, defender, atk));
+                    int cur = FactionRelation(defender, atk);
+                    SetRelation(defender, atk, Math.Max((int)FactionRelationKind.Enemy, cur - 40));
+                    SetRelation(atk, defender, Math.Max((int)FactionRelationKind.Enemy, FactionRelation(atk, defender) - 40));
+                }
+            }
+            return changes;
         }
 
         public SectLedger Clone()

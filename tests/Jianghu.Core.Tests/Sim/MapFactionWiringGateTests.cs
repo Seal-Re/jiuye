@@ -126,5 +126,30 @@ namespace Jianghu.Core.Tests.Sim
                 }
             Assert.Fail("未找到晋升行（长跑应产生晋升）");
         }
+
+        [Fact]
+        public void test_territory_conquest_end_to_end()
+        {
+            // story-011 AC 11.9：mapOn+factionOn 长跑后 Chronicle 含夺地行（territory+relation 联动真发生）。
+            // 需 mapOn（夺地依赖 IGeoQuery 相邻）+ factionOn（门派据 HomeSite 占地利）。
+            var w = WorldFactory.CreateInitial(7, LimitsConfig.Default, initialCount: 8,
+                                               cultivation: true, mapOn: true, factionOn: true);
+            for (int i = 0; i < 400; i++) w.Advance(64);
+
+            int conquests = 0;
+            foreach (var l in w.Chronicle.Lines)
+                if (l.Contains("攻取")) conquests++;
+            Assert.True(conquests > 0, "mapOn+factionOn 长跑后 Chronicle 应含夺地行（夺地兑现世仇真发生）");
+        }
+
+        [Fact]
+        public void test_conquest_requires_map_no_throw_faction_only()
+        {
+            // story-011：factionOn 但无 map（Might 有、geo 无）→ 夺地不触发（geo==null 守），不抛。
+            var w = WorldFactory.CreateInitial(7, LimitsConfig.Default, initialCount: 8,
+                                               cultivation: true, factionOn: true); // mapOn 缺省 false
+            var ex = Record.Exception(() => { for (int i = 0; i < 100; i++) w.Advance(64); });
+            Assert.Null(ex);
+        }
     }
 }

@@ -141,9 +141,15 @@ namespace Jianghu.Sim
                 processed++;
             }
             _lifecycle.MaybeSpawn(this);
-            // Faction tick（story-008，闭 C-1）：每 Advance 末推进门派生命周期/税收（off=Faction null 无操作，
-            // 逐字节）。geo=Map（IGeoQuery，亦 null 安全）。固定在 MaybeSpawn 后 → 事件顺序确定。
-            Faction?.Pump(Clock, Map);
+            // Faction tick（story-008/011，闭 C-1）：每 Advance 末推进门派生命周期/税收/夺地（off=Faction null 无操作，
+            // 逐字节）。geo=Map（IGeoQuery）；Might 快照经 World 注入（SectLedger 不知 Character 战力，承解耦）。
+            // 固定在 MaybeSpawn 后 → 事件顺序确定。夺地易主经返回值投影入 Chronicle。
+            if (Faction != null)
+            {
+                var conquests = Faction.Pump(Clock, Map, BuildFactionMight());
+                foreach (var c in conquests) // SectLedger 已按确定性序返回
+                    Chronicle.Append(new TerritoryLost(Clock, c.Site, c.From, c.To), NameOf);
+            }
             return processed;
         }
 
@@ -151,6 +157,23 @@ namespace Jianghu.Sim
         {
             _alive.Remove(c.Id.Value);
             c.Alive = false; Deceased.Add(c);
+        }
+
+        // story-011：per-faction Might 快照（Σ 在役成员 power，与 RuleBrain.SelfPower 同公式 Force×2+Int+Con）。
+        // World 算（知 Character.Stats）→ 注入 Pump，SectLedger 保持对 Character 无知（承 design 解耦）。
+        private Dictionary<int, int> BuildFactionMight()
+        {
+            var might = new Dictionary<int, int>();
+            if (Faction == null) return might;
+            foreach (var c in _alive.Values)
+            {
+                int fid = Faction.FactionOf(c.Id);
+                if (fid == 0) continue; // 散修不计
+                int power = c.Stats.Get(StatKind.Force) * 2 + c.Stats.Get(StatKind.Internal) + c.Stats.Get(StatKind.Constitution);
+                might.TryGetValue(fid, out int cur);
+                might[fid] = cur + power;
+            }
+            return might;
         }
 
         public DecisionContext BuildContext(Character a)

@@ -41,6 +41,9 @@ namespace Jianghu.Events
                     text = $"[{fp.Tick}] {name(fp.Id)} 因功勋卓著，晋升为 {rank}。";
                     break;
                 }
+                case TerritoryLost tl:
+                    text = $"[{tl.Tick}] 门派#{tl.ToFaction} 攻取门派#{tl.FromFaction} 的 {tl.Site} 号地，两派自此结怨。";
+                    break;
                 default: text = $"[{e.Tick}] (未知事件)"; break;
             }
             _lines.Add(text);

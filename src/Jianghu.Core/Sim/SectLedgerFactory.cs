@@ -19,11 +19,12 @@ namespace Jianghu.Sim
                 var result = Generator.Generate(config, rng, nodeCount);
                 var ledger = new SectLedger();
 
-                // Register factions + init phases
+                // Register factions + init phases + 初始领地（story-011：HomeSite 入版图，夺地有候选）
                 foreach (var f in result.Factions)
                 {
                     ledger.RegisterFaction(f);
                     ledger.InitPhase(f.Id, 0);
+                    ledger.ControlSite(f.Id, f.HomeSite); // 门派据 HomeSite 占地利（design §3）
                 }
 
                 // Set alignment-based relations

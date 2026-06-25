@@ -163,5 +163,17 @@ namespace Jianghu.Core.Tests.Determinism
             // Chronicle 晋升行也须逐字节一致。
             Assert.Equal(Chronicle(a), Chronicle(b));
         }
+
+        // —— story-011 AC 11.7：夺地确定性——mapOn+factionOn 同种子两跑 territory+relation 快照 + Chronicle 一致 ——
+        [Fact]
+        public void OnMapFaction_ConquestState_SameSeedIdentical()
+        {
+            var a = WorldFactory.CreateInitial(7, LimitsConfig.Default, 8, cultivation: true, mapOn: true, factionOn: true);
+            var b = WorldFactory.CreateInitial(7, LimitsConfig.Default, 8, cultivation: true, mapOn: true, factionOn: true);
+            for (int i = 0; i < 300; i++) { a.Advance(6); b.Advance(6); }
+            // CaptureState 含 territory(F 段 sites) + relation(R 段) → 夺地序列分歧暴露。
+            Assert.Equal(a.Faction!.CaptureState(), b.Faction!.CaptureState());
+            Assert.Equal(Chronicle(a), Chronicle(b)); // 夺地行（开疆/攻取）逐字节一致
+        }
     }
 }
