@@ -8,6 +8,9 @@ using Jianghu.Sim;
 
 // —— 参数解析：位置参 [seed] [steps] 保持既有语义；--cultivation 开关（默认 off → 逐字节既有行为）——
 bool cultivation = args.Any(a => a == "--cultivation");
+// story-008：--map / --faction 开关（默认 off → 不激活，逐字节既有行为）。
+bool mapOn = args.Any(a => a == "--map");
+bool factionOn = args.Any(a => a == "--faction");
 var positional = args.Where(a => !a.StartsWith("--", StringComparison.Ordinal)).ToArray();
 ulong seed = positional.Length > 0 && ulong.TryParse(positional[0], out var s) ? s : 2026UL;
 int steps = positional.Length > 1 && int.TryParse(positional[1], out var n) ? n : 200;
@@ -17,17 +20,17 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 if (!cultivation)
 {
-    RunLegacy(seed, steps, budget);
+    RunLegacy(seed, steps, budget, mapOn, factionOn);
     return;
 }
 
-RunCultivation(seed, steps, budget);
+RunCultivation(seed, steps, budget, mapOn, factionOn);
 
 // —— 既有开放式江湖演示（cultivation-off，与 v1.0 逐字节）——
-static void RunLegacy(ulong seed, int steps, int budget)
+static void RunLegacy(ulong seed, int steps, int budget, bool mapOn, bool factionOn)
 {
-    var world = WorldFactory.CreateInitial(seed, LimitsConfig.Default, initialCount: 8);
-    Console.WriteLine($"=== 江湖开演 (seed={seed}, steps={steps}) ===");
+    var world = WorldFactory.CreateInitial(seed, LimitsConfig.Default, initialCount: 8, mapOn: mapOn, factionOn: factionOn);
+    Console.WriteLine($"=== 江湖开演 (seed={seed}, steps={steps}{(mapOn ? ", map=on" : "")}{(factionOn ? ", faction=on" : "")}) ===");
     for (int i = 0; i < steps; i++) world.Advance(budget);  // 开放式：可改 while(true) 长跑
 
     var lines = world.Chronicle.Lines;
@@ -45,13 +48,13 @@ static void RunLegacy(ulong seed, int steps, int budget)
 }
 
 // —— 修炼江湖演示（cultivation-on）：21 路皆能定路 / 突破 / per-path 战力分化 / 软情境 ——
-static void RunCultivation(ulong seed, int steps, int budget)
+static void RunCultivation(ulong seed, int steps, int budget, bool mapOn, bool factionOn)
 {
-    var world = WorldFactory.CreateInitial(seed, LimitsConfig.Default, initialCount: 8, cultivation: true);
+    var world = WorldFactory.CreateInitial(seed, LimitsConfig.Default, initialCount: 8, cultivation: true, mapOn: mapOn, factionOn: factionOn);
     // 展示用注册表（独立于 World 内部 registry，仅供 PathId→路名/境界名/战力查询）。
     var registry = new PathRegistry(new CodePathSource());
 
-    Console.WriteLine($"=== 修炼江湖开演 (seed={seed}, steps={steps}, cultivation=on) ===");
+    Console.WriteLine($"=== 修炼江湖开演 (seed={seed}, steps={steps}, cultivation=on{(mapOn ? ", map=on" : "")}{(factionOn ? ", faction=on" : "")}) ===");
     for (int i = 0; i < steps; i++) world.Advance(budget);
 
     var lines = world.Chronicle.Lines;

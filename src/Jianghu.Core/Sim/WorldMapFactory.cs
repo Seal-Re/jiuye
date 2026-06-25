@@ -22,7 +22,7 @@ namespace Jianghu.Sim
             try
             {
                 var result = Generator.Generate(config, rng);
-                return new WorldMap(result);
+                return new WorldMap(result, config);
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace Jianghu.Sim
             adj[1].Add(2); adj[2].Add(1);
             adj[3].Add(4); adj[4].Add(3);
 
-            return new WorldMap(new MapGenerationResult(regions, sites, adj));
+            return new WorldMap(new MapGenerationResult(regions, sites, adj), config);
         }
     }
 }

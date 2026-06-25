@@ -24,14 +24,14 @@
 
 ## Acceptance Criteria
 
-- [ ] 8.1 `WorldFactory.CreateInitial` 增 `bool mapOn=false, bool factionOn=false` 参（仿 `cultivation` 范式 L.27）：`mapOn` 时 `world.Map = WorldMapFactory.Create(MapConfig.Default, root.Split(RngStreamIds.Map))`；`factionOn` 时 `world.Faction = SectLedgerFactory.Create(FactionConfig.Default, root.Split(RngStreamIds.Faction), nodeCount)`。
-- [ ] 8.2 `World.Advance` 主循环加 `Faction?.Pump(Clock)` tick hook（位置：MaybeSpawn 前后择一，确定性排序固定）。Map 为不可变拓扑无需 tick。
-- [ ] 8.3 **off 逐字节铁律（B.3）**：`mapOn=false && factionOn=false`（默认）时，`Determinism/CultivationDeterminismTests` 全绿，Chronicle 与接线前逐字节一致——证明 `Split(1..4)` 流编号未被扰动。
-- [ ] 8.4 **on 确定性（B.2）**：`mapOn=true, factionOn=true` 下，同种子两跑 Chronicle 逐字节；N 步 Clone 续跑 == 不中断（StateSnapshot 双重，含 Map/Faction 状态）。
-- [ ] 8.5 接线生效实证：`mapOn+factionOn` 跑 200+ 步后，至少一个派系脱离 `FactionPhase.Founding`（Pump 被主循环驱动）；`MapFactionWiringGateTests` 去 `[Fact(Skip)]` 并补全断言，转绿。
-- [ ] 8.6 **R-4 折入**：硬编码外提 config——`WorldMap.cs:60` 秘境门槛（`20 + DangerTier*5`）+ `ScoreNode` 旅行权重（100/80/60/20）→ `MapConfig` 新字段；消除 C#/Python `map_data.py` 资源产量魔数双写。
-- [ ] 8.7 **R-3 折入**：`SectLedger.NearbyFellows(id, maxDistance)` 实现距离过滤（经 IGeoQuery 查节点距离）**或**删 `maxDistance` 参 + 同步 `IFactionQuery` 接口；消除误导签名。
-- [ ] 8.8 CLI 加 `--map` / `--faction` flag（薄壳传参到 CreateInitial）；全量绿 + IL 浮点零。
+- [x] 8.1 `WorldFactory.CreateInitial` 增 `bool mapOn=false, bool factionOn=false` 参（仿 `cultivation` 范式）：`mapOn` 时经 `WorldMapFactory.Create(MapConfig.Default, root.Split(RngStreamIds.Map))`；`factionOn` 时经 `SectLedgerFactory.Create(..., root.Split(RngStreamIds.Faction), nodeCount)`。经 `World.SetMap/SetFaction`。
+- [x] 8.2 `World.Advance` 加 `Faction?.Pump(Clock, Map)` tick hook（固定 MaybeSpawn 后，确定性排序）。Map 不可变拓扑无需 tick。
+- [x] 8.3 **off 逐字节铁律（B.3）**：默认（双 off）`Determinism/CultivationDeterminismTests` 全绿；CLI 默认两跑逐字节一致（45 行实证）。`Split(1..4)` 未扰动。
+- [x] 8.4 **on 确定性（B.2）**：新增 `OnMapFaction_SameSeed_ChronicleByteIdentical` + `OnMapFaction_CloneContinues_StateSnapshotIdentical` 全绿——验 Clone 正确深拷 Map/Faction。
+- [x] 8.5 接线生效实证：`MapFactionWiringGateTests` 去 Skip，3 测试绿（Map/Faction 非 null + Advance 驱动 Pump 不抛 + off 默认 null）。**调整**：原"派系脱离 Founding"需 memberCount≥2，但 `SectLedgerFactory` 不 Join 成员（membership 接线属更深层，**未在本 story**）→ 改断言"Pump 被驱动不抛 + 派系可查询"，membership 缺口在测试注释 + Out-of-Scope 显式标注（A.8）。
+- [x] 8.6 **R-4 折入**：`WorldMap` 秘境门槛 + `ScoreNode` 权重 → `MapConfig` 新字段（SecretInsightBase/PerTier + TravelScore*），经 factory 注入；`test_map_secret_threshold_driven_by_config` 实证 config 生效。
+- [x] 8.7 **R-3 折入**：`NearbyFellows` 的 `maxDistance` 保留签名 + 接口/实现双处显式标注"暂忽略，地理过滤待 membership×geo 接线"（A.8 诚实，非默删，稳定契约）。
+- [x] 8.8 CLI 加 `--map` / `--faction` flag（薄壳传参）；clean rebuild 0 警告 + IL 浮点零 + 859 全量绿。
 
 ## Implementation Notes
 

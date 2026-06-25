@@ -236,6 +236,28 @@ namespace Jianghu.Core.Tests.Sim
         }
 
         [Fact]
+        public void test_map_secret_threshold_driven_by_config()
+        {
+            // story-008 R-4：秘境门槛由 MapConfig 驱动（原硬编码 20 + DangerTier*5）。
+            // 设极高 base → 任何 insight 都进不去；设极低 → 容易进。证明 config 真生效。
+            var strict = new MapConfig(SecretInsightBase: 9999, SecretInsightPerTier: 0);
+            var lax = new MapConfig(SecretInsightBase: 0, SecretInsightPerTier: 0);
+            var mStrict = WorldMapFactory.Create(strict, new Pcg32(42, 0));
+            var mLax = WorldMapFactory.Create(lax, new Pcg32(42, 0));
+
+            // 找一个秘境节点（同种子两图拓扑一致）。SiteType 返回 (int)SiteKind，Secret=2。
+            int? secret = null;
+            for (int i = 0; i < mStrict.NodeCount; i++)
+                if (mStrict.SiteType(new NodeId(i)) == (int)SiteKind.Secret) { secret = i; break; }
+
+            if (secret is int s) // 该种子下有秘境才断言
+            {
+                Assert.False(mStrict.EnterSecret(new NodeId(s), insight: 100), "strict config 下 insight=100 仍进不去");
+                Assert.True(mLax.EnterSecret(new NodeId(s), insight: 1), "lax config 下 insight=1 即可进");
+            }
+        }
+
+        [Fact]
         public void Faction_Phase_Transitions()
         {
             var ledger = new SectLedger();
@@ -248,6 +270,29 @@ namespace Jianghu.Core.Tests.Sim
             ledger.Join(new CharacterId(20), 1, 0);
             ledger.Pump(201, null); // age > 200, members >= 2
             Assert.Equal(FactionPhase.Growth, ledger.PhaseOf(1));
+        }
+
+        [Fact]
+        public void test_faction_pump_multi_faction_simultaneous_transition_no_throw()
+        {
+            // 守护：Pump 在 foreach(_phases) 内对已存在 key 做 indexer-set（_phases[fid]=newPhase）。
+            // Dictionary 的版本检查仅在结构性变更(Add/Remove)时触发，对已存在 key 的值重写不抛——
+            // 故多派系同 tick 转换安全。本测试钉死该前提（C-1 wiring 引入多派系生产路径，防回归）。
+            var ledger = new SectLedger();
+            for (int f = 1; f <= 3; f++)
+            {
+                ledger.RegisterFaction(new FactionDef(f, $"门派{f}", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+                ledger.InitPhase(f, 0);
+                ledger.Join(new CharacterId(f * 10), f, 0);
+                ledger.Join(new CharacterId(f * 10 + 1), f, 0);
+            }
+
+            // 3 派系同时满足 Founding→Growth（age>200, members>=2）→ 同 tick 多次 indexer-set
+            var ex = Record.Exception(() => ledger.Pump(201, null));
+
+            Assert.Null(ex); // 不得抛
+            for (int f = 1; f <= 3; f++)
+                Assert.Equal(FactionPhase.Growth, ledger.PhaseOf(f));
         }
 
         [Fact]

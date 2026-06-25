@@ -30,6 +30,17 @@ namespace Jianghu.Sim
 
         public int FactionCount => _factions.Count;
 
+        /// <summary>全部门派 Id（确定性顺序：升序）。供接线驱动/查询遍历派系（story-008）。</summary>
+        public IReadOnlyList<int> AllFactionIds
+        {
+            get
+            {
+                var ids = new List<int>(_factions.Keys);
+                ids.Sort();
+                return ids;
+            }
+        }
+
         /// <summary>注册门派。</summary>
         public void RegisterFaction(FactionDef def) => _factions[def.Id] = def;
 
@@ -80,6 +91,7 @@ namespace Jianghu.Sim
 
         public IReadOnlyList<CharacterId> NearbyFellows(CharacterId id, int maxDistance)
         {
+            // story-008 R-3（A.8 诚实标注）：maxDistance 暂忽略——地理过滤待 membership×geo 接线后补。
             if (!_members.TryGetValue(id, out var m)) return Array.Empty<CharacterId>();
             var list = new List<CharacterId>();
             foreach (var (otherId, (fid, _, _)) in _members)

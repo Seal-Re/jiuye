@@ -15,7 +15,8 @@ namespace Jianghu.Sim
         private static readonly string[] Ming = { "无忌", "寻欢", "飞", "玄机", "未央", "求败", "三", "九", "白", "青" };
 
         public static World CreateInitial(ulong seed, LimitsConfig limits, int initialCount,
-                                          bool cultivation = false, IPathSource? pathSource = null)
+                                          bool cultivation = false, IPathSource? pathSource = null,
+                                          bool mapOn = false, bool factionOn = false)
         {
             limits.Validate();
             var root = new Pcg32(seed, 1);
@@ -37,6 +38,14 @@ namespace Jianghu.Sim
             w.Nodes.Add(new WorldNode(new NodeId(0), "客栈"));
             w.Nodes.Add(new WorldNode(new NodeId(1), "山道"));
             w.Nodes.Add(new WorldNode(new NodeId(2), "市集"));
+
+            // Map/Faction 接线（story-008，闭 C-1）：仅 on 时消费 Split(7/8)（off 绝不调 → 保 Split(1..4) 编号
+            // 不变，off 逐字节铁律 B.3）。流编号 Map=7/Faction=8 已在 RngStreamIds 冻结预留（append-only）。
+            // 工厂内置灾备 fallback（最小拓扑/空账本），生成失败不崩 sim。
+            if (mapOn)
+                w.SetMap(WorldMapFactory.Create(MapConfig.Default, root.Split(RngStreamIds.Map)));
+            if (factionOn)
+                w.SetFaction(SectLedgerFactory.Create(FactionConfig.Default, root.Split(RngStreamIds.Faction), w.Nodes.Count));
 
             for (int i = 0; i < initialCount; i++)
             {

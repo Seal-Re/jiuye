@@ -68,7 +68,11 @@ namespace Jianghu.Sim
         /// <summary>门派数量。</summary>
         int FactionCount { get; }
 
-        /// <summary>就近同门列表（同行或相邻节点）。</summary>
+        /// <summary>
+        /// 就近同门列表。<paramref name="maxDistance"/> = 地理距离上限（经 IGeoQuery 过滤）。
+        /// 注（story-008 R-3，红线 A.8 诚实标注）：当前实现**忽略 maxDistance**，返回全部同门——
+        /// 地理距离过滤待 membership×geo 接线后补（需角色→节点位置映射，本 story 未接）。签名保留以稳定契约。
+        /// </summary>
         IReadOnlyList<CharacterId> NearbyFellows(CharacterId id, int maxDistance);
     }
 }

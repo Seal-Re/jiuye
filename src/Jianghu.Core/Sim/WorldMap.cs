@@ -17,6 +17,10 @@ namespace Jianghu.Sim
         private readonly HashSet<int> _revealedSecrets;
         private readonly int _nodeCount;
         private readonly int _regionCount;
+        // 配置化调参（story-008 R-4）：原硬编码常量改由 MapConfig 注入。
+        private readonly int _secretInsightBase;
+        private readonly int _secretInsightPerTier;
+        private readonly int _scoreResource, _scoreSect, _scoreSecret, _scoreNormalBase;
 
         public IReadOnlyList<RegionDef> Regions => _regions;
         public IReadOnlyCollection<int> RevealedSecrets => _revealedSecrets;
@@ -26,8 +30,9 @@ namespace Jianghu.Sim
         /// <summary>
         /// 从 MapGenerationResult 构造——纯数据注入，无生成逻辑。
         /// </summary>
-        internal WorldMap(MapGenerationResult result)
+        internal WorldMap(MapGenerationResult result, MapConfig? config = null)
         {
+            var cfg = config ?? MapConfig.Default;
             _regions = result.Regions as RegionDef[] ?? new List<RegionDef>(result.Regions).ToArray();
             _sites = result.Sites as NodeGeo[] ?? new List<NodeGeo>(result.Sites).ToArray();
             _nodeCount = _sites.Length;
@@ -36,6 +41,12 @@ namespace Jianghu.Sim
             for (int i = 0; i < _nodeCount; i++)
                 _adjacency[i] = new List<int>(result.Adjacency[i]);
             _revealedSecrets = new HashSet<int>();
+            _secretInsightBase = cfg.SecretInsightBase;
+            _secretInsightPerTier = cfg.SecretInsightPerTier;
+            _scoreResource = cfg.TravelScoreResource;
+            _scoreSect = cfg.TravelScoreSect;
+            _scoreSecret = cfg.TravelScoreSecret;
+            _scoreNormalBase = cfg.TravelScoreNormalBase;
         }
 
         // ================================================================
@@ -57,7 +68,7 @@ namespace Jianghu.Sim
         {
             var geo = _sites[node.Value];
             if (geo.Kind != SiteKind.Secret || _revealedSecrets.Contains(node.Value)) return false;
-            if (insight < 20 + geo.DangerTier * 5) return false;
+            if (insight < _secretInsightBase + geo.DangerTier * _secretInsightPerTier) return false;
             _revealedSecrets.Add(node.Value);
             return true;
         }
@@ -75,10 +86,10 @@ namespace Jianghu.Sim
 
         private int ScoreNode(int nid) => _sites[nid].Kind switch
         {
-            SiteKind.Resource => 100 + _sites[nid].ResourceAmount,
-            SiteKind.Sect => 80,
-            SiteKind.Secret => 60,
-            _ => 20 + _sites[nid].Qi
+            SiteKind.Resource => _scoreResource + _sites[nid].ResourceAmount,
+            SiteKind.Sect => _scoreSect,
+            SiteKind.Secret => _scoreSecret,
+            _ => _scoreNormalBase + _sites[nid].Qi
         };
 
         // ================================================================

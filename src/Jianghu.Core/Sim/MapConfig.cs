@@ -36,6 +36,11 @@ namespace Jianghu.Sim
         int WealthMin = 10, int WealthMax = 90,
         int QiMin = 20, int QiMax = 80,
         int StrategicMin = 20, int StrategicMax = 80,
+        // 秘境进入门槛（story-008 R-4：原 WorldMap 硬编码 20 + DangerTier*5）
+        int SecretInsightBase = 20, int SecretInsightPerTier = 5,
+        // 旅行加权（story-008 R-4：原 ScoreNode 硬编码 Resource=100/Sect=80/Secret=60/Normal=20+Qi）
+        int TravelScoreResource = 100, int TravelScoreSect = 80,
+        int TravelScoreSecret = 60, int TravelScoreNormalBase = 20,
         // Names
         IReadOnlyList<string>? RegionNames = null
     )

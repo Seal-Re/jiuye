@@ -103,5 +103,36 @@ namespace Jianghu.Core.Tests.Determinism
 
         static Character? FirstCultivator(World w)
             => w.AliveCharacters().FirstOrDefault(c => c.Cultivation != null);
+
+        // ================================================================
+        // story-008 接线：Map/Faction on 确定性（AC 8.4）。验证接线不破坏 B.2，
+        // 且 World.Clone 正确深拷 Map/Faction（C-1 前未被生产路径覆盖的分支）。
+        // ================================================================
+
+        // —— on+map+faction 同种子 Chronicle 逐字节 ——
+        [Fact]
+        public void OnMapFaction_SameSeed_ChronicleByteIdentical()
+        {
+            var a = WorldFactory.CreateInitial(2026, LimitsConfig.Default, 8, cultivation: true, mapOn: true, factionOn: true);
+            var b = WorldFactory.CreateInitial(2026, LimitsConfig.Default, 8, cultivation: true, mapOn: true, factionOn: true);
+            for (int i = 0; i < 200; i++) { a.Advance(6); b.Advance(6); }
+            Assert.Equal(Chronicle(a), Chronicle(b));
+        }
+
+        // —— on+map+faction：N 步 Clone 续跑 == 不中断（StateSnapshot 双重，验 Map/Faction 深拷确定性） ——
+        [Fact]
+        public void OnMapFaction_CloneContinues_StateSnapshotIdentical()
+        {
+            var full = WorldFactory.CreateInitial(7, LimitsConfig.Default, 8, cultivation: true, mapOn: true, factionOn: true);
+            for (int i = 0; i < 120; i++) full.Advance(6);
+
+            var part = WorldFactory.CreateInitial(7, LimitsConfig.Default, 8, cultivation: true, mapOn: true, factionOn: true);
+            for (int i = 0; i < 60; i++) part.Advance(6);
+            var clone = part.Clone();
+            Assert.Equal(StateSnapshot.Capture(part), StateSnapshot.Capture(clone));
+            for (int i = 0; i < 60; i++) clone.Advance(6);
+
+            Assert.Equal(StateSnapshot.Capture(full), StateSnapshot.Capture(clone));
+        }
     }
 }

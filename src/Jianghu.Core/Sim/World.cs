@@ -27,6 +27,12 @@ namespace Jianghu.Sim
         /// <summary>门派系统（D）。off=null——不激活，零性能影响。</summary>
         public SectLedger? Faction { get; private set; }
 
+        /// <summary>接线 Map（story-008）：仅 WorldFactory 构造期调用一次（mapOn）。off 不调 → 保持 null。</summary>
+        public void SetMap(WorldMap map) => Map = map;
+
+        /// <summary>接线 Faction（story-008）：仅 WorldFactory 构造期调用一次（factionOn）。off 不调 → 保持 null。</summary>
+        public void SetFaction(SectLedger faction) => Faction = faction;
+
         private readonly Dictionary<long, Character> _alive;
         private readonly Scheduler _sched;
         private readonly ActionSystem _actions;
@@ -129,6 +135,9 @@ namespace Jianghu.Sim
                 processed++;
             }
             _lifecycle.MaybeSpawn(this);
+            // Faction tick（story-008，闭 C-1）：每 Advance 末推进门派生命周期/税收（off=Faction null 无操作，
+            // 逐字节）。geo=Map（IGeoQuery，亦 null 安全）。固定在 MaybeSpawn 后 → 事件顺序确定。
+            Faction?.Pump(Clock, Map);
             return processed;
         }
 
