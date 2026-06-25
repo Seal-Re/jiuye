@@ -134,7 +134,7 @@ namespace Jianghu.Core.Tests.Sim
         // ================================================================
 
         [Fact]
-        public void RuleBrain_MapOff_ByteIdentical()
+        public async System.Threading.Tasks.Task RuleBrain_MapOff_ByteIdentical()
         {
             // When Reachable=null (Map off), Travel destination must be Node+1
             // — byte-identical to pre-Map behavior.
@@ -161,8 +161,8 @@ namespace Jianghu.Core.Tests.Sim
             // Map off → expect Node+1 = 6
             // Map on → expect Reachable[0] = 7 (weighted best neighbor)
             var brain = new RuleBrain(new Pcg32(42, 0), ArchetypeKind.Martial);
-            var choice1 = brain.DecideAsync(ctx1, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
-            var choice2 = brain.DecideAsync(ctx2, System.Threading.CancellationToken.None).GetAwaiter().GetResult();
+            var choice1 = await brain.DecideAsync(ctx1, System.Threading.CancellationToken.None);
+            var choice2 = await brain.DecideAsync(ctx2, System.Threading.CancellationToken.None);
 
             Assert.Equal(5 + 1, ((Actions.TravelChoice)choice1).To.Value); // backward compatible
             Assert.Equal(7, ((Actions.TravelChoice)choice2).To.Value);      // uses Reachable

@@ -149,7 +149,7 @@ namespace Jianghu.Core.Tests.Sim
                     if (geo.DangerTier <= 2) // low enough for Insight=50
                     {
                         Assert.True(success);
-                        Assert.True(m.RevealedSecrets.Contains(i));
+                        Assert.Contains(i, m.RevealedSecrets);
                     }
                     return;
                 }

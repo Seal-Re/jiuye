@@ -229,7 +229,7 @@ namespace Jianghu.Core.Tests.Cultivation
             var r2 = StoryletExecutor.TryTrigger(st2, 200, 10, Registry, sal2, new Pcg32(42, 0));
 
             Assert.Equal(r1.HasValue, r2.HasValue);
-            if (r1.HasValue)
+            if (r1.HasValue && r2.HasValue)
             {
                 Assert.Equal(r1.Value.Storylet.Id, r2.Value.Storylet.Id);
                 Assert.Equal(r1.Value.Option.Text, r2.Value.Option.Text);

@@ -142,7 +142,7 @@ namespace Jianghu.Core.Tests.Cultivation
                         bool reversed = atkTags.SetEquals(defB) && defTags.SetEquals(atkB);
                         bool sameSign = (ea.CoefPct > 0) == (eb.CoefPct > 0);
                         if (reversed && sameSign && ea.Axis != "economic")
-                            Assert.False(true,
+                            Assert.Fail(
                                 $"Same-sign mutual counter on axis '{ea.Axis}': ({string.Join(",", atkTags)})↔({string.Join(",", defTags)}) coefs {ea.CoefPct}/{eb.CoefPct}");
                     }
                 }
