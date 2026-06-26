@@ -62,7 +62,7 @@
 # 构建（全 solution）
 dotnet build
 
-# 全量测试（551 绿，零失败）
+# 全量测试（1051 绿，零失败）
 dotnet test
 
 # 单个测试文件
@@ -79,6 +79,13 @@ dotnet run --project src/Jianghu.Cli -- 42 100
 
 # 运行 CLI（cultivation 模式）
 dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
+
+# 可叠加开关（默认全 off → 逐字节既有行为）：
+#   --map           激活世界地图（Split(7) 流）
+#   --faction       激活门派派系（Split(8) 流；门派录显示晋升+夺地）
+#   --drama         激活恩怨/复仇弧/跨代继承（Split(6) 流）
+#   --drama-feuds   预置强恩怨+师徒边（演示用，需 --drama）
+# 例：dotnet run --project src/Jianghu.Cli -- 42 200 --cultivation --map --faction --drama
 ```
 
 **BannedApiAnalyzers**（`.editorconfig` RS0030=error）：Core 层禁 `System.Random`/`System.Console`/`System.DateTime`/`System.Threading.Thread`。违反 = 编译错误。
@@ -91,36 +98,38 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 |---|---|---|
 | `Jianghu.Core` | netstandard2.1 | **纯逻辑库**——全部模拟机制。零引擎依赖（后期直接 Unity 引用） |
 | `Jianghu.Cli` | net8.0 | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory` → `World.Advance` |
-| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（551），含确定性/off 逐字节/21 路独立/战斗差分 |
+| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1051），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
 
 ### 执行模型（事件驱动 + 确定性 PRNG）
 
-1. `WorldFactory.CreateInitial(seed, limits, count, cultivation)` → 生成世界（角色/宗门/关系）
-2. `World.Advance(budget)` → 主循环：Scheduler 弹事件 → Action 执行 → Cultivation 推进 → Lifecycle 计时 → 可能创生
+1. `WorldFactory.CreateInitial(seed, limits, count, cultivation, mapOn, factionOn, dramaOn, dramaSeedFeuds)` → 生成世界（角色/宗门/关系；可选地图/派系/恩怨）
+2. `World.Advance(budget)` → 主循环：Scheduler 弹事件 → Action 执行 → Cultivation 推进 → Drama Pump → Lifecycle 计时 → 可能创生
 3. 所有事件入 `Chronicle`（追加日志）→ CLI 打印快照
-4. **确定性保证**：`Pcg32`（种子驱动），`RngStreamIds.Cultivation = Split(5)` 隔离修炼流
+4. **确定性保证**：`Pcg32`（种子驱动），`root.Split(id)` 派生隔离子流。`RngStreamIds`（冻结·append-only）：Gen=1, Domain=2, Spawn=3, Brain=4, Cultivation=5, Drama=6, Map=7, Faction=8。新随机流 = 追加新 id，绝不复用既有，保 off 逐字节。
 
 ### "off" 模式 = 铁律（红线 B.3）
 
-`cultivation=false` 时输出必须与 v1.0 逐字节一致。修炼走独立随机流，不改 legacy 路径。16+ off 逐字节回归守。
+`cultivation=false` 时输出必须与 v1.0 逐字节一致。修炼/drama/map/faction 各走独立随机流（见上 RngStreamIds），不改 legacy 路径。off 逐字节回归守（`tests/.../Determinism/`，含 cultivation/drama 两轨；权威要求见红线 B.3）。
 
 ### 核心命名空间
 
 | 命名空间 | 关键类型 | 职责 |
 |---|---|---|
 | `Jianghu.Model` | `Character`(聚合根), `Persona`, `MemoryStore`, `Relations`, `Sect`, `WorldNode` | 领域模型 |
-| `Jianghu.Sim` | `World`, `WorldFactory`, `Lifecycle`, `Scheduler`, `StateSnapshot` | 世界模拟主循环 |
+| `Jianghu.Sim` | `World`, `WorldFactory`, `Lifecycle`, `Scheduler`, `StateSnapshot`, `WorldMap`, `WorldMapFactory`, `IMapGenerator`/`KruskalMstGenerator`, `IGeoQuery`, `SectLedger`, `SectLedgerFactory`, `IFactionQuery`, `IPipelineStage` | 世界模拟主循环 + 地图（`--map`）+ 门派派系（`--faction`） |
 | `Jianghu.Actions` | `ActionSystem`, `SparAction`, `TrainAction`, `TravelAction` | 角色动作执行 |
 | `Jianghu.Cultivation` | `PowerEngine`, `DuelEngine`, `CombatContext`, `CultivationPhase`(10态FSM), `TribulationResolver`, `LifespanAndFailure`, `Modules`(工厂), `ModuleResolver`, `EffectOp`, `GateField`, `RollbackStack`, `SuppressionMatrix`, `SituationalEdges`, `DerivedProviders`, `SpecialModuleRegistry`, `PathRegistry`, `RealmCurve` | 21 路完整修为系统（含战斗引擎/逆转/门域/压制矩阵/情境克敌/修炼FSM/三劫/寿元） |
 | `Jianghu.Cultivation.paths` | `SwordImmortalPath`…共 21 文件 | 具体修炼路径定义（`CodePathSource` 注册） |
 | `Jianghu.Cultivation.special` | `BrokenChainModule`…共 8 文件 | 唯一稀有度特殊模块 |
 | `Jianghu.Cultivation.Artifacts` | `ArtifactData`, `ArtifactRegistry` | 法宝系统 |
 | `Jianghu.Decide` | `IBrain`, `RuleBrain`(当前), `DecisionContext` | AI 决策（LLM 脑未建） |
+| `Jianghu.Drama` | `DramaDirector`, `GrudgeLedger`, `RevengeArc`, `ArcInstance`/`ArcStage`/`ArcTransition`, `IgnitionScanner`, `DramaScheduler`, `DramaStoryletEngine`, `StoryletSelector`, `RelationService`, `DramaProfile`, `IDramaView`/`IDramaMutator` | 恩怨/复仇弧/跨代继承（`--drama`，Split(6) 流；off 不激活） |
 | `Jianghu.Events` | `Chronicle`, `DomainEvent` 子类型 | 事件溯源 |
 | `Jianghu.Random` | `IRandom`, `Pcg32`, `RngStreamIds` | 确定性 PRNG |
 | `Jianghu.Stats` | `StatBlock`(力/内/体/识), `StatGenerator` | 角色属性 |
 | `Jianghu.Config` | `LimitsConfig` | 配置边界 |
 | `Jianghu.Compat` | `IsExternalInit` | C# 9 record init 兼容 shim（netstandard2.1） |
+| `Jianghu.Util` | `WeightedPicker`, `VariedSelector` | 确定性加权/去重采样工具 |
 
 ### Modules 工厂模式（红线 B.9）
 
