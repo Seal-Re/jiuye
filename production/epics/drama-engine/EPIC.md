@@ -21,6 +21,18 @@
 - drama-002 `DramaStoryletEngine`（关系 storylet + 仇敌检测 affinity≤-50）
 - 二者为薄工具层；GDD §9 的核心引擎（账本/弧/继承）待 drama-003~013 落地。
 
+## 核心引擎进度（drama-003~013，GDD §9）
+- ✅ drama-003 `VariedSelector` 共享原语（少用优先均匀轮替，spec Step 0）
+- ✅ drama-004 戏剧值类型骨架（Grudge/Arc/Predicate/Effect/DramaProfile，Step 1）
+- ✅ drama-005 `GrudgeLedger` 恩怨账本（List+索引+合并幂等+Clone，Step 2）
+- ✅ drama-006 LimitsConfig 戏剧上限 + `WeightedPicker` 整数轮盘（Step 3-4，926 绿；IL 浮点扫描扩 Util+Drama）
+- ⏳ drama-007 storylet schema + RevengeArc 5 态机 + FindIgnitions（Step 5，下一）
+- ⏳ drama-008 6 DomainEvent + Project/Chronicle case（⚠️ 空库逐字节先证，Step 6）
+- ⏳ drama-009 DramaScheduler + Pump + WorldFactory dramaRng（Step 7）
+- ⏳ drama-010 World 接线（⚠️ 字段+Advance+Clone 全 drama 态深拷，Step 8）
+- ⏳ drama-011 受控耦合（Goal 覆写/还原 + 镜像 Relations，Step 9）
+- ⏳ drama-012 跨代继承（Step 10）｜ drama-013 INV-CHAIN 端到端验收（Step 11）
+
 ## Dependencies
 **Unblocked by**: Relations/MemoryStore/Scheduler/RuleBrain/SparAction/Lifecycle（v1.0 已存在）
 **Blocks**: faction C.1（A/B 在位喂 GrudgeLedger，dramaprofile 联动）
