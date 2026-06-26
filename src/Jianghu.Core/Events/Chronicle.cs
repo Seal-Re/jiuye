@@ -44,6 +44,48 @@ namespace Jianghu.Events
                 case TerritoryLost tl:
                     text = $"[{tl.Tick}] 门派#{tl.ToFaction} 攻取门派#{tl.FromFaction} 的 {tl.Site} 号地，两派自此结怨。";
                     break;
+                // —— 戏剧引擎 B（drama-008）：武侠味投影，仅渲染层不进数值路径（B.8）——
+                case GrudgeFormed gf:
+                {
+                    string kind = gf.Kind switch
+                    {
+                        Drama.GrudgeKind.Insult => "羞辱之仇",
+                        Drama.GrudgeKind.Maiming => "残身之仇",
+                        Drama.GrudgeKind.Slaughter => "灭门血仇",
+                        _ => "怨仇",
+                    };
+                    text = $"[{gf.Tick}] {name(gf.Holder)} 与 {name(gf.Target)} 结下 {kind}（恨意 {gf.Intensity}）。";
+                    break;
+                }
+                case GrudgeInherited gi:
+                    text = $"[{gi.Tick}] {name(gi.Heir)} 继承先人遗志，誓向 {name(gi.Target)} 讨还血债——父债子偿，已是第 {gi.Generation} 代恩怨（恨意 {gi.Intensity}）。";
+                    break;
+                case ArcIgnited ai:
+                    text = $"[{ai.Tick}] {name(ai.Avenger)} 立誓复仇，踏上追讨 {name(ai.Target)} 的不归路。";
+                    break;
+                case ArcStageEntered ase:
+                {
+                    string stage = ase.Stage switch
+                    {
+                        Drama.ArcStage.Victimized => "蒙难含冤",
+                        Drama.ArcStage.BuildUp => "闭关蓄力",
+                        Drama.ArcStage.Hunting => "四处寻仇",
+                        Drama.ArcStage.Showdown => "狭路相逢",
+                        Drama.ArcStage.Resolved => "恩怨了结",
+                        Drama.ArcStage.Abandoned => "复仇未竟",
+                        _ => "复仇路上",
+                    };
+                    text = $"[{ase.Tick}] 复仇弧#{ase.Arc.Value} 进入「{stage}」。";
+                    break;
+                }
+                case RevengeConsummated rc:
+                    text = rc.AvengerPrevailed
+                        ? $"[{rc.Tick}] {name(rc.Avenger)} 于决战中手刃仇人 {name(rc.Target)}，大仇得报，恩怨自此了断。"
+                        : $"[{rc.Tick}] {name(rc.Avenger)} 寻 {name(rc.Target)} 决战，奈何技不如人，饮恨当场。";
+                    break;
+                case ArcAbandoned aa:
+                    text = $"[{aa.Tick}] 复仇弧#{aa.Arc.Value} 半途而废（{aa.Reason}），恩怨随风消散。";
+                    break;
                 default: text = $"[{e.Tick}] (未知事件)"; break;
             }
             _lines.Add(text);
