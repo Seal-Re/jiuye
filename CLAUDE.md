@@ -39,6 +39,7 @@
 - CCGS 采用路线图：`docs/reports/采用迁移计划.md`（增量补 GDD/ADR roadmap）
 - 项目状态审计（历史派生）：`docs/reports/项目状态审计.md`
 - 设计深度源（18 spec/4 plan/3 research，旧版/legacy）：`docs/legacy-specs/`
+- 设计 spec/plan（superpowers 工作流产出，artifact-system/map-renderer/inv-cross-calibration 等）：`docs/superpowers/`
 - 世界观 canonical：`docs/legacy-specs/specs/...WorldBible-九野...`
 - 像素管线规则/工具：`tools/pixel-pipeline/`（脚本 + PIXEL_RULES.md + AIGEN_TOOL.md）
 

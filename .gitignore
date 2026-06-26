@@ -29,11 +29,11 @@ docs/consistency-failures.md
 __pycache__/
 *.pyc
 # EPIC-TIDY 顺手补（像素产物 + 抓取 raw3）
-# 注: pixel/ 目录已迁 → tools/pixel-pipeline/(脚本) + assets/art/pixel/(资产)
+# 注: 顶层 pixel/ 已迁 → tools/pixel-pipeline/(脚本) + assets/art/pixel/(资产)，且本地残留已清
 assets/art/pixel/out/
 tools/pixel-pipeline/out/
 _research/raw3/
 # AI 文生图 raw 产物（精修入库的才进 tools/pixel-pipeline/parts/）
 tools/pixel-pipeline/_aigen/
-pixel/_aigen/
-pixel/out/
+# map-renderer 验证产物（可重生成，不入库）
+output/
