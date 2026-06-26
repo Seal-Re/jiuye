@@ -26,12 +26,16 @@ namespace Jianghu.Core.Tests.Drama
             public bool IsAlive(CharacterId who) => !Dead.Contains(who.Value);
             public bool SameNode(CharacterId a, CharacterId b)
                 => Together.Contains((a.Value, b.Value)) || Together.Contains((b.Value, a.Value));
+            public Goal GoalOf(CharacterId who) => new Goal(GoalKind.Wander, 0);
         }
 
         private sealed class RecordingMutator : IDramaMutator
         {
             public List<DomainEvent> Events = new();
             public void Emit(DomainEvent e) => Events.Add(e);
+            public void OverrideGoal(CharacterId who, GoalKind kind) { }
+            public void RestoreGoal(CharacterId who, Goal original) { }
+            public void MirrorRelation(CharacterId holder, CharacterId target, int delta) { }
             public int CountOf<T>() { int n = 0; foreach (var e in Events) if (e is T) n++; return n; }
         }
 

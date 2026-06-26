@@ -21,5 +21,8 @@ namespace Jianghu.Drama
 
         /// <summary>两角色当前同节点（狭路相逢判定）。</summary>
         bool SameNode(CharacterId a, CharacterId b);
+
+        /// <summary>角色当前 Goal（drama-011：Director 存档原 Goal 供弧收束还原）。</summary>
+        Goal GoalOf(CharacterId who);
     }
 }

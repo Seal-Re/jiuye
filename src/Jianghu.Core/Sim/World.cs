@@ -251,15 +251,33 @@ namespace Jianghu.Sim
             return ca.Node.Value == cb.Node.Value;
         }
 
+        Goal IDramaView.GoalOf(CharacterId who)
+            => _alive.TryGetValue(who.Value, out var c) ? c.Goal : new Goal(GoalKind.Wander, 0);
+
         private static int DramaPower(Character c)
             => c.Stats.Get(StatKind.Force) * 2 + c.Stats.Get(StatKind.Internal) + c.Stats.Get(StatKind.Constitution);
 
-        // —— IDramaMutator（drama-010）：戏剧唯一写口。Emit→Chronicle + drama memory 投影（drama-008 延后项落此）。——
+        // —— IDramaMutator（drama-010/011）：戏剧唯一写口。事件 + 受控耦合（Goal/Relations，drama→decision 唯一通道）。——
         void IDramaMutator.Emit(DomainEvent e)
         {
             Chronicle.Append(e, NameOf);
             ProjectDrama(e);
         }
+
+        // drama-011 受控耦合写口：覆写/还原 Goal（疯修通道）+ 镜像负 Relations（notFoe 通道）。
+        // 仅 drama Pump 路径可达（off=_drama null 不调）→ off 逐字节守恒。RuleBrain 零改，纯经既有项生效。
+        void IDramaMutator.OverrideGoal(CharacterId who, GoalKind kind)
+        {
+            if (_alive.TryGetValue(who.Value, out var c)) c.Goal = new Goal(kind, 0);
+        }
+
+        void IDramaMutator.RestoreGoal(CharacterId who, Goal original)
+        {
+            if (_alive.TryGetValue(who.Value, out var c)) c.Goal = original;
+        }
+
+        void IDramaMutator.MirrorRelation(CharacterId holder, CharacterId target, int delta)
+            => Relations.Adjust(holder, target, delta); // Relations 自身钳 [-100,100]
 
         // drama 事件 memory 投影：复仇结局写参与者负 valence（大恨入记忆，仿 spar memory）。
         // 仅 drama 事件，不碰既有 Project。off 不可达（_drama==null 时 Emit 不被调）。

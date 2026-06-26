@@ -23,6 +23,7 @@ namespace Jianghu.Drama
         private readonly DramaScheduler _scheduler;
         private readonly List<ArcInstance> _activeArcs;
         private readonly Dictionary<(long, long), long> _pairCooldownUntil; // 对子→冷却到期 tick（仅成员测试）
+        private readonly Dictionary<long, Goal> _originalGoals; // 弧 Id → 复仇者原 Goal（drama-011 收束还原）
         private long _nextIgnitionCheckAt;
         private long _nextArcId;
 
@@ -33,6 +34,7 @@ namespace Jianghu.Drama
             _scheduler = new DramaScheduler();
             _activeArcs = new List<ArcInstance>();
             _pairCooldownUntil = new Dictionary<(long, long), long>();
+            _originalGoals = new Dictionary<long, Goal>();
             _nextIgnitionCheckAt = 0;
             _nextArcId = 1;
         }
@@ -45,6 +47,7 @@ namespace Jianghu.Drama
             _scheduler.LoadFrom(src._scheduler.Snapshot());
             _activeArcs = new List<ArcInstance>(src._activeArcs); // ArcInstance record 不可变，浅拷即深拷
             _pairCooldownUntil = new Dictionary<(long, long), long>(src._pairCooldownUntil);
+            _originalGoals = new Dictionary<long, Goal>(src._originalGoals); // Goal 不可变 record，浅拷即深拷
             _nextIgnitionCheckAt = src._nextIgnitionCheckAt;
             _nextArcId = src._nextArcId;
         }
@@ -75,6 +78,7 @@ namespace Jianghu.Drama
                 var arc = _activeArcs[idx];
                 var trans = RevengeArc.TryAdvance(arc, view, _limits);
                 EmitForTransition(clock, arc, trans, mutator);
+                ApplyCoupling(arc, trans, view, mutator); // drama-011 受控耦合（Goal/Relations）
 
                 if (trans.Resolution == ArcResolution.Completed || trans.Resolution == ArcResolution.Abandoned)
                 {
@@ -103,6 +107,38 @@ namespace Jianghu.Drama
                     mutator.Emit(new ArcAbandoned(clock, trans.Next.Id, "ParticipantDied"));
                     break;
                 // Stalled：无事件，仅重排（待下次重试）。
+            }
+        }
+
+        // —— drama-011 受控耦合：经 IDramaMutator 两条 RuleBrain 既有通道间接驱动行为（RuleBrain 零改）。——
+        // BuildUp→覆写 Goal=Advance（疯修）；Hunting→镜像负 Relations（触发 notFoe）；收束→还原原 Goal。
+        private void ApplyCoupling(ArcInstance prev, ArcTransition trans, IDramaView view, IDramaMutator mutator)
+        {
+            long arcId = prev.Id.Value;
+            if (trans.Resolution == ArcResolution.Advanced)
+            {
+                switch (trans.Next.Stage)
+                {
+                    case ArcStage.BuildUp:
+                        // 存复仇者原 Goal（仅首次进 BuildUp）+ 覆写 Advance。
+                        if (!_originalGoals.ContainsKey(arcId))
+                            _originalGoals[arcId] = view.GoalOf(prev.Avenger);
+                        mutator.OverrideGoal(prev.Avenger, GoalKind.Advance);
+                        break;
+                    case ArcStage.Hunting:
+                        // 镜像上限内负 Relations（复仇者→仇人）→ 触发 RuleBrain notFoe。
+                        mutator.MirrorRelation(prev.Avenger, prev.Target, -_limits.RelationMirrorCap);
+                        break;
+                }
+            }
+            else if (trans.Resolution == ArcResolution.Completed || trans.Resolution == ArcResolution.Abandoned)
+            {
+                // 收束还原原 Goal（防永久卡复仇态）。无存档则不动（弧未进过 BuildUp）。
+                if (_originalGoals.TryGetValue(arcId, out var orig))
+                {
+                    mutator.RestoreGoal(prev.Avenger, orig);
+                    _originalGoals.Remove(arcId);
+                }
             }
         }
 

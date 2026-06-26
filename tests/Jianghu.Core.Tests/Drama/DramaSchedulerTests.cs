@@ -97,6 +97,9 @@ namespace Jianghu.Core.Tests.Drama
         {
             public List<DomainEvent> Events = new();
             public void Emit(DomainEvent e) => Events.Add(e);
+            public void OverrideGoal(CharacterId who, GoalKind kind) { }
+            public void RestoreGoal(CharacterId who, Goal original) { }
+            public void MirrorRelation(CharacterId holder, CharacterId target, int delta) { }
         }
 
         [Fact]

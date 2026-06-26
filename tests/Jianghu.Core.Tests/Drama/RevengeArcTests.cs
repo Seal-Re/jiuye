@@ -24,6 +24,7 @@ namespace Jianghu.Core.Tests.Drama
             public bool IsAlive(CharacterId who) => Alive.Contains(who.Value);
             public bool SameNode(CharacterId a, CharacterId b)
                 => Together.Contains((a.Value, b.Value)) || Together.Contains((b.Value, a.Value));
+            public Goal GoalOf(CharacterId who) => new Goal(GoalKind.Wander, 0);
         }
 
         private static readonly CharacterId Avenger = new(1);

@@ -35,6 +35,7 @@ namespace Jianghu.Core.Tests.Drama
             public int Affinity(CharacterId from, CharacterId to) => 0;
             public bool IsAlive(CharacterId who) => true;
             public bool SameNode(CharacterId a, CharacterId b) => false;
+            public Goal GoalOf(CharacterId who) => new Goal(GoalKind.Wander, 0);
         }
 
         private static readonly CharacterId Avenger = new(1);
