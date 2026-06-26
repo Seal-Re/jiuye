@@ -1,7 +1,7 @@
 # Story 004: 4路DailyMode枚举+整数倍率表
 
 > **Epic**: cultivation-a2
-> **Status**: Not Started
+> **Status**: Complete （A.6 审计 2026-06-26 订正：git/代码证据证实已实现，台账滞后）
 > **Last Updated**: 2026-06-24
 > **Layer**: Core
 > **Type**: Logic

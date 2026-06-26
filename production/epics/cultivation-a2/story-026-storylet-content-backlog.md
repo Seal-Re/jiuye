@@ -1,7 +1,7 @@
 # Story 026: 奇遇内容积压（50+ 故事数据行）
 
 > **Epic**: cultivation-a2
-> **Status**: Backlog
+> **Status**: Complete （A.6 审计 2026-06-26 订正：git/代码证据证实已实现，台账滞后）
 > **Last Updated**: 2026-06-25
 > **Layer**: Data
 > **Type**: Config/Data

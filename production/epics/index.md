@@ -1,7 +1,7 @@
 # Epics Index — jiuye（武侠人设生成 / 江湖涌现模拟）
 
 > 真相源（红线 A.2）。由 TASKS.md 迁入（2026-06-15）。状态枚举 = {Planned, In Progress, In Review, Done, Deferred, Blocked, **Built not wired**, **Wired**, **Partially wired**}。
-> 机器可读状态在 `production/sprint-status.yaml`；本表为人读总览。WIP(In Progress)≤2，当前=**1**（仅 #5 cultivation-a2；〔A.6 审计 2026-06-25 订正 #1 combat-r2 陈旧 In Progress→Done，WIP 2→1〕）。
+> 机器可读状态在 `production/sprint-status.yaml`；本表为人读总览。WIP(In Progress)≤2，当前=**0**（〔A.6 审计 2026-06-26：#5 cultivation-a2 陈旧 In Progress→Done，全 26 story git 证实；此前 #1 combat-r2 同样订正。当前无 active epic——待用户定下一方向〕）。
 > **Built not wired** = 代码已建+单测绿，但未接生产主循环（死代码）；属 Deferred 子态，待 wiring story。源 CR-2026-06-25 C-1（R-1(b) 决策）。
 > **Wired** = 已接生产主循环可激活；**Partially wired** = 部分接线（如 story-008 接 Map/Faction 但 membership 待 story-009）。
 
@@ -15,7 +15,7 @@
 | 2 | 真·全量机制结构化 | `combat-fullstruct` | Core | Deferred | 依赖 combat-r2 done；derived 求和/克制矩阵/召唤物/唯一签名全迁 |
 | 3 | 平衡标定 INV-CROSS | `balance-cross` | Core | Designed | 🔴 最大功能缺口；设计 `336280d` |
 | 4 | 修炼 A.1 余项（10 态/4 劫/5 失败/寿元） | `cultivation-a1-rest` | Core | Designed | 设计完；含 A1.4 blocked（依赖 balance-cross） |
-| 5 | 修炼 A.2（道心/破单调/奇遇/闭关） | `cultivation-a2` | Feature | **In Progress** | 25 故事已拆解 (f37838d)，Sprint 4 |
+| 5 | 修炼 A.2（道心/破单调/奇遇/闭关） | `cultivation-a2` | Feature | **Done** | 全 26 story 实现（道心/日课/闭关/奇遇/集成硬化）；〔A.6 审计 2026-06-26 订正陈旧 In Progress→Done，git 证据 + 874 绿〕 |
 | 6 | 修炼 A.3（转职/觉醒/双修） | `cultivation-a3` | Feature | Designed | A3-FINAL |
 | 7 | 戏剧引擎 B | `drama-engine` | Feature | Designed (0 code) | spec 完，零代码 |
 | 8 | 地图系统 C | `map-system` | Feature | **Wired** | WorldMap/Kruskal/Factory 已接 WorldFactory/Advance（story-008 `a05cd8d`，--map 激活）；懒加载待后续 map story |

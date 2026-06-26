@@ -1,12 +1,12 @@
 # Epic: 修炼 A.2
 
 **Layer**: Feature
-**Status**: In Progress
+**Status**: Done （A.6 审计 2026-06-26：全 26 story git/代码证据证实已实现，sprint5/6 已 retrospective）
 **GDD**: design/gdd/cultivation-system.md §3.5；深度源 A3-FINAL/A123/A2-FINAL
 **Governing ADRs**: adr-0001-integer-determinism, adr-0003-cultivation-off-byte-identical
 **Engine Risk**: LOW（.NET 8 纯整数）
 **Created**: 2026-06-15（迁自 TASKS.md）
-**Updated**: 2026-06-24（story breakdown）
+**Updated**: 2026-06-26（A.6 审计订正：In Progress→Done，台账此前滞后）
 
 ## Summary
 修炼 A.2——道心 / 破单调 / 奇遇 / 闭关。四子系统：21路道心表 + 4路日课微决策 + 闭关DES单点唤醒 + 奇遇storylet执行器。
@@ -53,13 +53,15 @@
 | 025 | A.2审计员终验 | 硬化 | Must Have | 0.5d | Not Started |
 
 ## Definition of Done
-- [ ] 道心系统实现 + 测试（story-001~003）
-- [ ] 破单调实现 + 测试（story-004~006）
-- [ ] 闭关（三档时间尺度 + QBN + DES）实现 + 测试（story-007~012）
-- [ ] 奇遇 storylet 实现 + 测试（story-013~018）
-- [ ] A.2↔A.1 全流程集成（story-019~021）
-- [ ] 不变量硬化 + 确定性守（story-022~024）
-- [ ] 审计终验（story-025）
+> 〔A.6 审计 2026-06-26：全项经 git 证据核实（feat(cultivation) 提交链 + 874 绿基线），勾闭。〕
+- [x] 道心系统实现 + 测试（story-001~003，`b373508`/`50a6480`/`50c03e4`）
+- [x] 破单调实现 + 测试（story-004~006，`d9214c8`/`e883e24`/`4bdb234`）
+- [x] 闭关（三档时间尺度 + QBN + DES）实现 + 测试（story-007~012，`e7fe1f8`/`da34c33`/`07a79d6`）
+- [x] 奇遇 storylet 实现 + 测试（story-013~018，`92ca7bc` +17 tests）
+- [x] A.2↔A.1 全流程集成（story-019~021，`76c83fe`/`5ff6ecd`）
+- [x] 不变量硬化 + 确定性守（story-022~024，`5ff6ecd`/`66cb195`）
+- [x] 审计终验（story-025，`5ff6ecd`）
+- [x] 奇遇内容池 POOL_MIN≥60（story-026，ExampleStorylets 23 + Batch1 43 = 66 条）
 
 ## Notes
 依赖 A.1 余项（cultivation-a1-rest：FSM+三劫+寿元 已完成）。道心严禁进 EffectivePower（红线 B.5/R3）。日课不修改 RuleBrain（仅 cultivation 内部决策）。RNG 全走 Split(5) cultRng。

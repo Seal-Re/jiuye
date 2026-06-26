@@ -1,7 +1,7 @@
 # Story 018: 太吾双面教训
 
 > **Epic**: cultivation-a2
-> **Status**: Not Started
+> **Status**: Complete （A.6 审计 2026-06-26 订正：git/代码证据证实已实现，台账滞后）
 > **Last Updated**: 2026-06-24
 > **Layer**: Core
 > **Type**: Logic
