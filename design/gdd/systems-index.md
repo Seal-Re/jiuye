@@ -1,6 +1,6 @@
 # Systems Index — 九野 · 江湖涌现模拟
 
-> **Status**: Designed
+> **Status**: Living（2026-06-26 圆桌订正状态列对齐 production/epics/index.md）
 > **Created**: 2026-06-21（逆向自 production/epics/index.md + 源码架构）
 > **Purpose**: 系统全景图——每一行对应一个游戏系统，含状态/层/依赖/GDD/ADR。
 
@@ -16,17 +16,17 @@
 | 4 | 事件驱动调度器 | `scheduler` | Foundation | Done | game-concept.md | — | model | actions, lifecycle |
 | 5 | 动作系统 | `actions` | Foundation | Done | game-concept.md | — | scheduler, model | combat |
 | 6 | 修炼系统 (21路) | `cultivation` | Core | Done | cultivation-system.md | adr-0003 | actions, model | combat |
-| 7 | 战斗系统 (模块化) | `combat` | Core | In Progress | combat-system.md | adr-0002 | cultivation, actions | drama |
-| 8 | 全量机制结构化 | `fullstruct` | Core | In Progress | combat-system.md | adr-0002 | combat | balance-cross |
+| 7 | 战斗系统 (模块化) | `combat` | Core | Done | combat-system.md | adr-0002 | cultivation, actions | drama |
+| 8 | 全量机制结构化 | `fullstruct` | Core | Deferred | combat-system.md | adr-0002 | combat | balance-cross |
 | 9 | 跨路平衡标定 | `balance-cross` | Core | Designed | cultivation-system.md | — | combat, fullstruct | — |
 | 10 | 修炼 A.1 余项 (劫/寿元) | `cultivation-a1-rest` | Core | Designed | cultivation-system.md | adr-0003 | cultivation, balance-cross | cultivation-a2 |
-| 11 | 修炼 A.2 (道心/奇遇) | `cultivation-a2` | Feature | Designed | cultivation-system.md | — | cultivation-a1-rest | cultivation-a3 |
+| 11 | 修炼 A.2 (道心/奇遇) | `cultivation-a2` | Feature | Done | cultivation-system.md | — | cultivation-a1-rest | cultivation-a3 |
 | 12 | 修炼 A.3 (转职/双修) | `cultivation-a3` | Feature | Designed | cultivation-system.md | — | cultivation-a2 | — |
-| 13 | 戏剧引擎 | `drama-engine` | Feature | Designed | (P8 补) | — | combat, model | — |
-| 14 | 地图系统 | `map-system` | Feature | Designed | (P8 补) | — | model | drama, faction |
-| 15 | 门派 Faction | `faction` | Feature | Designed | (P8 补) | — | model, map | drama |
+| 13 | 戏剧引擎 | `drama-engine` | Feature | Done | drama-system.md | — | combat, model | — |
+| 14 | 地图系统 | `map-system` | Feature | Wired | (P8 补) | — | model | drama, faction |
+| 15 | 门派 Faction | `faction` | Feature | C.0 Done | (P8 补) | — | model, map | drama |
 | 16 | LLM 脑 | `llm-brain` | Feature | Not Designed | — | — | actions | — |
-| 17 | 系统集成层 | `integration` | Feature | Not Designed | — | — | 全部 Core | — |
+| 17 | 系统集成层 | `integration` | Feature | Partially wired | — | — | 全部 Core | — |
 | 18 | 可视化 | `visualization` | Presentation | Spike Only | — | — | integration | — |
 
 **Status values**: Not Started | In Progress | In Review | Designed | Approved | Done | Deferred | Blocked
@@ -66,6 +66,7 @@ Foundation ──→ Core ──→ Feature ──→ Presentation
 ## Notes
 
 - 设计深度源在 `docs/legacy-specs/specs/`（18 份），原地保留；GDD 增量补
-- Combat 是唯一活跃 WIP epic（combat-r2 + combat-fullstruct）
+- Combat 系列已收官（combat-r2 Done；combat-fullstruct Deferred，待 balance-cross 验证近似档是否够用）
 - `cultivation-a1-rest` 的 A1.4 blocked-on `balance-cross`
-- `drama-engine` 已含 story-001（恩怨/复仇基础，Sprint 2 done），但 epic 仍标 Designed（0 code → 现在 1 story 已建）
+- `drama-engine` 已收官（drama-001~013 全落，1051 绿，`--drama` 激活）；`map-system`/`faction` 已接线（`--map`/`--faction`）
+- ⚠️ `balance-cross` = Designed（非 Done）：契约 C1[40,60]% 未兑现，balance-003 硬闸门 Deferred（详见圆桌纪要 §1）

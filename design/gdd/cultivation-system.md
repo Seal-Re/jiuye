@@ -1,6 +1,6 @@
 # 修炼系统（Cultivation System）
 
-> **Status**: Designed
+> **Status**: Implemented（A.0/A.1/A.2 Done；A.3 Designed）
 > **Layer**: Core
 > **Source**: `docs/legacy-specs/specs/2026-06-14-v1.2-A123-收敛对齐设计.md` + A.0 build-spec + A2/A3-FINAL
 > **Created**: 2026-06-21（逆向自 legacy specs + 源码）
@@ -11,7 +11,7 @@
 
 修炼系统是江湖涌现模拟的**核心纵深**——21 条修炼路径，每条含独立的资源体系、境界曲线（RealmCurve）、力量公式（PowerEngine）、战斗模块（Modules），以及突破/渡劫/失败/寿元/道心等深度机制。
 
-当前实现状态：A.0 walking-skeleton 已建（21 路全入册 + 境界引擎 + 战斗模块 + CLI 驱动，410 测试绿）；A.1 境界层 Done（大小境界双层/三轴/UT 平衡）；combat-r2 模块化战斗 Done（Modules 工厂 + DuelEngine + SpecialModule）。
+当前实现状态：A.0 walking-skeleton + A.1 境界层 + A.2（道心/破单调/奇遇/闭关）+ combat-r2 模块化战斗均 Done；A.3（转职/觉醒/双修）= Designed。当前全量基线 1051 绿（A.0 时点曾为 410）。
 
 ---
 
@@ -64,7 +64,7 @@
 - `PowerEngine.Evaluate(cs)` 算 pe（EffectivePower）
 - **道心解耦**（红线 B.5）：daoHeart/innerDemon 只进 TribScore/Phase，严禁进 EffectivePower
 
-### 3.4 A.1 余项（设计未建）
+### 3.4 A.1 余项（Done — cultivation-a1-rest）
 
 - **10 态流程状态机**：CultivationPhase（idle→breakthrough→tribulation→…）
 - **三劫**：天劫/心魔劫/道劫，数据驱动 TribulationDef
@@ -72,7 +72,7 @@
 - **寿元**：`Age >= Lifespan + lifespanBonus` → 飞升离场
 - **飞升**：UT12 圆满 → 转 Ascended 移出 _alive
 
-### 3.5 A.2（设计未建）
+### 3.5 A.2（Done — cultivation-a2）
 
 - **道心**（daoHeart）：每路独立资源，影响 TribScore/Phase
 - **心魔**（innerDemon）：反噬/污染机制
@@ -152,7 +152,8 @@
 - [x] 辅助路 UT 锚锁（Dan≤7/Array≤7/Qixiu≤10/Fu=12）
 - [x] off 逐字节一致（38+ 回归测试）
 - [x] IL 浮点扫描零（BannedApiAnalyzers 守）
-- [x] 全量测试绿（410 passed, 0 failed, 0 skipped）
-- [ ] A.1 余项：10 态流程 + 三劫 + 寿元/飞升
-- [ ] A.2：道心/心魔/破单调/奇遇/闭关
-- [ ] A.3：转职/觉醒/双修 + INV-CROSS 标定（同 UT 胜率 [40,60]%）
+- [x] A.0 里程碑全量测试绿（410 passed，2026-06 时点快照；当前基线 1051 绿）
+- [x] A.1 余项：10 态流程 + 三劫 + 寿元/飞升（cultivation-a1-rest Done）
+- [x] A.2：道心/心魔/破单调/奇遇/闭关（cultivation-a2 Done，26 story 全实现）
+- [ ] A.3：转职/觉醒/双修（cultivation-a3 = Designed，未建）
+- [ ] INV-CROSS 标定（同 UT 胜率 [40,60]%）：⚠️ 未兑现——balance-cross 仅 advisory gate[35,65]%（47/48 已知违规），balance-003 硬闸门 Deferred（详见圆桌纪要 §1）

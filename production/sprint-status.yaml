@@ -21,10 +21,10 @@ stories:
     name: "C1收敛[40,60]%硬闸门 (module cap + RealmMultipliers recalibration)"
     file: "production/epics/balance-cross/story-003-c1-convergence-40-60.md"
     priority: must-have
-    status: done  # A.6 订正(git证实)
+    status: deferred  # 圆桌订正 2026-06-26：误标 done；git 76a9a17 证实 defer（[40,60]% 硬闸门未做，advisory gate 47/48 已知违规）
     owner: ""
     estimate_days: 2
-    blocker: ""
+    blocker: "DuelEngine Scale=100 放大模块伤害致一击秒杀；需模块伤害钳制 + RealmMultipliers 重校准"
     completed: ""
   - id: "a2-007"
     name: "BreakAid四法数据模型"
