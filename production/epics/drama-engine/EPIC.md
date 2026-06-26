@@ -29,7 +29,9 @@
 - ✅ drama-007 storylet substrate（schema/IDramaView/DramaContext/StoryletSelector，Step 5a，957 绿）
 - ✅ drama-007b RevengeArc.TryAdvance 5 态机（纯转移）+ IgnitionScanner.FindIgnitions（Step 5b，979 绿）
 - ✅ drama-008 6 DomainEvent + Chronicle 武侠味投影（Step 6，990 绿，⚠️首触 v1.0 文件 off 逐字节实证；Project memory 投影显式延 drama-010）
-- ⏳ drama-009 DramaScheduler + Pump + WorldFactory dramaRng（Step 7，下一）
+- ✅ drama-009 DramaScheduler 最小堆 + IDramaMutator 事件汇 seam（Step 7a，997 绿；dramaRng 显式延 drama-010）
+- ⏳ drama-009b DramaDirector.Pump 推进相 + 节流点火相（Step 7b，下一）
+- ⏳ drama-010 World 接线（⚠️ 字段+Advance+Clone 全 drama 态深拷 + dramaRng=Split(6)，Step 8，最高危）
 - ⏳ drama-009 DramaScheduler + Pump + WorldFactory dramaRng（Step 7）
 - ⏳ drama-010 World 接线（⚠️ 字段+Advance+Clone 全 drama 态深拷，Step 8）
 - ⏳ drama-011 受控耦合（Goal 覆写/还原 + 镜像 Relations，Step 9）
