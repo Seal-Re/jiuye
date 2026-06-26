@@ -176,7 +176,42 @@ namespace Jianghu.Sim
         {
             _alive.Remove(c.Id.Value);
             c.Alive = false; Deceased.Add(c);
+            // drama-012：复仇者寿尽 → 在世子嗣/弟子继承未了恩怨（off=_drama null 不可达，逐字节）。
+            // 先移出 _alive（继承人候选不含死者）再调 OnDeath。Clock 为当前世界时刻。
+            if (_drama != null)
+                _drama.OnDeath(c.Id, BuildLivingHeirs(c.Id), Clock, this);
         }
+
+        /// <summary>
+        /// 死者的在世继承人（drama-012）：profiles 中 Master 或 Bloodline == 死者 的在世角色，
+        /// 按 年龄(降，长者先)→武力(降)→Id(升) 三级确定性排序（禁 Dictionary 枚举序）。
+        /// </summary>
+        private IReadOnlyList<CharacterId> BuildLivingHeirs(CharacterId deceased)
+        {
+            var heirs = new List<Character>();
+            foreach (var c in _alive.Values)
+            {
+                var p = _drama!.ProfileOf(c.Id);
+                if (p == null) continue;
+                bool linked = (p.Master.HasValue && p.Master.Value.Value == deceased.Value)
+                           || (p.Bloodline.HasValue && p.Bloodline.Value.Value == deceased.Value);
+                if (linked) heirs.Add(c);
+            }
+            heirs.Sort((a, b) =>
+            {
+                int c = b.Age.CompareTo(a.Age);                 // 年龄降（长者先）
+                if (c != 0) return c;
+                c = DramaPower(b).CompareTo(DramaPower(a));      // 武力降
+                if (c != 0) return c;
+                return a.Id.Value.CompareTo(b.Id.Value);         // Id 升
+            });
+            var ids = new List<CharacterId>(heirs.Count);
+            foreach (var h in heirs) ids.Add(h.Id);
+            return ids;
+        }
+
+        /// <summary>注册师承/血缘侧表（drama-012）：仅 drama-on 有效（_drama!=null）。off 无操作。</summary>
+        public void RegisterDramaProfile(DramaProfile profile) => _drama?.RegisterProfile(profile);
 
         // story-011：per-faction Might 快照（Σ 在役成员 power，与 RuleBrain.SelfPower 同公式 Force×2+Int+Con）。
         // World 算（知 Character.Stats）→ 注入 Pump，SectLedger 保持对 Character 无知（承 design 解耦）。

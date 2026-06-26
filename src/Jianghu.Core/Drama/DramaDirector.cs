@@ -24,6 +24,7 @@ namespace Jianghu.Drama
         private readonly List<ArcInstance> _activeArcs;
         private readonly Dictionary<(long, long), long> _pairCooldownUntil; // 对子→冷却到期 tick（仅成员测试）
         private readonly Dictionary<long, Goal> _originalGoals; // 弧 Id → 复仇者原 Goal（drama-011 收束还原）
+        private readonly Dictionary<long, DramaProfile> _profiles; // Self.Value → 师承/血缘侧表（drama-012 继承）
         private long _nextIgnitionCheckAt;
         private long _nextArcId;
 
@@ -35,6 +36,7 @@ namespace Jianghu.Drama
             _activeArcs = new List<ArcInstance>();
             _pairCooldownUntil = new Dictionary<(long, long), long>();
             _originalGoals = new Dictionary<long, Goal>();
+            _profiles = new Dictionary<long, DramaProfile>();
             _nextIgnitionCheckAt = 0;
             _nextArcId = 1;
         }
@@ -48,6 +50,7 @@ namespace Jianghu.Drama
             _activeArcs = new List<ArcInstance>(src._activeArcs); // ArcInstance record 不可变，浅拷即深拷
             _pairCooldownUntil = new Dictionary<(long, long), long>(src._pairCooldownUntil);
             _originalGoals = new Dictionary<long, Goal>(src._originalGoals); // Goal 不可变 record，浅拷即深拷
+            _profiles = new Dictionary<long, DramaProfile>(src._profiles);   // DramaProfile 不可变 record
             _nextIgnitionCheckAt = src._nextIgnitionCheckAt;
             _nextArcId = src._nextArcId;
         }
@@ -199,5 +202,46 @@ namespace Jianghu.Drama
 
         /// <summary>深拷全可变态（R-NF2 续跑，drama-010 World.Clone）。ledger 由调用方传克隆实例。</summary>
         public DramaDirector Clone(GrudgeLedger clonedLedger) => new DramaDirector(clonedLedger, _limits, this);
+
+        // —— drama-012 跨代继承（spec §3.3）——
+
+        /// <summary>注册师承/血缘侧表（Self→Master?/Bloodline?），供寿尽继承找继承人。进 Clone。</summary>
+        public void RegisterProfile(DramaProfile profile) => _profiles[profile.Self.Value] = profile;
+
+        /// <summary>查角色的师承/血缘 profile（无→null）。</summary>
+        public DramaProfile? ProfileOf(CharacterId who)
+            => _profiles.TryGetValue(who.Value, out var p) ? p : null;
+
+        /// <summary>
+        /// 复仇者寿尽继承钩（World.RemoveDead 调）。死者每条未了强恩怨（Intensity≥阈值且 Generation&lt;MaxGeneration）
+        /// → 取首位在世继承人（livingHeirsSorted 已按 年龄→武力→Id 由 World 排序）→ Form 衰减恩怨(Cause=Inherited,
+        /// gen+1) + Emit GrudgeInherited。绝嗣/衰减殆尽/达封顶 → 不继承。off 不可达（仅 drama-on World 调）。
+        /// </summary>
+        public void OnDeath(CharacterId deceased, IReadOnlyList<CharacterId> livingHeirsSorted, long clock, IDramaMutator mutator)
+        {
+            if (livingHeirsSorted.Count == 0) return; // 绝嗣绝门：恩怨随死者消散
+
+            // 快照死者恩怨（ByHolder 确定性序）；遍历中会向 ledger 写新条目，先拷出。
+            var held = ledgerSnapshot(deceased);
+            for (int i = 0; i < held.Count; i++)
+            {
+                var g = held[i];
+                if (g.Intensity < _limits.GrudgeIgniteThreshold) continue;     // 仅强恩怨继承
+                if (g.Generation >= _limits.MaxGeneration) continue;           // 封顶防无限链
+                int decayed = g.Intensity * _limits.InheritDecayPct / 100;     // 整数衰减（单调不增）
+                if (decayed < 1) continue;                                      // 衰减殆尽不继承
+
+                var heir = livingHeirsSorted[0];                               // 首位继承人（World 已排序）
+                var newId = _ledger.Form(heir, g.Target, g.Kind, decayed, clock,
+                    GrudgeCause.Inherited, g.Generation + 1, g.Id, _limits.GrudgeCap);
+                mutator.Emit(new GrudgeInherited(clock, newId, heir, g.Target, g.Id, g.Generation + 1, decayed));
+            }
+        }
+
+        private IReadOnlyList<Grudge> ledgerSnapshot(CharacterId holder)
+        {
+            var src = _ledger.ByHolder(holder);
+            return new List<Grudge>(src); // 拷出，避免遍历中写 ledger 影响迭代
+        }
     }
 }

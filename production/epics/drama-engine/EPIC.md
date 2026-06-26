@@ -33,8 +33,8 @@
 - ✅ drama-009b DramaDirector.Pump 推进相 + 节流点火相（Step 7b，1008 绿；空库 no-op rng 不消费实证）
 - ✅ drama-010 World 接线（Step 8，1019 绿，⚠️**最高危**已闭——Advance 主循环 + Clone 命门 + dramaRng=Split(6)，42 determinism/off 实证）
 - ✅ drama-011 受控耦合 Goal 覆写/还原 + 镜像 Relations（Step 9，1028 绿；**RuleBrain 零改实证**；off 战力封顶涌现发现记录）
-- ⏳ drama-012 跨代继承（CharacterDied 监听→子嗣/弟子继承 Grudge→点燃下一弧，Step 10，下一）
-- ⏳ drama-013 INV-CHAIN 端到端 + Showdown 超时 + 预置冤孽 fixture（Step 11，宜 cultivation-on 长跑见完整跨代链）
+- ✅ drama-012 跨代继承（寿尽→子嗣/弟子继承衰减恩怨→点燃下一弧，Step 10，1039 绿；跨代链端到端实证）
+- ⏳ drama-013 INV-CHAIN 端到端验收（预置冤孽 fixture + Showdown 超时强制结算 + 跨代链 + INV-PERF/NO-DEADLOCK，Step 11，**收官**）
 - ⏳ drama-009 DramaScheduler + Pump + WorldFactory dramaRng（Step 7）
 - ⏳ drama-010 World 接线（⚠️ 字段+Advance+Clone 全 drama 态深拷，Step 8）
 - ⏳ drama-011 受控耦合（Goal 覆写/还原 + 镜像 Relations，Step 9）
