@@ -1,6 +1,6 @@
 # 戏剧引擎 B（Drama System — 恩怨/复仇/storylet）
 
-> **Status**: In Design（2026-06-26 /loop 自驱补写；上游 spec 已 5-agent 圆桌定稿，本 GDD 形式化为可落地 8 节）
+> **Status**: **Implemented**（2026-06-26 /loop：drama-003~013 全落，1051 绿，AC-1~10 全过；本 GDD 形式化为可落地 8 节，已兑现）
 > **Author**: Claude（loop 全自主模式，用户 2026-06-26 授权）
 > **Last Updated**: 2026-06-26
 > **Implements Pillar**: 武侠"恩怨情仇·快意恩仇·父债子偿"的涌现戏剧性——NPC 江湖自发生出复仇桥段
@@ -148,7 +148,7 @@ C. 候选收集（**只扫 `Grudges.AboveIntensity` 强恩怨，非全员** → 
 | drama-010 | World 接线（字段+Advance+Clone 全 drama 态深拷）✅ | Step 8 |
 | drama-011 | 受控耦合（Goal 覆写/还原 + 镜像 Relations）✅ | Step 9 |
 | drama-012 | 跨代继承（寿尽→继承→点燃 + 衰减 + 封顶）✅ | Step 10 |
-| drama-013 | 预置冤孽 fixture + 种子 storylet + INV-CHAIN 端到端验收 | Step 11 |
+| drama-013 | 预置冤孽 fixture + 种子 storylet + INV-CHAIN 端到端验收 ✅ | Step 11 |
 
 > drama-001/002（RelationService/DramaStoryletEngine）已落，作为 storylet 关系结算的复用件。
 

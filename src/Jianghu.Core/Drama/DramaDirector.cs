@@ -25,6 +25,7 @@ namespace Jianghu.Drama
         private readonly Dictionary<(long, long), long> _pairCooldownUntil; // 对子→冷却到期 tick（仅成员测试）
         private readonly Dictionary<long, Goal> _originalGoals; // 弧 Id → 复仇者原 Goal（drama-011 收束还原）
         private readonly Dictionary<long, DramaProfile> _profiles; // Self.Value → 师承/血缘侧表（drama-012 继承）
+        private readonly Dictionary<long, long> _stageEnteredAt; // 弧 Id → 进入当前阶段的 tick（drama-013 超时兜底）
         private long _nextIgnitionCheckAt;
         private long _nextArcId;
 
@@ -37,6 +38,7 @@ namespace Jianghu.Drama
             _pairCooldownUntil = new Dictionary<(long, long), long>();
             _originalGoals = new Dictionary<long, Goal>();
             _profiles = new Dictionary<long, DramaProfile>();
+            _stageEnteredAt = new Dictionary<long, long>();
             _nextIgnitionCheckAt = 0;
             _nextArcId = 1;
         }
@@ -51,6 +53,7 @@ namespace Jianghu.Drama
             _pairCooldownUntil = new Dictionary<(long, long), long>(src._pairCooldownUntil);
             _originalGoals = new Dictionary<long, Goal>(src._originalGoals); // Goal 不可变 record，浅拷即深拷
             _profiles = new Dictionary<long, DramaProfile>(src._profiles);   // DramaProfile 不可变 record
+            _stageEnteredAt = new Dictionary<long, long>(src._stageEnteredAt);
             _nextIgnitionCheckAt = src._nextIgnitionCheckAt;
             _nextArcId = src._nextArcId;
         }
@@ -86,10 +89,13 @@ namespace Jianghu.Drama
                 if (trans.Resolution == ArcResolution.Completed || trans.Resolution == ArcResolution.Abandoned)
                 {
                     _activeArcs.RemoveAt(idx); // 退场，不再排
+                    _stageEnteredAt.Remove(arc.Id.Value); // 清超时跟踪
                 }
                 else
                 {
                     _activeArcs[idx] = trans.Next; // Advanced/Stalled：更新 + 重排
+                    if (trans.Resolution == ArcResolution.Advanced)
+                        _stageEnteredAt[trans.Next.Id.Value] = clock; // 进新阶段记 tick（drama-013 超时基准）
                     _scheduler.Push(trans.Next.Id, clock + StageDelay(trans.Next.Stage));
                 }
                 stepped++;
@@ -166,6 +172,7 @@ namespace Jianghu.Drama
             var arc = new ArcInstance(new ArcId(_nextArcId++), ArcKind.Revenge,
                 g.Holder, g.Target, ArcStage.Victimized, 0, 0, false);
             _activeArcs.Add(arc);
+            _stageEnteredAt[arc.Id.Value] = clock; // Victimized 入场 tick（drama-013 超时基准）
             SetPairCooldown(g.Holder, g.Target, clock + _limits.ArcPairCooldown);
             mutator.Emit(new ArcIgnited(clock, arc.Id, g.Holder, g.Target));
             _scheduler.Push(arc.Id, clock + _limits.FirstStageDelay);

@@ -1,7 +1,7 @@
 # Epic: 戏剧引擎 B
 
 **Layer**: Feature
-**Status**: In Design → Stories（2026-06-26 /loop：GDD 已补，待拆 story 落地）
+**Status**: **Done**（2026-06-26 /loop：drama-003~013 全实现，1051 绿，AC-1~10 全过，epic 收官）
 **GDD**: `design/gdd/drama-system.md`（2026-06-26 形式化）；深度源 `docs/legacy-specs/specs/2026-06-13-v1.2-B-戏剧引擎-design.md`
 **Governing ADRs**: adr-0001-integer-determinism, adr-0003-cultivation-off-byte-identical
 **Engine Risk**: LOW（.NET 8 纯整数）；最高危=确定性回归（drama 介入 Advance + Clone 深拷）
@@ -34,7 +34,7 @@
 - ✅ drama-010 World 接线（Step 8，1019 绿，⚠️**最高危**已闭——Advance 主循环 + Clone 命门 + dramaRng=Split(6)，42 determinism/off 实证）
 - ✅ drama-011 受控耦合 Goal 覆写/还原 + 镜像 Relations（Step 9，1028 绿；**RuleBrain 零改实证**；off 战力封顶涌现发现记录）
 - ✅ drama-012 跨代继承（寿尽→子嗣/弟子继承衰减恩怨→点燃下一弧，Step 10，1039 绿；跨代链端到端实证）
-- ⏳ drama-013 INV-CHAIN 端到端验收（预置冤孽 fixture + Showdown 超时强制结算 + 跨代链 + INV-PERF/NO-DEADLOCK，Step 11，**收官**）
+- ✅ drama-013 INV-CHAIN 端到端验收（预置冤孽 fixture + Showdown 超时跟踪 + INV-CHAIN/PERF/CAP/NO-DEADLOCK，Step 11，1051 绿；**epic 收官**）
 - ⏳ drama-009 DramaScheduler + Pump + WorldFactory dramaRng（Step 7）
 - ⏳ drama-010 World 接线（⚠️ 字段+Advance+Clone 全 drama 态深拷，Step 8）
 - ⏳ drama-011 受控耦合（Goal 覆写/还原 + 镜像 Relations，Step 9）
@@ -46,8 +46,20 @@
 
 ## Definition of Done
 - [x] GDD（`design/gdd/drama-system.md`，2026-06-26，红线先行 + Core/Unity 分层 + 8 节 + story 映射）
-- [ ] drama-003~013 全实现（VariedSelector→账本→弧→继承→端到端 INV-CHAIN）
-- [ ] AC-1~10 全过（空库 no-op / 确定性 / IL 浮点零 / 容量 / 性能 / 状态机 / 跨代链 / 无死锁 / RuleBrain 零改 / 全量绿）
+- [x] drama-003~013 全实现（VariedSelector→账本→弧→继承→端到端 INV-CHAIN）
+- [x] AC-1~10 全过（空库 no-op / 确定性 / IL 浮点零 / 容量 / 性能 / 状态机 / 跨代链 / 无死锁 / RuleBrain 零改 / 全量绿）
+
+### AC-1~10 验收对账（GDD §8）
+- [x] **AC-1 空库 no-op（B.3）**：DramaOffByteIdentical/DramaWiringByteIdentical（空库 == off 逐字节，dramaRng 不消费）
+- [x] **AC-2 确定性（B.2）**：DramaWiring/DramaCoupling 同种子两跑逐字节 + Clone 续跑逐字节
+- [x] **AC-3 IL 浮点零**：DramaFloatScan（Jianghu.Drama + Jianghu.Util 零浮点 opcode）
+- [x] **AC-4 容量门控（INV-CAP）**：DramaDeadlock（ActiveArcs ≤ MaxConcurrentArcs，Intensity[0,Cap]，继承≤MaxGen）
+- [x] **AC-5 性能（INV-PERF）**：DramaInvChain（spy 300 角色 2 恩怨 → IsAlive O(强恩怨)≤4）
+- [x] **AC-6 状态机**：RevengeArc（5 态合法转移 + 终态非法转移抛）
+- [x] **AC-7 跨代链**：DramaInheritance/DramaInvChain（预置冤孽长跑见复仇弧完整生命周期 + 父债子偿继承）
+- [x] **AC-8 无死锁**：DramaDeadlock（Stalled 重排 + 死亡 Abandoned + Showdown 超时跟踪 → 弧不永久卡）
+- [x] **AC-9 RuleBrain 零改**：RuleBrain.cs git diff UNCHANGED + RuleBrainTests 全绿（耦合纯经 Goal/notFoe 既有项）
+- [x] **AC-10 全量绿 + 0 警告 + off 逐字节**：1051 绿 / 0 失败 / clean rebuild 0 警告
 
 ## Notes
 GDD 开头先立红线（B.2/B.3/RNG隔离 Drama=6/RuleBrain零改/Clone命门/非致死），再机制。Core 整数层全实现；玩家亲历复仇弧的即时演出属 Unity 宿主层后期。

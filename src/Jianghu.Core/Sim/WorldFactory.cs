@@ -17,7 +17,8 @@ namespace Jianghu.Sim
 
         public static World CreateInitial(ulong seed, LimitsConfig limits, int initialCount,
                                           bool cultivation = false, IPathSource? pathSource = null,
-                                          bool mapOn = false, bool factionOn = false, bool dramaOn = false)
+                                          bool mapOn = false, bool factionOn = false, bool dramaOn = false,
+                                          bool dramaSeedFeuds = false)
         {
             limits.Validate();
             var root = new Pcg32(seed, 1);
@@ -73,7 +74,30 @@ namespace Jianghu.Sim
                         w.Faction.Join(ch.Id, fids[factionAssignRng.NextInt(fids.Count)], w.Clock);
                 }
             }
+
+            // 预置冤孽 fixture（drama-013，spec §5）：仅 dramaSeedFeuds && dramaOn。
+            // 经 genRng 派生独立子流 Split(7777)（纯派生不碰 root 编号/不扰 domain/spawn/drama/cult）。
+            // off / dramaOff → 不构造 feudRng → genRng 消费序不变 → off 逐字节守恒（B.3）。
+            if (dramaSeedFeuds && w.Grudges != null && initialCount >= 2)
+                SeedFeuds(w, genRng.Split(7777), limits, initialCount);
+
             return w;
+        }
+
+        // 预置 1~2 对强恩怨 + 师徒边（确定性，feudRng 种子驱动）。保证首刀必有可观测复仇线。
+        private static void SeedFeuds(World w, IRandom feudRng, LimitsConfig limits, int count)
+        {
+            // 第一对：holder=0 恨 target（≠0 的随机角色）灭门血仇（过点火阈值）。
+            int t1 = 1 + feudRng.NextInt(count - 1);     // [1, count-1]
+            int intensity1 = limits.GrudgeIgniteThreshold + 20 + feudRng.NextInt(15); // 强恩怨
+            if (intensity1 > limits.GrudgeCap) intensity1 = limits.GrudgeCap;
+            w.Grudges!.Form(new CharacterId(0), new CharacterId(t1), Drama.GrudgeKind.Slaughter,
+                intensity1, w.Clock, Drama.GrudgeCause.Direct, 0, null, limits.GrudgeCap);
+
+            // 师徒边：另一在世角色拜 0 为师（0 寿尽则其继承大仇 → 跨代链可观测）。
+            int heir = 1 + feudRng.NextInt(count - 1);
+            if (heir != 0)
+                w.RegisterDramaProfile(new Drama.DramaProfile(new CharacterId(heir), Master: new CharacterId(0), Bloodline: null));
         }
 
         /// <summary>随机生成一名江湖人 + 其 RuleBrain（Factory 与 Lifecycle.MaybeSpawn 共用）。</summary>

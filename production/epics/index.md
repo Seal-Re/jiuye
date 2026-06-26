@@ -17,7 +17,7 @@
 | 4 | 修炼 A.1 余项（10 态/4 劫/5 失败/寿元） | `cultivation-a1-rest` | Core | Designed | 设计完；含 A1.4 blocked（依赖 balance-cross） |
 | 5 | 修炼 A.2（道心/破单调/奇遇/闭关） | `cultivation-a2` | Feature | **Done** | 全 26 story 实现（道心/日课/闭关/奇遇/集成硬化）；〔A.6 审计 2026-06-26 订正陈旧 In Progress→Done，git 证据 + 874 绿〕 |
 | 6 | 修炼 A.3（转职/觉醒/双修） | `cultivation-a3` | Feature | Designed | A3-FINAL |
-| 7 | 戏剧引擎 B | `drama-engine` | Feature | **In Stories（收官在即）** | GDD ✅；drama-003~012 已落（引擎全栈 + World 接线活 + 受控耦合 + 跨代继承父债子偿，1039 绿）；仅剩 013 端到端验收（fixture + Showdown 超时 + INV-CHAIN） |
+| 7 | 戏剧引擎 B | `drama-engine` | Feature | **Done** | GDD ✅ + drama-003~013 全实现（恩怨账本/复仇弧 5 态机/跨代继承/storylet/受控耦合 RuleBrain 零改）；AC-1~10 全过；1051 绿；--drama/dramaSeedFeuds 激活。off 逐字节铁律守住 |
 | 8 | 地图系统 C | `map-system` | Feature | **Wired** | WorldMap/Kruskal/Factory 已接 WorldFactory/Advance（story-008 `a05cd8d`，--map 激活）；懒加载待后续 map story |
 | 9 | 门派 Faction D | `faction` | Feature | **C.0 Done** | C.0 全实现：接线+membership+生命周期（008/009）+ 贡献晋升（010）+ 夺地世仇（011）；C.1 朝廷/经营=远期 |
 | 10 | LLM 脑 v1.1（黑盒 API 多智能体涌现） | `llm-brain` | Feature | Not designed | 🔴 原始核心愿景未设计未建（R-5 sync-over-async 全链路 async 绑此 epic） |
