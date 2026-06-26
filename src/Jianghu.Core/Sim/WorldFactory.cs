@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Jianghu.Config;
 using Jianghu.Cultivation;
 using Jianghu.Decide;
+using Jianghu.Drama;
 using Jianghu.Model;
 using Jianghu.Random;
 using Jianghu.Stats;
@@ -16,7 +17,7 @@ namespace Jianghu.Sim
 
         public static World CreateInitial(ulong seed, LimitsConfig limits, int initialCount,
                                           bool cultivation = false, IPathSource? pathSource = null,
-                                          bool mapOn = false, bool factionOn = false)
+                                          bool mapOn = false, bool factionOn = false, bool dramaOn = false)
         {
             limits.Validate();
             var root = new Pcg32(seed, 1);
@@ -46,6 +47,13 @@ namespace Jianghu.Sim
                 w.SetMap(WorldMapFactory.Create(MapConfig.Default, root.Split(RngStreamIds.Map)));
             if (factionOn)
                 w.SetFaction(SectLedgerFactory.Create(FactionConfig.Default, root.Split(RngStreamIds.Faction), w.Nodes.Count));
+            // Drama 接线（drama-010）：仅 dramaOn 消费 Split(6)（off 绝不调 → 保 Split(1..4) 编号不变，B.3）。
+            // 流编号 Drama=6 已在 RngStreamIds 冻结预留。空库时 Pump no-op（不消费 dramaRng）→ on 空库亦逐字节。
+            if (dramaOn)
+            {
+                var ledger = new GrudgeLedger();
+                w.SetDrama(ledger, new DramaDirector(ledger, limits), root.Split(RngStreamIds.Drama));
+            }
             // 成员分配子流（story-009）：仅 factionOn 构造（off 绝不调 → 保 off 逐字节 B.3）。
             // 从 Faction 流再 Split(1) 派生，不新增 RngStreamIds 编号（承 story-008 流纪律）。
             var factionAssignRng = factionOn ? root.Split(RngStreamIds.Faction).Split(1) : null;

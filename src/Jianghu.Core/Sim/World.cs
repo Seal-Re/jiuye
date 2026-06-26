@@ -4,6 +4,7 @@ using Jianghu.Actions;
 using Jianghu.Config;
 using Jianghu.Cultivation;
 using Jianghu.Decide;
+using Jianghu.Drama;
 using Jianghu.Events;
 using Jianghu.Model;
 using Jianghu.Random;
@@ -11,7 +12,7 @@ using Jianghu.Stats;
 
 namespace Jianghu.Sim
 {
-    public sealed class World : IWorldMutator
+    public sealed class World : IWorldMutator, IDramaView, IDramaMutator
     {
         public long Clock { get; private set; }
         public LimitsConfig Limits { get; }
@@ -32,6 +33,20 @@ namespace Jianghu.Sim
 
         /// <summary>接线 Faction（story-008）：仅 WorldFactory 构造期调用一次（factionOn）。off 不调 → 保持 null。</summary>
         public void SetFaction(SectLedger faction) => Faction = faction;
+
+        /// <summary>恩怨账本（戏剧 B）。off=null——不激活，零性能影响。drama-010 接线。</summary>
+        public GrudgeLedger? Grudges { get; private set; }
+
+        /// <summary>戏剧编排器（drama-010）。off=null。每 Advance 末尾 Pump（null-guarded）。</summary>
+        private DramaDirector? _drama;
+        // 戏剧子流 root.Split(6)：仅 dramaOn 构造（off=null，绝不消费 Split(6)，保 Split(1..4) 编号）。
+        private IRandom? _dramaRng;
+
+        /// <summary>接线 Drama（drama-010）：仅 WorldFactory 构造期调用一次（dramaOn）。off 不调 → 保持 null。</summary>
+        public void SetDrama(GrudgeLedger ledger, DramaDirector director, IRandom dramaRng)
+        {
+            Grudges = ledger; _drama = director; _dramaRng = dramaRng;
+        }
 
         private readonly Dictionary<long, Character> _alive;
         private readonly Scheduler _sched;
@@ -150,6 +165,10 @@ namespace Jianghu.Sim
                 foreach (var c in conquests) // SectLedger 已按确定性序返回
                     Chronicle.Append(new TerritoryLost(Clock, c.Site, c.From, c.To), NameOf);
             }
+            // Drama Pump（drama-010）：每 Advance 末推进到期复仇弧 + 节流点火（off=_drama null 无操作，逐字节）。
+            // 固定在 Faction 后 → 事件顺序确定。空库时 Pump 严格 no-op（不消费 _dramaRng）。
+            // World 自身实现 IDramaView（读世界态）+ IDramaMutator（Emit→Chronicle+memory）。
+            _drama?.Pump(Clock, this, this, _dramaRng!);
             return processed;
         }
 
@@ -214,6 +233,44 @@ namespace Jianghu.Sim
                 case CharacterTrained t:
                     actor.Remember(new MemoryEntry(t.Tick, "train", t.Id, null, 1));
                     break;
+            }
+        }
+
+        // —— IDramaView（drama-010）：戏剧只读世界视图。Power 同 RuleBrain.SelfPower/SparAction 公式。——
+        int IDramaView.Power(CharacterId who)
+            => _alive.TryGetValue(who.Value, out var c) ? DramaPower(c) : 0;
+
+        int IDramaView.Affinity(CharacterId from, CharacterId to) => Relations.Affinity(from, to);
+
+        bool IDramaView.IsAlive(CharacterId who)
+            => _alive.TryGetValue(who.Value, out var c) && c.Alive;
+
+        bool IDramaView.SameNode(CharacterId a, CharacterId b)
+        {
+            if (!_alive.TryGetValue(a.Value, out var ca) || !_alive.TryGetValue(b.Value, out var cb)) return false;
+            return ca.Node.Value == cb.Node.Value;
+        }
+
+        private static int DramaPower(Character c)
+            => c.Stats.Get(StatKind.Force) * 2 + c.Stats.Get(StatKind.Internal) + c.Stats.Get(StatKind.Constitution);
+
+        // —— IDramaMutator（drama-010）：戏剧唯一写口。Emit→Chronicle + drama memory 投影（drama-008 延后项落此）。——
+        void IDramaMutator.Emit(DomainEvent e)
+        {
+            Chronicle.Append(e, NameOf);
+            ProjectDrama(e);
+        }
+
+        // drama 事件 memory 投影：复仇结局写参与者负 valence（大恨入记忆，仿 spar memory）。
+        // 仅 drama 事件，不碰既有 Project。off 不可达（_drama==null 时 Emit 不被调）。
+        private void ProjectDrama(DomainEvent e)
+        {
+            if (e is RevengeConsummated rc)
+            {
+                if (_alive.TryGetValue(rc.Avenger.Value, out var av))
+                    av.Remember(new MemoryEntry(rc.Tick, "revenge", rc.Avenger, rc.Target, rc.AvengerPrevailed ? 3 : -3));
+                if (_alive.TryGetValue(rc.Target.Value, out var tg))
+                    tg.Remember(new MemoryEntry(rc.Tick, "revenge", rc.Target, rc.Avenger, -3));
             }
         }
 
@@ -322,6 +379,13 @@ namespace Jianghu.Sim
                              Clock, Chronicle.Clone(), Relations.Clone(), nodes, deceased, alive, brains, sched);
             if (Map != null) w.Map = Map.Clone();           // 拓扑不可变，浅拷安全
             if (Faction != null) w.Faction = Faction.Clone(); // 深拷成员+关系
+            // Drama（drama-010）：账本只克隆一份，director 复用同一克隆实例（否则 director 操作的账本
+            // ≠ w.Grudges → 漂移）。dramaRng 深拷续跑（R-NF2）。off=三者 null 不拷。
+            if (_drama != null && Grudges != null && _dramaRng != null)
+            {
+                var clonedLedger = Grudges.Clone();
+                w.SetDrama(clonedLedger, _drama.Clone(clonedLedger), CloneRng(_dramaRng));
+            }
             return w;
         }
 

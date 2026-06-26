@@ -57,6 +57,22 @@ namespace Jianghu.Sim
                 sb.Append(w.Faction.CaptureState());
             }
 
+            // drama：off/dramaOff 时 w.Grudges==null → 整段省略（保 off 逐字节，drama-010）。
+            // on 时序列化恩怨账本（确定性 All 序：Id/Holder/Target/Kind/Intensity/Gen）。
+            if (w.Grudges != null)
+            {
+                sb.Append("drama\n");
+                foreach (var g in w.Grudges.All)
+                {
+                    sb.Append(g.Id.Value).Append(FieldSep)
+                      .Append(g.Holder.Value).Append(FieldSep)
+                      .Append(g.Target.Value).Append(FieldSep)
+                      .Append((int)g.Kind).Append(FieldSep)
+                      .Append(g.Intensity).Append(FieldSep)
+                      .Append(g.Generation).Append('\n');
+                }
+            }
+
             return sb.ToString();
         }
 

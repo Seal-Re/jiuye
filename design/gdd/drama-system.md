@@ -145,7 +145,7 @@ C. 候选收集（**只扫 `Grudges.AboveIntensity` 强恩怨，非全员** → 
 | drama-009 | DramaScheduler + DramaDirector.Pump + WorldFactory dramaRng | Step 7 |
 | ↳ 009 | DramaScheduler 最小堆 + IDramaMutator 事件汇 seam ✅ | Step 7a |
 | ↳ 009b | DramaDirector.Pump 推进相 + 节流点火相 ✅ | Step 7b |
-| drama-010 | World 接线（字段+Advance+Clone 全 drama 态深拷） | Step 8 |
+| drama-010 | World 接线（字段+Advance+Clone 全 drama 态深拷）✅ | Step 8 |
 | drama-011 | 受控耦合（Goal 覆写/还原 + 镜像 Relations） | Step 9 |
 | drama-012 | 跨代继承（寿尽→继承→点燃 + 衰减 + 封顶） | Step 10 |
 | drama-013 | 预置冤孽 fixture + 种子 storylet + INV-CHAIN 端到端验收 | Step 11 |
