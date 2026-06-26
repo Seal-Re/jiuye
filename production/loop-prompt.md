@@ -65,11 +65,13 @@
 
 每轮（尤其 compaction 后）先读 `active.md`，轮末回写。环境：.NET 8 SDK `C:\Users\huangjiaqi13\AppData\Local\Microsoft\dotnet`，Bash 侧 `export PATH/DOTNET_ROOT`（见记忆 dotnet-env-setup）。测试 `dotnet test`。
 
-### 当前起点（生成时快照，首轮先重新核实）
+### 当前起点（2026-06-26 R6 后刷新；首轮仍先重新核实）
 
-- HEAD `07120e7`（feat/cultivation-a2，与 origin 对齐），基线 **876 绿 / 0 警告**，WIP=0。
+- HEAD `c500acc`（feat/cultivation-a2，与 origin 对齐），基线 **896 绿 / 0 警告**，WIP=0。
 - Done：combat-r2 / cultivation-a1/a2/a3 / faction C.0 / map(Wired) / balance-cross / integration(C-1闭环) / CR-2026-06-25 全闭环。
-- **首选下一方向 = drama-engine B**（先补 GDD：`design/gdd/drama-system.md`，开头写红线，上游 `docs/legacy-specs/specs/2026-06-13-v1.2-B-戏剧引擎-design.md`，盘点 drama-001/002 已落部分 vs 待补）。
+- **当前 epic = drama-engine B（进行中）**：GDD ✅(`design/gdd/drama-system.md`) + drama-003 VariedSelector ✅ + drama-004 值类型 ✅ + drama-005 GrudgeLedger ✅。
+- **下一 story = drama-006**（LimitsConfig 戏剧上限 + WeightedPicker 整数轮盘，spec Step 3-4）→ 007 storylet+RevengeArc 5态机 → **008 DomainEvent+Project（空库逐字节先证，⚠️最高危）** → 009 DramaScheduler+Pump → **010 World接线+Clone全drama态（⚠️最高危）** → 011 受控耦合(Goal覆写/还原+镜像Relations) → 012 跨代继承 → 013 INV-CHAIN端到端验收。
+- **⚠️ 008/010 确定性最高危**：Project 改 + Clone 深拷全 drama 态。GDD/spec 要求"先证空库 no-op 逐字节不变（既有绿不退）再继续"，先写 INV-DET 专测红再实现。drama story 映射见 GDD §9。
 
 ---
 
