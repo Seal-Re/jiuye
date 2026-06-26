@@ -26,7 +26,8 @@
 - ✅ drama-004 戏剧值类型骨架（Grudge/Arc/Predicate/Effect/DramaProfile，Step 1）
 - ✅ drama-005 `GrudgeLedger` 恩怨账本（List+索引+合并幂等+Clone，Step 2）
 - ✅ drama-006 LimitsConfig 戏剧上限 + `WeightedPicker` 整数轮盘（Step 3-4，926 绿；IL 浮点扫描扩 Util+Drama）
-- ⏳ drama-007 storylet schema + RevengeArc 5 态机 + FindIgnitions（Step 5，下一）
+- ✅ drama-007 storylet substrate（schema/IDramaView/DramaContext/StoryletSelector，Step 5a，957 绿）
+- ⏳ drama-007b RevengeArc.TryAdvance 5 态机 + IDramaMutator + FindIgnitions（Step 5b，下一）
 - ⏳ drama-008 6 DomainEvent + Project/Chronicle case（⚠️ 空库逐字节先证，Step 6）
 - ⏳ drama-009 DramaScheduler + Pump + WorldFactory dramaRng（Step 7）
 - ⏳ drama-010 World 接线（⚠️ 字段+Advance+Clone 全 drama 态深拷，Step 8）
