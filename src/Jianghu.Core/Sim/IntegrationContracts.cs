@@ -69,9 +69,9 @@ namespace Jianghu.Sim
         int FactionCount { get; }
 
         /// <summary>
-        /// 就近同门列表。<paramref name="maxDistance"/> = 地理距离上限（经 IGeoQuery 过滤）。
-        /// 注（story-008 R-3，红线 A.8 诚实标注）：当前实现**忽略 maxDistance**，返回全部同门——
-        /// 地理距离过滤待 membership×geo 接线后补（需角色→节点位置映射，本 story 未接）。签名保留以稳定契约。
+        /// 就近同门列表（契约版，忽略 <paramref name="maxDistance"/>，返回全部同门）。
+        /// 地理过滤（同区域）见具体实现 <c>SectLedger.NearbyFellows(id, geo, positionOf)</c> 富重载（R-3 落地）——
+        /// 需角色→节点位置映射，由 World 注入；接口版保留以稳定契约 + 无 geo 时的退化路径。
         /// </summary>
         IReadOnlyList<CharacterId> NearbyFellows(CharacterId id, int maxDistance);
     }

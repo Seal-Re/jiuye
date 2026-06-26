@@ -510,5 +510,55 @@ namespace Jianghu.Core.Tests.Sim
             Assert.Contains(":c42", afterContrib);     // 贡献度入串
             Assert.Contains(":r1", afterPromote);      // Rank 入串
         }
+
+        // R-3：就近同门 = 同门 + 同区域（RegionOf）。RegionGeo: node.Value/10 = region。
+        sealed class RegionGeo : IGeoQuery
+        {
+            public int RegionOf(NodeId node) => node.Value / 10; // site 0-9=区0, 10-19=区1...
+            public IReadOnlyList<NodeId> SitesInRegion(int regionId) => System.Array.Empty<NodeId>();
+            public IReadOnlyList<NodeId> AdjacentTo(NodeId node) => System.Array.Empty<NodeId>();
+            public int SiteType(NodeId node) => 0;
+            public int ResourceAt(NodeId node) => 0;
+            public int NodeCount => 100;
+            public int RegionCount => 10;
+        }
+
+        [Fact]
+        public void test_nearby_fellows_same_region_only()
+        {
+            // R-3：同门 self(site5,区0)。fellowA(site3,区0)同区→含；fellowB(site15,区1)异区→排除；
+            // 异门 outsider(site5,区0)→不计；fellowC 位置未知→跳过。结果按 Id 升序。
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "甲", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            ledger.RegisterFaction(new FactionDef(2, "乙", 1, new NodeId(10), -1, System.Array.Empty<string>()));
+            var self = new CharacterId(1); var fellowA = new CharacterId(2);
+            var fellowB = new CharacterId(3); var fellowC = new CharacterId(4); var outsider = new CharacterId(5);
+            ledger.Join(self, 1, 0); ledger.Join(fellowA, 1, 0); ledger.Join(fellowB, 1, 0);
+            ledger.Join(fellowC, 1, 0); ledger.Join(outsider, 2, 0);
+
+            var pos = new System.Collections.Generic.Dictionary<long, NodeId>
+            {
+                [1] = new NodeId(5), [2] = new NodeId(3), [3] = new NodeId(15), [5] = new NodeId(5)
+                // fellowC(4) 无位置 → 跳过
+            };
+            NodeId? PositionOf(CharacterId c) => pos.TryGetValue(c.Value, out var n) ? n : (NodeId?)null;
+
+            var nearby = ledger.NearbyFellows(self, new RegionGeo(), PositionOf);
+
+            Assert.Equal(new[] { fellowA }, nearby); // 仅同门同区域的 fellowA
+        }
+
+        [Fact]
+        public void test_nearby_fellows_self_no_position_empty()
+        {
+            var ledger = new SectLedger();
+            ledger.RegisterFaction(new FactionDef(1, "甲", 0, new NodeId(0), 1, System.Array.Empty<string>()));
+            var self = new CharacterId(1); var fellow = new CharacterId(2);
+            ledger.Join(self, 1, 0); ledger.Join(fellow, 1, 0);
+
+            // 自身无位置 → 无从判同区域 → 空。
+            var nearby = ledger.NearbyFellows(self, new RegionGeo(), _ => (NodeId?)null);
+            Assert.Empty(nearby);
+        }
     }
 }

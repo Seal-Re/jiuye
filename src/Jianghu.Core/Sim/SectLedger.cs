@@ -108,12 +108,38 @@ namespace Jianghu.Sim
 
         public IReadOnlyList<CharacterId> NearbyFellows(CharacterId id, int maxDistance)
         {
-            // story-008 R-3（A.8 诚实标注）：maxDistance 暂忽略——地理过滤待 membership×geo 接线后补。
+            // story-008 R-3（A.8 诚实标注）：接口版忽略 maxDistance，返回全部同门。
+            // 同区域地理过滤见下方 SectLedger.NearbyFellows(id, geo, positionOf) 富重载（story R-3 落地）。
             if (!_members.TryGetValue(id, out var m)) return Array.Empty<CharacterId>();
             var list = new List<CharacterId>();
             foreach (var (otherId, (fid, _, _)) in _members)
                 if (fid == m.FactionId && !otherId.Equals(id))
                     list.Add(otherId);
+            return list;
+        }
+
+        /// <summary>
+        /// 就近同门（R-3 落地）：同门 + **同区域**（WorldMap.RegionOf 相等）。纯查询，确定性。
+        /// 数据流：SectLedger 不知成员位置 → 调用方（World）注入 <paramref name="positionOf"/>（CharacterId→NodeId）
+        /// + <paramref name="geo"/>（RegionOf）。位置缺失（散修/已逝）的成员跳过。结果按 CharacterId.Value 升序（确定性）。
+        /// </summary>
+        public IReadOnlyList<CharacterId> NearbyFellows(
+            CharacterId id, IGeoQuery geo, Func<CharacterId, NodeId?> positionOf)
+        {
+            if (!_members.TryGetValue(id, out var m)) return Array.Empty<CharacterId>();
+            var selfPos = positionOf(id);
+            if (selfPos == null) return Array.Empty<CharacterId>(); // 自身无位置→无从判同区域
+            int selfRegion = geo.RegionOf(selfPos.Value);
+
+            var list = new List<CharacterId>();
+            foreach (var (otherId, (fid, _, _)) in _members)
+            {
+                if (fid != m.FactionId || otherId.Equals(id)) continue;
+                var pos = positionOf(otherId);
+                if (pos == null) continue; // 位置未知→不计入就近
+                if (geo.RegionOf(pos.Value) == selfRegion) list.Add(otherId);
+            }
+            list.Sort((a, b) => a.Value.CompareTo(b.Value)); // 确定性序
             return list;
         }
 
