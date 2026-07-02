@@ -29,7 +29,8 @@ docs/consistency-failures.md
 __pycache__/
 *.pyc
 # EPIC-TIDY 顺手补（像素产物 + 抓取 raw3）
-# 注: 顶层 pixel/ 已迁 → tools/pixel-pipeline/(脚本) + assets/art/pixel/(资产)，且本地残留已清
+# 注: 顶层 pixel/ 已迁 → tools/pixel-pipeline/(脚本) + assets/art/pixel/(资产)。
+#    生成脚本 raw 产物默认落 tools/pixel-pipeline/_aigen/(见下·已 gitignored)，锚定 __file__ 不随 CWD 变，不再重建顶层 pixel/。
 assets/art/pixel/out/
 tools/pixel-pipeline/out/
 _research/raw3/

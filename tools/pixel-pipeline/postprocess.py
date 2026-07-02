@@ -6,6 +6,10 @@ run: python pixel/postprocess.py <输入图> [--out <输出> --w 32 --h 48 --anc
 import os, sys, argparse, math
 from PIL import Image
 
+# raw 产物默认落 tools/pixel-pipeline/_aigen/（已 gitignored）——锚定脚本自身位置，不随 CWD 变。
+# 旧默认 ./pixel/_aigen 从仓库根运行会重建顶层 pixel/ 残留（未 gitignored），故改此。
+_AIGEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_aigen")
+
 # 复用 char_gen 的 RAMP（量化目标调色板，保成套统一）
 sys.path.insert(0, os.path.dirname(__file__))
 try:
@@ -121,7 +125,7 @@ if __name__=="__main__":
         g.add_argument("--rows", type=int, required=True)
         g.add_argument("--cols", type=int, required=True)
         g.add_argument("--cell", type=int, default=48, help="每件目标像素(默认48,游戏内尺寸)")
-        g.add_argument("--out-dir", default="./pixel/_aigen/sliced")
+        g.add_argument("--out-dir", default=os.path.join(_AIGEN,"sliced"))
         g.add_argument("--names", default=None, help="逗号分隔的每格命名")
         g.add_argument("--ramp", default=None)
         a = g.parse_args(sys.argv[2:])

@@ -7,6 +7,10 @@ import os, sys, math
 from PIL import Image
 sys.stdout.reconfigure(encoding="utf-8")
 
+# raw 产物默认落 tools/pixel-pipeline/_aigen/（已 gitignored）——锚定脚本自身位置，不随 CWD 变。
+# 旧默认 ./pixel/_aigen 从仓库根运行会重建顶层 pixel/ 残留（未 gitignored），故改此。
+_AIGEN = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_aigen")
+
 # 品阶定义: 名 → (色调乘子 RGB, 是否加光环边, 光环色)
 TIERS = {
     "fan":  ((0.78,0.78,0.82), False, None),          # 凡品:去饱和压暗
@@ -51,7 +55,7 @@ def derive(base_png, out_dir):
 
 if __name__=="__main__":
     import argparse
-    ap=argparse.ArgumentParser(); ap.add_argument("base"); ap.add_argument("--out-dir",default="./pixel/_aigen/variants")
+    ap=argparse.ArgumentParser(); ap.add_argument("base"); ap.add_argument("--out-dir",default=os.path.join(_AIGEN,"variants"))
     a=ap.parse_args()
     s=derive(a.base, a.out_dir)
     print(f"品阶派生: {a.base} → {len(s)} 变体({'/'.join(TIERS)}) → {a.out_dir}")

@@ -52,9 +52,9 @@ SKILL=.claude/skills/sunshineflow-banana-alpha/scripts/generate_image.py
 # 列蓝图
 python $SKILL --list-blueprints
 # 文生图(默认 image2 带 alpha) → 出图标/可染色部件
-python $SKILL --prompt "<AI_PROMPTS.md 里的 prompt>" --output-dir "./pixel/_aigen"
+python $SKILL --prompt "<AI_PROMPTS.md 里的 prompt>" --output-dir "tools/pixel-pipeline/_aigen"
 # 像素角色部件(强制 pixel 蓝图)
-python $SKILL --blueprint pixel-art-fs --prompt "pixel art sprite ..." --output-dir "./pixel/_aigen"
+python $SKILL --blueprint pixel-art-fs --prompt "pixel art sprite ..." --output-dir "tools/pixel-pipeline/_aigen"
 # 图生图(保风格/出变体)
 python $SKILL --prompt "..." --reference_textures "./pixel/parts/3_robe/robe_sword_v1.png"
 ```
@@ -82,9 +82,9 @@ python $SKILL --prompt "..." --reference_textures "./pixel/parts/3_robe/robe_swo
 
 ```bash
 # ① AI 出网格图(prompt 要求 NxN grid, each centered, transparent, clean grid lines)
-python $SKILL --prompt "pixel art equipment icons, a 4x4 grid of 16 different ... each centered in its own cell, transparent background, consistent style, clean dark grid lines" --output-dir ./pixel/_aigen
+python $SKILL --prompt "pixel art equipment icons, a 4x4 grid of 16 different ... each centered in its own cell, transparent background, consistent style, clean dark grid lines" --output-dir tools/pixel-pipeline/_aigen
 # ② 本地切片成 N 独立件(48² 游戏尺寸)
-python tools/pixel-pipeline/postprocess.py grid <网格图> --rows 4 --cols 4 --cell 48 --names jian,dao,spear,... --out-dir pixel/_aigen/equip_sliced
+python tools/pixel-pipeline/postprocess.py grid <网格图> --rows 4 --cols 4 --cell 48 --names jian,dao,spear,... --out-dir tools/pixel-pipeline/_aigen/equip_sliced
 # ③ 精修挑用的入库 pixel/parts/ 或挂 char_skeleton 装备点
 ```
 
@@ -132,4 +132,4 @@ python tools/pixel-pipeline/postprocess.py grid <网格图> --rows 4 --cols 4 --
 - **红线 B.8**：游戏世界（角色/tile/物品）=像素轨；UI=古风轨。
 - **AI 出图是"原创基础件/静态展示"那一层**（PIXEL_RULES §0：算法做不出语义+审美原创 → 交 AI）；code 负责骨架/动画/拼装/批量。
 - **确定性边界**：AI 出料**不确定**（同 prompt 不同图），属"一次性出静态件"；char_gen 的骨架/拼装/换色**确定**（红线 B.2）。
-- 出的 raw 图建议放 `pixel/_aigen/`（gitignore），精修入库的才进 `pixel/parts/`。
+- 出的 raw 图放 `tools/pixel-pipeline/_aigen/`（gitignore，脚本默认 out-dir 即此），精修入库的才进 `pixel/parts/`。
