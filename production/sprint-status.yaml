@@ -19,7 +19,7 @@ start: "2026-07-03"
 end: "2026-07-10"
 generated: "2026-07-03"
 updated: "2026-07-03"
-status: active
+status: closed  # sprint-7 retrospective 完成（retro-sprint-7-2026-07-03.md）；三里程碑达成，进 Alpha
 
 stories:
   # —— Must Have ——
@@ -44,11 +44,11 @@ stories:
   - id: "balance-007"
     name: "控制衰减与冷却（Hybrid Cooldown & Diminishing Returns）— 消 stun-lock"
     file: "production/epics/balance-cross/story-007-control-cooldown-dr.md"
-    priority: should-have  # Alpha backlog（用户 2026-07-03 裁决方案B变体）；CC 机制健康化，非 sprint-7 目标
-    status: ready-for-dev  # story 已建，待 Review 确认后实现（DR=duration-based 因对拍无RNG；CD/DR duel-local）
+    priority: should-have  # Alpha backlog（用户 2026-07-03 裁决方案B变体 + Review Approved）；CC 机制健康化，非 sprint-7 目标
+    status: ready-for-dev  # story Review Approved（用户确认两工程修正：DR=duration-based/duel-local）；Alpha 后续实现
     owner: ""
     estimate_days: 1.5
-    blocker: "待用户 Review story 卡片确认（用户明示：Review 后再进 sprint-7 retrospective）"
+    blocker: ""
     completed: ""
   - id: "balance-004"
     name: "切磋碎压平滑 — 无势均对手则降切磋意愿（Target-Selection 权重）"
