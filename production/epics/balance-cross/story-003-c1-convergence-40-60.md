@@ -81,6 +81,24 @@ After calibration, update `DuelGateTests.Frozen`:
 - Module capping for artifact effects — deferred to combat-fullstruct epic
 - Full combat path rebalancing beyond what's needed for C1 gate
 
+## QA Test Cases
+<!-- 回填自 /qa-plan sprint（2026-07-03）。测试用例 spec，供 /dev-story 与 /code-review 溯源。 -->
+
+**测试文件**：`tests/Jianghu.Core.Tests/Cultivation/InvCrossDuelTests.cs`（硬闸门）、`DuelEngineTests.cs`（钳制边界）、`Determinism/OffByteIdenticalTests.cs`（回归守）
+
+**必测（源 AC 3.1–3.10）**：
+- **AC 3.4 硬闸门**：同UT战斗对 [40,60]% `violations == 0`（blocking，替代 advisory [35,65]% + 47/48 基线）。
+- **AC 3.3 重校准审计**：重校准后各路 PE 落 sword 锚 ±tolerance（`new_mul_p(i)=old_mul_p(i)×sword_PE(UT_i)/path_PE(UT_i)`）。
+- **AC 3.1 模块钳制边界**：OnUse 模块伤害增量 ≤ `ctx.ModuleDamageCap=PE/4`（正好 cap / 超 cap 钳平）。
+- **AC 3.5 C2 单调保**：UT gap≥2 → 高 UT 胜率 ≥80%（不退）。
+- **AC 3.6 C3 辅助豁免保**：Dan≤7/Array≤7/Qixiu≤10 不变。
+- **AC 3.7 反扁平**：≥ M=3 对 |win%−50%| ∈ [5,10]。
+- **AC 3.9**：全量绿 + off 逐字节 + IL 浮点零。
+
+**边界用例**：UT=2（最低分化）/ UT=12（顶境）/ 同 PE 对（margin→0）/ 极端 stats（Σ=80 单维顶）/ counter 克制对（若与 [40,60] 结构性冲突 → 需 counter 豁免名单，见下方 defer 复核）。
+
+**预计**：~8–12 集成/单测。
+
 ## Test Evidence Requirement
 
 **Type**: Integration — integrated tests. Post-fix C1 gate at [40,60]% with 0 violations, C2/C3 preservation, module cap boundary tests, RealmMultipliers audit, full green.
