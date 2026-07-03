@@ -6,7 +6,7 @@
 #          此前无 TR-ID 惯例——本文件建立 scheme。
 #
 # TR-ID scheme: TR-<DOMAIN>-<NNN>
-#   DOMAIN ∈ { DET(确定性) | MOD(模块系统) | BAL(平衡) | CULT(修炼) | DRAMA | MAP | FACTION }
+#   DOMAIN ∈ { DET(确定性) | MOD(模块系统) | BAL(平衡) | CULT(修炼) | DRAMA | MAP | FACTION | VIEW(表现层/Godot) }
 #   NNN    = 三位序号，域内 append-only（绝不复用/重编号）
 #
 # 每条字段:
@@ -25,7 +25,7 @@ requirements:
   - id: TR-DET-001
     requirement: >
       Jianghu.Cultivation 及所有逻辑层全程禁浮点、全整数确定性；
-      同种子同输入在任何 .NET 运行时（CLI JIT / Unity IL2CPP / Mono）逐字节一致。
+      同种子同输入在任何 .NET 运行时（CLI JIT / Godot CoreCLR / 各平台 AOT / Mono）逐字节一致。
     source_gdd: docs/architecture/adr-0001-integer-determinism.md
     governing_adr: adr-0001-integer-determinism
     status: implemented
@@ -155,3 +155,126 @@ requirements:
     notes: >
       GDD 待补（采用迁移计划 Step 4 DEFER：faction GDD 待 epic 转 doing）。
       RngStreamIds.Faction = 8。SectLedger / IFactionQuery。
+
+  # ---- 表现层 / Godot View (VIEW) ----
+  # 源真相 = docs/architecture/godot-architecture-manifest.md（前瞻规范，Alpha 入口基线）。
+  # 以下条目为 manifest 关键约束的溯源锚——多为 proposed/designed（View 层未落地）。
+  # 不新造机制；实现前须先出 GDD/ADR 定护栏（红线 A.10 内核前置）。
+  - id: TR-VIEW-001
+    requirement: >
+      逻辑与表现绝对隔离：Model(C# 内核) 持世界状态/战力/剧情/网格，严禁引入 Godot 库
+      （Godot.Mathf/RandomNumberGenerator 等）；View(Godot) 仅渲染 + 输入捕获，经 Signal/Event
+      观察内核；Controller(_Process) 仅转发，Tick() 由玩家输入驱动。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr: adr-0004-godot-view-host-boundary
+    status: designed  # 边界纪律已立（adr-0004）；Godot 宿主代码未生成
+    verified_by:
+      - BannedApiAnalyzers（Godot.* 禁入 Core，P-FORBIDDEN-1；当前 src 零命中）
+      - code review（P-REQUIRED-1..4 / P-FORBIDDEN-1..4，表现层边界）
+    redline: A.10
+    notes: manifest §1.1；完全对齐 adr-0004 §① + architecture §9.1 + control-manifest P 层。
+
+  - id: TR-VIEW-002
+    requirement: >
+      确定性回放安全：核心 100% 纯整数；录像/回放仅记 [初始 Seed] + [每回合离散指令序列]；
+      导致浮点漂移的即时物理碰撞结算严禁进 C# 内核。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr:
+      - adr-0001-integer-determinism
+      - adr-0003-cultivation-off-byte-identical
+    status: implemented  # 内核整数确定性 + 命令端口整数意图已达成（Core 侧）；录像系统本身未建
+    verified_by:
+      - ILFloatScanner（Jianghu.Cultivation 零浮点）
+      - OffByteIdenticalTests（off 逐字节 SHA256）
+    redline: B.2
+    notes: manifest §1.2 = 复述 TR-DET-001/002；"离散指令序列" = adr-0004 §① 整数意图命令端口。
+
+  - id: TR-VIEW-003
+    requirement: >
+      反应式回合战斗：玩家选技能 → View 触发 QTE → 结果映射为离散乘子（0.5x/1.0x/1.2x）
+      回传内核结算；内核闪避/命中 → View 反应窗口帧宽容度；弹反(Parry)成功抵消内核原定伤害；
+      同类强控连发时弹反窗口阶梯放大（抗性递减 = balance-007）。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr: adr-0002-module-factory-effect-system
+    status: designed  # combat-system.md 已定"双档保真度"(Core 整数 q_core / View 浮点窗口 q)；View 未建
+    verified_by:
+      - code review（离散乘子回传 = 浮点不进 Core，P-FORBIDDEN-2）
+      - balance-007 story（Review Approved；DR=duration-based/duel-local）
+    redline: B.2
+    notes: >
+      manifest §3。QTE 浮点手感只在 View；回传内核的是离散整数乘子 → 守 B.2。
+      弹反窗口阶梯 = balance-007 CC 抗性递减（story-007-control-cooldown-dr.md）。
+
+  - id: TR-VIEW-004
+    requirement: >
+      韧性/硬直系统（Poise/Stagger）：体质/防御属性 → 战斗场景韧性条；强控标签攻击产生高削韧；
+      韧性清零前受击霸体（不断动作），击破后触发真实硬直 + 控制状态。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr: adr-0002-module-factory-effect-system
+    status: proposed  # 新战斗维度，未设计；纯整数可表达（韧性条/削韧=int），与 B.2 无冲突
+    verified_by: []  # 待 GDD + 实现
+    redline: null
+    notes: manifest 补§3.2。落地时须接 combat-system.md 结算层 + Modules 工厂（B.9）。
+
+  - id: TR-VIEW-005
+    requirement: >
+      PCG 动态生成：数据驱动（宗门/势力/剧情模板经 JSON/YAML 外置，杜绝硬编码）；
+      管线 = 剧情模板 → 宏观 Voronoi/BSP 划版图 → 微观柏林噪声填地形 → Godot 等距 TileMap 出图块。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr: adr-0004-godot-view-host-boundary
+    status: proposed  # 未设计；等距 TileMap = adr-0004 §③ iso 预留（0 代码）
+    verified_by: []  # 待 GDD + ADR
+    redline: A.10
+    notes: >
+      manifest §4。数据驱动一致（配置外置）；等距投影浮点/像素只属 View（§9.3）。
+      **开放调和项 R2**：柏林噪声浮点若入 Core 撞 B.2 → 候选 adr-0006（architecture §10.2）。
+
+  - id: TR-VIEW-006
+    requirement: >
+      动态叙事/LLM 集成：前端江湖记事本历史图谱 UI；系统为外部文本生成（本地 LLM/RAG）留接口，
+      每次输入 Seed 时自动书写背景故事/宗门史/功法视觉描述；功法数值变异限于 PE 平价公式阈值内。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr: null
+    status: proposed  # IBrain 端口在（Decide 层）；llm-brain epic 未设计（原始核心愿景）
+    verified_by:
+      - InvCrossDuelTests（数值变异限 PE 阈 = INV-CROSS C1，见 TR-BAL-001）
+    redline: null
+    notes: >
+      manifest 补§4.3。数值变异"限 PE 平价阈"= TR-BAL-001（C1 [40,60]%）。
+      llm-brain 实现前须先出 GDD 定护栏（epics index #10 Not designed）。
+
+  # ---- 开放调和项（触及 Core，候选 ADR，未裁决；登记于 architecture §10.2）----
+  # 非 append-only 需求，而是待架构裁决的张力锚。裁决后转正式 ADR + 更新对应 TR 条目。
+  - id: TR-VIEW-R1
+    requirement: >
+      【开放张力，未裁决】宏观同步回合（manifest §2.1：玩家不操作世界绝对静止，决策一次结算一次 Tick）
+      vs adr-0004 §② 累加器"观察态自动追帧"。候选 adr-0005：分治(宏观玩家驱动+微观累加器) 或 统一纯玩家驱动。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr: null  # 候选 adr-0005（未立）
+    status: proposed
+    verified_by: []
+    redline: A.1  # 大方向决策交用户
+    notes: 影响 architecture §9.2 / adr-0004 §②。本次仅登记，不裁决。
+
+  - id: TR-VIEW-R2
+    requirement: >
+      【开放张力，未裁决】柏林噪声（manifest §4）天然浮点，若地形生成结果入 Core（喂 A* 权重/属性乘区）
+      则撞 B.2。候选 adr-0006：① 整数/定点柏林查表；② 噪声只在 View 生成，仅整数化结果经命令端口入 Core。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr: null  # 候选 adr-0006（未立）
+    status: proposed
+    verified_by: []
+    redline: B.2
+    notes: 影响 PCG 落地层归属（TR-VIEW-005）。本次仅登记，不裁决。
+
+  - id: TR-VIEW-R3
+    requirement: >
+      【开放张力，未裁决】ECS 倾向（manifest 补§1.3：限制深层 OOP，强制向 ECS 靠拢）
+      vs 现 Character OOP 聚合根（深拷 World.Clone + 确定性子流绑定）。候选 adr-0007：
+      ① 维持 OOP；② 局部 data-oriented 重构热路径；③ 全 ECS。需先立性能基准证明必要性。
+    source_gdd: docs/architecture/godot-architecture-manifest.md
+    governing_adr: null  # 候选 adr-0007（未立）
+    status: proposed
+    verified_by: []
+    redline: A.1
+    notes: 大架构决定（同 retro"方差战斗模型需专门立项"级）。本次仅登记，不裁决。

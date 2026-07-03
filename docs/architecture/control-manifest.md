@@ -14,6 +14,7 @@
 |---|---|
 | 2026-07-03 | 初始 bootstrap。编入红线 B.2/B.3/B.5/B.9 + BannedApiAnalyzers 禁用清单 + RngStreamIds append-only 与 Clone 要求。 |
 | 2026-07-03b | 引擎目标 Unity→Godot 4.x .NET（ADR-0004）。新增 **Presentation·Host 层**（P-REQUIRED/P-FORBIDDEN）；F-FORBIDDEN 新增 `Godot.*` 禁入 Core；IL2CPP 表述→CoreCLR/AOT/Mono。Foundation/Core 层规则不变。 |
+| 2026-07-03c | 对接 [godot-architecture-manifest.md](godot-architecture-manifest.md)（View 层前瞻规范）。Presentation·Host 层加反应式战斗「QTE→离散乘子回传内核」与 P-FORBIDDEN-2 一致性注 + manifest 参考链接。**层规则本身不变**（纯索引/说明）。 |
 
 ---
 
@@ -104,6 +105,8 @@
 ## Presentation·Host 层（Godot 4.x .NET 宿主 / CLI View）
 
 > 表现层**尚未生成**——本层规则为 ADR-0004 立的**接入前置边界**，任何 Godot 宿主代码落地即受约束。CLI（`Jianghu.Cli`）作为当前 headless View 已合规。**权威真相**：[adr-0004](adr-0004-godot-view-host-boundary.md)。
+>
+> **View 层完整形态目标**（宏微观双层世界 / 反应式 QTE-弹反战斗 / PCG / 韧性硬直 / LLM 叙事）见 [godot-architecture-manifest.md](godot-architecture-manifest.md)。**关键一致性**：反应式战斗的「玩家 QTE → 离散乘子（0.5x/1.0x/1.2x）回传内核结算」正是 **P-FORBIDDEN-2** 的体现——QTE 浮点手感只活在 View，**回传内核的是离散整数乘子**，浮点/帧时绝不进 Core（守 B.2）。弹反窗口阶梯放大 = balance-007 CC 抗性递减（story Approved）。三处触及 Core 的开放调和项（柏林浮点/ECS 倾向/宏观同步回合）登记于 [architecture.md §10.2](architecture.md)，候选 ADR，未裁决。
 
 ### Required（P-REQUIRED）
 
@@ -147,7 +150,8 @@
 ## 参考
 
 - 主架构：[architecture.md](architecture.md)
-- 需求溯源：[tr-registry.yaml](tr-registry.yaml)
+- View 层前瞻规范（宏微观世界/反应式战斗/PCG/韧性/LLM）：[godot-architecture-manifest.md](godot-architecture-manifest.md)
+- 需求溯源：[tr-registry.yaml](tr-registry.yaml)（含 TR-VIEW-* 表现层锚 + R1/R2/R3 开放调和项）
 - ADR：[adr-0001](adr-0001-integer-determinism.md) / [adr-0002](adr-0002-module-factory-effect-system.md) / [adr-0003](adr-0003-cultivation-off-byte-identical.md) / [adr-0004](adr-0004-godot-view-host-boundary.md)
 - 红线：CLAUDE.md §A（流程）/ §B（技术）
 - 禁用清单源：`src/Jianghu.Core/BannedSymbols.txt`

@@ -28,8 +28,12 @@
 | 16 | LLM 脑 | `llm-brain` | Feature | Not Designed | — | — | actions | — |
 | 17 | 系统集成层 | `integration` | Feature | Partially wired | — | — | 全部 Core | — |
 | 18 | 可视化 | `visualization` | Presentation | Spike Only | — | — | integration | — |
+| 19 | Godot 宿主层（View/Host） | `godot-host` | Presentation | Planned | godot-architecture-manifest.md | adr-0004 | integration | — |
+| 20 | 宏微观双层世界 | `macro-micro-world` | Presentation | Not Designed | godot-architecture-manifest.md §2 | (候选 adr-0005) | godot-host, map-system | — |
+| 21 | 反应式回合战斗（QTE/弹反/韧性） | `reactive-combat` | Presentation | Not Designed | godot-architecture-manifest.md §3 + combat-system.md | adr-0002 | godot-host, combat | — |
+| 22 | 动态江湖生成器（PCG） | `pcg` | Presentation | Not Designed | godot-architecture-manifest.md §4 | (候选 adr-0006) | godot-host | — |
 
-**Status values**: Not Started | In Progress | In Review | Designed | Approved | Done | Deferred | Blocked
+**Status values**: Not Started | In Progress | In Review | Designed | Approved | Done | Deferred | Blocked | Planned | Not Designed | Wired
 
 ---
 
@@ -40,7 +44,7 @@
 | Foundation | 地基——无此游戏不成立 | World, Character, PRNG, Scheduler |
 | Core | 核心玩法系统 | Cultivation, Combat, Balance |
 | Feature | 上层特征——增强涌现/戏剧性 | Drama, Map, Faction, LLM-Brain |
-| Presentation | 渲染/UI/可视化 | Pixel art, SVG UI, Unity rendering |
+| Presentation | 渲染/UI/可视化 | Pixel art, SVG UI, Godot rendering（Godot 4.x .NET，adr-0004） |
 
 ---
 
@@ -66,6 +70,7 @@ Foundation ──→ Core ──→ Feature ──→ Presentation
 ## Notes
 
 - 设计深度源在 `docs/legacy-specs/specs/`（18 份），原地保留；GDD 增量补
+- **2026-07-03 引擎切换**：表现层目标 Unity→**Godot 4.x (.NET)**（[adr-0004](../../docs/architecture/adr-0004-godot-view-host-boundary.md)）。系统 #19-22（Godot 宿主/宏微观世界/反应式战斗/PCG）为 **View 层前瞻规范**，源真相 = [godot-architecture-manifest.md](../../docs/architecture/godot-architecture-manifest.md)；均 **Not Designed/Planned**，未实现（接入闸口=无头日志证核心无死锁，红线 A.10）。触及 Core 的开放调和项（柏林浮点/ECS/宏观同步回合）见 [architecture.md §10.2](../../docs/architecture/architecture.md)，候选 ADR 未裁决。
 - Combat 系列已收官（combat-r2 Done；combat-fullstruct Deferred，待 balance-cross 验证近似档是否够用）
 - `cultivation-a1-rest` 的 A1.4 blocked-on `balance-cross`
 - `drama-engine` 已收官（drama-001~013 全落，1051 绿，`--drama` 激活）；`map-system`/`faction` 已接线（`--map`/`--faction`）

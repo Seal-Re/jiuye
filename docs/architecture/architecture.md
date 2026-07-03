@@ -2,7 +2,8 @@
 
 > **Status**: Living（主架构文档）
 > **Created**: 2026-07-03（综合 CLAUDE.md §F + ADR-0001/0002/0003 + technical-preferences.md）
-> **Scope**: Foundation 层 + Core 层。Feature 层（drama/map/faction/llm-brain）与 Presentation 层（可视化/Godot 宿主）仅点到接口边界，详见各自 GDD 与 §9 / ADR-0004。
+> **Scope**: Foundation 层 + Core 层。Feature 层（drama/map/faction/llm-brain）与 Presentation 层（可视化/Godot 宿主）仅点到接口边界，详见各自 GDD 与 §9 / §10 / ADR-0004。
+> **View 层规范锚点**：Godot 表现层（View）、PCG（程序化生成）、2D 等距地图渲染的**前瞻规范真相源** = [godot-architecture-manifest.md](godot-architecture-manifest.md)（§10 索引其与内核红线的隔离关系）。
 > **Traceability**: 每条关键决策回链其 ADR（见 §7 ADR 索引）。本文档 = 派生综合，源真相在 ADR / 红线 / 源码。
 
 ---
@@ -163,6 +164,7 @@
 ## 8. 参考
 
 - 层规则手册（Required/Forbidden/Performance）：[control-manifest.md](control-manifest.md)
+- **Godot 表现层前瞻规范（View/PCG/地图渲染真相源）**：[godot-architecture-manifest.md](godot-architecture-manifest.md)（宏微观双层世界 / 反应式回合战斗 / PCG / 韧性硬直 / LLM 叙事；§10 索引隔离关系）
 - 需求溯源注册表（TR-ID）：[tr-registry.yaml](tr-registry.yaml)
 - 系统全景：`design/gdd/systems-index.md`
 - CLAUDE.md §F 架构概览 / §B 技术红线（源真相）
@@ -173,6 +175,8 @@
 ## 9. Godot 表现层边界（Presentation / Host 层，ADR-0004）
 
 > 2026-07-03 引擎目标由 Unity 切至 **Godot 4.x (.NET)**。本节是边界**摘要**，权威真相在 [adr-0004](adr-0004-godot-view-host-boundary.md)。**当前表现层未生成、2D 等距地图未开发**——本节含"架构预留"，不落地任何宿主/地图代码。
+>
+> **前瞻规范扩展**：本节（§9）定的是 Model⊥View **边界纪律**（单向流/固定时间步/iso 预留）；View 层的**完整形态目标**（宏微观双层世界、反应式 QTE/弹反战斗、PCG 管线、韧性硬直、LLM 叙事）见 [godot-architecture-manifest.md](godot-architecture-manifest.md)，其与内核红线的隔离关系与开放调和项见 **§10**。
 
 **Core = Model（纯逻辑数据层），Godot = View（只读渲染 + 输入采集）。** 三条规矩：
 
@@ -193,3 +197,40 @@
 - Core 若需空间坐标，只持**整数逻辑格** `(int gx,int gy)`，engine-agnostic；屏幕像素/iso 菱形投影全在 View 换算。
 - 现有 `Jianghu.Sim.WorldMap`（Kruskal MST **整数图拓扑**）与未来 iso 空间层**分离**——它是引擎无关的逻辑图，非空间/像素 iso，不在"地图渲染代码"范畴。
 - 预留缝（未来 `IMapProjection`，宿主实现）**当前不创建**——预留 = 文档登记，代码 0 行。
+
+---
+
+## 10. View 层前瞻规范索引 + 开放调和项（Godot Architecture Manifest 对接）
+
+> 2026-07-03 落盘用户交付的 [godot-architecture-manifest.md](godot-architecture-manifest.md)（"最终形态规范"，Alpha 阶段入口基线）。它定义 View 层的**完整形态目标**，比 §9（边界纪律）更进一步。本节做两件事：**① 概念索引**（新规范引入的架构概念 → 现有红线/ADR 的对应）；**② 开放调和项**（新规范触及 Core、需专门架构裁决的张力，登记为候选 ADR，**本次不裁决**——大方向决策交用户，红线 A.1）。
+>
+> **落盘边界（本次仅文档基线，红线 A.10 内核前置）**：manifest 是**前瞻设计源**，非落地清单。宏微观世界/反应式战斗/PCG 等**均未实现**，本节只做登记映射，不触任何 `.cs`，不为新概念作全 8 段 GDD（那属过早雕琢）。表现层接入闸口仍为「无头数据日志证明核心机制无死锁」（红线 A.10 / adr-0004）。
+
+### 10.1 概念索引（manifest 概念 → 现有架构对应）
+
+| manifest 概念 | 节 | 与现有红线/ADR 关系 | 现状 |
+|---|---|---|---|
+| **逻辑与表现绝对隔离**（Model/View/Controller） | §1.1 | **完全一致** adr-0004 §① Model→View 单向流 + `Godot.*` 禁入 Core（§6 / P-FORBIDDEN-1）。`_Process` 只转发、`Tick()` 玩家驱动 = §9.2 固定时间步 | 边界已立 |
+| **确定性与回放安全**（纯整数 + Seed+离散指令序列录像） | §1.2 | **完全一致** §5.1 整数确定性（B.2）+ §5.2 off 逐字节（B.3）。"离散指令序列"= adr-0004 §① 整数意图命令端口 | 内核已达成 |
+| **宏微观双层世界**（大世界同步回合 + 微观箱庭实时反应） | §2 | **新增 View 概念**。宏观同步回合与 adr-0004 §② 累加器"观察态自动追帧"有张力 → **开放调和项 R1** | 未设计 |
+| **反应式回合战斗**（QTE→离散乘子回传内核 / 弹反抵消） | §3 | **一致**：`combat-system.md` 已定"双档保真度"（Core 整数 q_core / View 浮点窗口 q）；QTE 结果映射为**离散乘子**回传 = 浮点不进 Core（P-FORBIDDEN-2）。balance-007 弹反窗口阶梯 = CC 抗性递减（已 Approved story） | View 未建，Core 侧 q_core 设计在案 |
+| **PCG 动态生成**（Voronoi/BSP + 柏林噪声 + 等距 TileMap） | §4 | 数据驱动=一致（配置外置，红线 A.10）；等距 TileMap=§9.3 iso 预留。**柏林噪声浮点**若入 Core 撞 B.2 → **开放调和项 R2** | 未设计 |
+| **实体平权**（主角=具外部输入特权的标准实体） | 补§1.3 | **一致** adr-0004 §① 玩家介入=命令端口喂整数意图；主角无写死特殊机制=纯涌现 | 概念一致，未实现玩家实体 |
+| **性能天花板 → ECS 倾向**（限制深层 OOP，向 ECS 靠拢） | 补§1.3 | 现 `Character` 是 OOP 聚合根（§3）。ECS 化 = Core 架构方向性变动 → **开放调和项 R3** | 未评估 |
+| **韧性/硬直系统**（Poise/Stagger，体质→韧性条，削韧破霸体） | 补§3.2 | **新增战斗维度**。纯整数可表达（韧性条=int，削韧=int），与 B.2 无冲突；需接 `combat-system.md` 结算层 | 未设计 |
+| **动态叙事/LLM 叙事**（记事本 UI + 生成器接口 + 数值变异限 PE 阈） | 补§4.3 | **一致** `IBrain` 端口（§3 Decide 层）；数值变异"限 PE 平价阈"= INV-CROSS C1（TR-BAL-001）。llm-brain epic 已登记（未设计，需先出 GDD） | 端口在，实现未建 |
+
+### 10.2 开放调和项（候选 ADR，本次不裁决）
+
+> 以下三项触及 **Core 逻辑/架构**，非文本同步可解——需专门架构立项裁决（红线 A.1 大方向交用户）。此处仅**登记张力 + 候选方向**，不下结论、不改任何 `.cs`。
+
+- **R1 — 宏观同步回合 vs 累加器自动追帧**（候选 adr-0005）
+  manifest §2.1「玩家不操作，世界绝对静止；决策一次 → 全局结算一次 `Tick()`」是**纯回合驱动**；adr-0004 §② 累加器含「观察态自动追帧」（真实时间累加自动 `Advance`）。二者可**分治**（宏观层玩家驱动步进 + 微观箱庭累加器插值）或**统一为纯玩家驱动**。裁决影响 §9.2。**未决**。
+
+- **R2 — 柏林噪声浮点 vs B.2 整数确定性**（候选 adr-0006）
+  manifest §4「微观柏林噪声填充地形」天然浮点。若地形生成结果**入 Core**（影响 A* 权重/属性乘区，manifest §2.1/§2.2），则撞 B.2（`Jianghu.Cultivation` 及全逻辑层禁浮点）。候选方向：① 整数/定点柏林（查表）；② 噪声**只在 View 生成**，仅整数化结果（如离散地形枚举 int）经命令端口入 Core。裁决影响 PCG 落地层归属。**未决**。
+
+- **R3 — ECS 倾向 vs 现 OOP 聚合根**（候选 adr-0007）
+  manifest 补§1.3「限制深层 OOP 继承，强制向 ECS 靠拢」。现 `Character`（§3 Model）是 OOP 聚合根，深拷贝语义（`World.Clone`）与确定性子流绑定。ECS 化是**大架构决定**（承 active.md retro action item「评估方差战斗模型需专门立项」同级）。候选方向：① 维持 OOP（继承已浅，性能未证瓶颈）；② 局部 data-oriented 重构热路径；③ 全 ECS。**需先立性能基准证明必要性，未决**。
+
+> 三项均登记于 [tr-registry.yaml](tr-registry.yaml)（TR-VIEW-* proposed 条目），候选 ADR 号预留 0005/0006/0007（0005 此前建议留给道心解耦正式化，见 §7 脚注——实际立项时统一重编，不在此钉死）。
