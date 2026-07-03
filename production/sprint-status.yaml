@@ -45,11 +45,11 @@ stories:
     name: "切磋碎压平滑 — 无势均对手则降切磋意愿（Target-Selection 权重）"
     file: "production/epics/balance-cross/story-004-spar-stomp-smoothing.md"
     priority: must-have
-    status: ready-for-dev  # story 已建（/create-stories）；PE 度量已对齐（16dc54c），加"无势均降意愿"层
+    status: done  # 9b73358 stompPenalty；碾压率 33%→24%（seed42 残留34%，受确定性模型限，承 balance-006）；B.3 守
     owner: ""
     estimate_days: 1.0
-    blocker: "依赖 balance-003（重校准后再平滑切磋，done）"
-    completed: ""
+    blocker: ""
+    completed: "2026-07-03"
 
   # —— Should Have ——
   - id: "doc-debt-1"
