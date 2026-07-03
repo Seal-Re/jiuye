@@ -1,9 +1,9 @@
 # 控制清单 — 层规则手册（Control Manifest）
 
-> **Manifest Version: 2026-07-03**
+> **Manifest Version: 2026-07-03b**
 > **Status**: Active
-> **Purpose**: 按层（Foundation / Core）声明 Required / Forbidden / Performance 规则。story 的 layer 约束、`/dev-story` 实现纪律、`/code-review` 判据均以本清单为准。
-> **Source of truth**: 红线（CLAUDE.md §A/§B）+ ADR-0001/0002/0003。本清单是红线的**分层编排**，红线冲突时以 CLAUDE.md 为准。
+> **Purpose**: 按层（Foundation / Core / Presentation·Host）声明 Required / Forbidden / Performance 规则。story 的 layer 约束、`/dev-story` 实现纪律、`/code-review` 判据均以本清单为准。
+> **Source of truth**: 红线（CLAUDE.md §A/§B）+ ADR-0001/0002/0003/0004。本清单是红线的**分层编排**，红线冲突时以 CLAUDE.md 为准。
 > **Traceability**: Forbidden 每条注原因 + 溯源红线/ADR + 守护机制（编译器 / IL 扫描 / 测试 / code review）。
 
 ---
@@ -13,6 +13,7 @@
 | Version | 变更 |
 |---|---|
 | 2026-07-03 | 初始 bootstrap。编入红线 B.2/B.3/B.5/B.9 + BannedApiAnalyzers 禁用清单 + RngStreamIds append-only 与 Clone 要求。 |
+| 2026-07-03b | 引擎目标 Unity→Godot 4.x .NET（ADR-0004）。新增 **Presentation·Host 层**（P-REQUIRED/P-FORBIDDEN）；F-FORBIDDEN 新增 `Godot.*` 禁入 Core；IL2CPP 表述→CoreCLR/AOT/Mono。Foundation/Core 层规则不变。 |
 
 ---
 
@@ -23,6 +24,7 @@
 | **Foundation** | 地基——无此模拟不成立 | `Jianghu.Model` / `Random` / `Stats` / `Config` / `Sim`(核心主循环) / `Actions` / `Events` |
 | **Core** | 核心玩法——修炼与战斗 | `Jianghu.Cultivation`(+`.paths`/`.special`/`.Artifacts`) |
 | Feature | 上层特征（本清单不详列，规则同 Foundation 且 off 不激活） | `Jianghu.Drama` / `Decide` / `Sim`(map/faction) |
+| **Presentation·Host** | 表现/宿主——只读渲染 + 输入采集（**Core 之外**的独立程序集） | Godot 4.x .NET 宿主（`WorldBridge` 等，未生成）；`Jianghu.Cli`（当前 headless View） |
 
 > Feature 层新增系统：**必须**走独立 PRNG 流（append-only）、off 不激活、侧表不污染 v1.0 record——即遵守 Foundation 的 F-FORBIDDEN-4 与 F-REQUIRED-1/2。
 
@@ -45,8 +47,8 @@
 
 | ID | 禁止 | 原因 | 溯源 | 守护 |
 |---|---|---|---|---|
-| F-FORBIDDEN-1 | **`System.Random`** in Core | 跨运行时（Framework / .NET 6+ / Mono / IL2CPP）同种子序列不同 → 破确定性。改用注入的 `IRandom`。 | 红线 B.2 / ADR-0001 | **BannedApiAnalyzers**（`RS0030=error`，编译失败） |
-| F-FORBIDDEN-2 | **`System.Console`** in Core | Core 是纯逻辑库不做 IO；IO 属 Host（CLI/Unity）层。 | ADR-0001 | **BannedApiAnalyzers** |
+| F-FORBIDDEN-1 | **`System.Random`** in Core | 跨运行时（Framework / .NET 6+ / Mono / CoreCLR / AOT）同种子序列不同 → 破确定性。改用注入的 `IRandom`。 | 红线 B.2 / ADR-0001 | **BannedApiAnalyzers**（`RS0030=error`，编译失败） |
+| F-FORBIDDEN-2 | **`System.Console`** in Core | Core 是纯逻辑库不做 IO；IO 属 Host（CLI/Godot）层。 | ADR-0001 | **BannedApiAnalyzers** |
 | F-FORBIDDEN-3 | **`System.DateTime` / `DateTime.Now`** in Core | 挂钟时间不可复现 → 破逐字节复现。改逻辑 `Tick`。 | 红线 B.2 / ADR-0001 §3 | **BannedApiAnalyzers** |
 | F-FORBIDDEN-4 | **`System.Threading.Thread` / `Task.Run`** in Core | 多线程执行顺序不确定 → 破确定性。Core 单线程确定性推进。 | ADR-0001 §4 | **BannedApiAnalyzers** |
 | F-FORBIDDEN-5 | **复用/重编号既有 `RngStreamIds`**（1..8 冻结） | 改动既有子流编号会改变 off 消费序列 → 破 off 逐字节。只能 append。 | ADR-0003 / CLAUDE.md §F | off 逐字节测试 + code review |
@@ -81,7 +83,7 @@
 
 | ID | 禁止 | 原因 | 溯源 | 守护 |
 |---|---|---|---|---|
-| C-FORBIDDEN-1 | **浮点（`float`/`double`/`System.Math`）in `Jianghu.Cultivation`** | IEEE754 在不同后端/优化等级（JIT vs AOT vs IL2CPP）舍入行为可能不同 → 破跨运行时逐字节一致。需要非整数运算改整数查表/定点。 | 红线 B.2 / ADR-0001 §2 | **`ILFloatScanner` 测试**（IL 扫描，BLOCKING） |
+| C-FORBIDDEN-1 | **浮点（`float`/`double`/`System.Math`）in `Jianghu.Cultivation`** | IEEE754 在不同后端/优化等级（JIT vs AOT，如 CoreCLR/Mono/IL2CPP）舍入行为可能不同 → 破跨运行时逐字节一致。需要非整数运算改整数查表/定点。 | 红线 B.2 / ADR-0001 §2 | **`ILFloatScanner` 测试**（IL 扫描，BLOCKING） |
 | C-FORBIDDEN-2 | **`daoHeart`/`innerDemon` 进 `EffectivePower`**（BaseSum/Modifier/战力） | 道心/心魔是叙事+突破维度，非战斗强度维度。混入战力会用道心数值污染跨路战力平衡。**唯一允许位置** = 突破劫 `TribulationDef.ResistTerms`。 | 红线 B.5 | `PowerEngine.Resolve` 抛 `ArgumentException`（`res:daoHeart`/`res:innerDemon`）+ 专项测试 |
 | C-FORBIDDEN-3 | **裸写 `new EffectOp(七参)` 战斗构造在 path 文件** | 7 参极易漏（ratio/Amount2≥1/Trigger/Rarity）；散在 21 文件难查错；绕过平衡体系；重复造轮子。必经 `Modules` 工厂单点。 | 红线 B.9 / ADR-0002 | **code review**（`EffectOp` internal，BannedApiAnalyzers 未覆盖） |
 | C-FORBIDDEN-4 | **改 `RealmMultipliers`/`UnifiedTierOf` 等 on 数据后不验 off 逐字节** | 虽然这些仅经 cultivation-on 路径（`PowerEngine.Evaluate`），改后仍须证 off 不受扰（`OffByteIdenticalTests`/`OffRegressionWith21PathsTests`）。 | 红线 B.3 / balance-cross story-003 §B.3 分析 | off 逐字节测试 |
@@ -99,6 +101,37 @@
 
 ---
 
+## Presentation·Host 层（Godot 4.x .NET 宿主 / CLI View）
+
+> 表现层**尚未生成**——本层规则为 ADR-0004 立的**接入前置边界**，任何 Godot 宿主代码落地即受约束。CLI（`Jianghu.Cli`）作为当前 headless View 已合规。**权威真相**：[adr-0004](adr-0004-godot-view-host-boundary.md)。
+
+### Required（P-REQUIRED）
+
+| ID | 规则 | 溯源 | 守护 |
+|---|---|---|---|
+| P-REQUIRED-1 | **数据只沿 Model→View 单向流**：宿主节点只读 `World`/`StateSnapshot`/`Chronicle`，经 `WorldBridge` 转 Godot `[Signal]` 广播。 | ADR-0004 §① | code review |
+| P-REQUIRED-2 | **玩家回写唯一经显式命令端口**（整数意图 → 下一确定性 `Tick`）；绝不直改 Core 字段。 | ADR-0004 §① | code review |
+| P-REQUIRED-3 | **`World.Advance` 走固定时间步累加器**（宿主累加真实时间，够 `SimStepSeconds` 推进一步）；渲染帧与模拟步解耦。 | ADR-0004 §② | code review |
+| P-REQUIRED-4 | iso/空间坐标换算（屏幕像素 ↔ 逻辑格）**只在宿主**；Core 侧只持整数逻辑格 `(int gx,int gy)`。 | ADR-0004 §③ | code review（地图未来） |
+
+### Forbidden（P-FORBIDDEN）
+
+| ID | 禁止 | 原因 | 溯源 | 守护 |
+|---|---|---|---|---|
+| P-FORBIDDEN-1 | **`Godot.*`（及 `UnityEngine.*`）进 `Jianghu.Core`** | Core 是纯逻辑库；引擎 API 破"零改写/零引擎依赖"承诺，且焊死单一宿主使 CLI/测试无法复用。桥接（`using Godot`）只属宿主程序集。 | ADR-0004 §① / architecture §6 | code review（当前无 Godot 引用；如未来加 `BannedSymbols` 可升编译期守） |
+| P-FORBIDDEN-2 | **渲染帧时 `delta`（浮点）进 Core / 传入 `World.Advance`** | 浮点 `delta` 破 B.2 整数确定性；`Advance` 吃 `delta` 使模拟速度随帧率漂移 → 破可复现。`delta` 只属 `_Process` 渲染插值。 | ADR-0004 §② / 红线 B.2 | code review |
+| P-FORBIDDEN-3 | **iso 屏幕投影/浮点像素坐标进 Core** | iso `((gx−gy)·w/2,(gx+gy)·h/2)` 是浮点/像素温床，属 View；进 Core 破 B.2。Core 只认整数逻辑格。 | ADR-0004 §③ / 红线 B.2 | code review（地图未来） |
+| P-FORBIDDEN-4 | **View 反向驱动/修改确定性内核状态**（绕过命令端口） | 破 Model/View 单向流；View 写 Core 会引入非确定性输入路径。 | ADR-0004 §① | code review |
+
+### Performance（P-PERF）
+
+| ID | 规则 | 说明 |
+|---|---|---|
+| P-PERF-1 | 固定时间步宿主须设**每帧最大追帧数上限**，防掉帧"追帧螺旋"。 | 宿主层实现细节，不入 Core；见 ADR-0004 Consequences。 |
+| P-PERF-2 | 渲染插值/UI 帧预算属宿主层（Godot 实时帧），与 Core 的"无实时帧预算"（F-PERF-1）分治。 | Core 非帧循环；宿主才有帧预算。 |
+
+---
+
 ## 守护机制速查
 
 | 机制 | 类型 | 覆盖 |
@@ -107,7 +140,7 @@
 | **`ILFloatScanner` 测试** | 测试期，BLOCKING | C-FORBIDDEN-1（`Jianghu.Cultivation` 浮点） |
 | **`OffByteIdenticalTests`** | 测试期，BLOCKING | F-REQUIRED-3/4、F-FORBIDDEN-5/6、C-FORBIDDEN-4（off 逐字节 SHA256） |
 | **`PowerEngine.Resolve` 护栏** | 运行期抛异常 + 测试 | C-FORBIDDEN-2（道心解耦） |
-| **code review**（Opus 4.8） | 人工/agent | C-FORBIDDEN-3（裸 `EffectOp`）、C-REQUIRED-1/2/3、F-REQUIRED-1/2 |
+| **code review**（Opus 4.8） | 人工/agent | C-FORBIDDEN-3（裸 `EffectOp`）、C-REQUIRED-1/2/3、F-REQUIRED-1/2、**P-REQUIRED-1..4 / P-FORBIDDEN-1..4**（表现层边界，ADR-0004；当前无 Godot 代码，纪律先行） |
 
 ---
 
@@ -115,6 +148,6 @@
 
 - 主架构：[architecture.md](architecture.md)
 - 需求溯源：[tr-registry.yaml](tr-registry.yaml)
-- ADR：[adr-0001](adr-0001-integer-determinism.md) / [adr-0002](adr-0002-module-factory-effect-system.md) / [adr-0003](adr-0003-cultivation-off-byte-identical.md)
+- ADR：[adr-0001](adr-0001-integer-determinism.md) / [adr-0002](adr-0002-module-factory-effect-system.md) / [adr-0003](adr-0003-cultivation-off-byte-identical.md) / [adr-0004](adr-0004-godot-view-host-boundary.md)
 - 红线：CLAUDE.md §A（流程）/ §B（技术）
 - 禁用清单源：`src/Jianghu.Core/BannedSymbols.txt`

@@ -13,15 +13,15 @@
 
 ### 项目本质（牢记，影响每个设计决策）
 
-- **目标平台 = Unity**（非终端小游戏）。CLI 只是 Core 的 headless 测试驱动，**不是产品形态**。
-- **分层铁律**：`Jianghu.Core`（netstandard2.1，纯整数确定性，零引擎依赖）**零改写进 Unity 被引用**；需浮点/实时帧/玩家输入/即时窗口的 → 放 **Unity 宿主层**（后期），不放 Core。设计文档须显式标注"哪部分 Core 整数结算 / 哪部分 Unity 宿主层"（参 `design/gdd/combat-system.md` 的双层范式）。
+- **目标平台 = Godot 4.x (.NET)**（非终端小游戏；2026-07-03 由 Unity 切换，[adr-0004](../docs/architecture/adr-0004-godot-view-host-boundary.md)）。CLI 只是 Core 的 headless 测试驱动，**不是产品形态**。
+- **分层铁律**：`Jianghu.Core`（netstandard2.1，纯整数确定性，零引擎依赖）**零改写进 Godot 被引用**；需浮点/实时帧/玩家输入/即时窗口/iso 屏幕坐标的 → 放 **Godot 宿主层**（后期），不放 Core（`Godot.*`/`delta`/iso 投影禁入 Core，adr-0004 §9）。设计文档须显式标注"哪部分 Core 整数结算 / 哪部分 Godot 宿主层"（参 `design/gdd/combat-system.md` 的双层范式）。
 - **可视化分轨（B.8）**：游戏世界=像素(Pillow)，UI=古风(SVG/HTML-CSS)。设计涉及表现层时分轨标注。
 
 ### 工作顺序铁律：先设计，再落地
 
 每个 epic 推进必须按此顺序，不得跳步直接写代码：
 
-1. **设计先行**：epic 无 GDD（`design/gdd/<system>.md`）→ 先写 GDD。**GDD 开头先写红线/约束**（本系统受哪些红线约束 + Core/Unity 分层 + 不变量），再写机制（Overview/Player Fantasy/Detailed Rules/Formulas/Edge Cases/Dependencies/Tuning Knobs/Acceptance Criteria 八节，见 coding-standards）。上游真相源指向 `docs/legacy-specs/specs/`。
+1. **设计先行**：epic 无 GDD（`design/gdd/<system>.md`）→ 先写 GDD。**GDD 开头先写红线/约束**（本系统受哪些红线约束 + Core/Godot 分层 + 不变量），再写机制（Overview/Player Fantasy/Detailed Rules/Formulas/Edge Cases/Dependencies/Tuning Knobs/Acceptance Criteria 八节，见 coding-standards）。上游真相源指向 `docs/legacy-specs/specs/`。
 2. **拆 story**：GDD 就绪 → `/create-stories` 或手动按 GDD 拆 implementable story（每个嵌 AC + 测试证据路径 + 红线约束）。story 先 ready-for-dev。
 3. **TDD 落地**：① 差分测试 RED（"装备 vs 剥离"语义正确，非仅≠0）② 实现转绿 ③ `dotnet test --nologo` 全量 ④ 勾 story DoD（机器证据）。
 4. **回写台账 + 提交合并**。

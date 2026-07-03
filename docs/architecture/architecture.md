@@ -2,7 +2,7 @@
 
 > **Status**: Living（主架构文档）
 > **Created**: 2026-07-03（综合 CLAUDE.md §F + ADR-0001/0002/0003 + technical-preferences.md）
-> **Scope**: Foundation 层 + Core 层。Feature 层（drama/map/faction/llm-brain）与 Presentation 层（可视化/Unity 宿主）仅点到接口边界，详见各自 GDD。
+> **Scope**: Foundation 层 + Core 层。Feature 层（drama/map/faction/llm-brain）与 Presentation 层（可视化/Godot 宿主）仅点到接口边界，详见各自 GDD 与 §9 / ADR-0004。
 > **Traceability**: 每条关键决策回链其 ADR（见 §7 ADR 索引）。本文档 = 派生综合，源真相在 ADR / 红线 / 源码。
 
 ---
@@ -11,11 +11,13 @@
 
 九野是一个**确定性、事件驱动的江湖涌现模拟内核**。核心设计意图是**分层宿主**：
 
-- **`Jianghu.Core`（纯逻辑库，netstandard2.1）**：全部模拟机制。零引擎依赖——不引用 `UnityEngine.*`，不做 IO。这是"Model"。
-- **`Jianghu.Cli`（薄壳驱动，net8.0）**：当前阶段的"View/Host"——解析 CLI 参数 → 构造 World → 推进 → 打印文本快照。
-- **后期 Unity 宿主**：`Jianghu.Core` 设计为 `netstandard2.1`（Unity 默认 API 兼容级），意图**零改写被 Unity 直接引用**渲染 + 承接玩家介入。Core 保持无引擎 API 是这一"零改写"承诺的前提（见 §6）。
+- **`Jianghu.Core`（纯逻辑库，netstandard2.1）**：全部模拟机制。零引擎依赖——不引用 `Godot.*`（历史目标 `UnityEngine.*` 同禁），不做 IO。这是"Model"。
+- **`Jianghu.Cli`（薄壳驱动，net8.0）**：当前阶段的"View/Host"——解析 CLI 参数 → 构造 World → 推进 → 打印文本快照。后期与 Godot 宿主**并列共存**（同一 Core，两个 View；headless 回归不受宿主影响）。
+- **后期 Godot 宿主（Godot 4.x .NET）**：`Jianghu.Core` 为 `netstandard2.1`，Godot 4.x .NET（CoreCLR）可**直接引用**渲染 + 承接玩家介入。Core 保持无引擎 API 是这一"零改写"承诺的前提（见 §6、§9，ADR-0004）。
 
-**Model / View 分离**是贯穿全局的第一原则：模拟状态（World）与其呈现（CLI 文本 / 后期 Unity 渲染）严格解耦。View 只读 World 状态，不反向驱动确定性内核。这使得同一 Core 可在 CLI（.NET 8 JIT）与 Unity（IL2CPP）下产出**逐字节一致**的模拟轨迹（见 §5.1，ADR-0001）。
+> **引擎目标 = Godot 4.x (.NET)**（2026-07-03 由 Unity 切换）。切换 ≈ 术语对齐 + 新增桥接红线（ADR-0004），**非架构重写**——Model/View 分离、B.2 整数确定性、B.3 off 逐字节三条地基一字不改。`netstandard2.1` TFM 保留（Godot 4.x .NET 直接引用，比 Unity asset 导入层更贴合标准 `dotnet` 工具链）。
+
+**Model / View 分离**是贯穿全局的第一原则：模拟状态（World）与其呈现（CLI 文本 / 后期 Godot 渲染）严格解耦。View 只读 World 状态，不反向驱动确定性内核（回写只经显式命令端口，见 §9）。这使得同一 Core 可在 CLI（.NET 8 JIT）与 Godot（CoreCLR / 各平台 AOT）下产出**逐字节一致**的模拟轨迹（见 §5.1，ADR-0001）。
 
 模拟有两个模式，由构造参数 `cultivation` 切换：
 - **off 模式**（默认）：纯 v1.0 规则，无修炼。输出必须与最初 v1.0 **逐字节一致**（ADR-0003，红线 B.3）。
@@ -27,8 +29,8 @@
 
 | 程序集 | TFM | 职责 | 关键约束 |
 |---|---|---|---|
-| `Jianghu.Core` | `netstandard2.1` | **纯逻辑库**——全部模拟机制（模型/PRNG/调度/动作/修炼/战斗/戏剧/事件）。 | 零引擎依赖；禁 `System.Random`/`Console`/`DateTime`/`Thread`（BannedApiAnalyzers）；`Jianghu.Cultivation` 禁浮点（IL 扫描）。后期直接被 Unity 引用。 |
-| `Jianghu.Cli` | `net8.0` | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory.CreateInitial` → `World.Advance` → 打印快照。 | 当前唯一 Host；后期由 Unity 宿主并列/取代。可用 `System.Console`（非 Core）。 |
+| `Jianghu.Core` | `netstandard2.1` | **纯逻辑库**——全部模拟机制（模型/PRNG/调度/动作/修炼/战斗/戏剧/事件）。 | 零引擎依赖；禁 `System.Random`/`Console`/`DateTime`/`Thread`（BannedApiAnalyzers）；`Jianghu.Cultivation` 禁浮点（IL 扫描）。后期直接被 Godot 4.x .NET 引用。 |
+| `Jianghu.Cli` | `net8.0` | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory.CreateInitial` → `World.Advance` → 打印快照。 | 当前 Host；后期与 Godot 宿主并列（同一 Core，两个 View）。可用 `System.Console`（非 Core）。 |
 | `Jianghu.Core.Tests` | `net8.0` | xUnit 全量测试（1051 绿）：确定性（IL 浮点扫描 / 逐字节复现）、off 逐字节、21 路独立、战斗模块差分、drama 恩怨链。 | 回归基线 = 全量绿不退。 |
 
 ---
@@ -90,7 +92,7 @@
 
 ### 5.1 整数确定性（ADR-0001，红线 B.2）
 
-**`Jianghu.Cultivation` 及所有逻辑层全程禁浮点，全部整数确定性。** 同种子同输入 → 任何 .NET 运行时（CLI JIT / Unity IL2CPP / Mono）逐字节一致。
+**`Jianghu.Cultivation` 及所有逻辑层全程禁浮点，全部整数确定性。** 同种子同输入 → 任何 .NET 运行时（CLI JIT / Godot CoreCLR / 各平台 AOT / Mono）逐字节一致。
 
 - **PRNG**：`Pcg32`（整数），`Split(id)` 派生子流。
 - **禁浮点**：`Jianghu.Cultivation` 全命名空间由 **`ILFloatScanner` 测试** IL 扫描守护（零 `float`/`double`/`System.Math`）。
@@ -128,20 +130,20 @@
 
 ---
 
-## 6. 引擎兼容 — "零改写进 Unity" 前提
+## 6. 引擎兼容 — "零改写进 Godot" 前提
 
-`Jianghu.Core` 保持 `netstandard2.1` + 无引擎依赖，是"后期零改写被 Unity 引用"的硬前提。由 **`Microsoft.CodeAnalysis.BannedApiAnalyzers`**（`.editorconfig` `RS0030=error`）编译期强制，违者**编译错误**。`BannedSymbols.txt` 冻结禁用清单：
+`Jianghu.Core` 保持 `netstandard2.1` + 无引擎依赖，是"后期零改写被 Godot 4.x .NET 引用"的硬前提。由 **`Microsoft.CodeAnalysis.BannedApiAnalyzers`**（`.editorconfig` `RS0030=error`）编译期强制，违者**编译错误**。`BannedSymbols.txt` 冻结禁用清单：
 
 | 禁用 API | 原因 |
 |---|---|
-| `System.Random` | 跨运行时（Framework/.NET 6+/Mono/IL2CPP）同种子序列不同 → 改用注入的 `IRandom` |
+| `System.Random` | 跨运行时（Framework/.NET 6+/Mono/CoreCLR/AOT）同种子序列不同 → 改用注入的 `IRandom` |
 | `System.Console` | Core 不做 IO（IO 属 Host 层） |
 | `System.DateTime` / `.get_Now` | 挂钟时间不可复现 → 改用逻辑 `Tick` 时钟 |
 | `System.Threading.Thread` | 多线程执行顺序不确定 → Core 单线程确定性推进 |
 | `float`/`double`（仅 `Jianghu.Cultivation`） | IEEE754 跨后端舍入可能不同 → 全整数（`ILFloatScanner` 测试守，非 BannedApiAnalyzers） |
-| `UnityEngine.*` | Core 是纯逻辑库；引擎 API 会破坏"零改写"承诺（当前无 Unity 引用，路由纪律见 technical-preferences.md） |
+| `UnityEngine.*` / **`Godot.*`** | Core 是纯逻辑库；引擎 API 会破坏"零改写"承诺。当前无 Godot 引用，`Godot.*` 只属宿主程序集（路由纪律见 technical-preferences.md，边界见 §9 / ADR-0004） |
 
-> 若未来真需非整数（如 Unity 即时反应窗口的正态判定），放在 **Unity 宿主层**，不进 Core（红线 B.2 只约束 `Jianghu.Cultivation`）。
+> 若未来真需非整数（如 Godot 即时反应窗口的正态判定），放在 **Godot 宿主层**，不进 Core（红线 B.2 只约束 `Jianghu.Cultivation`）。渲染帧时 `delta` / iso 屏幕坐标同理——只属 View，绝不进 Core（§9）。
 
 ---
 
@@ -152,8 +154,9 @@
 | [adr-0001](adr-0001-integer-determinism.md) | Integer Determinism | Accepted | §5.1 整数确定性 | B.2 |
 | [adr-0002](adr-0002-module-factory-effect-system.md) | Module Factory Effect System | Accepted | §5.3 模块工厂 | B.9 |
 | [adr-0003](adr-0003-cultivation-off-byte-identical.md) | Cultivation-off Byte-Identical | Accepted | §5.2 off 逐字节 | B.3 |
+| [adr-0004](adr-0004-godot-view-host-boundary.md) | Godot View/Host 边界 | Accepted | §9 Godot 表现层边界 | A.10 |
 
-> 道心解耦（§5.4，红线 B.5）当前无独立 ADR——由 `PowerEngine` 源码护栏 + code review 守。如需正式化，建议补 adr-0004。
+> 道心解耦（§5.4，红线 B.5）当前无独立 ADR——由 `PowerEngine` 源码护栏 + code review 守。如需正式化，建议补 adr-0005（adr-0004 已用于 Godot 表现层边界）。
 
 ---
 
@@ -164,3 +167,29 @@
 - 系统全景：`design/gdd/systems-index.md`
 - CLAUDE.md §F 架构概览 / §B 技术红线（源真相）
 - 源码：`src/Jianghu.Core/Random/`（Pcg32/RngStreamIds）、`Sim/`（World/WorldFactory）、`Cultivation/`（PowerEngine/Modules/ModuleResolver）
+
+---
+
+## 9. Godot 表现层边界（Presentation / Host 层，ADR-0004）
+
+> 2026-07-03 引擎目标由 Unity 切至 **Godot 4.x (.NET)**。本节是边界**摘要**，权威真相在 [adr-0004](adr-0004-godot-view-host-boundary.md)。**当前表现层未生成、2D 等距地图未开发**——本节含"架构预留"，不落地任何宿主/地图代码。
+
+**Core = Model（纯逻辑数据层），Godot = View（只读渲染 + 输入采集）。** 三条规矩：
+
+### 9.1 Model → View 单向数据流 + Signal 订阅
+- Godot 节点**只读** `World`/`StateSnapshot`/`Chronicle`；数据只沿 Model→View 单向流。
+- 宿主侧 `WorldBridge : Node` 拉取 Core `DomainEvent`/快照增量 → 转 Godot C# `[Signal]` 向渲染节点广播。**Core 不感知 Godot**——只产出 `DomainEvent`，适配在宿主层。
+- **玩家回写唯一合法通道 = 显式命令端口**：输入 → 宿主收为**整数意图** → 喂进下一确定性 `Tick`。绝不让 View 直改 Core 字段，绝不把浮点/帧时/坐标塞进 Core。
+- **`Godot.*` 禁入 `Jianghu.Core`**（§6，对标原 `UnityEngine.*` 禁令）。
+
+### 9.2 `_Process()` ↔ `Tick()` = 固定时间步累加器
+- Godot `_Process(double delta)` **只渲染/插值**，`delta`（浮点帧时）**绝不进 Core**。
+- 内核走**固定时间步累加器**：宿主累加真实时间，够一个 `SimStepSeconds` 就 `World.Advance` 一步（`while (acc >= step) { Advance(); acc -= step; }`），渲染按 `acc/step` 插值。
+- `Advance` 由**逻辑步/玩家意图**驱动，非帧率驱动 → 掉帧只影响追帧次数，不改每步确定性轨迹（同种子→同轨迹，与帧率无关）。为何：`delta` 进 Core 会破 B.2 + 模拟速度随帧率漂移破可复现。
+
+### 9.3 2D 等距（Isometric）TileMap 坐标系转换红线（**架构预留，0 代码**）
+- **地图未设计，本轮绝不实现任何 iso/地图代码。** 仅登记未来红线：
+- iso 投影 `screen=((gx−gy)·tileW/2,(gx+gy)·tileH/2)` 及其逆是**浮点/像素温床**，只属 Godot 宿主（`TileMap.MapToLocal`/`LocalToMap`）；**绝不进 Core**。
+- Core 若需空间坐标，只持**整数逻辑格** `(int gx,int gy)`，engine-agnostic；屏幕像素/iso 菱形投影全在 View 换算。
+- 现有 `Jianghu.Sim.WorldMap`（Kruskal MST **整数图拓扑**）与未来 iso 空间层**分离**——它是引擎无关的逻辑图，非空间/像素 iso，不在"地图渲染代码"范畴。
+- 预留缝（未来 `IMapProjection`，宿主实现）**当前不创建**——预留 = 文档登记，代码 0 行。

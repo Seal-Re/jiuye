@@ -5,6 +5,8 @@
 - **Deciders**: huangjiaqi13 + Claude (architecture-review)
 - **Affects**: `Jianghu.Core` / `Jianghu.Core.Cultivation`
 
+> **2026-07-03 注**：引擎目标由 Unity 切至 **Godot 4.x (.NET)**（见 [adr-0004](adr-0004-godot-view-host-boundary.md)）。本 ADR 的决策**引擎无关**、完全成立——下文 "Unity/IL2CPP" 是历史撰写时的跨运行时**举例**（IL2CPP 仍是 AOT 舍入分歧的真实例证），保留为历史记录；现宿主运行时以 Godot CoreCLR / 各平台 AOT / Mono 为准。
+
 ---
 
 ## Context
