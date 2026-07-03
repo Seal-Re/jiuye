@@ -62,7 +62,7 @@ namespace Jianghu.Cultivation.Paths
             //    四列等长（M4）：倍率 / UnifiedTierOf（UT0-12 映射）/ 境界名（炼气→筑基→金丹→元婴→化神→炼虚→合体→大乘→渡劫）/
             //    升入阈值（资源积累+法术参悟厚积，realm0=0 起；法术早成体系故前段阈低、稳健渐进）。——
             var curve = new RealmCurveDef(
-                new[] { 10, 14, 19, 27, 42, 62, 96, 151, 237 }, // INV-CROSS v2: nerf -5~10% UT4+ (module-dominant); UT8=0.91x sword (was 0.98x)
+                new[] { 10, 13, 19, 28, 43, 65, 100, 156, 247 }, // balance-003: §5 归一化校准至 sword 锚 target(UT)（TR-BAL-001）
                 new[] { 0, 2, 4, 6, 8, 9, 10, 11, 12 },
                 new[] { "炼气", "筑基", "金丹", "元婴", "化神", "炼虚", "合体", "大乘", "法相天地" },
                 // 法术早成体系故厚积渐进（≥90×当前realm 升阶，平滑无跳变）。

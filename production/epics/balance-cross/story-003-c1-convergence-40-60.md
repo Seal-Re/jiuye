@@ -121,3 +121,18 @@ After calibration, update `DuelGateTests.Frozen`:
 
 **未提交任何实现**：本轮所写 `[40,60]%` RED 硬闸门测试已撤销（工作树恢复 1051 绿）。上述为纯分析落盘。
 
+---
+
+## 2026-07-03 Alpha 落地（sprint-7）：PE 归一化 Done，counter 平衡拆出
+
+**做了（§5 解析校准，数据驱动）**：`C1RecalibrationTests` harness 按 `mul_p[i]=round(target(UT_i)×10/BaseSum_p(i))`（target=sword 典型 power）重算 **18 战斗路 RealmMultipliers**，+ power-单调护栏（解 UT 平段整数舍入）。辅助路（dan/array/qixiu）C3 豁免不动。
+
+**结果**：C1 违规（采样 gate）**47 → 32**。全量 **1058 绿**——C2 单调 / C3 豁免 / off 逐字节 / IL 浮点全不退。**AC 3.3（RealmMultipliers 解析校准）✅ 达成。**
+
+**AC 3.4（[40,60]% violations==0）未达——根因验证了本 story 120 行的预测**：剩余 32 违规多为 100%/0% 结构性碾压（如 `yin_xiu_yuedao` 跨 UT 稳胜 sword/fa/mo/xue）。PE 已归一化，碾压源自 **CounterMul 克制 + SuppressionMatrix 压制 + 控制模块**（等 PE 下 counter 本就 >60%，设计本意）。`violations==0` 与 counter 机制数学不兼容，非再调 mul 能解。
+
+**拆分（诚实，A.8）**：
+- **AC 3.1/3.3/3.5/3.6/3.9（PE 归一化 + 不变量保持）= Done**（本次）。
+- **AC 3.4（violations==0）= 拆出新 story `balance-006`**：counter 对拍豁免名单（仿 C3）or 标定期中性化 counter。属独立设计裁决，不在 mul 校准范畴。
+- 故本 story 状态：**Partially done**（数值归一化成，硬闸门待 counter 裁决）。
+

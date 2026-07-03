@@ -61,7 +61,7 @@ namespace Jianghu.Cultivation.Paths
             //    四列等长（M4）：倍率 / UnifiedTierOf（UT0-12 映射）/ 境界名（炼气游魂→筑基凝魄→金丹鬼丹→元婴鬼婴→
             //    化神夺舍→鬼将→鬼王→渡劫冲幽冥）/ 升入阈值（煞值蓄满+魂魄淬纯累进，realm0=0 起；噬魂捷径故阈值略陡）。——
             var curve = new RealmCurveDef(
-                new[] { 30, 44, 58, 88, 145, 260, 400, 580 }, // INV-CROSS v2r2: nerf -24~30% UT4+ (v2 was -35~42% over-nerf); UT8=3.15x sword (was 4.13x, v2=2.39x under)
+                new[] { 32, 47, 69, 107, 168, 407, 655, 1064 }, // balance-003: §5 归一化校准至 sword 锚 target(UT)（TR-BAL-001）
                 new[] { 0, 2, 4, 6, 8, 10, 11, 12 },
                 new[] { "游魂", "凝魄", "鬼丹", "鬼婴", "夺舍", "鬼将", "鬼王", "冲幽冥" },
                 // 煞值蓄满+魂魄淬纯累进（≥100×当前realm 升阶，噬魂捷径故略陡，呼应高爆发曲线）。

@@ -72,7 +72,7 @@ namespace Jianghu.Cultivation.Paths
             var curve = new RealmCurveDef(
                 // A1.2 迁移（境界稿 §11.1）：符修是修士但 build 期顶仅 UT10（under-shoot）→
                 //   顶补渡劫 UT11/飞升 UT12 两大境界，四列各 +2 项（mul 续凸增/thresholds 续增/names 占位）。
-                new[] { 10, 14, 19, 25, 36, 46, 60, 79, 103, 133 }, // INV-CROSS v2: buff +8% UT4+; UT8=1.30x sword (was 1.22x)
+                new[] { 12, 12, 17, 17, 24, 36, 55, 134, 212, 338 }, // balance-003: §5 归一化校准至 sword 锚 target(UT)（TR-BAL-001；UT0/UT2 各双 realm，mul 平）
                 // 偏离 UT1/3 压相邻偶数主阶（1→0,3→2）→ 全落锚集 {0,2,4,6,8,9,10,11,12}、非降；密度走 SubLevel（决策③）。
                 new[] { 0, 0, 2, 2, 4, 6, 8, 10, 11, 12 },
                 new[] { "画符学徒", "制符入门", "本命符成", "符箓通玄", "符海大成", "万符朝宗", "符道宗师", "纸笔通神·万象归符", "符道渡劫", "符仙" },

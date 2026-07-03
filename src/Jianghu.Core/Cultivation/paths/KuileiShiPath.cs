@@ -72,7 +72,7 @@ namespace Jianghu.Cultivation.Paths
             //    四列等长（M4）：倍率 / UnifiedTierOf（UT0-12 映射：三流→二流→一流→绝顶→宗师→大宗师）/
             //    境界名（炼气→筑基→金丹→元婴→化神→炼虚→合体→大乘→机关之巅）/ 升入阈值（炼成本境标志傀儡累进，realm0=0 起）。——
             var curve = new RealmCurveDef(
-                new[] { 19, 27, 32, 50, 78, 120, 185, 285, 450 }, // INV-CROSS v2r2: nerf -12~15% UT4+ (v2 was -18~22% over-nerf); UT8=1.70x sword (was 1.89x, v2=1.52x under)
+                new[] { 7, 10, 15, 22, 34, 53, 83, 133, 213 }, // balance-003: §5 归一化校准至 sword 锚 target(UT)（TR-BAL-001）
                 new[] { 0, 2, 4, 6, 8, 9, 10, 11, 12 },
                 new[] { "炼气", "筑基", "金丹", "元婴", "化神", "炼虚", "合体", "大乘", "机关之巅" },
                 // 突破须独力炼成本境标志傀儡（炼气→筑基须成功炼成并稳运一具青铜小甲整周期），里程累进，realm0=0 起。
