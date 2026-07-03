@@ -92,6 +92,19 @@ static void RunCultivation(ulong seed, int steps, int budget, bool mapOn, bool f
         foreach (var l in conquests.Skip(Math.Max(0, conquests.Count - 6))) Console.WriteLine(l);
     }
 
+    // —— 恩怨录：drama 层叙事投影（--drama 才有数据；引擎已产于 Chronicle，此处显示）——
+    //    立誓复仇(ArcIgnited)/手刃仇人(RevengeConsummated)/父债子偿(GrudgeInherited)/结怨(GrudgeFormed)/弧推进(ArcStageEntered)。
+    //    匹配 Chronicle.cs 投影关键词；纯显示，不改模拟。
+    var dramaLines = lines.Where(l =>
+        l.Contains("立誓复仇") || l.Contains("手刃仇人") || l.Contains("父债子偿")
+        || l.Contains("结怨") || l.Contains("复仇弧") || l.Contains("复仇未竟")
+        || l.Contains("之仇") || l.Contains("讨还血债")).ToList();
+    if (dramaLines.Count > 0)
+    {
+        Console.WriteLine($"\n--- 恩怨录（Drama：恩怨/复仇/跨代继承，共 {dramaLines.Count} 条，节选末 10）---");
+        foreach (var l in dramaLines.Skip(Math.Max(0, dramaLines.Count - 10))) Console.WriteLine(l);
+    }
+
     // —— 当世修士群像：per-path 战力分化（不同路同四维 → 不同 EffectivePower）——
     var cultivators = world.AliveCharacters().Where(c => c.Cultivation != null).ToList();
     Console.WriteLine($"\n--- 当世修士 {cultivators.Count} 人（per-path 战力分化）---");
