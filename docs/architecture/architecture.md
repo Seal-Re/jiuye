@@ -156,8 +156,11 @@
 | [adr-0002](adr-0002-module-factory-effect-system.md) | Module Factory Effect System | Accepted | §5.3 模块工厂 | B.9 |
 | [adr-0003](adr-0003-cultivation-off-byte-identical.md) | Cultivation-off Byte-Identical | Accepted | §5.2 off 逐字节 | B.3 |
 | [adr-0004](adr-0004-godot-view-host-boundary.md) | Godot View/Host 边界 | Accepted | §9 Godot 表现层边界 | A.10 |
+| [adr-0005](adr-0005-macro-sync-turn-vs-accumulator.md) | 宏观同步回合 vs 累加器自动追帧 | **Proposed** | §10.2 R1（未裁决） | A.1 |
+| [adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md) | 柏林噪声浮点 vs B.2 整数确定性 | **Proposed** | §10.2 R2（未裁决） | B.2 |
+| [adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md) | ECS 倾向 vs OOP 聚合根 | **Proposed** | §10.2 R3（未裁决） | A.1 |
 
-> 道心解耦（§5.4，红线 B.5）当前无独立 ADR——由 `PowerEngine` 源码护栏 + code review 守。如需正式化，建议补 adr-0005（adr-0004 已用于 Godot 表现层边界）。
+> 道心解耦（§5.4，红线 B.5）当前无独立 ADR——由 `PowerEngine` 源码护栏 + code review 守。如需正式化，建议补 **adr-0008**（0005/0006/0007 已用于 View 层三开放调和项 R1/R2/R3）。
 
 ---
 
@@ -224,13 +227,13 @@
 
 > 以下三项触及 **Core 逻辑/架构**，非文本同步可解——需专门架构立项裁决（红线 A.1 大方向交用户）。此处仅**登记张力 + 候选方向**，不下结论、不改任何 `.cs`。
 
-- **R1 — 宏观同步回合 vs 累加器自动追帧**（候选 adr-0005）
+- **R1 — 宏观同步回合 vs 累加器自动追帧**（[adr-0005](adr-0005-macro-sync-turn-vs-accumulator.md)，Proposed）
   manifest §2.1「玩家不操作，世界绝对静止；决策一次 → 全局结算一次 `Tick()`」是**纯回合驱动**；adr-0004 §② 累加器含「观察态自动追帧」（真实时间累加自动 `Advance`）。二者可**分治**（宏观层玩家驱动步进 + 微观箱庭累加器插值）或**统一为纯玩家驱动**。裁决影响 §9.2。**未决**。
 
-- **R2 — 柏林噪声浮点 vs B.2 整数确定性**（候选 adr-0006）
+- **R2 — 柏林噪声浮点 vs B.2 整数确定性**（[adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md)，Proposed）
   manifest §4「微观柏林噪声填充地形」天然浮点。若地形生成结果**入 Core**（影响 A* 权重/属性乘区，manifest §2.1/§2.2），则撞 B.2（`Jianghu.Cultivation` 及全逻辑层禁浮点）。候选方向：① 整数/定点柏林（查表）；② 噪声**只在 View 生成**，仅整数化结果（如离散地形枚举 int）经命令端口入 Core。裁决影响 PCG 落地层归属。**未决**。
 
-- **R3 — ECS 倾向 vs 现 OOP 聚合根**（候选 adr-0007）
+- **R3 — ECS 倾向 vs 现 OOP 聚合根**（[adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md)，Proposed）
   manifest 补§1.3「限制深层 OOP 继承，强制向 ECS 靠拢」。现 `Character`（§3 Model）是 OOP 聚合根，深拷贝语义（`World.Clone`）与确定性子流绑定。ECS 化是**大架构决定**（承 active.md retro action item「评估方差战斗模型需专门立项」同级）。候选方向：① 维持 OOP（继承已浅，性能未证瓶颈）；② 局部 data-oriented 重构热路径；③ 全 ECS。**需先立性能基准证明必要性，未决**。
 
-> 三项均登记于 [tr-registry.yaml](tr-registry.yaml)（TR-VIEW-* proposed 条目），候选 ADR 号预留 0005/0006/0007（0005 此前建议留给道心解耦正式化，见 §7 脚注——实际立项时统一重编，不在此钉死）。
+> 三项均登记于 [tr-registry.yaml](tr-registry.yaml)（TR-VIEW-R1/R2/R3）+ **已升格为 Proposed ADR**（2026-07-04）：R1→[adr-0005](adr-0005-macro-sync-turn-vs-accumulator.md)、R2→[adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md)、R3→[adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md)。**均 Status=Proposed（未裁决）**——ADR 内列备选 + 裁决前置门，最终取舍交用户（道心解耦正式化改由 adr-0008 承接，见 §7 脚注）。

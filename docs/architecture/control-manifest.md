@@ -152,6 +152,7 @@
 - 主架构：[architecture.md](architecture.md)
 - View 层前瞻规范（宏微观世界/反应式战斗/PCG/韧性/LLM）：[godot-architecture-manifest.md](godot-architecture-manifest.md)
 - 需求溯源：[tr-registry.yaml](tr-registry.yaml)（含 TR-VIEW-* 表现层锚 + R1/R2/R3 开放调和项）
-- ADR：[adr-0001](adr-0001-integer-determinism.md) / [adr-0002](adr-0002-module-factory-effect-system.md) / [adr-0003](adr-0003-cultivation-off-byte-identical.md) / [adr-0004](adr-0004-godot-view-host-boundary.md)
+- ADR：[adr-0001](adr-0001-integer-determinism.md) / [adr-0002](adr-0002-module-factory-effect-system.md) / [adr-0003](adr-0003-cultivation-off-byte-identical.md) / [adr-0004](adr-0004-godot-view-host-boundary.md)（Accepted）
+- ADR（**Proposed**，View 层开放调和项，未裁决）：[adr-0005](adr-0005-macro-sync-turn-vs-accumulator.md)（宏观同步回合 R1）/ [adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md)（柏林浮点 R2）/ [adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md)（ECS 倾向 R3）
 - 红线：CLAUDE.md §A（流程）/ §B（技术）
 - 禁用清单源：`src/Jianghu.Core/BannedSymbols.txt`
