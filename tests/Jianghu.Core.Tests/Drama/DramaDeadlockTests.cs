@@ -83,6 +83,50 @@ namespace Jianghu.Core.Tests.Drama
             Assert.True(mut.CountOf<RevengeConsummated>() >= 1);
         }
 
+        // —— Vendetta Urge：BuildUp 停滞超 StallTimeout → 强制进 Hunting（飞蛾扑火，不困死闭关）——
+        [Fact]
+        public void test_buildup_stall_timeout_forces_hunting()
+        {
+            // 复仇者战力永不涨（Power 恒 100 < base+GrowthNeeded）→ BuildUp 永远 Stalled。
+            // 无超时时会困死 BuildUp 至死亡 Abandoned；有超时应强制进 Hunting。
+            var limits = L with { GrowthNeeded = 999, StallTimeout = 200 };
+            var dir = new DramaDirector(Led(1, 2, 90), limits);
+            var view = new FakeView { Powers = { [1] = 100, [2] = 50 } }; // 不同节点，战力不涨
+            var mut = new RecordingMutator();
+            var rng = Rng();
+            for (long c = 0; c < 1000; c += 10) dir.Pump(c, view, mut, rng);
+            // 应观察到弧曾进入 Hunting 阶段（ArcStageEntered(Hunting)），而非全程困 BuildUp。
+            bool enteredHunting = false;
+            foreach (var e in mut.Events)
+                if (e is ArcStageEntered ase && ase.Stage == ArcStage.Hunting) enteredHunting = true;
+            Assert.True(enteredHunting, "BuildUp 停滞超 StallTimeout 应强制进 Hunting（飞蛾扑火），实际困死 BuildUp");
+        }
+
+        // —— Vendetta Urge：弱者被强制走完全链 → 决战饮恨（prevailed=false），而非老死 Abandoned ——
+        [Fact]
+        public void test_underpowered_avenger_reaches_showdown_not_old_age()
+        {
+            // 复仇者(100) 弱于仇人(200)，永不同节点 → 无超时则 Hunting 困死至 Abandoned。
+            // 有超时应：BuildUp 超时→Hunting 超时→Showdown→RevengeConsummated(prevailed=false 饮恨当场)。
+            var limits = L with { GrowthNeeded = 999, StallTimeout = 150 };
+            var dir = new DramaDirector(Led(1, 2, 90), limits);
+            var view = new FakeView { Powers = { [1] = 100, [2] = 200 } }; // 弱于仇人，永不同节点
+            var mut = new RecordingMutator();
+            var rng = Rng();
+            for (long c = 0; c < 2000; c += 10) dir.Pump(c, view, mut, rng);
+            // 弧不再老死 Abandoned，而是被强制走到 Showdown 决战。弱者(100<200)饮恨当场（prevailed=false）。
+            // 注：恩怨未消（账本仍在）→ 弧会反复点火再决战，故不断言 ActiveArcs 空（那是 drama-013 死锁测的职责）。
+            Assert.True(mut.CountOf<RevengeConsummated>() >= 1,
+                "弱者应被强制走到 Showdown 决战（RevengeConsummated），而非老死 Abandoned");
+            // 饮恨当场：至少一次 prevailed=false（弱者决战落败，戏剧性收场而非闭关到死）。
+            bool foundLoss = false;
+            foreach (var e in mut.Events)
+                if (e is RevengeConsummated rc && !rc.AvengerPrevailed) foundLoss = true;
+            Assert.True(foundLoss, "弱者决战应 prevailed=false（饮恨当场）");
+            // 且不应有"老死"式 Abandoned（本 case 无人死亡，弧必以决战收场，非放弃）。
+            Assert.Equal(0, mut.CountOf<ArcAbandoned>());
+        }
+
         // —— D13.8 INV-CAP：活跃弧 ≤ MaxConcurrentArcs（多强恩怨长跑）——
         [Fact]
         public void test_inv_cap_active_arcs_bounded()

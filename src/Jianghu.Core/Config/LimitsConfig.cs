@@ -46,6 +46,7 @@ namespace Jianghu.Config
         public int MaxGeneration { get; init; } = 3;           // 跨代恩怨封顶，须 ≥1（§7）
         public int RelationMirrorCap { get; init; } = 30;      // 镜像负 Relations 钳幅，须 ∈ [0,100]（§3.1）
         public int ShowdownTimeout { get; init; } = 100;       // Showdown 死锁兜底超时，须 ≥1（§3.2）
+        public int StallTimeout { get; init; } = 300;          // BuildUp/Hunting 停滞兜底：停滞超此 tick → 强制推进（飞蛾扑火），须 ≥1
 
         public static LimitsConfig Default { get; } = new();
 
@@ -84,6 +85,7 @@ namespace Jianghu.Config
             if (RelationMirrorCap < 0 || RelationMirrorCap > 100)
                 throw new InvalidOperationException($"RelationMirrorCap 须 ∈ [0,100]，实为 {RelationMirrorCap}");
             if (ShowdownTimeout < 1) throw new InvalidOperationException("ShowdownTimeout<1");
+            if (StallTimeout < 1) throw new InvalidOperationException("StallTimeout<1");
         }
     }
 }

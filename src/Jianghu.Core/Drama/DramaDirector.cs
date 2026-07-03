@@ -83,6 +83,17 @@ namespace Jianghu.Drama
 
                 var arc = _activeArcs[idx];
                 var trans = RevengeArc.TryAdvance(arc, view, _limits);
+
+                // Vendetta Urge（停滞兜底）：BuildUp/Hunting 停滞超 StallTimeout → 强制推进，
+                // 不再困死闭关/寻仇。飞蛾扑火——弱者也被推向决战（Showdown 由 TryAdvance 结算胜负）。
+                // 纯整数 tick 比较（B.2）；仅 --drama 内 DramaDirector 执行（B.3 off 不受影响）。
+                if (trans.Resolution == ArcResolution.Stalled
+                    && _stageEnteredAt.TryGetValue(arc.Id.Value, out long enteredAt)
+                    && clock - enteredAt >= _limits.StallTimeout)
+                {
+                    trans = ForceAdvance(arc);
+                }
+
                 EmitForTransition(clock, arc, trans, mutator);
                 ApplyCoupling(arc, trans, view, mutator); // drama-011 受控耦合（Goal/Relations）
 
@@ -116,6 +127,26 @@ namespace Jianghu.Drama
                     mutator.Emit(new ArcAbandoned(clock, trans.Next.Id, "ParticipantDied"));
                     break;
                 // Stalled：无事件，仅重排（待下次重试）。
+            }
+        }
+
+        /// <summary>
+        /// Vendetta Urge 强制推进（停滞超时兜底）：BuildUp→Hunting、Hunting→Showdown，
+        /// 不检门控（战力/同节点），产 Advanced 转移让事件/耦合正常触发。飞蛾扑火：弱者也被推向决战。
+        /// Showdown 由 RevengeArc.TryAdvance 无条件结算，不会 Stalled，故不在此强制之列。
+        /// 纯函数式 with 产新弧，不消费 rng、不 mutate（承 RevengeArc 纪律）。
+        /// </summary>
+        private static ArcTransition ForceAdvance(ArcInstance arc)
+        {
+            switch (arc.Stage)
+            {
+                case ArcStage.BuildUp:
+                    return new ArcTransition(arc with { Stage = ArcStage.Hunting }, ArcResolution.Advanced, false);
+                case ArcStage.Hunting:
+                    return new ArcTransition(arc with { Stage = ArcStage.Showdown }, ArcResolution.Advanced, false);
+                default:
+                    // Victimized 首步即 Advanced（不 Stalled）；其余阶段不强制 → 原样返回 Stalled。
+                    return new ArcTransition(arc, ArcResolution.Stalled, false);
             }
         }
 
