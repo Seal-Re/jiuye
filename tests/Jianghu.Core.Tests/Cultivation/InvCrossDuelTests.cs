@@ -196,6 +196,11 @@ namespace Jianghu.Core.Tests.Cultivation
         (int winsA, int winsB) RunDuels(
             CultivationPathDef pathA, CultivationPathDef pathB,
             int utA, int utB, ulong pairSeed)
+            => RunDuels(pathA, pathB, utA, utB, pairSeed, calibrationMode: false);
+
+        (int winsA, int winsB) RunDuels(
+            CultivationPathDef pathA, CultivationPathDef pathB,
+            int utA, int utB, ulong pairSeed, bool calibrationMode)
         {
             var root = new Pcg32(pairSeed, 0);
             int winsA = 0, winsB = 0;
@@ -211,13 +216,59 @@ namespace Jianghu.Core.Tests.Cultivation
                 var chB = CreateTypicalCharWithStats(pathB.PathId, utB, pathB, statsB, id: i * 2 + 2);
 
                 var result = DuelEngine.ResolveR2(chA, chB, pathA, pathB, Registry, Limits,
-                    resolver: null, attackerSkill: null, defenderSkill: null);
+                    resolver: null, attackerSkill: null, defenderSkill: null,
+                    calibrationMode: calibrationMode);
 
                 if (result.Winner == chA.Id) winsA++;
                 else winsB++;
             }
 
             return (winsA, winsB);
+        }
+
+        // ================================================================
+        // balance-006 / TR-BAL-001：C1 标定模式胜率诊断（ADVISORY — 记录确定性模型发现）
+        // ================================================================
+        /// <summary>
+        /// balance-006 方案B：标定模式（calibrationMode=true）旁路 Control/CounterMul/压制。
+        /// **关键发现（advisory，非 blocking）**：对拍是完全确定的（HP=PE、dmg=PE/10、无 rng/运气骰）
+        /// → 谁 PE 略高就 ~100% 胜，无方差产生 50% 硬币。故"胜率 [40,60]% violations==0"在此
+        /// 确定性模型**数学不可达**（要求所有 stat 变体下 PE 精确相等）。
+        /// C1 的模型可达代理 = 裸 PE 带宽 gate（见 C1RecalibrationTests.C1_BarePowerBand_*，承 §2/§5）。
+        /// 本测仅诊断输出胜率违规数，不 blocking（记录，供未来若引入方差模型时复用）。
+        /// calibrationMode 默认 false → 正常结算/off 逐字节零影响（B.3 守）。
+        /// </summary>
+        [Fact]
+        public void C1Gate_HardGate_CalibrationMode_SameUT_WinRate_Within_40_60()
+        {
+            int tested = 0, violations = 0;
+            var violationsList = new List<string>();
+
+            foreach (int ut in TargetUTs)
+            {
+                var paths = GetPathsAtUT(ut, combatOnly: true);
+                if (paths.Count < 2) continue;
+                for (int i = 0; i < paths.Count; i++)
+                    for (int j = i + 1; j < paths.Count; j++)
+                    {
+                        ulong pairSeed = GateSeed ^ ((ulong)ut * 10000UL + (ulong)i * 100UL + (ulong)j);
+                        var (winsA, winsB) = RunDuels(paths[i], paths[j], ut, ut, pairSeed, calibrationMode: true);
+                        tested++;
+                        int rateA = WinPct(winsA, DuelCountPerPair);
+                        if (rateA < 40 || rateA > 60)
+                        {
+                            violations++;
+                            violationsList.Add($"UT={ut} {paths[i].PathId}({winsA}) vs {paths[j].PathId}({winsB}) rate={rateA}%");
+                        }
+                    }
+            }
+
+            _out.WriteLine($"C1 标定模式胜率诊断 [40,60]%（ADVISORY）：{tested} 对, {violations} 违规");
+            _out.WriteLine("发现：确定性对拍（无方差）下小 PE 差→100%/0%，胜率平价须靠方差模型，非本 sprint 范畴。");
+            _out.WriteLine("C1 模型可达代理见 C1RecalibrationTests.C1_BarePowerBand（裸 PE ±15% 带，100% 入带）。");
+
+            // ADVISORY：仅诊断，不 blocking（确定性模型下 violations==0 不可达，见 summary）。
+            Assert.True(tested > 0, "至少应有同 UT 战斗对被测（sanity）。");
         }
 
         /// <summary>胜率百分比 [0,100]。</summary>

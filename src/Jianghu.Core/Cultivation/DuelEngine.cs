@@ -55,7 +55,8 @@ namespace Jianghu.Cultivation
             PathRegistry registry, LimitsConfig limits,
             SituationalResolver? resolver,
             CombatSkillDef? attackerSkill, CombatSkillDef? defenderSkill,
-            ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null)
+            ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null,
+            bool calibrationMode = false)
         {
             if (attacker.Cultivation == null || defender.Cultivation == null)
                 throw new ArgumentException("DuelEngine.ResolveR2 requires both sides have Cultivation (off→legacy SparAction)");
@@ -122,7 +123,7 @@ namespace Jianghu.Cultivation
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls,
-                    attackerArtifact, defenderArtifact);
+                    attackerArtifact, defenderArtifact, calibrationMode);
 
                 int dmgToB, dmgToA_redirect;
                 if (attackerControlled || aFleetFrozen)
@@ -138,7 +139,7 @@ namespace Jianghu.Cultivation
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls,
-                    defenderArtifact, attackerArtifact);
+                    defenderArtifact, attackerArtifact, calibrationMode);
 
                 int dmgToA, dmgToB_redirect;
                 if (defenderControlled || bFleetFrozen)
@@ -257,7 +258,8 @@ namespace Jianghu.Cultivation
             CombatContext ctx, LimitsConfig limits, SituationalResolver? resolver,
             Side attackerSide, Side defenderSide,
             List<DotEntry> pendingDots, List<ControlEntry> pendingControls,
-            ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null)
+            ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null,
+            bool calibrationMode = false)
         {
             const int Scale = 100;
             long dmg = (long)attackerPe * Scale / BaseDamageDivisor;
@@ -281,10 +283,14 @@ namespace Jianghu.Cultivation
                     }
                     if (op.Kind == EffectOpKind.Control)
                     {
+                        // balance-006 方案B：标定模式旁路 Control（锁回合破坏行动经济，与裸 PE 平价正交）。
+                        if (calibrationMode) continue;
                         int turns = op.Amount >= 1 ? op.Amount : 1;
                         pendingControls.Add(new ControlEntry(defenderSide, op.Key ?? "ctrl", turns));
                         continue;
                     }
+                    // balance-006 方案B：标定模式旁路 CounterMul（tag 克制倍乘，与裸 PE 正交）。
+                    if (calibrationMode && op.Kind == EffectOpKind.CounterMul) continue;
                     int dmgUnscaled = (int)(dmg / Scale);
                     int result = ModuleResolver.ApplyOnUse(dmgUnscaled, op, ctx);
                     dmg = (long)result * Scale + (dmg % Scale);
@@ -341,10 +347,14 @@ namespace Jianghu.Cultivation
             }
 
             // 负向压制矩阵检查（PostMul — 在 FlatPen/FlatDR 之后、软情境之前乘算）
-            int suppressionRatio = SuppressionMatrix.GetSuppressionRatio(
-                attackerPath.SituationalTags, defenderPath?.SituationalTags ?? Array.Empty<string>());
-            if (suppressionRatio != 10)
-                dmg = dmg * suppressionRatio / 10;
+            // balance-006 方案B：标定模式旁路压制（阴→阳/魔→佛 结构性克制，与裸 PE 平价正交）。
+            if (!calibrationMode)
+            {
+                int suppressionRatio = SuppressionMatrix.GetSuppressionRatio(
+                    attackerPath.SituationalTags, defenderPath?.SituationalTags ?? Array.Empty<string>());
+                if (suppressionRatio != 10)
+                    dmg = dmg * suppressionRatio / 10;
+            }
 
             // —— 批4 GoldenBodyMax DR×2 + 受击转愿：防方金身大成态内伤害减半，吸收部分转愿力 ——
             if (HasTurnResource(ctx, defenderSide, "goldenBodyTurns"))

@@ -147,6 +147,37 @@ namespace Jianghu.Core.Tests.Cultivation
             _out.WriteLine(sb.ToString());
         }
 
+        // —— balance-006 方案B（模型可达 gate）：裸 PE 带宽 gate（承 §2 代理指标）。
+        //    确定性对拍下"胜率[40,60] violations==0"不可达；§2 给的 C1 代理 = 同 UT 典型 power 落同一带 ±X%。
+        //    重校准后测各战斗路 @各 UT 相对 sword 的偏差，报最大偏差 + 落 ±15% 带的比例。——
+        [Fact]
+        public void C1_BarePowerBand_WithinTolerance_Of_SwordAnchor()
+        {
+            var target = BuildTargetByUT();
+            const int BandPct = 15; // §5 D1/§2 建议带宽 target(UT*)±15%
+            int cells = 0, within = 0, maxDevPct = 0;
+            string worst = "";
+            foreach (var def in AllPaths)
+            {
+                if (AuxiliaryPathIds.Contains(def.PathId) || def.PathId == AnchorPathId) continue;
+                var curve = def.Curve;
+                for (int r = 0; r < curve.RealmMultipliers.Count; r++)
+                {
+                    int ut = curve.UnifiedTierOf[r];
+                    if (!target.TryGetValue(ut, out int tgt) || tgt <= 0) continue; // sword 不可达该 UT → 跳
+                    int pe = PowerAt(def.PathId, r);
+                    int devPct = (int)(System.Math.Abs((long)pe - tgt) * 100 / tgt);
+                    cells++;
+                    if (devPct <= BandPct) within++;
+                    if (devPct > maxDevPct) { maxDevPct = devPct; worst = $"{def.PathId}@UT{ut}: PE={pe} vs target={tgt} ({devPct}%)"; }
+                }
+            }
+            int withinPct = cells > 0 ? within * 100 / cells : 0;
+            _out.WriteLine($"裸 PE 带宽 gate（±{BandPct}%）：{within}/{cells} cell 入带 ({withinPct}%)；最大偏差 {maxDevPct}% [{worst}]");
+            Assert.True(withinPct >= 80,
+                $"裸 PE 带宽：仅 {withinPct}% cell 落 sword±{BandPct}% 带（AC: ≥80%）。最大偏差 {maxDevPct}% [{worst}]。");
+        }
+
         // —— 诊断：5 路非严格递增根因（UT 重复 vs BaseSum 跳变）——
         [Fact]
         public void Diagnose_NonMonotonic_Paths()
