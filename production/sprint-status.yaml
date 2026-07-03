@@ -27,10 +27,19 @@ stories:
     name: "C1 收敛 [40,60]% 硬闸门 + RealmMultipliers 按 sword 锚重校准"
     file: "production/epics/balance-cross/story-003-c1-convergence-40-60.md"
     priority: must-have
-    status: ready-for-dev  # 前 Deferred→Alpha 解禁（Fairness 名正言顺，承 A.10）；已备重校准公式 new_mul=old×sword_PE/path_PE + RED 思路
+    status: review  # PE 归一化 Done（8c5504e，18 路 §5 校准，C1 47→32，1058 绿，AC 3.1/3.3/3.5/3.6/3.9 ✅）；AC 3.4 硬闸门拆出 balance-006（counter 结构性冲突，非 mul 可解）
     owner: ""
     estimate_days: 2.5
-    blocker: ""
+    blocker: "AC 3.4 violations==0 撞 counter 机制 → 拆 balance-006"
+    completed: ""
+  - id: "balance-006"
+    name: "C1 硬闸门 counter 对拍豁免 or 标定期中性化（AC 3.4 从 balance-003 拆出）"
+    file: ""
+    priority: must-have
+    status: backlog  # 待 /create-stories；PE 归一化后剩余 32 违规为 CounterMul/压制结构性碾压
+    owner: ""
+    estimate_days: 1.5
+    blocker: "依赖 balance-003 PE 归一化（done）；需设计裁决：counter 豁免名单 vs 标定中性化"
     completed: ""
   - id: "balance-004"
     name: "切磋碎压平滑 — 无势均对手则降切磋意愿（Target-Selection 权重）"
