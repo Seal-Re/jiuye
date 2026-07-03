@@ -389,7 +389,10 @@ namespace Jianghu.Sim
         }
 
         // A.0 每次行动累加的本路修为定额（确定性，不掷随机 → 无运行期 _cultRng 消费）。
-        private const int CultivationGainPerAction = 1;
+        // Viability 调平（2026-07-03 用户指令 Step 2）：1→8。原值使首破(阈100)需~100行动≈1100 tick，
+        // 超中位寿命(~900)→大部分实体老死前零破境（闭关到老死死锁）。提到 8 → 中位寿命内可破 3-4 境，
+        // 成长线跑通。纯整数（B.2）；仅 cultivation-on 调（B.3 off 不受影响）。
+        private const int CultivationGainPerAction = 8;
 
         /// <summary>
         /// on：角色行动后累加本路修为 → <see cref="RealmCurve.NextIndexIfReady"/> 判突破（A.0 确定性，

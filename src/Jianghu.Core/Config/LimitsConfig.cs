@@ -12,8 +12,10 @@ namespace Jianghu.Config
         public int Concentration { get; init; } = 6;   // 偏中庸集中度（越大越向均值聚集）
 
         // 生命周期（§7.4）
-        public long LifespanMin { get; init; } = 600;  // 逻辑时间单位
-        public long LifespanMax { get; init; } = 1200;
+        // Viability 调平（2026-07-03 用户指令 Step 2）：600/1200→1200/2400。配合破境率提升，
+        // 让典型实体有生之年走完更长成长线（寿命消耗与成长速度匹配）。整数（B.2）。
+        public long LifespanMin { get; init; } = 1200; // 逻辑时间单位
+        public long LifespanMax { get; init; } = 2400;
         public int PopulationLow { get; init; } = 5;    // 低于则涌现新人
         public int PopulationHigh { get; init; } = 30;  // 高于则抑制涌现
 
