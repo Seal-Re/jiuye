@@ -24,7 +24,8 @@
 4. **不舍弃任何路径**：21 路全入册，加路=数据行，none dropped。
 5. **道心解耦**：daoHeart/innerDemon 严禁进 EffectivePower（仅突破劫 ResistTerms）。
 6. **Σ=80 仅生成期**；侧表纪律（新态挂侧表不污染 v1.0 record）。
-7. **subagent 模型分层**：dev/review/research 等**实现与核验关键**子代理一律 Opus 4.8（主控独立核验亦 Opus）。CCGS 内置诊断/格式类 skill 自带较廉价 tier 的 frontmatter（`project-stage-detect`=haiku、`adopt`/`create-*`=sonnet）予以保留——其产物均为派生/建议且经主控复核（A.3），不承担实现正确性。**凡产出代码、判定 done、或做平衡/确定性裁决的子代理，必须 Opus 4.8**；如某 CCGS agent 默认 sonnet 却被用于此类任务，override 其 frontmatter 为 opus。
+7. **subagent 模型分层（按风险分档，档位与后端解耦）**：**① 逻辑性任务一律「旗舰档」**——方案探索、story/GDD 设计、架构规划、research 综合、code review、判定 done、平衡/确定性裁决；主控独立核验（A.3）亦旗舰档。**② 编码任务按风险分档**：触 `Jianghu.Cultivation`（B.2 禁浮点）/ off 逐字节（B.3）/ PRNG 流（RngStreamIds）/ 平衡数值的**高风险实现必须旗舰档**（一处细微 bug 即破坏确定性或平衡且难查）；CLI 接线、测试脚手架、可视化脚本、文档/工具类**低风险编码用「标准档」**（风险可控 + 主控复核 A.3）。**③** CCGS 内置诊断/格式类 skill 自带「廉价档」frontmatter（`project-stage-detect`/`adopt`/`create-*` 等）予以保留——其产物均为派生/建议且经主控复核（A.3），不承担实现正确性。如某 CCGS agent 默认档位与本档不符却被用于该档任务，override 其 frontmatter（高风险档 → 旗舰档）。
+   > **档位→模型映射由环境网关解析**（`~/.claude/settings.json` 的 `ANTHROPIC_MODEL` / `ANTHROPIC_DEFAULT_SONNET_MODEL` / `ANTHROPIC_DEFAULT_HAIKU_MODEL`）；红线只管风险分档，不钉具体模型名。**当前映射**：旗舰档 = Opus 4.8（`claude-opus-4-8[1m]`）；标准档 / 廉价档 = `glm-5.2[1m]`（经本地网关 `127.0.0.1:15721`）。换后端只改网关，不动红线。
 8. **可视化分轨**：游戏世界(tile/角色/物品)=像素(Pillow)；**UI/界面=精细化古风**(非像素，SVG/HTML-CSS 水墨/卷轴，贴合武侠背景)。程序化只做「变换/派生/拼装」，原创基础件交手绘/AI。
 9. **模块化·可插拔·不重复造轮子**：战斗效果/功法/战技等可扩展内容必须**积木化组合**——普通/稀有档经 `Modules` 工厂（`Cultivation/Modules.cs`，单一构造入口，封 ratio-Kind Amount2≥1/Trigger/Rarity 等易漏参），唯一档签名机制经 `SpecialModuleRegistry` 注册式插件。**禁路文件里裸写 `new EffectOp(七参)` 散造**（易漏参、难查错、重复轮子）。新算子=加 1 工厂方法 + `ModuleResolver` 1 分支，不改既有积木。跨路平衡视图靠 `BalanceMatrixDump` harness **派生**，不靠集中源码（承 A.2 单一真相源：源唯一、看板派生）。
 
