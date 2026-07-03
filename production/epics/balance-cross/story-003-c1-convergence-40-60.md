@@ -1,14 +1,16 @@
 # Story 003: C1 收敛 [40,60]% 硬闸门 + 模块伤害钳制
 
 > **Epic**: balance-cross
-> **Status**: Deferred → **Alpha 阶段**（流水线纪律，见下「2026-07-02 defer 复核」）
-> **Last Updated**: 2026-07-02
+> **Status**: Deferred → **Alpha 阶段**（流水线纪律，见下「2026-07-02 defer 复核」）；sprint-7 ready-for-dev
+> **Last Updated**: 2026-07-03
 > **Layer**: Core
 > **Type**: Integration
+> **TR**: TR-BAL-001（`docs/architecture/tr-registry.yaml`）
 > **Estimate**: 大 (2d)
 > **Depends**: balance-002 (INV-CROSS gate done, 47/48 violations at [35,65]%), combat-r2 story-005 (hardening gate done)
 > **ADR**: adr-0002-module-factory-effect-system, adr-0001-integer-determinism
-> **GDD**: 平衡标定INV-CROSS-design.md §2；模块化效果系统-design.md §15.7
+> **GDD**: `docs/legacy-specs/specs/2026-06-14-v1.2-B5-平衡标定INV-CROSS-design.md` §2；模块化效果系统-design.md §15.7
+> **Manifest Version**: 2026-07-03（`docs/architecture/control-manifest.md`）
 
 ## Context
 

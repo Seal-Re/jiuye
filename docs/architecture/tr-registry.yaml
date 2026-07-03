@@ -1,0 +1,157 @@
+# 需求溯源注册表 — Traceability Requirement Registry
+#
+# Registry Version: 2026-07-03 (initial bootstrap)
+# Status: Active
+# Purpose: 为既有已实现需求赋稳定 TR-ID，供 story / ADR / test 引用溯源。
+#          此前无 TR-ID 惯例——本文件建立 scheme。
+#
+# TR-ID scheme: TR-<DOMAIN>-<NNN>
+#   DOMAIN ∈ { DET(确定性) | MOD(模块系统) | BAL(平衡) | CULT(修炼) | DRAMA | MAP | FACTION }
+#   NNN    = 三位序号，域内 append-only（绝不复用/重编号）
+#
+# 每条字段:
+#   id            : 稳定 TR-ID（引用锚点，冻结）
+#   requirement   : 一句话可测需求陈述
+#   source_gdd    : 需求来源设计文档（相对仓库根的可解析路径）
+#   governing_adr : 治理此需求的 ADR（无则 null + 注说明）
+#   status        : implemented | designed | deferred | proposed
+#   verified_by   : 守护此需求的测试/机制（机器证据锚，承红线 A.3）
+#   redline       : 对应 CLAUDE.md 红线编号（无则 null）
+#   notes         : 补充/不确定处标注（不编造）
+
+requirements:
+
+  # ---- 确定性 (DET) ----
+  - id: TR-DET-001
+    requirement: >
+      Jianghu.Cultivation 及所有逻辑层全程禁浮点、全整数确定性；
+      同种子同输入在任何 .NET 运行时（CLI JIT / Unity IL2CPP / Mono）逐字节一致。
+    source_gdd: docs/architecture/adr-0001-integer-determinism.md
+    governing_adr: adr-0001-integer-determinism
+    status: implemented
+    verified_by:
+      - ILFloatScanner（IL 扫描，Jianghu.Cultivation 零 float/double/System.Math）
+      - BannedApiAnalyzers（RS0030=error；禁 System.Random/Console/DateTime/Thread）
+      - 逐字节复现测试（同种子字节一致）
+    redline: B.2
+    notes: PRNG = Pcg32（整数），Split(id) 派生子流不消费父状态。
+
+  - id: TR-DET-002
+    requirement: >
+      cultivation=false（off 模式）输出必须与 v1.0 逐字节一致（SHA256 断言）；
+      修炼/drama/map/faction 走独立 PRNG 流，off 时不构造不消费。
+    source_gdd: docs/architecture/adr-0003-cultivation-off-byte-identical.md
+    governing_adr: adr-0003-cultivation-off-byte-identical
+    status: implemented
+    verified_by:
+      - OffByteIdenticalTests（cultivation=false SHA256 == v1.0 基线）
+      - OffRegressionWith21PathsTests
+      - CultivationDeterminismTests
+    redline: B.3
+    notes: >
+      侧表纪律——新态挂 Character 侧表，不污染 v1.0 core record 字段顺序。
+      改任何 v1.0 共享文件后 commit 前必跑 off 回归。
+
+  # ---- 模块系统 (MOD) ----
+  - id: TR-MOD-001
+    requirement: >
+      所有战斗效果必经 Modules 静态工厂构造（封 ratio/Kind/Amount2≥1/Trigger/Rarity）；
+      唯一档经 SpecialModuleRegistry 注册式插件；禁裸写 new EffectOp(七参) 散造在 path 文件。
+      新算子 = 1 工厂方法 + ModuleResolver 1 分支。
+    source_gdd: docs/architecture/adr-0002-module-factory-effect-system.md
+    governing_adr: adr-0002-module-factory-effect-system
+    status: implemented
+    verified_by:
+      - ModulesTests
+      - ModuleResolverTests
+      - code review（EffectOp internal 构造，BannedApiAnalyzers 未覆盖 → 靠审查）
+    redline: B.9
+    notes: >
+      4 参资源/标记操作（AddResource/GrantPassive/SetFlag/Cost/AddFlatDR 等）
+      在 path 文件裸写合法——仅 7 参战斗效果构造受约束。
+      跨路平衡视图靠 BalanceMatrixDump harness 派生，不靠集中源码。
+
+  # ---- 平衡 (BAL) ----
+  - id: TR-BAL-001
+    requirement: >
+      INV-CROSS C1 契约：任一 UnifiedTier(UT) 上，任两条战斗路的典型角色 1v1
+      胜率收敛到 [40%, 60%]（同 UT 平价）。终 gate = 对拍胜率 violations==0。
+    source_gdd: docs/legacy-specs/specs/2026-06-14-v1.2-B5-平衡标定INV-CROSS-design.md
+    governing_adr:
+      - adr-0002-module-factory-effect-system
+      - adr-0001-integer-determinism
+    status: deferred
+    verified_by:
+      - InvCrossDuelTests（硬闸门 [40,60]% violations==0，Alpha 落地）
+      - DuelEngineTests（模块钳制边界 ctx.ModuleDamageCap）
+    redline: null
+    notes: >
+      balance-cross story-003 引用本 ID。§2 定义 C1/C2/C3：
+      C2 碾压单调（UT gap≥2 → 高 UT 胜率≥80%）；C3 辅助路豁免 C1 但 UT 诚实。
+      2026-07-02 defer 复核确认推迟至 Alpha（详细平衡调优 = 过早雕琢）；
+      Prong1 模块伤害钳制已落（ModuleResolver.CapDelta + ctx.ModuleDamageCap=pe/4），
+      剩 Prong2 RealmMultipliers 校准（new_mul = old_mul × sword_PE(UT)/path_PE(UT)）。
+      story 内引用简称 "平衡标定INV-CROSS-design.md §2" = 上述 source_gdd 全路径。
+
+  # ---- 修炼 (CULT) ----
+  - id: TR-CULT-001
+    requirement: >
+      21 条修炼路径全入册（none dropped）；加路 = 加数据行 + CodePathSource 注册，
+      不删减。每路独立可求值（PowerEngine.Evaluate）。
+    source_gdd: design/gdd/cultivation-system.md
+    governing_adr: adr-0003-cultivation-off-byte-identical
+    status: implemented
+    verified_by:
+      - 21 路独立测试（各路 def 单测）
+      - OffRegressionWith21PathsTests
+    redline: B.4
+    notes: >
+      paths/ 21 文件 + special/ 8 唯一档模块。governing_adr 取 0003
+      （路径系统属 cultivation-on，走 Split(5) 流；off 不激活）。
+
+  # ---- 增补：已实现 Feature 层需求（drama/map/faction）----
+  - id: TR-DRAMA-001
+    requirement: >
+      恩怨/复仇弧/跨代继承走独立 Drama PRNG 流（Split(6)）；off（dramaOn=false）
+      不激活、不消费 Split(6)，保 off 逐字节。
+    source_gdd: design/gdd/drama-system.md
+    governing_adr: null
+    status: implemented
+    verified_by:
+      - drama 恩怨链测试（drama-001~013 套件）
+      - off 逐字节测试（drama 轨）
+    redline: null
+    notes: >
+      drama-engine epic 已收官（drama-013 端到端验收）。无独立 ADR
+      （遵守 ADR-0003 的独立流 + off 不激活模式，未单独立 ADR）。
+      RngStreamIds.Drama = 6。
+
+  - id: TR-MAP-001
+    requirement: >
+      世界地图走独立 Map PRNG 流（Split(7)）；Kruskal MST 拓扑生成；
+      off（mapOn=false）不激活、不消费 Split(7)。
+    source_gdd: null
+    governing_adr: null
+    status: implemented
+    verified_by:
+      - 地图生成/geo 查询测试
+      - off 逐字节测试（map 轨）
+    redline: null
+    notes: >
+      GDD 待补（采用迁移计划 Step 4 DEFER：map-system GDD 待 epic 转 doing）。
+      RngStreamIds.Map = 7。KruskalMstGenerator / IGeoQuery。
+
+  - id: TR-FACTION-001
+    requirement: >
+      门派派系走独立 Faction PRNG 流（Split(8)）；晋升+夺地机制；
+      off（factionOn=false）不激活、不消费 Split(8)。
+    source_gdd: null
+    governing_adr: null
+    status: implemented
+    verified_by:
+      - 门派录/派系查询测试
+      - off 逐字节测试（faction 轨）
+    redline: null
+    notes: >
+      GDD 待补（采用迁移计划 Step 4 DEFER：faction GDD 待 epic 转 doing）。
+      RngStreamIds.Faction = 8。SectLedger / IFactionQuery。
