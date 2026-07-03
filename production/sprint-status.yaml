@@ -34,9 +34,9 @@ stories:
     completed: ""
   - id: "balance-006"
     name: "C1 硬闸门 counter 对拍豁免 or 标定期中性化（AC 3.4 从 balance-003 拆出）"
-    file: ""
+    file: "production/epics/balance-cross/story-006-c1-counter-exemption.md"
     priority: must-have
-    status: backlog  # 待 /create-stories；PE 归一化后剩余 32 违规为 CounterMul/压制结构性碾压
+    status: ready-for-dev  # story 已建（/create-stories）；两方案列出（豁免名单 推荐 vs 标定中性化）
     owner: ""
     estimate_days: 1.5
     blocker: "依赖 balance-003 PE 归一化（done）；需设计裁决：counter 豁免名单 vs 标定中性化"
@@ -45,10 +45,10 @@ stories:
     name: "切磋碎压平滑 — 无势均对手则降切磋意愿（Target-Selection 权重）"
     file: "production/epics/balance-cross/story-004-spar-stomp-smoothing.md"
     priority: must-have
-    status: backlog  # 待 /create-stories balance-cross 拆出正式 story 文件
+    status: ready-for-dev  # story 已建（/create-stories）；PE 度量已对齐（16dc54c），加"无势均降意愿"层
     owner: ""
     estimate_days: 1.0
-    blocker: "依赖 balance-003（重校准后再平滑切磋）"
+    blocker: "依赖 balance-003（重校准后再平滑切磋，done）"
     completed: ""
 
   # —— Should Have ——
