@@ -61,10 +61,15 @@ namespace Jianghu.Decide
                 {
                     if (ctx.Nearby.Count == 0) return (long.MinValue, new SparChoice(new CharacterId(-1)));
                     var t = BestSparTarget(ctx);
-                    int gap = System.Math.Abs(SelfPowerOf(ctx) - t.Power);
+                    int self = SelfPowerOf(ctx);
+                    int gap = System.Math.Abs(self - t.Power);
                     long rival = System.Math.Max(0, 600 - 15L * gap);  // 势均力敌更想切磋
                     long notFoe = t.Affinity > -50 ? 0 : -500;
-                    return (archMartial - 300 + rival + notFoe, new SparChoice(t.Id));
+                    // balance-004：无势均对手（gap 悬殊，> 自身 PE 的一半）→ 无意义碾压，重罚切磋意愿
+                    // → 转修炼/游历。**仅 cultivation-on（ctx.SelfPower>0）触发**——off/legacy(SelfPower=0)
+                    // 走原路径不加罚，保 B.3 逐字节。整数确定性（B.2）。
+                    long stompPenalty = (ctx.SelfPower > 0 && gap > ctx.SelfPower / 2) ? -2500 : 0;
+                    return (archMartial - 300 + rival + notFoe + stompPenalty, new SparChoice(t.Id));
                 }
                 default: return (long.MinValue, new TrainChoice(StatKind.Force));
             }

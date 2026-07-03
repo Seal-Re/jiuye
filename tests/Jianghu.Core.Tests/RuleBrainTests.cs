@@ -45,4 +45,27 @@ public class RuleBrainTests
         for (int i = 0; i < 12; i++) seen.Add((await brain.DecideAsync(ctx, CancellationToken.None)).Type);
         Assert.True(seen.Count >= 2, "独行者也应在 Train/Travel 间交替，不单一刷屏");
     }
+
+    // —— balance-004：单元级——势均对手仍可切磋（不误伤 16dc54c 势均选择）。
+    // 注：碾压抑制的真实效果在 sim 级验证（SparStompRateTests，动态 goal/streak），
+    // 单元级固定 Advance goal 下 Train 本就压制 Spar，无法复现刷屏。
+    private static DecisionContext CtxWithPower(int selfPower, List<NearbyActor> nearby)
+        => new DecisionContext(new CharacterId(1), new StatBlock(new[] { 20, 20, 20, 20 }),
+            new Goal(GoalKind.Advance, 0), new NodeId(0), nearby,
+            new List<ActionType> { ActionType.Train, ActionType.Travel, ActionType.Spar },
+            new List<MemoryEntry>(), SelfPower: selfPower);
+
+    [Fact]
+    public async System.Threading.Tasks.Task Even_rival_still_sparred()
+    {
+        var brain = new RuleBrain(new Pcg32(7, 1), ArchetypeKind.Martial);
+        // 势均对手 PE=210 vs 自身 200（gap=10）→ 切磋意愿应保留（不误伤势均选择）。
+        // 用 Wander goal（Train 权重降）让 Spar 有机会胜出，验势均对手可被切磋。
+        var ctx = new DecisionContext(new CharacterId(1), new StatBlock(new[] { 20, 20, 20, 20 }),
+            new Goal(GoalKind.Wander, 0), new NodeId(0),
+            new List<NearbyActor> { new NearbyActor(new CharacterId(2), 210, 0) },
+            new List<ActionType> { ActionType.Spar }, new List<MemoryEntry>(), SelfPower: 200);
+        var choice = await brain.DecideAsync(ctx, CancellationToken.None);
+        Assert.Equal(ActionType.Spar, choice.Type); // 仅 Spar 可选且势均 → 应选 Spar（非 long.MinValue 弃权）
+    }
 }
