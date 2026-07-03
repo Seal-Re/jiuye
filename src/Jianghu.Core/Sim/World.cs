@@ -236,7 +236,15 @@ namespace Jianghu.Sim
             foreach (var other in AtNode(a.Node))
             {
                 if (other.Id.Value == a.Id.Value) continue;
-                int power = other.Stats.Get(StatKind.Force) * 2 + other.Stats.Get(StatKind.Internal) + other.Stats.Get(StatKind.Constitution);
+                // 战力度量须与 DuelEngine 一致（2026-07-03 机制修复）：on 且对方有修为 → 用 PowerEngine.Evaluate
+                // （含 realm 倍率，实战真值）；off/无修为 → 回退 raw stats（B.3 逐字节，off 不调 registry）。
+                // 修复前一律 raw stats → brain 对修为盲，把 999 碾压当势均力敌反复切磋。
+                int power;
+                if (_registry != null && other.Cultivation != null)
+                    power = PowerEngine.Evaluate(other.Cultivation, other.Stats,
+                                                 _registry.ById(other.Cultivation.PathId), Limits);
+                else
+                    power = other.Stats.Get(StatKind.Force) * 2 + other.Stats.Get(StatKind.Internal) + other.Stats.Get(StatKind.Constitution);
                 nearby.Add(new NearbyActor(other.Id, power, Relations.Affinity(a.Id, other.Id)));
             }
 
@@ -254,8 +262,15 @@ namespace Jianghu.Sim
                 factionRep = 0; // reputation not tracked yet
             }
 
+            // 自身战力（与 nearby.Power 同度量）：on 且有修为 → PE；否则 raw stats（off 逐字节：0 时 RuleBrain 回退）。
+            int selfPower = 0;
+            if (_registry != null && a.Cultivation != null)
+                selfPower = PowerEngine.Evaluate(a.Cultivation, a.Stats,
+                                                 _registry.ById(a.Cultivation.PathId), Limits);
+
             return new DecisionContext(a.Id, a.Stats, a.Goal, a.Node, nearby, _actions.Types, a.RecallMemory(),
-                Reachable: reachable, FactionId: factionId, FactionRank: factionRank, FactionReputation: factionRep);
+                Reachable: reachable, FactionId: factionId, FactionRank: factionRank, FactionReputation: factionRep,
+                SelfPower: selfPower);
         }
 
         private void Project(Character actor, DomainEvent e)

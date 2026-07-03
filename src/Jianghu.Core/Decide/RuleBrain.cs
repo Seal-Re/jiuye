@@ -61,7 +61,7 @@ namespace Jianghu.Decide
                 {
                     if (ctx.Nearby.Count == 0) return (long.MinValue, new SparChoice(new CharacterId(-1)));
                     var t = BestSparTarget(ctx);
-                    int gap = System.Math.Abs(SelfPower(ctx.Stats) - t.Power);
+                    int gap = System.Math.Abs(SelfPowerOf(ctx) - t.Power);
                     long rival = System.Math.Max(0, 600 - 15L * gap);  // 势均力敌更想切磋
                     long notFoe = t.Affinity > -50 ? 0 : -500;
                     return (archMartial - 300 + rival + notFoe, new SparChoice(t.Id));
@@ -73,6 +73,11 @@ namespace Jianghu.Decide
         private static int SelfPower(StatBlock s) =>
             s.Get(StatKind.Force) * 2 + s.Get(StatKind.Internal) + s.Get(StatKind.Constitution);
 
+        // 切磋度量修复（2026-07-03）：优先用 ctx.SelfPower（on=PE，与 NearbyActor.Power/DuelEngine 一致）；
+        // 未提供（off/legacy=0）→ 回退 raw stats 公式（逐字节兼容）。决策逻辑不变，仅度量来源对齐。
+        private static int SelfPowerOf(DecisionContext ctx) =>
+            ctx.SelfPower > 0 ? ctx.SelfPower : SelfPower(ctx.Stats);
+
         private static StatKind WeakestCombat(StatBlock s)
         {
             StatKind w = StatKind.Force; int min = int.MaxValue;
@@ -83,7 +88,7 @@ namespace Jianghu.Decide
 
         private static NearbyActor BestSparTarget(DecisionContext ctx)
         {
-            NearbyActor best = ctx.Nearby[0]; int bestGap = int.MaxValue; int self = SelfPower(ctx.Stats);
+            NearbyActor best = ctx.Nearby[0]; int bestGap = int.MaxValue; int self = SelfPowerOf(ctx);
             foreach (var n in ctx.Nearby)
             {
                 int gap = System.Math.Abs(self - n.Power);

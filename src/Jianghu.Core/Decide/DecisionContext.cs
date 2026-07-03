@@ -23,6 +23,9 @@ namespace Jianghu.Decide
         IReadOnlyList<NodeId>? Reachable = null,             // 可达节点（Map-on → 邻接图；Map-off → null）
         int FactionId = 0,                                    // 所属门派（0=散修）
         int FactionRank = 0,                                  // 门派内 rank
-        int FactionReputation = 0                             // 门派声望
+        int FactionReputation = 0,                            // 门派声望
+        // —— 切磋度量修复（2026-07-03）：自身战力（on=PE 含 realm 倍率，与 NearbyActor.Power/DuelEngine 一致；
+        //    off/0=未提供 → RuleBrain 回退 raw stats 公式，逐字节兼容）。——
+        int SelfPower = 0
     );
 }
