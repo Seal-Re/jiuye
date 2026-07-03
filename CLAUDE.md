@@ -14,7 +14,7 @@
 7. **改实现不改测试**；声明完成前**跑全量套件**；单点 fix ≤ 3 次，超限标 `known_issue` 上报人审，不死循环。
 8. **诚实标 defer**：任何计划内 task 若延后，必须在 plan/TASKS.md 显式标 `deferred` + 依赖，不得静默移走（本项目已犯：A1.4 静默 defer）。
 9. **主动调度 skill·善用工具增效**：不被动等指示。每个任务开始时主动扫描 CCGS 可用 skill（`.claude/skills/`）与 agent，匹配当下工作并**主动 invoke** 能提效的工具（如 `/sprint-status` 对账、`/adopt` 重审、`/create-stories` 拆解、`/gate-check` 过闸、`/dev-story` 落实、`/balance-check` 验平衡）。自调度受 A.1 约束：**大方向决策仍交用户**，但工具性、派生性、核验性操作应主动发起，不空等。A.3（机器证据）、A.5（WIP≤2）仍约束 skill 产出。
-10. **阶段流水线纪律（防过早雕琢）**：严禁跳过阶段直接做最终品质雕琢；前一阶段未验收不进下一阶段。当前阶段以 `production/stage.txt` 为准（CCGS 七阶，`/gate-check` 守闸）。**平衡数值的收敛/冻结调优、美术打磨、UI 美化不在 Pre-Production 做**（属 Production/Alpha 及以后）；但平衡「观测/防退化 gate」全程可跑（收敛 gate 到 Alpha 才拧硬）。数值外置须整数/定点（非浮点 JSON，承 B.2）+ 变更版本锁定。详见 `docs/agent-guide/开发流水线纪律.md`（含三条修正论断 + 联网来源）。
+10. **阶段流水线纪律（防过早雕琢·内核前置）**：严禁跳过阶段直接做最终品质雕琢；前一阶段未验收不进下一阶段。当前阶段以 `production/stage.txt` 为准（CCGS 七阶，`/gate-check` 守闸）。**平衡拆两类，别混为一谈**：① **Viability（可运转性）**——实体能否走完成长线（破境率/寿命消耗/生命周期流转）= **Pre-Production 核心前置**，必须先跑通（否则上层剧情因数值门控阻塞而死锁，如"闭关到老死"）；② **Fairness（公平性）**——流派间强度对等（如 21 路同 UT [40,60]% 胜率 balance-003）= **推迟 Alpha**。**内核（生命周期/基础数值/行为树）绝对前置于 Drama 等上层应用**（Drama 强依赖实体核心属性；内核未通则剧情死锁）。美术打磨/UI 美化不在 Pre-Production。**表现层（Unity）接入闸口 = 唯"无头数据日志证明核心机制无死锁"方可接**（Model/View 分离：Core=Model、Unity=View 只渲染，过早接拖慢底层迭代）。数值外置须整数/定点（非浮点 JSON，承 B.2）+ 变更版本锁定。详见 `docs/agent-guide/开发流水线纪律.md`。
 
 ## B. 技术红线（既有，合并）
 
