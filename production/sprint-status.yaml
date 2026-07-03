@@ -36,10 +36,19 @@ stories:
     name: "C1 硬闸门 counter 对拍豁免 or 标定期中性化（AC 3.4 从 balance-003 拆出）"
     file: "production/epics/balance-cross/story-006-c1-counter-exemption.md"
     priority: must-have
-    status: ready-for-dev  # story 已建（/create-stories）；两方案列出（豁免名单 推荐 vs 标定中性化）
+    status: done  # 53e83f4：方案B calibrationMode 中性化设施 + PE-band 硬 gate（151/151 入带）；证胜率[40,60]确定性模型不可达→改判裸PE代理
     owner: ""
     estimate_days: 1.5
-    blocker: "依赖 balance-003 PE 归一化（done）；需设计裁决：counter 豁免名单 vs 标定中性化"
+    blocker: ""
+    completed: "2026-07-03"
+  - id: "balance-007"
+    name: "控制衰减与冷却（Hybrid Cooldown & Diminishing Returns）— 消 stun-lock"
+    file: "production/epics/balance-cross/story-007-control-cooldown-dr.md"
+    priority: should-have  # Alpha backlog（用户 2026-07-03 裁决方案B变体）；CC 机制健康化，非 sprint-7 目标
+    status: ready-for-dev  # story 已建，待 Review 确认后实现（DR=duration-based 因对拍无RNG；CD/DR duel-local）
+    owner: ""
+    estimate_days: 1.5
+    blocker: "待用户 Review story 卡片确认（用户明示：Review 后再进 sprint-7 retrospective）"
     completed: ""
   - id: "balance-004"
     name: "切磋碎压平滑 — 无势均对手则降切磋意愿（Target-Selection 权重）"
