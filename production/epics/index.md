@@ -25,5 +25,5 @@
 | 12 | 可视化（像素 tile / 古风 UI） | `visualization` | Presentation | Spike only | spike + 规则 doc（B.8 分轨） |
 | 13 | 仓库整理 | `repo-tidy` | chore | Todo | _research/raw3、pixel 决断、icon_gen bug |
 
-> 阶段（production/stage.txt）= **Pre-Production**（2026-07-02 订正，原误标 Production；依据见红线 A.10 / `docs/agent-guide/开发流水线纪律.md` §1）。jiuye 0-9 细分阶序保留为本表 epic 排序（0-3 done 历史，5=combat 当前，6-9 future）。
+> 阶段（production/stage.txt）= **Production**（= AAA Alpha，CCGS 七阶映射见 `docs/agent-guide/开发流水线纪律.md` §1）。2026-07-03 推进：core-loop-fun = **validated**（Viability 实质证明：破境 UT0→8 纵深 + 19 条"立誓-寻仇-手刃"恩怨链，见 `production/playtests/2026-07-03-cd-playtest-emergence.md`）；结束 Pre-Production 内核验证期。jiuye 0-9 细分阶序保留为本表 epic 排序（0-3 done 历史，5=combat 当前，6-9 future）。
 > 设计深度源仍在 `docs/legacy-specs/specs/`（18 份，原地保留，P8 增量逆向补 GDD）。
