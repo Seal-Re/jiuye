@@ -1,7 +1,7 @@
 # Story 008: turns=1 控制哑弹裁决（tick 时序 off-by-one vs 轻控设计意图）
 
 > **Epic**: balance-cross
-> **Status**: In Review（实现完成，AC 8.1-8.5 全绿，待提交 sha 转 Done）
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（承 balance-007 机制侧；控制经济健康化）
@@ -76,4 +76,4 @@ combat GDD 按**时机窗口类型**分类控制：
 
 **Story Type**: Logic
 **Required evidence**: `tests/Jianghu.Core.Tests/Cultivation/ControlInterruptTests.cs`（方案C 语义固化单测，10 例）。
-**Status**: [x] 已创建 — 10 用例全绿；off 逐字节 27 绿 + 浮点扫描 8 绿 + balance-007 CD/DR 15 绿回归守（2026-07-06 主控实测）。**待提交 sha 补齐 A.3 证据门第②项后转 Done。**
+**Status**: [x] 已创建 — 10 用例全绿；off 逐字节 27 绿 + 浮点扫描 8 绿 + balance-007 CD/DR 15 绿回归守（2026-07-06 主控实测）。**Done @ sha `d385cd8`**（A.3 证据门三项齐全：①1087 绿 ②sha d385cd8 ③ControlInterruptTests.cs 存在）。

@@ -46,4 +46,4 @@
 - **story-005** INV-CROSS 派生视图刷新 + /balance-check — backlog（nice-to-have）
 - **story-006** c1-counter-exemption — Done（53e83f4，calibrationMode + PE-band gate）
 - **story-007** control-cooldown-dr — **Done @ 9592d41**（CD/DR 消 turns≥2 stun-lock；AC 7.1-7.6 ✅，7.7 指标正交另证）
-- **story-008** turns1-control-nop — **In Review**（裁决=方案C 分级语义：turns=1 即时打断/turns≥2 长控不变；1087 绿(+10)，待提交 sha 转 Done）
+- **story-008** turns1-control-nop — **Done @ d385cd8**（裁决=方案C 分级语义：turns=1 即时打断/turns≥2 长控不变；1087 绿(+10)，balance-007 CD/DR 不退）
