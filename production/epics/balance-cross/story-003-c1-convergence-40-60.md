@@ -1,8 +1,8 @@
 # Story 003: C1 收敛 [40,60]% 硬闸门 + 模块伤害钳制
 
 > **Epic**: balance-cross
-> **Status**: Deferred → **Alpha 阶段**（流水线纪律，见下「2026-07-02 defer 复核」）；sprint-7 ready-for-dev
-> **Last Updated**: 2026-07-03
+> **Status**: Complete
+> **Last Updated**: 2026-07-06
 > **Layer**: Core
 > **Type**: Integration
 > **TR**: TR-BAL-001（`docs/architecture/tr-registry.yaml`）
@@ -135,4 +135,20 @@ After calibration, update `DuelGateTests.Frozen`:
 - **AC 3.1/3.3/3.5/3.6/3.9（PE 归一化 + 不变量保持）= Done**（本次）。
 - **AC 3.4（violations==0）= 拆出新 story `balance-006`**：counter 对拍豁免名单（仿 C3）or 标定期中性化 counter。属独立设计裁决，不在 mul 校准范畴。
 - 故本 story 状态：**Partially done**（数值归一化成，硬闸门待 counter 裁决）。
+
+---
+
+## Completion Notes
+**Completed**: 2026-07-06（`/story-done`，旗舰档主控独立核验 A.3）
+**Criteria**: 9/10 覆盖 — AC 3.1/3.2/3.3/3.5/3.6/3.8/3.9/3.10 ✅；AC 3.4 拆出 balance-006（Done @53e83f4）；AC 3.7 反扁平 M=3 = UNTESTED（advisory）
+**Machine evidence**:
+- 实现 sha `8c5504e`（18 路 RealmMultipliers §5 校准 + `C1RecalibrationTests.cs`）
+- Gate 类核跑：`dotnet test --filter C1RecalibrationTests|InvCrossDuelTests|DuelGateTests` → **37/37 通过 / 0 失败**
+- 全量：`dotnet test` → **1087 通过 / 0 失败 / 0 跳过**
+- AC 溯源：3.3/3.8→`C1RecalibrationTests`；3.5→`InvCrossDuelTests.C2Gate:364`；3.6→`C3Gate:426`；3.9→`CultivationFloatScanTests`+`OffByteIdenticalTests`+`CultivationDeterminismTests`；3.10→`DuelGateTests.Frozen:22`
+**Deviations**:
+- ADVISORY — AC 3.7（反扁平 M=3，|win%-50|∈[5,10]）无测试。根因同 AC 3.4：确定性对拍无方差 → 胜率 ~100%/0%，中间带宽结构性不可达。已记入 `docs/tech-debt-register.md`，跟踪至「方差战斗模型」立项。
+- ADVISORY — Manifest 版本 story 记 `2026-07-03` vs 当前 `2026-07-03b`（微修订，无新增层规则）。
+**Test Evidence**: Integration — `tests/Jianghu.Core.Tests/Cultivation/C1RecalibrationTests.cs`（存在且通过，BLOCKING gate 满足）
+**Code Review**: Skipped — lean mode（`/code-review` 未单独跑；实现 sha `8c5504e` 已入 master 主线，18 路仅 RealmMultipliers 单值改动，主控复核范围内）
 

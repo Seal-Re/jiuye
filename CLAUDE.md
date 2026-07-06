@@ -66,7 +66,7 @@
 # 构建（全 solution）
 dotnet build
 
-# 全量测试（1062 绿，零失败）
+# 全量测试（1087 绿，零失败）
 dotnet test
 
 # 单个测试文件
@@ -102,7 +102,7 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 |---|---|---|
 | `Jianghu.Core` | netstandard2.1 | **纯逻辑库**——全部模拟机制。零引擎依赖（后期直接 Godot 4.x .NET 引用；引擎 2026-07-03 由 Unity 切换，见 ADR-0004） |
 | `Jianghu.Cli` | net8.0 | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory` → `World.Advance` |
-| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1062），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
+| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1087），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
 
 ### 执行模型（事件驱动 + 确定性 PRNG）
 

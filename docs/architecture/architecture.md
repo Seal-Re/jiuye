@@ -32,7 +32,7 @@
 |---|---|---|---|
 | `Jianghu.Core` | `netstandard2.1` | **纯逻辑库**——全部模拟机制（模型/PRNG/调度/动作/修炼/战斗/戏剧/事件）。 | 零引擎依赖；禁 `System.Random`/`Console`/`DateTime`/`Thread`（BannedApiAnalyzers）；`Jianghu.Cultivation` 禁浮点（IL 扫描）。后期直接被 Godot 4.x .NET 引用。 |
 | `Jianghu.Cli` | `net8.0` | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory.CreateInitial` → `World.Advance` → 打印快照。 | 当前 Host；后期与 Godot 宿主并列（同一 Core，两个 View）。可用 `System.Console`（非 Core）。 |
-| `Jianghu.Core.Tests` | `net8.0` | xUnit 全量测试（1062 绿）：确定性（IL 浮点扫描 / 逐字节复现）、off 逐字节、21 路独立、战斗模块差分、drama 恩怨链。 | 回归基线 = 全量绿不退。 |
+| `Jianghu.Core.Tests` | `net8.0` | xUnit 全量测试（1087 绿）：确定性（IL 浮点扫描 / 逐字节复现）、off 逐字节、21 路独立、战斗模块差分、drama 恩怨链。 | 回归基线 = 全量绿不退。 |
 
 ---
 

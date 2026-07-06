@@ -43,7 +43,7 @@
 原引擎目标为 Unity（见 `2026-06-18-core-unity-split-design.md`），现改为 **Godot 4.x (.NET)**。需在动任何宿主代码前，把"逻辑与表现严格分离"的边界纪律换成 Godot 语汇并物理落盘（规范先行，红线 A.10 / 核心执行原则 1）。
 
 ### 现状（切换起点）
-- `Jianghu.Core`（`netstandard2.1`）纯逻辑库，零引擎依赖，BannedApiAnalyzers 守（`System.Random`/`Console`/`DateTime`/`Thread` 禁；`Jianghu.Cultivation` 禁浮点 IL 扫描守）。**1062 测试绿**。
+- `Jianghu.Core`（`netstandard2.1`）纯逻辑库，零引擎依赖，BannedApiAnalyzers 守（`System.Random`/`Console`/`DateTime`/`Thread` 禁；`Jianghu.Cultivation` 禁浮点 IL 扫描守）。**1087 测试绿**。
 - `Jianghu.Cli`（`net8.0`）薄壳 Host：解析参数 → `WorldFactory.CreateInitial` → `World.Advance` → 文本快照。
 - **表现层尚未生成**；核心处于 headless C# 状态。**2D 等距地图从未实现**（`Jianghu.Sim.WorldMap` 是引擎无关的**整数图拓扑**，非空间/像素 iso，不在本 ADR 的"地图代码"范畴）。
 
@@ -134,7 +134,7 @@ public override void _Process(double delta)   // delta: 浮点, 仅宿主可见
 ## Consequences
 
 ### Positive
-- 引擎切换**零触碰 Core 逻辑**：1062 测试、B.2/B.3、determinism 轨全部不动（核心执行原则 3 达成）。
+- 引擎切换**零触碰 Core 逻辑**：1087 测试、B.2/B.3、determinism 轨全部不动（核心执行原则 3 达成）。
 - Model/View 边界比 Unity 时更干净：Godot 用标准 `dotnet`/`.csproj` 消费 `netstandard2.1` 程序集。
 - 固定时间步 → 渲染帧率与模拟轨迹解耦，同种子跨机器/跨帧率逐字节一致仍成立。
 - CLI headless 驱动与 Godot 宿主**并列共存**（同一 Core，两个 View）——headless 回归不受宿主影响。
