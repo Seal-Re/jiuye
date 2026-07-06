@@ -45,11 +45,11 @@ stories:
     name: "控制衰减与冷却（Hybrid Cooldown & Diminishing Returns）— 消 stun-lock"
     file: "production/epics/balance-cross/story-007-control-cooldown-dr.md"
     priority: should-have  # Alpha backlog（用户 2026-07-03 裁决方案B变体 + Review Approved）；CC 机制健康化，非 sprint-7 目标
-    status: review  # 2026-07-06 impl 完成：CD/DR duel-local（DuelEngine+LimitsConfig 旋钮 2/1）；1077 绿（+15）；AC 7.1-7.6 ✅，7.7 指标正交另证（用户选 A）；待提交 sha 转 done
+    status: done  # 9592d41：CD/DR duel-local（DuelEngine+LimitsConfig 旋钮 2/1）；1077 绿（+15）；AC 7.1-7.6 ✅，7.7 指标正交另证（用户选 A）；turns=1 哑弹→balance-008 候选
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-06"
   - id: "balance-004"
     name: "切磋碎压平滑 — 无势均对手则降切磋意愿（Target-Selection 权重）"
     file: "production/epics/balance-cross/story-004-spar-stomp-smoothing.md"

@@ -1,7 +1,7 @@
 # Story 007: 控制衰减与冷却（Hybrid Cooldown & Diminishing Returns）
 
 > **Epic**: balance-cross
-> **Status**: In Review
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（`docs/architecture/tr-registry.yaml`；C1 平价的机制侧——消除 stun-lock 零博弈碾压）
@@ -111,7 +111,7 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/Jianghu.Core.Tests/Cultivation/ControlCooldownTests.cs` — 须存在且过 + off 逐字节回归守
-**Status**: [x] 已创建 — 15 用例全绿；off 逐字节 27 绿 + 浮点扫描 8 绿回归守（2026-07-06 主控实测）。**待提交 sha 补齐 A.3 证据门第②项后转 Done。**
+**Status**: [x] 已创建 — 15 用例全绿；off 逐字节 27 绿 + 浮点扫描 8 绿回归守（2026-07-06 主控实测）。**Done @ sha `9592d41`**（A.3 证据门三项齐全：①1077 绿 ②sha 9592d41 ③ControlCooldownTests.cs 存在）。
 
 ---
 
