@@ -306,7 +306,7 @@ namespace Jianghu.Cultivation
                             continue;
                         }
 
-                        pendingControls.Add(new ControlEntry(defenderSide, ctrlKey, effTurns));
+                        pendingControls.Add(new ControlEntry(defenderSide, ctrlKey, StoredControlTurns(baseTurns, effTurns)));
                         controlLimiter.HitCount[limiterKey] = priorHits + 1;
                         controlLimiter.CooldownUntilRound[limiterKey] = round + limits.ControlCooldown;
                         continue;
@@ -446,6 +446,20 @@ namespace Jianghu.Cultivation
         /// <param name="drStep">每次重复的递减步长（LimitsConfig.ControlDRStep；0=无递减）</param>
         public static int EffectiveControlTurns(int baseTurns, int priorHits, int drStep)
             => Math.Max(0, baseTurns - priorHits * drStep);
+
+        /// <summary>
+        /// balance-008 分级语义（方案C，2026-07-06 用户裁定）：turns=1 = 即时打断（interrupt），
+        /// turns≥2 = 定身/长控（stun，保持 balance-007 的 N−1 拒止不变）。纯整数（B.2），纯函数。
+        ///
+        /// tick 时序令控制在"施加回合末"白耗一次递减 → turns=N 实际拒止 N−1 回合。故 baseTurns=1
+        /// 现为哑弹（拒止 0）。本函数对 baseTurns=1 存 effTurns+1 补偿该损耗（→ 拒止 1 回合=打断）；
+        /// baseTurns≥2 存 effTurns 原样（拒止 N−1 不变，balance-007 CD/DR 逐字节守）。
+        /// 前置：仅在 effTurns>0（未被 DR 免疫）时调用；DR 递减后的 effTurns 不触发补偿（守 balance-007）。
+        /// </summary>
+        /// <param name="baseTurns">控制基础持续回合（Modules.Control 的 turns，判 interrupt vs stun 档）</param>
+        /// <param name="effTurns">经 DR 递减后的有效回合（EffectiveControlTurns 输出，>0）</param>
+        public static int StoredControlTurns(int baseTurns, int effTurns)
+            => baseTurns == 1 ? effTurns + 1 : effTurns;
 
         /// <summary>回合间 dot/control 结算（AC 4.3）。dot 扣 hp；control 减回合。</summary>
         private static void TickDots(List<DotEntry> dots, List<ControlEntry> controls, ref int hpA, ref int hpB)

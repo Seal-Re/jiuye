@@ -1,7 +1,7 @@
 # Story 008: turns=1 控制哑弹裁决（tick 时序 off-by-one vs 轻控设计意图）
 
 > **Epic**: balance-cross
-> **Status**: Ready-for-Decision（阻塞在设计裁决 — 非 Ready-for-Dev）
+> **Status**: In Review（实现完成，AC 8.1-8.5 全绿，待提交 sha 转 Done）
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（承 balance-007 机制侧；控制经济健康化）
@@ -46,13 +46,19 @@ combat GDD 按**时机窗口类型**分类控制：
 
 **主控倾向（供参考，非裁决）**：从 GDD"困/定身/打断均列**即时**窗口"看，方案 **A 或 C** 更可能贴原设计（迷魂/勾魂作即时扰动，非长控）。方案 **B** 风险最高——动确定性对拍全轨迹，且与刚落地的 balance-007 CD/DR 交互需全面重验。**但语义定性是设计大方向，交用户裁。**
 
-## Acceptance Criteria（占位 — 随裁决细化）
+## Acceptance Criteria（裁决=方案C 分级语义，2026-07-06 用户裁定）
 
-- [ ] 8.1 **设计裁决记录**：选定方案（A/B/C）+ 理由，落 story + 视需要立 ADR（若改 tick 语义=架构级）。
-- [ ] 8.2 **语义固化测试**：turns=1 行为符合裁决（A：断言不跨回合锁；B：断言锁 1 回合；C：断言按档位）。
-- [ ] 8.3 **21 路 4 招一致性**：`mihun`/`soulLock`/`lawPrison`/`voidPrison` 语义与裁决一致（B.4 不漏路）。
-- [ ] 8.4 **若选 B**：off 逐字节 + balance-007 CD/DR（`ControlCooldownTests`）+ C2 碾压单调 + C3 辅助豁免全绿不退；on 对拍轨迹变化经差分核为"预期改善"。
-- [ ] 8.5 **全量绿 + 浮点扫描**（B.2）：新增逻辑纯整数，全量测试绿贴计数。
+> **裁决记录（8.1）**：turns=1 = **即时打断**（interrupt，拒止 1 回合）；turns≥2 = **定身/长控**（stun，保持现有 N−1 拒止不变）。贴 GDD combat-system.md:83-84 的"困/定身"与"打断蓄招"双语义。4 招（mihun/soulLock/lawPrison/voidPrison）归"即时打断"档，从哑弹变为拒止对手 1 回合出招。**不动 turns≥2 轨迹与 balance-007 CD/DR**（隔离改动）。
+>
+> **实现机制（隔离补偿 tick 损耗）**：根因 = tick 时序令控制在"施加回合末"白耗一次递减（turns=N 实际拒止 N−1）。故新增纯 helper `DuelEngine.StoredControlTurns(baseTurns, effTurns)`：base=1 存 `effTurns+1`（补偿→拒止 1 回合）；base≥2 存 `effTurns` 原样。DR 免疫（effTurns≤0）仍跳过。→ 仅 4 条 base=1 路对拍变，turns≥2 与 DR/CD 逐字节不变。
+
+- [x] 8.1 **设计裁决记录**：✅ 方案C 分级语义（见上）。非架构级（不改结算语义、只补 turns=1 损耗），无需 ADR。
+- [x] 8.2 **语义固化测试**：✅ `StoredControlTurns_TieredSemantics`（4 例阶梯）+ `Turns1Control_NowInterrupts_AttackerGainsAdvantage`（哑弹 margin=0 → 打断 margin>0）。
+- [x] 8.3 **21 路 4 招一致性**：✅ `FourSignatureControls_AreTurns1_DataLevel`（mihun/soulLock/lawPrison/voidPrison 全 turns=1，B.4 不漏路）。
+- [x] 8.4 **turns≥2 + balance-007 不退**：✅ `Turns2Control_Unchanged_StillDominates` + `ControlCooldownTests` 15 例全绿（turns≥2 与 CD/DR 逐字节不受扰）。
+- [x] 8.5 **off 逐字节 + 全量绿 + 浮点扫描（B.2）**：✅ 全量 1087 绿（+10）；off+determinism 27 绿；浮点扫描 8 绿；4 路 turns=1 变更零回归（全量绿实证——既有对拍或用 calibrationMode 旁路、或 UT-gap auto-win、或不依赖 turns=1 控制结果）。
+
+> **机器证据（2026-07-06 主控实测）**：全量 **1087 绿 / 0 失败 / 0 跳过**（1077+10 新）；off+determinism **27 绿**；Cultivation 浮点扫描 **8 绿**；balance-007 CD/DR **15 绿不退**。测试文件 `tests/Jianghu.Core.Tests/Cultivation/ControlInterruptTests.cs`（10 用例）。
 
 ## Out of Scope
 
@@ -69,5 +75,5 @@ combat GDD 按**时机窗口类型**分类控制：
 ## Test Evidence
 
 **Story Type**: Logic
-**Required evidence**: 随裁决定 —— 方案 A/C：语义固化单测；方案 B：off 逐字节 + 全差分回归。
-**Status**: [ ] 阻塞在 8.1 设计裁决，未进实现。
+**Required evidence**: `tests/Jianghu.Core.Tests/Cultivation/ControlInterruptTests.cs`（方案C 语义固化单测，10 例）。
+**Status**: [x] 已创建 — 10 用例全绿；off 逐字节 27 绿 + 浮点扫描 8 绿 + balance-007 CD/DR 15 绿回归守（2026-07-06 主控实测）。**待提交 sha 补齐 A.3 证据门第②项后转 Done。**
