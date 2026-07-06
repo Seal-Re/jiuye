@@ -73,5 +73,5 @@ Foundation ──→ Core ──→ Feature ──→ Presentation
 - **2026-07-03 引擎切换**：表现层目标 Unity→**Godot 4.x (.NET)**（[adr-0004](../../docs/architecture/adr-0004-godot-view-host-boundary.md)）。系统 #19-22（Godot 宿主/宏微观世界/反应式战斗/PCG）为 **View 层前瞻规范**，源真相 = [godot-architecture-manifest.md](../../docs/architecture/godot-architecture-manifest.md)；均 **Not Designed/Planned**，未实现（接入闸口=无头日志证核心无死锁，红线 A.10）。触及 Core 的开放调和项（柏林浮点/ECS/宏观同步回合）见 [architecture.md §10.2](../../docs/architecture/architecture.md)，候选 ADR 未裁决。
 - Combat 系列已收官（combat-r2 Done；combat-fullstruct Deferred，待 balance-cross 验证近似档是否够用）
 - `cultivation-a1-rest` 的 A1.4 blocked-on `balance-cross`
-- `drama-engine` 已收官（drama-001~013 全落，1051 绿，`--drama` 激活）；`map-system`/`faction` 已接线（`--map`/`--faction`）
+- `drama-engine` 已收官（drama-001~013 全落，1062 绿，`--drama` 激活）；`map-system`/`faction` 已接线（`--map`/`--faction`）
 - ⚠️ `balance-cross` = Designed（非 Done）：契约 C1[40,60]% 未兑现，balance-003 硬闸门 Deferred（详见圆桌纪要 §1）

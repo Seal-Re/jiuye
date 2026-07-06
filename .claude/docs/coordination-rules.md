@@ -22,6 +22,8 @@ Skills and agents are assigned to model tiers based on task complexity:
 | **Sonnet** | `claude-sonnet-4-6` | Implementation, design authoring, analysis of individual systems — default for most work |
 | **Opus** | `claude-opus-4-6` | Multi-document synthesis, high-stakes phase gate verdicts, cross-system holistic review |
 
+> **注（红线 B.7 优先）**：上表为 CCGS 骨架默认档位 + 旧模型 ID（`claude-sonnet-4-6`/`claude-opus-4-6` 等），**本项目以 `CLAUDE.md` 红线 B.7「按风险分档」为准并覆盖之**：碰确定性(B.2/B.3)/平衡/推理 → **旗舰档**；纯机械低耦合编码（CLI 接线/测试脚手架/可视化/文档工具）→ **标准档**；CCGS 诊断/格式类 skill → 廉价档。档位→模型映射由环境网关（`~/.claude/settings.json`）解析，红线不钉模型名（当前：旗舰=Opus 4.8，标准/廉价=本地网关 glm-5.2）。某 agent 默认档与任务风险不符时 override 其 frontmatter。
+
 Skills with `model: haiku`: `/help`, `/sprint-status`, `/story-readiness`, `/scope-check`,
 `/project-stage-detect`, `/changelog`, `/patch-notes`, `/onboard`
 

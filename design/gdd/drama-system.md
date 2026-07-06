@@ -5,7 +5,7 @@
 > **Last Updated**: 2026-06-26
 > **Implements Pillar**: 武侠"恩怨情仇·快意恩仇·父债子偿"的涌现戏剧性——NPC 江湖自发生出复仇桥段
 > **真相源（上游）**: `docs/legacy-specs/specs/2026-06-13-v1.2-B-戏剧引擎-design.md`（5-agent 圆桌 + 集成官实读源码，11 步 walking-skeleton）
-> **已落地（drama-001~013）**: 核心引擎全栈已建——`Drama/GrudgeLedger.cs`（恩怨账本）+ `RevengeArc.cs`（复仇弧 5 态机）+ `DramaDirector.cs`（Pump 推进/点火 + 跨代继承）+ `IgnitionScanner`/`StoryletSelector`/`RelationService`。1051 绿，AC-1~10 全过，`--drama`/`--drama-feuds` 激活。drama-001/002 的 `RelationService`/`DramaStoryletEngine` 是最初薄工具层，现已被完整引擎覆盖。
+> **已落地（drama-001~013）**: 核心引擎全栈已建——`Drama/GrudgeLedger.cs`（恩怨账本）+ `RevengeArc.cs`（复仇弧 5 态机）+ `DramaDirector.cs`（Pump 推进/点火 + 跨代继承）+ `IgnitionScanner`/`StoryletSelector`/`RelationService`。1062 绿，AC-1~10 全过，`--drama`/`--drama-feuds` 激活。drama-001/002 的 `RelationService`/`DramaStoryletEngine` 是最初薄工具层，现已被完整引擎覆盖。
 
 ---
 
@@ -42,7 +42,7 @@
 
 核心范式：**恩怨账本（GrudgeLedger）** 记录有向深仇 → **复仇弧状态机（5 态）** 把一条仇驱动为多 tick 的戏剧弧 → **storylet 声明式事件库** 提供桥段模板 → **DramaDirector.Pump** 每 Advance 末尾推进到期弧 + 节流点火新弧。全整数、确定、空库 no-op。
 
-**当前状态**：drama-001~013 全落——本 GDD 描述的核心引擎（恩怨账本 + 复仇弧 5 态机 + 跨代继承）已建并接线，1051 绿，AC-1~10 全过（见 §9 落地表）。
+**当前状态**：drama-001~013 全落——本 GDD 描述的核心引擎（恩怨账本 + 复仇弧 5 态机 + 跨代继承）已建并接线，1062 绿，AC-1~10 全过（见 §9 落地表）。
 
 ## 2. Player Fantasy
 
