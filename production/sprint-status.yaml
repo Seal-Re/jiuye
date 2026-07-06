@@ -45,7 +45,7 @@ stories:
     name: "控制衰减与冷却（Hybrid Cooldown & Diminishing Returns）— 消 stun-lock"
     file: "production/epics/balance-cross/story-007-control-cooldown-dr.md"
     priority: should-have  # Alpha backlog（用户 2026-07-03 裁决方案B变体 + Review Approved）；CC 机制健康化，非 sprint-7 目标
-    status: ready-for-dev  # story Review Approved（用户确认两工程修正：DR=duration-based/duel-local）；Alpha 后续实现
+    status: review  # 2026-07-06 impl 完成：CD/DR duel-local（DuelEngine+LimitsConfig 旋钮 2/1）；1077 绿（+15）；AC 7.1-7.6 ✅，7.7 指标正交另证（用户选 A）；待提交 sha 转 done
     owner: ""
     estimate_days: 1.5
     blocker: ""

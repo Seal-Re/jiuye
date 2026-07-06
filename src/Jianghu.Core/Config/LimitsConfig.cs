@@ -28,6 +28,11 @@ namespace Jianghu.Config
         public int PowerCap { get; init; } = 1_000_000;     // PowerEngine.final 上钳
         public int SituationalP0Base { get; init; } = 400;  // 情境 adj clamp ±P0/4 基准（Task 1.6 用）
 
+        // 控制经济（balance-007；DuelEngine 结算侧，duel-local，off 不调 DuelEngine → B.3 天然守）。
+        // 治 turns≥2 硬控每回合重挂→永久锁死（stun-lock）。纯整数（B.2），从时间经济根治零博弈碾压，不碰 PE。
+        public int ControlCooldown { get; init; } = 2;  // 挂控成功后隔 N 回合该控不可再挂（≥0；0=退化无冷却，向后兼容）
+        public int ControlDRStep { get; init; } = 1;    // 同目标同类控制每次重复，TurnsRemaining 递减步长（≥0；0=退化无递减）
+
         // 戏剧引擎 B（drama-006，GDD §7；纯加，off 全关时绝不消费 → B.3 逐字节守恒）。
         // 全 int，含 MaxArcWeightSum（int 范围内 → WeightedPicker (int)total 抽取安全）。
         public int GrudgeCap { get; init; } = 100;             // 恩怨强度上限 [0,Cap]（§3.1）
@@ -63,6 +68,10 @@ namespace Jianghu.Config
             if (StatMin < 0 || StatMin > StatCap) throw new InvalidOperationException("min 越界 [0,cap]");
             if (PopulationLow > PopulationHigh) throw new InvalidOperationException("人口带非法");
             if (LifespanMin > LifespanMax) throw new InvalidOperationException("寿命带非法");
+
+            // 控制经济（balance-007）：两旋钮 ≥0（0 合法=退化无限制，向后兼容）。
+            if (ControlCooldown < 0) throw new InvalidOperationException("ControlCooldown<0（0 合法=无冷却）");
+            if (ControlDRStep < 0) throw new InvalidOperationException("ControlDRStep<0（0 合法=无递减）");
 
             // 戏剧引擎 B 越界断言（drama-006，GDD §7）。独立断言，顺序不限。
             if (GrudgeCap < 1) throw new InvalidOperationException("GrudgeCap<1");

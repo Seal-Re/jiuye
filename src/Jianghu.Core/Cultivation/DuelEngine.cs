@@ -95,6 +95,7 @@ namespace Jianghu.Cultivation
             long totalDmgToB = 0, totalDmgToA = 0;
             var pendingDots = new List<DotEntry>();
             var pendingControls = new List<ControlEntry>();
+            var controlLimiter = new ControlLimiterState(); // balance-007：CD/DR duel-local
             var rollbackStack = new RollbackStack();
             for (int round = 0; round < roundLimit && hpA > 0 && hpB > 0; round++)
             {
@@ -122,7 +123,7 @@ namespace Jianghu.Cultivation
                     activeASkill, effPeA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
-                    pendingDots, pendingControls,
+                    pendingDots, pendingControls, controlLimiter, round,
                     attackerArtifact, defenderArtifact, calibrationMode);
 
                 int dmgToB, dmgToA_redirect;
@@ -138,7 +139,7 @@ namespace Jianghu.Cultivation
                     activeDSkill, effPeB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
-                    pendingDots, pendingControls,
+                    pendingDots, pendingControls, controlLimiter, round,
                     defenderArtifact, attackerArtifact, calibrationMode);
 
                 int dmgToA, dmgToB_redirect;
@@ -258,6 +259,7 @@ namespace Jianghu.Cultivation
             CombatContext ctx, LimitsConfig limits, SituationalResolver? resolver,
             Side attackerSide, Side defenderSide,
             List<DotEntry> pendingDots, List<ControlEntry> pendingControls,
+            ControlLimiterState controlLimiter, int round,
             ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null,
             bool calibrationMode = false)
         {
@@ -285,8 +287,28 @@ namespace Jianghu.Cultivation
                     {
                         // balance-006 方案B：标定模式旁路 Control（锁回合破坏行动经济，与裸 PE 平价正交）。
                         if (calibrationMode) continue;
-                        int turns = op.Amount >= 1 ? op.Amount : 1;
-                        pendingControls.Add(new ControlEntry(defenderSide, op.Key ?? "ctrl", turns));
+                        int baseTurns = op.Amount >= 1 ? op.Amount : 1;
+                        string ctrlKey = op.Key ?? "ctrl";
+                        var limiterKey = (defenderSide, ctrlKey);
+
+                        // balance-007 硬冷却：上次挂控后 ControlCooldown 回合内该控不可再挂（给博弈窗口）。
+                        if (controlLimiter.CooldownUntilRound.TryGetValue(limiterKey, out int until)
+                            && round < until)
+                            continue;
+
+                        // balance-007 抗性递减（duration-based）：同目标同类控制重复 → 有效回合阶梯降，0=免疫。
+                        controlLimiter.HitCount.TryGetValue(limiterKey, out int priorHits);
+                        int effTurns = EffectiveControlTurns(baseTurns, priorHits, limits.ControlDRStep);
+                        if (effTurns <= 0)
+                        {
+                            // 免疫：仍记 hit 使 DR 单调推进（重复施加不重置阶梯），但不挂控、不进冷却。
+                            controlLimiter.HitCount[limiterKey] = priorHits + 1;
+                            continue;
+                        }
+
+                        pendingControls.Add(new ControlEntry(defenderSide, ctrlKey, effTurns));
+                        controlLimiter.HitCount[limiterKey] = priorHits + 1;
+                        controlLimiter.CooldownUntilRound[limiterKey] = round + limits.ControlCooldown;
                         continue;
                     }
                     // balance-006 方案B：标定模式旁路 CounterMul（tag 克制倍乘，与裸 PE 正交）。
@@ -401,6 +423,29 @@ namespace Jianghu.Cultivation
             public ControlEntry(Side target, string key, int turns)
             { Target = target; Key = key; TurnsRemaining = turns; }
         }
+
+        /// <summary>
+        /// balance-007：控制冷却/递减 duel-local 状态（每场对拍内，不入 World.Clone/Character 持久态
+        /// → B.3 off 逐字节天然安全，off 更不调 DuelEngine）。仅按 (Side,key) 键读写，从不遍历 → 无序不影响确定性（B.2）。
+        /// </summary>
+        private sealed class ControlLimiterState
+        {
+            /// <summary>(目标,key) → 该控制下次可再挂的回合号（round < 此值则本回合拒挂）。</summary>
+            public readonly Dictionary<(Side, string), int> CooldownUntilRound = new Dictionary<(Side, string), int>();
+            /// <summary>(目标,key) → 该控制已成功施加次数（供 DR 阶梯递减）。</summary>
+            public readonly Dictionary<(Side, string), int> HitCount = new Dictionary<(Side, string), int>();
+        }
+
+        /// <summary>
+        /// balance-007 抗性递减（duration-based，纯整数 B.2）：同目标同类控制重复施加，
+        /// 有效持续回合数 = max(0, baseTurns − priorHits × drStep)。0 = 免疫（不挂控）。
+        /// 纯函数（无副作用），供 ResolveExchange 调用 + 单测直接验（对拍无 RNG，确定）。
+        /// </summary>
+        /// <param name="baseTurns">控制基础持续回合（Modules.Control 的 turns）</param>
+        /// <param name="priorHits">此前已对该目标施加同类控制的次数</param>
+        /// <param name="drStep">每次重复的递减步长（LimitsConfig.ControlDRStep；0=无递减）</param>
+        public static int EffectiveControlTurns(int baseTurns, int priorHits, int drStep)
+            => Math.Max(0, baseTurns - priorHits * drStep);
 
         /// <summary>回合间 dot/control 结算（AC 4.3）。dot 扣 hp；control 减回合。</summary>
         private static void TickDots(List<DotEntry> dots, List<ControlEntry> controls, ref int hpA, ref int hpB)
