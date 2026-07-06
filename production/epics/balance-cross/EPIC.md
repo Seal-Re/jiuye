@@ -34,3 +34,16 @@
 
 ## Notes
 设计完 sha 336280d，范围限标定。
+
+## Stories（story 级指针；机器可读状态在各 story 文件 Status 字段）
+
+> sprint-7 已 closed，balance-007/008 属 epic 级 backlog（下个 sprint 规划时拉入），不塞闭合 sprint 的 sprint-status.yaml。
+
+- **story-001** balance-matrix-dump — Done（派生视图 harness）
+- **story-002** inv-cross-duel-gate — Done（advisory gate）
+- **story-003** c1-convergence-40-60 — Review（PE 归一化 done 8c5504e；AC 3.4 硬闸门拆 006）
+- **story-004** spar-stomp-smoothing — Done（9b73358，碾压率 33%→24%）
+- **story-005** INV-CROSS 派生视图刷新 + /balance-check — backlog（nice-to-have）
+- **story-006** c1-counter-exemption — Done（53e83f4，calibrationMode + PE-band gate）
+- **story-007** control-cooldown-dr — **Done @ 9592d41**（CD/DR 消 turns≥2 stun-lock；AC 7.1-7.6 ✅，7.7 指标正交另证）
+- **story-008** turns1-control-nop — **Ready-for-Decision**（turns=1 控制哑弹裁决；阻塞在设计定性 A 维持/B 修时序/C 分级语义，balance-007 核验副产物）
