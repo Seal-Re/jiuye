@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Jianghu.Config;
 using Jianghu.Cultivation.Artifacts;
 using Jianghu.Model;
+using Jianghu.Random;
 
 namespace Jianghu.Cultivation
 {
@@ -56,7 +57,8 @@ namespace Jianghu.Cultivation
             SituationalResolver? resolver,
             CombatSkillDef? attackerSkill, CombatSkillDef? defenderSkill,
             ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null,
-            bool calibrationMode = false)
+            bool calibrationMode = false,
+            IRandom? duelRng = null)
         {
             if (attacker.Cultivation == null || defender.Cultivation == null)
                 throw new ArgumentException("DuelEngine.ResolveR2 requires both sides have Cultivation (off→legacy SparAction)");
@@ -124,7 +126,8 @@ namespace Jianghu.Cultivation
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls, controlLimiter, round,
-                    attackerArtifact, defenderArtifact, calibrationMode);
+                    attackerArtifact, defenderArtifact, calibrationMode,
+                    defenderPe: effPeB, duelRng: duelRng, exchangeNonce: 0);
 
                 int dmgToB, dmgToA_redirect;
                 if (attackerControlled || aFleetFrozen)
@@ -140,7 +143,8 @@ namespace Jianghu.Cultivation
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls, controlLimiter, round,
-                    defenderArtifact, attackerArtifact, calibrationMode);
+                    defenderArtifact, attackerArtifact, calibrationMode,
+                    defenderPe: effPeA, duelRng: duelRng, exchangeNonce: 1);
 
                 int dmgToA, dmgToB_redirect;
                 if (defenderControlled || bFleetFrozen)
@@ -261,8 +265,23 @@ namespace Jianghu.Cultivation
             List<DotEntry> pendingDots, List<ControlEntry> pendingControls,
             ControlLimiterState controlLimiter, int round,
             ArtifactDef? attackerArtifact = null, ArtifactDef? defenderArtifact = null,
-            bool calibrationMode = false)
+            bool calibrationMode = false,
+            int defenderPe = 0, IRandom? duelRng = null, int exchangeNonce = 0)
         {
+            // —— cv-001（adr-0008 决策①③④）：主动交锋概率拦截（管线1）——
+            // duelRng!=null（仅生产 sim，off/单测传 null→确定性旁路，既有断言逐字节不变）时，
+            // 查 CombatMath 表 → 伯努利判定。未命中 = 攻击被化解（本切片伤害归零 + 不施本次 rider dot/control：
+            // "弹反挂毒的暗器→无毒"，用户界定）；已挂 DoT 仍由 TickDots 结算（管线2 绕过，不受影响）。
+            // 防守帧钩子/削韧/标签门控/溢出留 cv-002~004。标定期（calibrationMode）旁路方差（只测裸 PE）。
+            if (duelRng != null && !calibrationMode && skill != null)
+            {
+                int p = CombatMath.GetSuccessPermille(attackerPe - defenderPe, defenderPe);
+                // per-exchange 掷骰：nonce 混入保同回合两次交锋（攻/防）用不同抽样点，确定且不相关。
+                int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
+                if (roll >= p)
+                    return (0, 0); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载
+            }
+
             const int Scale = 100;
             long dmg = (long)attackerPe * Scale / BaseDamageDivisor;
             long totalReflect = 0;

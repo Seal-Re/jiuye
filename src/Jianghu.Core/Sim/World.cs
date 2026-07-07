@@ -68,7 +68,7 @@ namespace Jianghu.Sim
                      IRandom? cultRng = null, PathRegistry? registry = null)
         {
             Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; _cultRng = cultRng; _registry = registry; Sect = sect;
-            _actions = new ActionSystem(limits, registry); _lifecycle = lifecycle;
+            _actions = new ActionSystem(limits, registry, cultRng); _lifecycle = lifecycle;
             Chronicle = new Chronicle(); Relations = new Relations(); Nodes = new List<WorldNode>();
             Deceased = new List<Character>(); _alive = new Dictionary<long, Character>();
             _sched = new Scheduler(); _brains = new Dictionary<CharacterId, IBrain>();
@@ -82,7 +82,7 @@ namespace Jianghu.Sim
                       Dictionary<CharacterId, IBrain> brains, Scheduler sched)
         {
             Limits = limits; _domainRng = domainRng; SpawnRng = spawnRng; _cultRng = cultRng; _registry = registry; Sect = sect;
-            _actions = new ActionSystem(limits, registry); _lifecycle = lifecycle;
+            _actions = new ActionSystem(limits, registry, cultRng); _lifecycle = lifecycle;
             Clock = clock; Chronicle = chronicle; Relations = relations; Nodes = nodes;
             Deceased = deceased; _alive = alive; _brains = brains; _sched = sched;
         }

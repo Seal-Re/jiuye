@@ -159,8 +159,9 @@
 | [adr-0005](adr-0005-macro-sync-turn-vs-accumulator.md) | 宏观同步回合 vs 累加器自动追帧 | **Proposed** | §10.2 R1（未裁决） | A.1 |
 | [adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md) | 柏林噪声浮点 vs B.2 整数确定性 | **Proposed** | §10.2 R2（未裁决） | B.2 |
 | [adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md) | ECS 倾向 vs OOP 聚合根 | **Proposed** | §10.2 R3（未裁决） | A.1 |
+| [adr-0008](adr-0008-variance-reactive-combat-model.md) | 方差 + 反应式 QTE 战斗模型（Margin→概率映射）| **Accepted** | 战斗内核范式重构（标量→概率分布 + 判定权移交 View）| A.10 / B.2 / TR-BAL-001 |
 
-> 道心解耦（§5.4，红线 B.5）当前无独立 ADR——由 `PowerEngine` 源码护栏 + code review 守。如需正式化，建议补 **adr-0008**（0005/0006/0007 已用于 View 层三开放调和项 R1/R2/R3）。
+> 道心解耦（§5.4，红线 B.5）当前无独立 ADR——由 `PowerEngine` 源码护栏 + code review 守。如需正式化，建议补 **adr-0009**（adr-0008 已用于战斗模型重构；0005/0006/0007 已用于 View 层三开放调和项 R1/R2/R3）。
 
 ---
 
@@ -236,4 +237,4 @@
 - **R3 — ECS 倾向 vs 现 OOP 聚合根**（[adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md)，Proposed）
   manifest 补§1.3「限制深层 OOP 继承，强制向 ECS 靠拢」。现 `Character`（§3 Model）是 OOP 聚合根，深拷贝语义（`World.Clone`）与确定性子流绑定。ECS 化是**大架构决定**（承 active.md retro action item「评估方差战斗模型需专门立项」同级）。候选方向：① 维持 OOP（继承已浅，性能未证瓶颈）；② 局部 data-oriented 重构热路径；③ 全 ECS。**需先立性能基准证明必要性，未决**。
 
-> 三项均登记于 [tr-registry.yaml](tr-registry.yaml)（TR-VIEW-R1/R2/R3）+ **已升格为 Proposed ADR**（2026-07-04）：R1→[adr-0005](adr-0005-macro-sync-turn-vs-accumulator.md)、R2→[adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md)、R3→[adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md)。**均 Status=Proposed（未裁决）**——ADR 内列备选 + 裁决前置门，最终取舍交用户（道心解耦正式化改由 adr-0008 承接，见 §7 脚注）。
+> 三项均登记于 [tr-registry.yaml](tr-registry.yaml)（TR-VIEW-R1/R2/R3）+ **已升格为 Proposed ADR**（2026-07-04）：R1→[adr-0005](adr-0005-macro-sync-turn-vs-accumulator.md)、R2→[adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md)、R3→[adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md)。**均 Status=Proposed（未裁决）**——ADR 内列备选 + 裁决前置门，最终取舍交用户（道心解耦正式化改由 adr-0009 承接，见 §7 脚注；adr-0008 已用于战斗模型重构）。

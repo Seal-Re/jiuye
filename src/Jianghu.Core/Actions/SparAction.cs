@@ -4,6 +4,7 @@ using Jianghu.Cultivation;
 using Jianghu.Decide;
 using Jianghu.Events;
 using Jianghu.Model;
+using Jianghu.Random;
 using Jianghu.Stats;
 
 namespace Jianghu.Actions
@@ -15,13 +16,16 @@ namespace Jianghu.Actions
         private readonly LimitsConfig? _limits;
         private readonly PathRegistry? _registry;
         private readonly SituationalResolver? _resolver;
+        // cv-001：修炼子流（on 才注入，off=null）。per-duel 方差流经 Split 派生（不消费父状态→_cultRng 黄金轨迹不变）。
+        private readonly IRandom? _cultRng;
 
         public SparAction() { } // off 默认（v1.0 caller）：registry/resolver=null。
 
-        public SparAction(LimitsConfig limits, PathRegistry? registry)
+        public SparAction(LimitsConfig limits, PathRegistry? registry, IRandom? cultRng = null)
         {
             _limits = limits;
             _registry = registry;
+            _cultRng = cultRng;
             // on：软情境结算器经全局零-PathId 边表构造（off=null 时不构造，不参与结算）。
             _resolver = registry != null ? new SituationalResolver(SituationalEdges.Default) : null;
         }
@@ -45,8 +49,22 @@ namespace Jianghu.Actions
             {
                 var aPath = _registry.ById(a.Cultivation.PathId);
                 var tPath = _registry.ById(target.Cultivation.PathId);
+
+                // cv-001：per-duel 方差流。种子 = 逻辑 clock + 双方 id（排序保交换律：A打B 与 B打A 同场）。
+                // Split 不消费 _cultRng 父状态 → 既有 cultivation 黄金轨迹逐字节不变（仅对拍结果因方差改变）。
+                // _cultRng==null（理论上 on 恒非 null，双保险）→ duelRng=null → 确定性旁路（既有行为）。
+                IRandom? duelRng = null;
+                if (_cultRng != null)
+                {
+                    ulong lo = (ulong)System.Math.Min(a.Id.Value, target.Id.Value);
+                    ulong hi = (ulong)System.Math.Max(a.Id.Value, target.Id.Value);
+                    ulong mix = ((ulong)w.Clock * 0x9E3779B97F4A7C15UL) ^ (lo << 1) ^ (hi << 33);
+                    duelRng = _cultRng.Split(RngStreamIds.Duel).Split(mix);
+                }
+
                 var result = DuelEngine.ResolveR2(a, target, aPath, tPath, _registry, _limits, _resolver,
-                    attackerSkill: null, defenderSkill: null); // 自动选招
+                    attackerSkill: null, defenderSkill: null, // 自动选招
+                    duelRng: duelRng);
 
                 var winner = result.Winner == a.Id ? a : target;
                 var loser = result.Winner == a.Id ? target : a;

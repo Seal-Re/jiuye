@@ -3,6 +3,7 @@ using Jianghu.Config;
 using Jianghu.Cultivation;
 using Jianghu.Events;
 using Jianghu.Model;
+using Jianghu.Random;
 
 namespace Jianghu.Actions
 {
@@ -13,13 +14,14 @@ namespace Jianghu.Actions
 
         // registry==null（off / v1.0 caller）→ SparAction 走旧公式（逐字节）；
         // on 时 World 注入注册表 → SparAction 按 Cultivation 分流到 PowerEngine × 软情境。
-        public ActionSystem(LimitsConfig c, PathRegistry? registry = null)
+        // cultRng（cv-001）：仅 on 传入（off=null），供 SparAction 派生 per-duel 方差流（Split，不消费父状态）。
+        public ActionSystem(LimitsConfig c, PathRegistry? registry = null, IRandom? cultRng = null)
         {
             _actions = new Dictionary<ActionType, IAction>
             {
                 { ActionType.Train, new TrainAction(c) },
                 { ActionType.Travel, new TravelAction() },
-                { ActionType.Spar, registry == null ? new SparAction() : new SparAction(c, registry) },
+                { ActionType.Spar, registry == null ? new SparAction() : new SparAction(c, registry, cultRng) },
             };
         }
         public IReadOnlyList<ActionType> Types => new List<ActionType>(_actions.Keys);
