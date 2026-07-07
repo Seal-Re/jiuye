@@ -41,6 +41,7 @@ namespace Jianghu.Cultivation
         RelationAdjust,     // L1 造关系边: Key=delta(正=正边/负=负边), Amount=delta. 经CombatContext accumulator→SparAction→IWorldMutator
         PostMul,            // L1 乘法修正: dmg *= Amount/10（在 FlatPen/FlatDR 之后乘算，整数×10比例）。Key=压制Kind(LawSuppress/Transform/Literati/HeavenSuppress)。钳[0,20]。
         SoulSplit,          // L1 分魂挡刀(OnDefend): 伤害×Amount/100 转移到魂资源(Key=soulResourceKey)，本体HP仅受剩余伤害
+        PoiseDamage,        // L1 削韧(combat-variance cv-002): 攻方额外削防方韧性 Amount 点（基础削韧从伤害派生，此算子供强控标签附加高削韧）。挂载在 ResolveExchange，累加至 duel-local PoiseState，不产直伤。
         // 注: SumOfSet 撤(§15.1), 真Σ用 PenFromResource on 标量聚合资源
     }
 

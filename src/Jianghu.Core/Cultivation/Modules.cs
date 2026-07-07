@@ -79,6 +79,15 @@ namespace Jianghu.Cultivation
             => new EffectOp(EffectOpKind.Control, ctrlKey, turns, note, Rarity: EffectRarity.Rare);
 
         /// <summary>
+        /// 削韧（OnUse 挂载，combat-variance cv-002）：攻方本次交锋额外削防方韧性 <paramref name="amount"/> 点
+        /// （基础削韧已从有效伤害派生，本算子供"强控标签附带高削韧"额外叠加，adr-0008 决策⑦步7 / §3.2）。
+        /// 不产直伤——累加至 DuelEngine 的 duel-local <c>PoiseState</c>；韧性≤0 触发硬直（Stagger）。
+        /// 破招式/顿挫劲/大力金刚等削韧积木。
+        /// </summary>
+        public static EffectOp PoiseBreak(int amount, string? note = null)
+            => new EffectOp(EffectOpKind.PoiseDamage, null, amount, note, Rarity: EffectRarity.Rare);
+
+        /// <summary>
         /// 反伤（ratio-Kind，OnDefend）：攻方受 incoming × num/den（读扣血前/不递归，§15.5；时序结算批4 接）。
         /// <paramref name="den"/> 自动钳 ≥1，Trigger 固定 OnDefend。铁山靠/护宝罡等反震积木。
         /// 功法门控：<see cref="GateType.HasBodyArt"/>（需横练/护体类功法，story fullstruct-006）。

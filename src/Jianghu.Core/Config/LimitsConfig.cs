@@ -33,6 +33,15 @@ namespace Jianghu.Config
         public int ControlCooldown { get; init; } = 2;  // 挂控成功后隔 N 回合该控不可再挂（≥0；0=退化无冷却，向后兼容）
         public int ControlDRStep { get; init; } = 1;    // 同目标同类控制每次重复，TurnsRemaining 递减步长（≥0；0=退化无递减）
 
+        // 削韧副轴（combat-variance cv-002；DuelEngine 结算侧，duel-local PoiseState，off 不调 DuelEngine → B.3 天然守）。
+        // adr-0008 决策⑦步7：伤害结算后同步派生削韧累加防方韧性条；韧性≤0 触发硬直（复用 Control 管线注入 turns=1）+ DR。
+        // 纯整数（B.2）。全默认值不影响 off（off 走 legacy SparAction，不入 DuelEngine）。
+        public int PoiseMax { get; init; } = 300;              // 韧性条上限基准（≥1；硬直后重置至此值。默认 ≈ 3× 基础削韧使连击 ~3 回合破韧）
+        public int PoiseDamageRatioPermille { get; init; } = 1000; // 有效伤害→基础削韧千分比（≥0；0=退化无基础削韧，仅算子削韧。1000=削韧==伤害）
+        public int StaggerDurationTurns { get; init; } = 1;    // 硬直注入的 stagger 控制回合（≥1；1=打断语义，经 balance-008 StoredControlTurns 补偿实拒止 1 回合）
+        public int StaggerDRStep { get; init; } = 1;           // 同方连续硬直，PoiseMax 重置量阶梯抬升的递减基（≥0；0=退化无 DR，防 stagger-lock 关闭）
+        public int StaggerCooldown { get; init; } = 2;         // 硬直触发后隔 N 回合该方不可再硬直（≥0；0=退化无冷却）
+
         // 戏剧引擎 B（drama-006，GDD §7；纯加，off 全关时绝不消费 → B.3 逐字节守恒）。
         // 全 int，含 MaxArcWeightSum（int 范围内 → WeightedPicker (int)total 抽取安全）。
         public int GrudgeCap { get; init; } = 100;             // 恩怨强度上限 [0,Cap]（§3.1）
@@ -72,6 +81,13 @@ namespace Jianghu.Config
             // 控制经济（balance-007）：两旋钮 ≥0（0 合法=退化无限制，向后兼容）。
             if (ControlCooldown < 0) throw new InvalidOperationException("ControlCooldown<0（0 合法=无冷却）");
             if (ControlDRStep < 0) throw new InvalidOperationException("ControlDRStep<0（0 合法=无递减）");
+
+            // 削韧副轴（combat-variance cv-002）：韧性上限 ≥1，其余 ≥1/≥0（0 合法=退化关闭对应机制）。
+            if (PoiseMax < 1) throw new InvalidOperationException("PoiseMax<1（韧性上限须 ≥1）");
+            if (PoiseDamageRatioPermille < 0) throw new InvalidOperationException("PoiseDamageRatioPermille<0（0 合法=无基础削韧）");
+            if (StaggerDurationTurns < 1) throw new InvalidOperationException("StaggerDurationTurns<1（硬直须 ≥1 回合）");
+            if (StaggerDRStep < 0) throw new InvalidOperationException("StaggerDRStep<0（0 合法=无 DR）");
+            if (StaggerCooldown < 0) throw new InvalidOperationException("StaggerCooldown<0（0 合法=无冷却）");
 
             // 戏剧引擎 B 越界断言（drama-006，GDD §7）。独立断言，顺序不限。
             if (GrudgeCap < 1) throw new InvalidOperationException("GrudgeCap<1");

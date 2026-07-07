@@ -98,6 +98,7 @@ namespace Jianghu.Cultivation
             var pendingDots = new List<DotEntry>();
             var pendingControls = new List<ControlEntry>();
             var controlLimiter = new ControlLimiterState(); // balance-007：CD/DR duel-local
+            var poise = new PoiseState(limits.PoiseMax);     // cv-002：削韧副轴 duel-local（不入 Clone → B.3 天然守）
             var rollbackStack = new RollbackStack();
             for (int round = 0; round < roundLimit && hpA > 0 && hpB > 0; round++)
             {
@@ -121,7 +122,7 @@ namespace Jianghu.Cultivation
                     && !HasResidualOrder(ctx, Side.Defender);
 
                 // —— Exchange 1: 攻方→防方 ——
-                var (rawDmgToB, reflectToA) = ResolveExchange(
+                var (rawDmgToB, reflectToA, poiseBonusToB) = ResolveExchange(
                     activeASkill, effPeA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
@@ -137,8 +138,11 @@ namespace Jianghu.Cultivation
                 else
                 { dmgToB = rawDmgToB; dmgToA_redirect = 0; }
 
+                // cv-002：削韧 bonus 仅在招式"正常命中防方"时施加（被控/僵死/反噬→招式未落对方，无 bonus）。
+                bool aHitB = !attackerControlled && !aFleetFrozen && !aRedirected;
+
                 // —— Exchange 2: 防方→攻方 ——
-                var (rawDmgToA, reflectToB) = ResolveExchange(
+                var (rawDmgToA, reflectToB, poiseBonusToA) = ResolveExchange(
                     activeDSkill, effPeB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
@@ -153,6 +157,9 @@ namespace Jianghu.Cultivation
                 { dmgToA = 0; dmgToB_redirect = rawDmgToA; } // 反噬：自伤
                 else
                 { dmgToA = rawDmgToA; dmgToB_redirect = 0; }
+
+                // cv-002：防方招式正常命中攻方？
+                bool bHitA = !defenderControlled && !bFleetFrozen && !bRedirected;
 
                 // Merge redirect damage
                 dmgToA += dmgToA_redirect;
@@ -202,6 +209,18 @@ namespace Jianghu.Cultivation
 
                 // —— AC 4.3：dot/control 回合间结算 ——
                 TickDots(pendingDots, pendingControls, ref hpA, ref hpB);
+
+                // —— cv-002（adr-0008 决策⑦步7）：削韧副轴结算（TickDots 之后！）——
+                // 时序铁律：stagger 注入必须在 TickDots 之后，否则本回合末 TickDots 会把 turns=1 立即递减到 0
+                // → 下回合 IsControlled=false → 哑弹（balance-008 教训）。此处注入的裸 turns=1 不经 StoredControlTurns
+                // 补偿（补偿是给"回合早期 ResolveExchange 挂载、会历经本回合 TickDots"的算子控制用；此注入点已在
+                // TickDots 之后，天然拒止下回合 1 次 = 打断语义）。削韧值 = derive(实际伤害) + 命中时的算子 bonus。
+                // balance-006 方案B：标定模式旁路削韧（stagger 锁回合破坏行动经济，与裸 PE 平价正交，
+                // 同 Control/CounterMul/压制旁路一致）。cv-005 若带方差重标定再评估纳入。
+                if (!calibrationMode)
+                    TickPoise(poise, pendingControls, round, limits,
+                        dmgToB + reflectToB, aHitB ? poiseBonusToB : 0,   // 防方 B 挨的伤 + 攻方 A 命中时的削韧算子
+                        dmgToA + reflectToA, bHitA ? poiseBonusToA : 0);  // 攻方 A 挨的伤 + 防方 B 命中时的削韧算子
 
                 // —— 批4 turn-loop：逐回合状态标记消费（goldenBodyTurns/residualOrder 等）——
                 TickTurnState(ctx);
@@ -255,7 +274,7 @@ namespace Jianghu.Cultivation
         /// 单次交锋结算：攻方 OnUse→防方 OnDefend→软情境→(对防方伤害, 反伤回攻方量)。
         /// Dot/Control 模块不直接改 dmg，而是通过 out 列表挂载到对应方，TickDots 结算。
         /// </summary>
-        private static (int DmgToDefender, int ReflectToAttacker) ResolveExchange(
+        private static (int DmgToDefender, int ReflectToAttacker, int PoiseBreakBonus) ResolveExchange(
             CombatSkillDef? skill,
             int attackerPe,
             CultivationState defenderState,
@@ -279,7 +298,20 @@ namespace Jianghu.Cultivation
                 // per-exchange 掷骰：nonce 混入保同回合两次交锋（攻/防）用不同抽样点，确定且不相关。
                 int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
                 if (roll >= p)
-                    return (0, 0); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载
+                    return (0, 0, 0); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载、零削韧（未命中不削韧，语义自洽）
+            }
+
+            // —— cv-002（adr-0008 决策⑦步7）：PoiseBreak 算子额外削韧收集（路线 B）——
+            // 强控标签附带的显式削韧算子，累加基础派生削韧之外的 bonus。不产直伤（continue）。
+            // 基础削韧（从有效伤害派生）在 ResolveR2 的 TickPoise 里算，此处仅收集算子附加量。
+            int poiseBreakBonus = 0;
+            if (skill != null)
+            {
+                foreach (var op in skill.OnUse)
+                {
+                    if (op.Kind == EffectOpKind.PoiseDamage)
+                        poiseBreakBonus += op.Amount >= 0 ? op.Amount : 0; // 削韧量非负
+                }
             }
 
             const int Scale = 100;
@@ -419,7 +451,7 @@ namespace Jianghu.Cultivation
                 dmg = dmg * (100 + adj) / 100;
             }
 
-            return ((int)Math.Max(0, dmg / Scale), (int)totalReflect);
+            return ((int)Math.Max(0, dmg / Scale), (int)totalReflect, poiseBreakBonus);
         }
 
         /// <summary>dot 挂载条目：对哪方、每 tick 伤害、剩余回合。</summary>
@@ -479,6 +511,100 @@ namespace Jianghu.Cultivation
         /// <param name="effTurns">经 DR 递减后的有效回合（EffectiveControlTurns 输出，>0）</param>
         public static int StoredControlTurns(int baseTurns, int effTurns)
             => baseTurns == 1 ? effTurns + 1 : effTurns;
+
+        /// <summary>
+        /// cv-002：削韧副轴 duel-local 状态（比照 <see cref="ControlLimiterState"/>；每场对拍内，不入
+        /// World.Clone/Character 持久态 → B.3 off 逐字节天然安全，off 更不调 DuelEngine）。
+        /// 仅按 Side 键读写，从不遍历 → 无序不影响确定性（B.2）。
+        /// </summary>
+        private sealed class PoiseState
+        {
+            /// <summary>Side → 当前剩余韧性（初值 PoiseMax；≤0 触发硬直后重置）。</summary>
+            public readonly Dictionary<Side, int> Remaining = new Dictionary<Side, int>();
+            /// <summary>Side → 该方已被硬直次数（供 DR 阶梯 + 重置量抬升）。</summary>
+            public readonly Dictionary<Side, int> StaggerCount = new Dictionary<Side, int>();
+            /// <summary>Side → 该方下次可再被硬直的回合号（round < 此值则本回合免疫硬直，防 stagger-lock）。</summary>
+            public readonly Dictionary<Side, int> StaggerCooldownUntilRound = new Dictionary<Side, int>();
+            private readonly int _poiseMax;
+            public PoiseState(int poiseMax)
+            {
+                _poiseMax = poiseMax < 1 ? 1 : poiseMax;
+                Remaining[Side.Attacker] = _poiseMax;
+                Remaining[Side.Defender] = _poiseMax;
+            }
+            public int PoiseMax => _poiseMax;
+        }
+
+        /// <summary>
+        /// cv-002 基础削韧派生（纯整数 B.2，纯函数）：有效伤害 → 削韧值 = dmg × ratioPermille / 1000（向下取整）。
+        /// dmg≤0（未命中/被控）→ 削韧 0（语义自洽：没挨打不削韧）。ratioPermille=0 → 退化无基础削韧。
+        /// 供 TickPoise 调用 + 单测直验。
+        /// </summary>
+        /// <param name="dmg">本次实际落到该方的伤害（含反伤）</param>
+        /// <param name="ratioPermille">伤害→削韧千分比（LimitsConfig.PoiseDamageRatioPermille）</param>
+        public static int DerivePoiseDamage(int dmg, int ratioPermille)
+        {
+            if (dmg <= 0 || ratioPermille <= 0) return 0;
+            return (int)((long)dmg * ratioPermille / 1000);
+        }
+
+        /// <summary>
+        /// cv-002 硬直后韧性重置量（纯整数 B.2，纯函数）：随该方已被硬直次数阶梯抬升韧性上限
+        /// = poiseMax + priorStaggers × drStep。语义 = "越被打断越难再被打断"（抗性递减防 stagger-lock，
+        /// 复用 balance-007 DR 精神）。drStep=0 → 退化恒定重置 poiseMax。
+        /// </summary>
+        /// <param name="poiseMax">韧性基准上限（LimitsConfig.PoiseMax）</param>
+        /// <param name="priorStaggers">此前该方已被硬直次数</param>
+        /// <param name="drStep">每次硬直的抗性抬升步长（LimitsConfig.StaggerDRStep；0=无 DR）</param>
+        public static int StaggerResetPoise(int poiseMax, int priorStaggers, int drStep)
+            => poiseMax + priorStaggers * (drStep < 0 ? 0 : drStep);
+
+        /// <summary>
+        /// cv-002 削韧副轴回合结算（adr-0008 决策⑦步7）。**必须在 TickDots 之后调用**（见调用点时序注释）。
+        /// 双方按本回合实际所受伤害派生基础削韧 + 命中方的 PoiseBreak 算子 bonus，累加削减韧性条；
+        /// 韧性 ≤0 且不在硬直冷却内 → 触发硬直：向 pendingControls 注入 turns=1 stagger（复用 Control 管线
+        /// → 下回合 IsControlled → dmg=0 = 打断），韧性重置（经 StaggerResetPoise 抗性递减），记 hit + 冷却。
+        /// 霸体：韧性 &gt;0 时不注入 stagger（伤害照受不打断）。纯整数，duel-local，无 RNG（确定性 B.2）。
+        /// </summary>
+        private static void TickPoise(
+            PoiseState poise, List<ControlEntry> pendingControls, int round, LimitsConfig limits,
+            int dmgToDefenderB, int poiseBonusToB,
+            int dmgToAttackerA, int poiseBonusToA)
+        {
+            ApplyPoiseToSide(poise, pendingControls, round, limits, Side.Defender,
+                DerivePoiseDamage(dmgToDefenderB, limits.PoiseDamageRatioPermille) + poiseBonusToB);
+            ApplyPoiseToSide(poise, pendingControls, round, limits, Side.Attacker,
+                DerivePoiseDamage(dmgToAttackerA, limits.PoiseDamageRatioPermille) + poiseBonusToA);
+        }
+
+        /// <summary>cv-002：对单方施加削韧 + 韧性≤0 触发硬直（复用 Control 管线注入 turns=1 stagger）。</summary>
+        private static void ApplyPoiseToSide(
+            PoiseState poise, List<ControlEntry> pendingControls, int round, LimitsConfig limits,
+            Side side, int poiseDamage)
+        {
+            if (poiseDamage <= 0) return; // 无削韧（未命中/退化）→ 韧性不变
+            poise.Remaining.TryGetValue(side, out int cur);
+            cur -= poiseDamage;
+            if (cur > 0)
+            {
+                poise.Remaining[side] = cur; // 霸体：韧性未破，伤害照受不打断
+                return;
+            }
+            // —— 韧性破 ——
+            // 硬直冷却检查（防 stagger-lock）：冷却内 → 韧性钳 0 不触发硬直（下次削韧再破才触发）。
+            if (poise.StaggerCooldownUntilRound.TryGetValue(side, out int until) && round < until)
+            {
+                poise.Remaining[side] = 0;
+                return;
+            }
+            // 触发硬直：注入 turns=1 stagger（TickDots 已过 → 天然拒止下回合 1 次 = 打断）。
+            pendingControls.Add(new ControlEntry(side, "stagger", limits.StaggerDurationTurns));
+            poise.StaggerCount.TryGetValue(side, out int priorStaggers);
+            poise.StaggerCount[side] = priorStaggers + 1;
+            poise.StaggerCooldownUntilRound[side] = round + limits.StaggerCooldown;
+            // 韧性重置（抗性递减：越被打断上限越高，越难再破）。
+            poise.Remaining[side] = StaggerResetPoise(poise.PoiseMax, priorStaggers, limits.StaggerDRStep);
+        }
 
         /// <summary>回合间 dot/control 结算（AC 4.3）。dot 扣 hp；control 减回合。</summary>
         private static void TickDots(List<DotEntry> dots, List<ControlEntry> controls, ref int hpA, ref int hpB)
