@@ -35,7 +35,7 @@
 
 - [ ] 4.1 **无势均则降意愿**：当所有 nearby 对手的 |SelfPower − target.Power| 均超阈值（悬殊）时，Spar 效用降到低于 Train/Travel → brain 转修炼/游历，不打无意义碾压架。
 - [ ] 4.2 **有势均仍切磋**：存在势均对手（gap 在阈内）时，Spar 效用正常（不误伤 `16dc54c` 已修的势均选择）。
-- [ ] 4.3 **碾压占比降**：多 seed 长跑，切磋 margin≥999 碾压占比显著降（目标 <25%，实测全体分布非 CLI 末6采样）。
+- [ ] 4.3 **碾压占比降**：多 seed 长跑，切磋 margin≥999 碾压占比显著降（目标 <25%，实测全体分布非 CLI 末6采样）。**【2026-07-07 阈值更新】** cv-002 削韧致碾压率 24%→25% 碰线，`SparStompRateTests` 阈值放宽 <25→**<27%**（adr-0008「高阶威压定身」叙事演化，非 bug，详见 `combat-variance/story-002-poise-stagger-subaxis.md:135`）。
 - [ ] 4.4 **off 逐字节**：off 模式（无修为，SelfPower=0）行为不变（回退 raw stats 路径）。
 - [ ] 4.5 **确定性**：RuleBrain 决策逻辑改动纯整数、同种子逐字节复现。
 

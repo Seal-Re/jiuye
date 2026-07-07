@@ -64,6 +64,10 @@
 - adr-0002-module-factory-effect-system（B.9，P8 补，治理 combat-r2）
 - adr-0003-cultivation-off-byte-identical（B.3，P8 补）
 - adr-0004-godot-view-host-boundary（A.10，2026-07-03，Unity→Godot 引擎切换 + Model/View 边界）
+- adr-0005-macro-sync-turn-vs-accumulator（2026-07-04，**Proposed** 张力登记—时间推进模型调和，A.1 未裁决）
+- adr-0006-perlin-noise-float-vs-integer-determinism（2026-07-04，**Proposed** 张力登记—PCG 地形层归属，A.1 未裁决）
+- adr-0007-ecs-vs-oop-aggregate-root（2026-07-04，**Proposed** 张力登记—内核实体架构方向，A.1 未裁决）
+- adr-0008-variance-reactive-combat-model（2026-07-06，**Accepted**—方差+反应式 QTE 战斗模型 Margin→概率映射，B.2/B.3/B.9/TR-BAL-001）
 
 ## Engine Specialists
 

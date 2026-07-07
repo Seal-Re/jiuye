@@ -66,7 +66,7 @@
 # 构建（全 solution）
 dotnet build
 
-# 全量测试（1087 绿，零失败）
+# 全量测试（1147 绿，零失败）
 dotnet test
 
 # 单个测试文件
@@ -102,14 +102,14 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 |---|---|---|
 | `Jianghu.Core` | netstandard2.1 | **纯逻辑库**——全部模拟机制。零引擎依赖（后期直接 Godot 4.x .NET 引用；引擎 2026-07-03 由 Unity 切换，见 ADR-0004） |
 | `Jianghu.Cli` | net8.0 | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory` → `World.Advance` |
-| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1087），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
+| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1147），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
 
 ### 执行模型（事件驱动 + 确定性 PRNG）
 
 1. `WorldFactory.CreateInitial(seed, limits, count, cultivation, mapOn, factionOn, dramaOn, dramaSeedFeuds)` → 生成世界（角色/宗门/关系；可选地图/派系/恩怨）
 2. `World.Advance(budget)` → 主循环：Scheduler 弹事件 → Action 执行 → Cultivation 推进 → Drama Pump → Lifecycle 计时 → 可能创生
 3. 所有事件入 `Chronicle`（追加日志）→ CLI 打印快照
-4. **确定性保证**：`Pcg32`（种子驱动），`root.Split(id)` 派生隔离子流。`RngStreamIds`（冻结·append-only）：Gen=1, Domain=2, Spawn=3, Brain=4, Cultivation=5, Drama=6, Map=7, Faction=8。新随机流 = 追加新 id，绝不复用既有，保 off 逐字节。
+4. **确定性保证**：`Pcg32`（种子驱动），`root.Split(id)` 派生隔离子流。`RngStreamIds`（冻结·append-only）：Gen=1, Domain=2, Spawn=3, Brain=4, Cultivation=5, Drama=6, Map=7, Faction=8, Duel=9（cv-001 per-duel 方差流，off 不构造）。新随机流 = 追加新 id，绝不复用既有，保 off 逐字节。
 
 ### "off" 模式 = 铁律（红线 B.3）
 
@@ -122,7 +122,7 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 | `Jianghu.Model` | `Character`(聚合根), `Persona`, `MemoryStore`, `Relations`, `Sect`, `WorldNode` | 领域模型 |
 | `Jianghu.Sim` | `World`, `WorldFactory`, `Lifecycle`, `Scheduler`, `StateSnapshot`, `WorldMap`, `WorldMapFactory`, `IMapGenerator`/`KruskalMstGenerator`, `IGeoQuery`, `SectLedger`, `SectLedgerFactory`, `IFactionQuery`, `IPipelineStage` | 世界模拟主循环 + 地图（`--map`）+ 门派派系（`--faction`） |
 | `Jianghu.Actions` | `ActionSystem`, `SparAction`, `TrainAction`, `TravelAction` | 角色动作执行 |
-| `Jianghu.Cultivation` | `PowerEngine`, `DuelEngine`, `CombatContext`, `CultivationPhase`(10态FSM), `TribulationResolver`, `LifespanAndFailure`, `Modules`(工厂), `ModuleResolver`, `EffectOp`, `GateField`, `RollbackStack`, `SuppressionMatrix`, `SituationalEdges`, `DerivedProviders`, `SpecialModuleRegistry`, `PathRegistry`, `RealmCurve` | 21 路完整修为系统（含战斗引擎/逆转/门域/压制矩阵/情境克敌/修炼FSM/三劫/寿元） |
+| `Jianghu.Cultivation` | `PowerEngine`, `DuelEngine`(cv-001 起含 duelRng·Margin→概率 adr-0008), `CombatMath`(permille 查表), `CombatContext`, `CultivationPhase`(10态FSM), `CultivationState`/`CultivationTickA2`, `TribulationResolver`, `LifespanAndFailure`, `Modules`(工厂), `ModuleResolver`, `EffectOp`, `GateField`, `RollbackStack`, `SuppressionMatrix`, `SituationalEdges`, `DerivedProviders`/`DerivedRegistry`, `SpecialModuleRegistry`, `PathRegistry`, `RealmCurve`/`RealmProjection`/`RealmQuery`, `DailyModeSelector`, `DaoHeartRegistry`, `SeclusionFormulas`/`SeclusionState`, `StoryletExecutor`/`StoryletDef`, `VarietyTracker`, `BreakAidService`, `AwakenTriggerService`/`AwakeningAndDualModels`, `CanonicalTransitions`/`TransitionDef`, `BuddhistVow`, `A3FeatureServices` | 21 路完整修为系统（战斗引擎含 Margin→概率映射[adr-0008]/逆转/门域/压制矩阵/情境克敌/修炼FSM/三劫/寿元/道心/日课/闭关/奇遇/觉醒双修） |
 | `Jianghu.Cultivation.paths` | `SwordImmortalPath`…共 21 文件 | 具体修炼路径定义（`CodePathSource` 注册） |
 | `Jianghu.Cultivation.special` | `BrokenChainModule`…共 8 文件 | 唯一稀有度特殊模块 |
 | `Jianghu.Cultivation.Artifacts` | `ArtifactData`, `ArtifactRegistry` | 法宝系统 |
