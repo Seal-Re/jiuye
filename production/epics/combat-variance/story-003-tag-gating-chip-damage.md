@@ -1,7 +1,7 @@
 # Story 003: 标签门控 + 元素格挡穿透（Tag Gating + Chip Damage）
 
 > **Epic**: combat-variance
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（标签门控是"读招策略"维度——看攻击类型选防御姿态，与 cv-001 概率主轴/cv-002 削韧节奏正交叠加；[40,60]% 硬闸门断言仍在 cv-005）
@@ -115,6 +115,24 @@ adr-0008 决策⑨.1 让"单纯弹反不再万能"：内核据攻击 `DamageType
 **Story Type**: Logic
 **Required evidence**: `tests/Jianghu.Core.Tests/Cultivation/TagGatingChipTests.cs` — 须存在且过 + off 逐字节回归守（`Determinism/` + worktree sha256）+ IL 浮点零 + cv-001/002/balance-007/008 不退
 **Status**: [ ] 待实现（/dev-story）
+
+---
+
+## Completion Notes
+**Completed**: 2026-07-07
+**实现 sha**: `786890a`（docs: 订正 CLAUDE.md 基线 + ADR 日志补 0005-0008 + balance-004 阈值指针 —— 该提交由会话外发起，打包了 cv-003 全部实现代码 + 测试 + CLAUDE.md/technical-preferences 基线订正 + balance-004 阈值指针；主控核验代码 1147 绿在位）
+**Criteria**: 10/10 passing（0 UNTESTED，20 测试全 COVERED）
+**机器证据（主控独立核验 A.3）**:
+- `dotnet test` = **1147 绿 / 0 失败 / 0 跳过**（1127+20）
+- determinism 子集 **27 绿**（B.2 IL 浮点扫描 + B.3 off 逐字节两轨）
+- **B.3 worktree sha256 实证**：cv-002 基线（ee89af4）vs cv-003 工作树，4 组 off 配置逐字节 **IDENTICAL ×4**
+- 对抗式子代理（旗舰档 opus）grep 全库 + git diff 逐行核验：21 路全默认 Normal → 门控惰性 → 零行为改变（确证 1147 绿根因）
+**Deviations**:
+- **提交流程偏差（如实记录）**：cv-003 代码由会话外提交 `786890a` 提走，其 Co-Authored-By 用 `Claude <noreply@anthropic.com>`（非红线要求的 `Claude Opus 4.8 (1M context)`），且混入 CLAUDE.md 基线订正（本应独立笔）。用户 2026-07-07 裁定接受既成事实、不 amend 历史、补 docs 收尾（本笔用正确 trailer）。
+- 实现期修复 1 个真 overflow bug（ChipDamageFloor int 回绕，病态大输入）+ 修正 3 个测试断言（margin 语义误用——winner 翻转时 margin 不可比，改用 DefenderHpRemaining）。改测试不改实现（overflow 除外）。
+- 4 项 ADVISORY（code-review INFO，deferred）：①法宝盾无 Blunt 豁免（cv-004 裁定）②PostMul/Special 型 OnDefend 在 Block/Dodge 分类外（cv-004）③guRevolt+Elemental 自伤当前不可达（未来加 Elemental 路复审）④chip 免硬直条件化于格挡强度（符合⑩.1 预期）
+**Test Evidence**: Logic — `tests/Jianghu.Core.Tests/Cultivation/TagGatingChipTests.cs`（20/20 绿）
+**Code Review**: Complete（本会话 /code-review = APPROVED；旗舰档 + 对抗式子代理 opus 档 grep 全库 + git diff 核验，B.7）。
 
 ---
 
