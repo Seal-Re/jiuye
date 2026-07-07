@@ -1,13 +1,13 @@
 # Story 001: 主动交锋概率拦截最小闭环（Active-Clash Variance）
 
 > **Epic**: combat-variance
-> **Status**: In Review
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（`docs/architecture/tr-registry.yaml`；本 story 铺概率内核，[40,60]% 硬闸门最终兑现在 cv-005）
 > **Estimate**: 中大 (2.5d)
 > **Manifest Version**: 2026-07-03b（`docs/architecture/control-manifest.md`）
-> **Last Updated**: 2026-07-06
+> **Last Updated**: 2026-07-07
 
 ## Context
 
@@ -102,7 +102,25 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/Jianghu.Core.Tests/Cultivation/CombatMathTests.cs` + `ActiveClashVarianceTests.cs` — 须存在且过 + off 逐字节回归守（`Determinism/`）+ IL 浮点零（`ILFloatScanner`）
-**Status**: [x] 已创建 — `CombatMathTests.cs`（10 例）+ `ActiveClashVarianceTests.cs`（5 例）全绿；全量 1102 绿 + 27 determinism 绿回归守（2026-07-06 主控实测）。**待 /story-done 贴 sha 闭合 A.3**（现三项：①1102 绿 ✅ ②sha 待提交 ③测试文件存在 ✅）。
+**Status**: [x] 已创建 — `CombatMathTests.cs`（10 例）+ `ActiveClashVarianceTests.cs`（5 例）全绿；全量 1102 绿 + 27 determinism 绿回归守（2026-07-06 主控实测，2026-07-07 二次会话重核坐实）。**A.3 三项证据门全闭合**：①1102 绿 ✅ ②实现 sha `dbd070c` ✅ ③测试文件存在 ✅。
+
+---
+
+## Completion Notes
+**Completed**: 2026-07-07
+**Criteria**: 9/9 passing（8 full AC + calibrationMode hook；0 UNTESTED，全 COVERED）
+**实现 sha**: `dbd070c`（feat(cultivation): cv-001 主动交锋概率拦截最小闭环）
+**机器证据（主控独立核验 A.3，二次会话重跑坐实）**:
+- `dotnet test` = **1102 绿 / 0 失败 / 0 跳过**（1087+15）
+- determinism 子集 **27 绿**（B.2 IL 浮点扫描 + B.3 off 逐字节，cultivation/drama 两轨）
+- **B.3 worktree sha256 实证**：HEAD 基线（b30308b，无 cv-001）vs 工作树，4 组 off 配置（`42 300`/`777 300`/`+--map --faction --drama`/`+--drama --drama-feuds`）**逐字节 IDENTICAL ×4** ← World/ActionSystem/SparAction 改动在 off 调用链上但零漂移
+- CLI 同种子 md5 一致；seed42 切磋录 88/13/109 悬念对局（vs 前全 999）
+**Deviations**: None（blocking）。3 项 ADVISORY 均已在本 story `Out of Scope` 内、deferred-by-design：
+1. permille 斜率/BasePermille 为 `CombatMath` inline const（非 LimitsConfig）→ cv-005 重标定期外置（承 A.10）
+2. 方差拦截有 `skill != null` 前置 → 裸攻（无习得战技）绕过方差走确定伤害 → cv-005 seed-sweep 须保测试群体有可选战技
+3. PCG `Split` 首输出值域轻微欠散（chi²≈640）→ 对阈值 gate 的 P(hit|p) 零偏差（已实证 0.1%/99.9%），仅供未来维护者勿依赖 roll 幅值分布
+**Test Evidence**: Logic — `tests/Jianghu.Core.Tests/Cultivation/CombatMathTests.cs` + `ActiveClashVarianceTests.cs`（15/15 绿）
+**Code Review**: Complete（本会话 /code-review = APPROVED；旗舰档 + 对抗式子代理 trace+2M 样本实证，B.7）。lean 模式虽跳过 LP-CODE-REVIEW gate，实际已超额执行。
 
 ---
 
