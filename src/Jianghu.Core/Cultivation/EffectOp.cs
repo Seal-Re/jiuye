@@ -48,6 +48,15 @@ namespace Jianghu.Cultivation
     /// <summary>战斗期算子的触发时机：OnUse 主动使用 / OnDefend 受击防御 / Passive 被动常驻。</summary>
     public enum EffectTrigger { OnUse, OnDefend, Passive }
 
+    /// <summary>
+    /// 攻击伤害类型（combat-variance cv-003，adr-0008 决策⑨.1）：据此**动态门控**防守方 Block/Dodge 类防御模块。
+    /// Normal=常规（锐器/物理，Block+Dodge 全开）；Blunt=重型钝击（Unblockable_Weapon，内核关 Block→招架崩坏，须 Dodge）；
+    /// Elemental=元素/范围法术（Undodgeable_Space，AOE 并入，内核关 Dodge，须 Block 但承 Chip 穿透，决策⑩.1）。
+    /// 挂 <see cref="CombatSkillDef"/> 招式级（非路径级 SituationalTags）。裸攻（无招）默认 Normal。
+    /// 后台 NPC 侧 = 确定性禁用对应防御类（无 QTE/帧数，那属 View/cv-004）。
+    /// </summary>
+    public enum DamageType { Normal, Blunt, Elemental }
+
     /// <summary>模块算子稀有度：Common 常见 / Rare 稀有 / Unique 独门。</summary>
     public enum EffectRarity  { Common, Rare, Unique }
 

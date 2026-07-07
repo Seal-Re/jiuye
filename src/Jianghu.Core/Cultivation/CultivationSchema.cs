@@ -20,11 +20,13 @@ namespace Jianghu.Cultivation
         string Name, string Role, int PickMin, int PickMax,
         IReadOnlyList<ArtDef> Arts);
 
-    /// <summary>战技。OnUse = 战斗期算子；Cost = 资源消耗表（resourceKey→量）。</summary>
+    /// <summary>战技。OnUse = 战斗期算子；Cost = 资源消耗表（resourceKey→量）。
+    /// Damage（cv-003）= 攻击伤害类型（决策⑨.1 标签门控），可选默认 Normal → 21 路现有构造零改动向后兼容。</summary>
     public sealed record CombatSkillDef(
         string Id, string Name, int Tier,
         IReadOnlyList<EffectOp> OnUse,
-        IReadOnlyDictionary<string, int> Cost);
+        IReadOnlyDictionary<string, int> Cost,
+        DamageType Damage = DamageType.Normal);
 
     /// <summary>
     /// 战力公式项。Src ∈ stat:* | realm | sumArtPower | res:&lt;key&gt; | derived:&lt;key&gt;。

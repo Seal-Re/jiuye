@@ -42,6 +42,13 @@ namespace Jianghu.Config
         public int StaggerDRStep { get; init; } = 1;           // 同方连续硬直，PoiseMax 重置量阶梯抬升的递减基（≥0；0=退化无 DR，防 stagger-lock 关闭）
         public int StaggerCooldown { get; init; } = 2;         // 硬直触发后隔 N 回合该方不可再硬直（≥0；0=退化无冷却）
 
+        // 标签门控 + 元素格挡穿透（combat-variance cv-003；DuelEngine 结算侧，off 不调 DuelEngine → B.3 天然守）。
+        // adr-0008 决策⑨.1/⑩.1：DamageType 门控 Block/Dodge 类防御；Elemental 被 Block 承 Chip 穿透（免削韧）。
+        // 纯整数（B.2）。全默认值不影响 off（off 走 legacy SparAction，不入 DuelEngine）。
+        public int ChipDamagePermille { get; init; } = 300;    // 元素格挡穿透基础千分比（≥0；0=退化无 chip。300=基础伤害30%穿透，决策⑩.1示例）
+        public int ChipMarginDivisor { get; init; } = 4;       // Chip 的 Margin 修正除数（>0 生效；≤0=无 margin 修正。正 margin/此值 抬穿透）
+        public int GuardBreakPoiseBonus { get; init; } = 100;  // 招架崩坏削韧 bonus（Blunt 门控关 Block 类时追加削韧，≥0；0=退化无崩坏惩罚）
+
         // 戏剧引擎 B（drama-006，GDD §7；纯加，off 全关时绝不消费 → B.3 逐字节守恒）。
         // 全 int，含 MaxArcWeightSum（int 范围内 → WeightedPicker (int)total 抽取安全）。
         public int GrudgeCap { get; init; } = 100;             // 恩怨强度上限 [0,Cap]（§3.1）
@@ -88,6 +95,11 @@ namespace Jianghu.Config
             if (StaggerDurationTurns < 1) throw new InvalidOperationException("StaggerDurationTurns<1（硬直须 ≥1 回合）");
             if (StaggerDRStep < 0) throw new InvalidOperationException("StaggerDRStep<0（0 合法=无 DR）");
             if (StaggerCooldown < 0) throw new InvalidOperationException("StaggerCooldown<0（0 合法=无冷却）");
+
+            // 标签门控 + Chip（combat-variance cv-003）：≥0（0 合法=退化关闭对应机制）。
+            if (ChipDamagePermille < 0) throw new InvalidOperationException("ChipDamagePermille<0（0 合法=无 chip 穿透）");
+            if (GuardBreakPoiseBonus < 0) throw new InvalidOperationException("GuardBreakPoiseBonus<0（0 合法=无招架崩坏惩罚）");
+            // ChipMarginDivisor 无 <0 断言（≤0 语义=无 margin 修正，合法退化，见 ChipDamageFloor）。
 
             // 戏剧引擎 B 越界断言（drama-006，GDD §7）。独立断言，顺序不限。
             if (GrudgeCap < 1) throw new InvalidOperationException("GrudgeCap<1");

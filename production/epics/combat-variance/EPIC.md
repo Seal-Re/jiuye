@@ -51,7 +51,7 @@
 
 - **story-001** active-clash-variance — **Complete**（`dbd070c` @2026-07-07；本 epic 首切片）。CombatMath 查表 + RngStreamIds.Duel=9 + ResolveExchange 插入伯努利判定 + duel-local seed 派生。后台 NPC 内核代掷，`dotnet run` 已见"差999"变有悬念对局（88/13/109）。1102 绿 + 27 determinism + worktree sha256 实证（A.3）。
 - **story-002** poise-stagger-subaxis — **Complete**（`1bcd48f` @2026-07-07；削韧+硬直+DR 最小闭环）。PoiseState duel-local + DerivePoiseDamage/StaggerResetPoise 纯函数 + TickPoise 复用 Control 管线注入 turns=1 stagger + A+B 混合削韧来源（伤害派生 + PoiseDamage 算子骨架，21 路数据 deferred）+ calibrationMode 旁路。1127 绿 + worktree sha256 实证（A.3）。balance-004 阈值因削韧放宽 <27。
-- **story-003** tag-gating-chip-damage — Backlog。DamageType 标签动态开关 Block/Dodge 钩子（Unblockable_Weapon 关招架→招架崩坏；Undodgeable_Space 关闪避）+ 元素格挡穿透 Chip Damage（决策⑨.1/⑩.1）。
+- **story-003** tag-gating-chip-damage — **Ready**（`story-003-tag-gating-chip-damage.md` 详文已展开 @2026-07-07）。DamageType 标签（Normal/Blunt/Elemental，AOE 并入 Elemental）动态门控 Block/Dodge 类防御 + 元素格挡穿透 Chip Damage（决策⑨.1/⑩.1）。**范围=Model 侧最小闭环**（后台 NPC 确定性门控 + Chip 纯整数）；DamageType 挂 CombatSkillDef 可选字段（21 路数据 deferred）；Block 类={FlatDR,ReflectDamage}/Dodge 类={Evade,SoulSplit}；Chip 免削韧协调 cv-002 TickPoise。**QTE 帧窗/裁定优先级/连续格挡递减留 cv-004**。
 - **story-004** overflow-defense-frame-contract — Backlog。难度溢出 >1000‰（NPC 数学必败=绝对秒杀）+ Godot 防守帧钩子整数契约 + 保底帧规则A + 裁定优先级链（标签>溢出>保底，决策⑧A/⑨.2/⑩.2/⑩.4）。Model 侧钩子契约，View 落实属 godot-host。
 - **story-005** recalibration-40-60-gate — Backlog（依赖 cv-001）。InvCrossDuelTests 改 seed-sweep 统计胜率，复活 [40,60]% 硬闸门 violations==0（解除 balance-006 PE-band 降级）；C2/C3 不退；21 路 mul 概率模型下复算。
 

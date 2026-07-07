@@ -10,7 +10,7 @@ namespace Jianghu.Cultivation
     /// <summary>
     /// R2 战斗结算引擎（story-003 batch4 + fullstruct-007 rollback stack）。接模块系统：HP=pe、选招经 tier/cost/gate、
     /// OnUse→OnDefend→软情境同时扣血。回合间 push RollbackStack 快照，支持因果逆演/夺舍续命的
-    /// 结算回滚。纯整数、确定性、无 RNG。
+    /// 结算回滚。纯整数确定性（同种子逐字节复现）；cv-001（adr-0008）起引入 duelRng 做 Margin→概率伯努利判定，duel-local 不入 World.Clone（off 不构造→B.3 天然守）。
     /// off（无 Cultivation）不入本引擎，由 SparAction 走 legacy（红线 B.3）。
     /// </summary>
     public static class DuelEngine
@@ -122,7 +122,7 @@ namespace Jianghu.Cultivation
                     && !HasResidualOrder(ctx, Side.Defender);
 
                 // —— Exchange 1: 攻方→防方 ——
-                var (rawDmgToB, reflectToA, poiseBonusToB) = ResolveExchange(
+                var (rawDmgToB, reflectToA, poiseBonusToB, chipImmuneB) = ResolveExchange(
                     activeASkill, effPeA, defender.Cultivation,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
@@ -142,7 +142,7 @@ namespace Jianghu.Cultivation
                 bool aHitB = !attackerControlled && !aFleetFrozen && !aRedirected;
 
                 // —— Exchange 2: 防方→攻方 ——
-                var (rawDmgToA, reflectToB, poiseBonusToA) = ResolveExchange(
+                var (rawDmgToA, reflectToB, poiseBonusToA, chipImmuneA) = ResolveExchange(
                     activeDSkill, effPeB, attacker.Cultivation,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
@@ -217,10 +217,13 @@ namespace Jianghu.Cultivation
                 // TickDots 之后，天然拒止下回合 1 次 = 打断语义）。削韧值 = derive(实际伤害) + 命中时的算子 bonus。
                 // balance-006 方案B：标定模式旁路削韧（stagger 锁回合破坏行动经济，与裸 PE 平价正交，
                 // 同 Control/CounterMul/压制旁路一致）。cv-005 若带方差重标定再评估纳入。
+                // cv-003（决策⑩.1）：Chip 穿透交锋免控制/硬直 → chipImmune 时该方向削韧（基础+bonus）全归零。
                 if (!calibrationMode)
-                    TickPoise(poise, pendingControls, round, limits,
-                        dmgToB + reflectToB, aHitB ? poiseBonusToB : 0,   // 防方 B 挨的伤 + 攻方 A 命中时的削韧算子
-                        dmgToA + reflectToA, bHitA ? poiseBonusToA : 0);  // 攻方 A 挨的伤 + 防方 B 命中时的削韧算子
+                {
+                    int poiseToB = chipImmuneB ? 0 : DerivePoiseDamage(dmgToB + reflectToB, limits.PoiseDamageRatioPermille) + (aHitB ? poiseBonusToB : 0);
+                    int poiseToA = chipImmuneA ? 0 : DerivePoiseDamage(dmgToA + reflectToA, limits.PoiseDamageRatioPermille) + (bHitA ? poiseBonusToA : 0);
+                    TickPoiseDirect(poise, pendingControls, round, limits, poiseToB, poiseToA);
+                }
 
                 // —— 批4 turn-loop：逐回合状态标记消费（goldenBodyTurns/residualOrder 等）——
                 TickTurnState(ctx);
@@ -271,10 +274,11 @@ namespace Jianghu.Cultivation
         }
 
         /// <summary>
-        /// 单次交锋结算：攻方 OnUse→防方 OnDefend→软情境→(对防方伤害, 反伤回攻方量)。
+        /// 单次交锋结算：攻方 OnUse→防方 OnDefend→软情境→(对防方伤害, 反伤回攻方量, 削韧 bonus, Chip 免削韧)。
         /// Dot/Control 模块不直接改 dmg，而是通过 out 列表挂载到对应方，TickDots 结算。
+        /// cv-003：ChipImmuneToPoise=true 时该交锋伤害为 Elemental 格挡穿透（免控制/硬直，⑩.1）→ ResolveR2 不派生削韧。
         /// </summary>
-        private static (int DmgToDefender, int ReflectToAttacker, int PoiseBreakBonus) ResolveExchange(
+        private static (int DmgToDefender, int ReflectToAttacker, int PoiseBreakBonus, bool ChipImmuneToPoise) ResolveExchange(
             CombatSkillDef? skill,
             int attackerPe,
             CultivationState defenderState,
@@ -298,7 +302,7 @@ namespace Jianghu.Cultivation
                 // per-exchange 掷骰：nonce 混入保同回合两次交锋（攻/防）用不同抽样点，确定且不相关。
                 int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
                 if (roll >= p)
-                    return (0, 0, 0); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载、零削韧（未命中不削韧，语义自洽）
+                    return (0, 0, 0, false); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载、零削韧（未命中不削韧，语义自洽）
             }
 
             // —— cv-002（adr-0008 决策⑦步7）：PoiseBreak 算子额外削韧收集（路线 B）——
@@ -390,16 +394,30 @@ namespace Jianghu.Cultivation
                 }
             }
 
+            // —— cv-003（adr-0008 决策⑨.1/⑩.1）：标签门控 + Chip 穿透准备 ——
+            // 攻击 DamageType（攻方招式级；裸攻/无招默认 Normal）。标定模式旁路门控（同 Control/压制，保裸 PE 平价）。
+            DamageType attackType = (!calibrationMode && skill != null) ? skill.Damage : DamageType.Normal;
+            bool blockFired = false;          // 本次交锋是否有 Block 类防御实际减伤（供 Elemental Chip 判定）
+            bool blockGatedByBlunt = false;   // Blunt 是否门控关掉了防方 Block 类（供招架崩坏削韧 bonus）
+
             // —— 批5 法宝配套：防方装备法宝 OnDefend 效果（盾/护甲等） ——
             if (defenderArtifact != null)
             {
                 foreach (var op in defenderArtifact.Effects)
                 {
                     if (op.Trigger != EffectTrigger.OnDefend) continue;
+                    // cv-003 门控：Blunt 关 Block 类 / Elemental 关 Dodge 类 → 该防御失效（continue）。
+                    if (IsDefenseGatedOut(attackType, op.Kind))
+                    {
+                        if (IsBlockClass(op.Kind)) blockGatedByBlunt = true;
+                        continue;
+                    }
+                    long dmgBefore = dmg;
                     int dmgUnscaled = (int)(dmg / Scale);
                     int result = ModuleResolver.ApplyOnDefend(dmgUnscaled, op, ctx, defenderSide, out int artReflect);
                     dmg = (long)result * Scale + (dmg % Scale);
                     totalReflect += artReflect;
+                    if (IsBlockClass(op.Kind) && dmg < dmgBefore) blockFired = true;
                 }
             }
 
@@ -411,11 +429,19 @@ namespace Jianghu.Cultivation
                 foreach (var op in defSkill.OnUse)
                 {
                     if (op.Trigger != EffectTrigger.OnDefend) continue;
+                    // cv-003 门控：Blunt 关 Block 类 / Elemental 关 Dodge 类 → 该防御失效（continue）。
+                    if (IsDefenseGatedOut(attackType, op.Kind))
+                    {
+                        if (IsBlockClass(op.Kind)) blockGatedByBlunt = true;
+                        continue;
+                    }
                     // Gate check now in ModuleResolver.ApplyOnDefend via op.Gate field
+                    long dmgBefore = dmg;
                     int dmgUnscaled = (int)(dmg / Scale);
                     int result = ModuleResolver.ApplyOnDefend(dmgUnscaled, op, ctx, defenderSide, out int reflectDmg);
                     dmg = (long)result * Scale + (dmg % Scale);
                     totalReflect += reflectDmg;
+                    if (IsBlockClass(op.Kind) && dmg < dmgBefore) blockFired = true;
                 }
             }
 
@@ -451,7 +477,29 @@ namespace Jianghu.Cultivation
                 dmg = dmg * (100 + adj) / 100;
             }
 
-            return ((int)Math.Max(0, dmg / Scale), (int)totalReflect, poiseBreakBonus);
+            // —— cv-003（adr-0008 决策⑩.1）：元素格挡穿透 Chip Damage ——
+            // Elemental 攻击被 Block 类成功减伤 → 免控制/硬直（chipImmune）但承受穿透保底。
+            // 基础伤害 = attackerPe/BaseDamageDivisor（未缩放）；Margin = attackerPe − defenderPe。
+            bool chipImmuneToPoise = false;
+            if (attackType == DamageType.Elemental && blockFired)
+            {
+                int chipFloor = ChipDamageFloor(
+                    attackerPe / BaseDamageDivisor, attackerPe - defenderPe,
+                    limits.ChipDamagePermille, limits.ChipMarginDivisor);
+                int dmgUnscaledNow = (int)Math.Max(0, dmg / Scale);
+                if (chipFloor > dmgUnscaledNow)
+                {
+                    dmg = (long)chipFloor * Scale;      // 穿透保底：减伤后仍不低于 chip
+                    chipImmuneToPoise = true;           // 穿透伤害免削韧（保霸体，⑩.1）
+                }
+            }
+
+            // —— cv-003（adr-0008 决策⑨.1）：招架崩坏 —— Blunt 门控关掉了防方 Block 类 → 追加大额削韧。
+            // NPC 侧退化：Block 禁用（全额伤害上面已实现）+ 削韧 bonus（复用 cv-002 PoiseBreakBonus 通道）。
+            if (attackType == DamageType.Blunt && blockGatedByBlunt)
+                poiseBreakBonus += limits.GuardBreakPoiseBonus;
+
+            return ((int)Math.Max(0, dmg / Scale), (int)totalReflect, poiseBreakBonus, chipImmuneToPoise);
         }
 
         /// <summary>dot 挂载条目：对哪方、每 tick 伤害、剩余回合。</summary>
@@ -513,6 +561,53 @@ namespace Jianghu.Cultivation
             => baseTurns == 1 ? effTurns + 1 : effTurns;
 
         /// <summary>
+        /// cv-003（adr-0008 决策⑨.1）：判 OnDefend 算子是否 **Block 类**（招架/护体/减伤/反震）。
+        /// Blunt（Unblockable_Weapon）攻击门控关闭此类。纯函数（B.2），供 ResolveExchange + 单测直验。
+        /// Block 类 = {AddFlatDR 固定减伤, ReflectDamage 反震}（+ 法宝盾另判）。
+        /// 注（cv-003 非对称，主控 code-review 2026-07-07 记）：ReflectDamage 归 Block 类**仅在 Blunt 门控路径生效**
+        /// （Blunt 关反震 + 招架崩坏）；它在 Chip 路径**永不触发 blockFired**——ReflectDamage 不减来袭伤（ModuleResolver
+        /// 返回 incoming 原值），故 Elemental 对"仅反震"防方无 chip（元素吃满额本已 ≥ chip 保底，语义自洽）。
+        /// </summary>
+        public static bool IsBlockClass(EffectOpKind kind)
+            => kind == EffectOpKind.AddFlatDR || kind == EffectOpKind.ReflectDamage;
+
+        /// <summary>
+        /// cv-003（adr-0008 决策⑨.1）：判 OnDefend 算子是否 **Dodge 类**（闪避/身法规避）。
+        /// Elemental（Undodgeable_Space）攻击门控关闭此类。纯函数（B.2）。
+        /// Dodge 类 = {Evade 闪避, SoulSplit 分魂挡刀}（用户 2026-07-07 裁定 SoulSplit 归 Dodge——身法秘术，门控同 Evade）。
+        /// </summary>
+        public static bool IsDodgeClass(EffectOpKind kind)
+            => kind == EffectOpKind.Evade || kind == EffectOpKind.SoulSplit;
+
+        /// <summary>
+        /// cv-003（adr-0008 决策⑨.1）：攻击 DamageType 是否门控关闭该 OnDefend 防御算子。
+        /// Blunt → 关 Block 类；Elemental → 关 Dodge 类；Normal → 全开。纯函数（B.2）。
+        /// </summary>
+        public static bool IsDefenseGatedOut(DamageType attackType, EffectOpKind defenseKind)
+            => (attackType == DamageType.Blunt && IsBlockClass(defenseKind))
+            || (attackType == DamageType.Elemental && IsDodgeClass(defenseKind));
+
+        /// <summary>
+        /// cv-003（adr-0008 决策⑩.1）：元素格挡穿透 Chip Damage 保底（纯整数 B.2，纯函数）。
+        /// Elemental 攻击被 Block 类成功减伤时：免控制/硬直但承受穿透 =
+        /// 基础伤害 × chipPermille/1000 + Margin 修正（Margin=攻防 PE 差，divisor 调修正幅度）。
+        /// 返回穿透保底值（调用方取 max(dmg, chipFloor)）。chipPermille=0 → 退化无 chip（返 0）。
+        /// </summary>
+        /// <param name="baseDamage">基础伤害（未缩放，= attackerPe/BaseDamageDivisor）</param>
+        /// <param name="peMargin">攻防 PE 差（attackerPe − defenderPe，正=攻方占优 → 穿透更狠）</param>
+        /// <param name="chipPermille">穿透基础千分比（LimitsConfig.ChipDamagePermille）</param>
+        /// <param name="marginDivisor">Margin 修正除数（LimitsConfig.ChipMarginDivisor；≤0 则无 margin 修正）</param>
+        public static int ChipDamageFloor(int baseDamage, int peMargin, int chipPermille, int marginDivisor)
+        {
+            if (chipPermille <= 0 || baseDamage <= 0) return 0;
+            long chip = (long)baseDamage * chipPermille / 1000;
+            if (marginDivisor > 0)
+                chip += (long)peMargin / marginDivisor; // 正 margin 抬穿透，负 margin 削（向下取整）
+            if (chip < 0) return 0;                       // 负 margin 削穿透到负 → 钳 0
+            return chip > int.MaxValue ? int.MaxValue : (int)chip; // 防 int 回绕（病态大输入）
+        }
+
+        /// <summary>
         /// cv-002：削韧副轴 duel-local 状态（比照 <see cref="ControlLimiterState"/>；每场对拍内，不入
         /// World.Clone/Character 持久态 → B.3 off 逐字节天然安全，off 更不调 DuelEngine）。
         /// 仅按 Side 键读写，从不遍历 → 无序不影响确定性（B.2）。
@@ -561,20 +656,17 @@ namespace Jianghu.Cultivation
 
         /// <summary>
         /// cv-002 削韧副轴回合结算（adr-0008 决策⑦步7）。**必须在 TickDots 之后调用**（见调用点时序注释）。
-        /// 双方按本回合实际所受伤害派生基础削韧 + 命中方的 PoiseBreak 算子 bonus，累加削减韧性条；
+        /// 入参 = 各方本回合**已算好**的削韧值（基础派生 + bonus，cv-003 chip-immune 已在调用点归零）。
         /// 韧性 ≤0 且不在硬直冷却内 → 触发硬直：向 pendingControls 注入 turns=1 stagger（复用 Control 管线
         /// → 下回合 IsControlled → dmg=0 = 打断），韧性重置（经 StaggerResetPoise 抗性递减），记 hit + 冷却。
         /// 霸体：韧性 &gt;0 时不注入 stagger（伤害照受不打断）。纯整数，duel-local，无 RNG（确定性 B.2）。
         /// </summary>
-        private static void TickPoise(
+        private static void TickPoiseDirect(
             PoiseState poise, List<ControlEntry> pendingControls, int round, LimitsConfig limits,
-            int dmgToDefenderB, int poiseBonusToB,
-            int dmgToAttackerA, int poiseBonusToA)
+            int poiseToDefenderB, int poiseToAttackerA)
         {
-            ApplyPoiseToSide(poise, pendingControls, round, limits, Side.Defender,
-                DerivePoiseDamage(dmgToDefenderB, limits.PoiseDamageRatioPermille) + poiseBonusToB);
-            ApplyPoiseToSide(poise, pendingControls, round, limits, Side.Attacker,
-                DerivePoiseDamage(dmgToAttackerA, limits.PoiseDamageRatioPermille) + poiseBonusToA);
+            ApplyPoiseToSide(poise, pendingControls, round, limits, Side.Defender, poiseToDefenderB);
+            ApplyPoiseToSide(poise, pendingControls, round, limits, Side.Attacker, poiseToAttackerA);
         }
 
         /// <summary>cv-002：对单方施加削韧 + 韧性≤0 触发硬直（复用 Control 管线注入 turns=1 stagger）。</summary>
