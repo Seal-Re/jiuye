@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Jianghu.Cultivation
+namespace Jianghu.Cultivation.Paths
 {
     /// <summary>
     /// 音修·音律乐道（琴箫）<c>yin_xiu_yuedao</c>（spirit 范围软控 + 团队增益减益支援枢纽路）。

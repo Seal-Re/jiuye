@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Jianghu.Cultivation
+namespace Jianghu.Cultivation.Paths
 {
     /// <summary>
     /// 魂修·神识元神道 <c>soul_divine_sense</c>（spirit 正交·神识/魂术·spirit_attack 绕物防）。数据照

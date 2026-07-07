@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Jianghu.Cultivation
+namespace Jianghu.Cultivation.Paths
 {
     /// <summary>
     /// 儒修·文气浩然道 <c>ru_xiu_haoran</c>（physical·道德维度门·正气克邪+群增益一脉）。数据照

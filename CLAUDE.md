@@ -123,8 +123,8 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 | `Jianghu.Sim` | `World`, `WorldFactory`, `Lifecycle`, `Scheduler`, `StateSnapshot`, `WorldMap`, `WorldMapFactory`, `IMapGenerator`/`KruskalMstGenerator`, `IGeoQuery`, `SectLedger`, `SectLedgerFactory`, `IFactionQuery`, `IPipelineStage` | 世界模拟主循环 + 地图（`--map`）+ 门派派系（`--faction`） |
 | `Jianghu.Actions` | `ActionSystem`, `SparAction`, `TrainAction`, `TravelAction` | 角色动作执行 |
 | `Jianghu.Cultivation` | `PowerEngine`, `DuelEngine`(cv-001 起含 duelRng·Margin→概率 adr-0008), `CombatMath`(permille 查表), `CombatContext`, `CultivationPhase`(10态FSM), `CultivationState`/`CultivationTickA2`, `TribulationResolver`, `LifespanAndFailure`, `Modules`(工厂), `ModuleResolver`, `EffectOp`, `GateField`, `RollbackStack`, `SuppressionMatrix`, `SituationalEdges`, `DerivedProviders`/`DerivedRegistry`, `SpecialModuleRegistry`, `PathRegistry`, `RealmCurve`/`RealmProjection`/`RealmQuery`, `DailyModeSelector`, `DaoHeartRegistry`, `SeclusionFormulas`/`SeclusionState`, `StoryletExecutor`/`StoryletDef`, `VarietyTracker`, `BreakAidService`, `AwakenTriggerService`/`AwakeningAndDualModels`, `CanonicalTransitions`/`TransitionDef`, `BuddhistVow`, `A3FeatureServices` | 21 路完整修为系统（战斗引擎含 Margin→概率映射[adr-0008]/逆转/门域/压制矩阵/情境克敌/修炼FSM/三劫/寿元/道心/日课/闭关/奇遇/觉醒双修） |
-| `Jianghu.Cultivation.paths` | `SwordImmortalPath`…共 21 文件 | 具体修炼路径定义（`CodePathSource` 注册） |
-| `Jianghu.Cultivation.special` | `BrokenChainModule`…共 8 文件 | 唯一稀有度特殊模块 |
+| `Jianghu.Cultivation.Paths` | `SwordImmortalPath`…共 21 文件 | 具体修炼路径定义（`CodePathSource` 注册；21 路统一 `.Paths` 命名空间） |
+| `Jianghu.Cultivation`（`special/` 子目录，无独立命名空间） | `BrokenChainModule`…共 8 文件 | 唯一稀有度特殊模块 |
 | `Jianghu.Cultivation.Artifacts` | `ArtifactData`, `ArtifactRegistry` | 法宝系统 |
 | `Jianghu.Decide` | `IBrain`, `RuleBrain`(当前), `DecisionContext` | AI 决策（LLM 脑未建） |
 | `Jianghu.Drama` | `DramaDirector`, `GrudgeLedger`, `RevengeArc`, `ArcInstance`/`ArcStage`/`ArcTransition`, `IgnitionScanner`, `DramaScheduler`, `DramaStoryletEngine`, `StoryletSelector`, `RelationService`, `DramaProfile`, `IDramaView`/`IDramaMutator` | 恩怨/复仇弧/跨代继承（`--drama`，Split(6) 流；off 不激活） |

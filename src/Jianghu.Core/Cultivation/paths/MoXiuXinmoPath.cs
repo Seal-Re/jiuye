@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Jianghu.Cultivation
+namespace Jianghu.Cultivation.Paths
 {
     /// <summary>
     /// 魔修·夺养噬心道 <c>mo_xiu_xinmo</c>（西陲血河魔宫嫡传·魔道总纲）。数据照《余9路深度设计》魔修节 +

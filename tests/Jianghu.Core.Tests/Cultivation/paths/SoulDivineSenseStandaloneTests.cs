@@ -1,12 +1,13 @@
 using System.Linq;
 using Jianghu.Cultivation;
+using Jianghu.Cultivation.Paths;
 using Xunit;
 
 /// <summary>
 /// 魂修·神识元神道 soul_divine_sense standalone 数据 gate（只验 Def 本身，不依赖注册/生成/World）。
 /// ①PathValidator 全部校验过；②canon pathId + 形状（≥3 战斗类目+daoheart、≥5 战技、Curve 四列等长、
 /// terms 无 ×0 无 daoHeart/innerDemon、SituationalTags=属性 tag 非 PathId、daoheart 占位 tier=0 空 Effects）。
-/// 全局命名空间 public class，与 21 路并行作者文件隔离不互拖（仅 using Jianghu.Cultivation）。
+/// 全局命名空间 public class，与 21 路并行作者文件隔离不互拖（using Jianghu.Cultivation + .Paths）。
 /// </summary>
 public class SoulDivineSenseStandaloneTests
 {

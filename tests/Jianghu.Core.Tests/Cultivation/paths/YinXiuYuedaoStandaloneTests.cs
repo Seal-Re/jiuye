@@ -1,5 +1,6 @@
 using System.Linq;
 using Jianghu.Cultivation;
+using Jianghu.Cultivation.Paths;
 using Xunit;
 
 /// <summary>

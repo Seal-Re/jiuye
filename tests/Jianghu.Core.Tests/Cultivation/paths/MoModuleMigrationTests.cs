@@ -12,7 +12,7 @@ namespace Jianghu.Core.Tests.Cultivation.Paths
     /// 血河倾泻 → PenFromResource(MoGong,2)（清空 MoGong 自爆,全槽×2,满槽自爆极痛、空槽哑火真差分）；
     /// 噬元夺脉 → PenFromResource(MoGong,1)（伤害基于 MoGong,一致性优先）；
     /// 夺舍/渡心魔劫 = A.2 道心层(innerDemon/moHeart) defer（保 AddPenInteger(0) 占位）。
-    /// 注：MoXiuXinmoPath 在 namespace Jianghu.Cultivation（非 .Paths），由 using Jianghu.Cultivation 覆盖。
+    /// 注：MoXiuXinmoPath 命名空间已与其他 20 路统一为 Jianghu.Cultivation.Paths（2026-07-07 格式合规订正）。
     /// </summary>
     public class MoModuleMigrationTests
     {
