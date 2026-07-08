@@ -160,8 +160,9 @@
 | [adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md) | 柏林噪声浮点 vs B.2 整数确定性 | **Proposed** | §10.2 R2（未裁决） | B.2 |
 | [adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md) | ECS 倾向 vs OOP 聚合根 | **Proposed** | §10.2 R3（未裁决） | A.1 |
 | [adr-0008](adr-0008-variance-reactive-combat-model.md) | 方差 + 反应式 QTE 战斗模型（Margin→概率映射）| **Accepted** | 战斗内核范式重构（标量→概率分布 + 判定权移交 View）| A.10 / B.2 / TR-BAL-001 |
+| [adr-0010](adr-0010-defense-funnel-mechanism.md) | 三层防御漏斗（Evasion→Block→Resistance）| **Accepted** | 防御端判定层：SEC 合流命中 / SBC 调 Chip / 派生抗性 R；叠加细化 cv-001/002/003 | B.2 / B.5 / TR-BAL-001 |
 
-> 道心解耦（§5.4，红线 B.5）当前无独立 ADR——由 `PowerEngine` 源码护栏 + code review 守。如需正式化，建议补 **adr-0009**（adr-0008 已用于战斗模型重构；0005/0006/0007 已用于 View 层三开放调和项 R1/R2/R3）。
+> 道心解耦（§5.4，红线 B.5）当前无独立 ADR——由 `PowerEngine` 源码护栏 + code review 守。如需正式化，**adr-0009 预留**给它（adr-0008 用于战斗模型重构、adr-0010 用于防御漏斗；0005/0006/0007 用于 View 层三开放调和项 R1/R2/R3）。
 
 ---
 

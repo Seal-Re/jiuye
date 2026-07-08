@@ -68,6 +68,7 @@
 - adr-0006-perlin-noise-float-vs-integer-determinism（2026-07-04，**Proposed** 张力登记—PCG 地形层归属，A.1 未裁决）
 - adr-0007-ecs-vs-oop-aggregate-root（2026-07-04，**Proposed** 张力登记—内核实体架构方向，A.1 未裁决）
 - adr-0008-variance-reactive-combat-model（2026-07-06，**Accepted**—方差+反应式 QTE 战斗模型 Margin→概率映射，B.2/B.3/B.9/TR-BAL-001）
+- adr-0010-defense-funnel-mechanism（2026-07-08，**Accepted**—三层防御漏斗 Evasion→Block→Resistance；SEC 合流命中/SBC 调 Chip/派生抗性 R；叠加细化 cv-001/002/003，B.2/B.5/TR-BAL-001。adr-0009 预留道心解耦）
 
 ## Engine Specialists
 
