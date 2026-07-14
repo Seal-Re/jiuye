@@ -12,14 +12,14 @@
 
 ## Context
 
-**GDD**: `design/gdd/combat-system.md`（实现期同步修订）；深度源/权威 `docs/architecture/adr-0010-defense-funnel-mechanism.md`（决策③ 抵抗层 + 派生抗性 R）
+**GDD**: `design/gdd/combat-system.md`（实现期同步修订 §防御漏斗 / 抵抗层）；primary design authority = `docs/architecture/adr-0010-defense-funnel-mechanism.md`（决策③ 抵抗层 + 派生抗性 R，GDD 将在漏斗三层全部落盘后同步修订）
 
 **ADR Decision Summary**: 第三层抵抗采用**半衰模型**（纯整数 B.2）：`DamageMultiplier = K × 1000 / (K + R)`，R=0 → ×1000（无减伤），R=K → ×500（半衰），R→∞ → →0（趋 1 保底 `max(1, ...)`）。抗性 R 必须是**派生属性**（Derived Stat），绝不为 `StatBlock` 挂无根字段。R 由现有维度映射：体质→物理抗性、识/悟性→属性/法术抗性、功法标签（HasBodyArt→抬物理抗）+ 法宝 OnDefend 效果。内力留作后续主动护盾蓝条，不进常驻 R。
 
 **关键约束（B.5）**：派生抗性 R **禁引用 daoHeart/innerDemon**，**禁进 EffectivePower**（抗性只作防御结算，不算战力）。
 
-**Engine**: .NET 8 / netstandard2.1 | **Risk**: **HIGH**（触 `Jianghu.Cultivation`：新增 DerivedProvider / 改 ResolveExchange 判定管线 / B.2 半衰整数化 / B.5 道心解耦。B.7 旗舰档实现 + 主控独立核验 A.3）
-**Engine Notes**: 无 post-cutoff API。`DerivedProviders` 已有先例（既有派生属性），本 story 追加 `ResistanceOf`。`LimitsConfig` 新增 3+ 旋钮（A.10）。
+**Engine**: .NET 8 / netstandard2.1 | **Risk**: **HIGH**（触 `Jianghu.Cultivation`：新建 ResistanceProviders / 改 ResolveExchange 判定管线 / B.2 半衰整数化 / B.5 道心解耦。B.7 旗舰档实现 + 主控独立核验 A.3）
+**Engine Notes**: 无 post-cutoff API。新建 `ResistanceProviders` 静态类（**非** `DerivedProviders`——后者是 power registry 单一职责，见背景 §1）。复用 `DuelEngine.HasBodyArt` 既有 helper。`CombatMath` 追加 `ApplyResistance`。`LimitsConfig` 新增 5 旋钮（A.10）。**真实 API 事实**：`StatBlock` 无命名属性用 `Get(StatKind)`；`CodePathSource` 是路线集合非单条路（用 `CultivationPathDef`）；角色不持法宝实例（法宝加成留 TODO）。
 
 **Control Manifest Rules (Core 层)**:
 - Required: 半衰公式全整数 `K*1000/(K+R)`；R 派生化（从体质/识/功法标签/法宝映射）；`max(1, ...)` 保底；旋钮外置 LimitsConfig。
@@ -30,7 +30,7 @@
 
 ## 背景（承 adr-0010 决策③ + 用户 2026-07-08 裁定映射方向）
 
-adr-0010 决策③ 确立：抵抗层是防御漏斗的最后一环（①闪避→②格挡→**③抵抗**），在 OnDefend 模块结算后、SuppressionMatrix 前对 RawDamage 做半衰减伤。R 的数据链**完全可追溯**（从 StatBlock 四维 + 功法标签 + 法宝效果派生，无凭空出现的魔法数字）。
+adr-0010 决策③ 确立：抵抗层是防御漏斗的最后一环（①闪避→②格挡→**③抵抗**），在 OnDefend 模块结算后、SuppressionMatrix 前对 RawDamage 做半衰减伤。R 的数据链**完全可追溯**（从 StatBlock 四维 + 功法标签派生，无凭空出现的魔法数字；法宝 OnDefend 加成因角色不持法宝实例而留 TODO 接口，见背景 §5）。
 
 ### 半衰公式（纯整数 B.2）
 
@@ -55,35 +55,48 @@ FinalDamage      = max(1, RawDamage × DamageMultiplier / 1000)  // 向下取整
 
 **内力不进常驻 R**（用户裁定：留作后续主动护盾蓝条）。
 
-### 关键工程事实
+### 关键工程事实（2026-07-14 主控勘探核实真实 API，钉死实现形态）
 
-1. **DerivedProviders 落点**：`DerivedProviders`（`src/Jianghu.Core/Cultivation/DerivedProviders.cs`）新增静态方法 `ResistanceOf(CultivationState cultivation, StatBlock stats, CodePathSource path, DamageType damageType)` → 按 DamageType 分物理/属性抗，返回 `int R`。纯整数派生，**不进 EffectivePower**（B.5：与 daoHeart 一样，抗性只作防御结算）。
-2. **DamageType → 抗性维度映射**：Normal → 物理抗性（体质派生）；Blunt → 物理抗性（体质派生）；Elemental → 属性抗性（识派生）。此映射是**确定性规则**，不依赖 RNG。
-3. **半衰计算落点**：`CombatMath`（`CombatMath.cs`）新增 `ApplyResistance(int rawDamage, int R, int K)` 静态纯函数。公式 `max(1, rawDamage * K * 1000 / (K + R) / 1000)` 或等价整数化（注意中间溢出，使用 `long` 中间类型或分步运算）。
-4. **ResolveExchange 接线点**：在既有 OnDefend 模块结算后、SuppressionMatrix 前（adr-0010 决策④管线 step 4）。伪代码：
+1. **`ResistanceOf` 落点 = 新静态类，非 `DerivedProviders`**：`DerivedProviders`（`DerivedProviders.cs`）是 `static` 类，只含 `RegisterAll()` + 9 个 `internal sealed class XxxProvider : IDerivedProvider`（走 `DerivedRegistry.Register` 注册 + `Compute(st, stats)`），其单一职责是 **power 派生 registry**，**不是**放任意静态派生函数的地方。抗性派生是防御结算用的独立计算，**新建** `src/Jianghu.Core/Cultivation/ResistanceProviders.cs` 静态类承载 `ResistanceOf`（与 power registry 解耦，B.5：抗性不进 EffectivePower/power 体系）。
+2. **`ResistanceOf` 签名（含 `LimitsConfig limits`，对齐真实 API）**：
+   ```csharp
+   public static int ResistanceOf(
+       CultivationState cultivation, StatBlock stats,
+       CultivationPathDef path, GateType gate,       // gate 来自 CombatContext, 非 CultivationState
+       DamageType damageType, LimitsConfig limits)
+   ```
+   - `StatBlock`（`Stats/StatBlock.cs`）**无** `Constitution`/`Insight` 命名属性，只有 `Get(StatKind k)` + `Sum`。四维经 `StatKind` 枚举（`StatKind.cs`：`Force=0, Internal=1, Constitution=2, Insight=3`）索引 → 用 `stats.Get(StatKind.Constitution)` / `stats.Get(StatKind.Insight)`。
+   - `LimitsConfig`（`Config/LimitsConfig.cs`，`sealed record`，旋钮范式 `{ get; init; } = 默认`）必须**显式传参**（不在 `CultivationState`/`StatBlock` 内）。承 cv-002/003 旋钮注释模板。
+3. **DamageType → 抗性维度映射**（确定性规则，无 RNG）：Normal/Blunt → 物理抗性（`stats.Get(StatKind.Constitution) × limits.PhysResistPerConstitution`）；Elemental → 属性抗性（`stats.Get(StatKind.Insight) × limits.ElemResistPerInsight`）。
+4. **`HasBodyArt` 用真实既有逻辑，非 `path.Tags.HasBodyArt`（不存在）**：真实 `DuelEngine.cs:890` 有 `private static bool HasBodyArt(CultivationPathDef path, CultivationState st)` —— 遍历 `path.ArtCategories` 找 `Role=="body"||"defense"` 且角色已 `ChosenArtIds` 选了该 art（语义="已修横练/护体"，正是抗性抬升所需）。**方案**：将该 helper 提为 `internal static`（或抽到 `ResistanceProviders` 共享），`ResistanceOf` 内复用判定 `BodyArtPhysResistBonus`。**不**用 `gate.HasFlag(GateType.HasBodyArt)`（那是 `CombatContext.CheckGate` 的静态能力门="有能力"，非"已修"，语义不符）。
+5. **法宝加成 = 预留接口，不遍历（角色不持法宝实例）**：`CultivationState` **无** `Artifacts` 字段；法宝是全局 `ArtifactDef` registry（`Cultivation/Artifacts/ArtifactData.All` + `ArtifactRegistry`），角色经 `ChosenArtIds` 选功法**不**含法宝持有。cv-003 code-review 已记"法宝盾无 Blunt 豁免（cv-004 裁定）"——法宝防御接入是 cv-004/cv-008 域。**本 story 仅预留** `// TODO(cv-008): 法宝 OnDefend 效果加 R` 注释接口，**不**臆造遍历代码（避免子代理按不存在的 `cultivation.Artifacts` 写）。
+6. **半衰计算落点 = `CombatMath.ApplyResistance`**（`CombatMath.cs`，纯函数库，与 cv-006 `ApplyEvasionCoefficient` 同处）。`public static int ApplyResistance(int rawDamage, int R, int K)`，用 `long` 中间类型防溢出：`long mul = (long)K * 1000 / (K + R); long dmg = (long)rawDamage * mul / 1000; return Math.Max(1, (int)dmg);`。R=0→mul=1000（全伤）；R=K→mul=500（半衰）；R 极大→mul→0（趋 1 保底）。
+7. **ResolveExchange 接线点**（adr-0010 决策④管线 step 4）：既有 OnDefend 模块结算后、SuppressionMatrix 前。接线需 `limits`（DuelEngine 已持有 `LimitsConfig` 字段，直接传）。伪代码：
    ```csharp
    // step 3: 既有 OnDefend 结算（不变）
-   // step 4 [新]: 抵抗层
+   // step 4 [新]: 抵抗层（需 CombatContext 的 gate + DuelEngine 的 limits，均已可见）
    if (!calibrationMode) {
-       int R = DerivedProviders.ResistanceOf(defCult, defStats, defPath, skill?.Damage ?? DamageType.Normal);
+       int R = ResistanceProviders.ResistanceOf(defCult, defStats, defPath, defGate,
+                                                 skill?.Damage ?? DamageType.Normal, limits);
        dmg = CombatMath.ApplyResistance(dmg, R, limits.ResistanceHalfLifeK);
    }
    // step 5: SuppressionMatrix / cv-002 削韧（不变）
    ```
-5. **半衰常数 K 外置**：`LimitsConfig` 新增 `ResistanceHalfLifeK`（默认 500，int + init + Validate `>0`）。K 越大 → 减伤曲线越平缓（需要更多 R 才能显著减伤）。负值抛。
-6. **calibrationMode 旁路**：标定期抵抗层不生效（`if(!calibrationMode)`），保 cv-005 seed-sweep 裸 PE 纯净。承 cv-001/002/003/006 一致。
-7. **确定性 + off**：全整数确定性运算，无 RNG（不碰 duelRng）。R 派生源（StatBlock 四维 + 功法标签 + 法宝）在 dueling 期间不变（无跨回合累积），duel-local 纯净。off 走 legacy SparAction 不入 DuelEngine 天然守 B.3。
-8. **B.5 红线守门**：`ResistanceOf` 参数列表**不含** `daoHeart`/`innerDemon`。测试显式验证：调 `EffectivePower` 前后 R 值不变（证 R 不进战力）。
+   **注**：`defGate`（`GateType`）来自 `CombatContext`，DuelEngine 结算时可见——若接线点拿不到 gate，则 BodyArt 加成退化为"仅体质/识派生"，BodyArt bonus 留 TODO（同法宝，不臆造）。实现期由子代理核实 ResolveExchange 作用域内 `CombatContext` 可达性后定。
+8. **半衰常数 K + 映射系数外置**：`LimitsConfig` 追加 5 旋钮（承 cv-002/003 `{ get; init; } = 默认` + 注释 + Validate 范式）：`ResistanceHalfLifeK`(默认 500，Validate `>0`)、`PhysResistPerConstitution`(50，`≥0`)、`ElemResistPerInsight`(50，`≥0`)、`BodyArtPhysResistBonus`(100，`≥0`)、`PathElemResistBonus`(100，`≥0`)。
+9. **calibrationMode 旁路**：标定期抵抗层不生效（`if(!calibrationMode)`），保 cv-005 seed-sweep 裸 PE 纯净。承 cv-001/002/003/006 一致。
+10. **确定性 + off**：全整数确定性运算，无 RNG（不碰 duelRng）。R 派生源（StatBlock 四维 + 功法标签）在 dueling 期间不变（无跨回合累积），duel-local 纯净。off 走 legacy SparAction 不入 DuelEngine 天然守 B.3。
+11. **B.5 红线守门**：`ResistanceOf` 参数列表**不含** `daoHeart`/`innerDemon`（`CultivationState` 本就有这些字段，但签名不传它们）。测试显式验证：调 `EffectivePower` 前后 R 值不变（证 R 不进战力）。
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] **7.1 DerivedProviders.ResistanceOf**：按 DamageType 分物理/属性抗。Normal/Blunt → 体质派生；Elemental → 识派生。功法标签（HasBodyArt）+ 法宝 OnDefend 加成叠加。纯整数返回。单测：同角色不同 DamageType 返回不同 R。
-- [ ] **7.2 CombatMath.ApplyResistance**：半衰公式 `max(1, rawDamage × K × 1000 / (K + R) / 1000)` 纯整数（B.2）。单测：R=0 → 伤害不变；R=K → 伤害≈半衰；R 极大 → 伤害=1（保底）；rawDamage=1 任意 R 仍为 1。
-- [ ] **7.3 LimitsConfig 旋钮**：`ResistanceHalfLifeK`(默认 500) + `PhysResistPerConstitution`(默认 50) + `ElemResistPerInsight`(默认 50) + `BodyArtPhysResistBonus`(默认 100) + `PathElemResistBonus`(默认 100)。全部 int + init + Validate 断言（K>0，系数≥0）。默认安全/负值抛。
+- [ ] **7.1 ResistanceProviders.ResistanceOf**：新建 `ResistanceProviders` 静态类，签名 `ResistanceOf(CultivationState, StatBlock, CultivationPathDef, GateType, DamageType, LimitsConfig)`。按 DamageType 分物理/属性抗：Normal/Blunt → `stats.Get(StatKind.Constitution) × PhysResistPerConstitution`；Elemental → `stats.Get(StatKind.Insight) × ElemResistPerInsight`。HasBodyArt（复用 `DuelEngine.HasBodyArt` 提为 internal）→ `+BodyArtPhysResistBonus`。法宝 OnDefend 加成留 TODO 接口（不臆造遍历）。纯整数返回，参数不含 daoHeart/innerDemon（B.5）。单测：同角色不同 DamageType 返回不同 R；HasBodyArt 角色 Physical R 更高。
+- [ ] **7.2 CombatMath.ApplyResistance**：半衰公式 `max(1, rawDamage × K × 1000 / (K + R) / 1000)` 纯整数（B.2，`long` 中间类型防溢出）。单测：R=0 → 伤害不变；R=K → 伤害≈半衰；R 极大 → 伤害=1（保底）；rawDamage=1 任意 R 仍为 1；rawDamage=int.MaxValue/1000 不溢出。
+- [ ] **7.3 LimitsConfig 旋钮**：`ResistanceHalfLifeK`(默认 500) + `PhysResistPerConstitution`(默认 50) + `ElemResistPerInsight`(默认 50) + `BodyArtPhysResistBonus`(默认 100) + `PathElemResistBonus`(默认 100)。全部 `{ get; init; }` + Validate 断言（K>0，系数≥0）。默认安全/负值抛。
 - [ ] **7.4 ResolveExchange 接线**：OnDefend 结算后、SuppressionMatrix 前插入抵抗层。测试：防方高体质 → 物理攻击减伤 > 低体质；防方高识 → Elemental 攻击减伤 > 低识。
-- [ ] **7.5 B.5 道心解耦**：`ResistanceOf` 参数不含 daoHeart/innerDemon。EffectivePower 不含 R。测试显式验证。
+- [ ] **7.5 B.5 道心解耦**：`ResistanceOf` 参数不含 daoHeart/innerDemon；EffectivePower 不含 R。测试显式验证（改 daoHeart → EffectivePower 不变，R 不变）。
 - [ ] **7.6 calibrationMode 旁路**：标定模式抵抗层不生效（R 视为 0），保裸 PE 平价。
 - [ ] **7.7 B.2 + B.3 + 不退**：IL 浮点零；半衰中间值不溢出（long 中间类型）；同种子逐字节；off worktree sha256 IDENTICAL；cv-001/002/003 + balance-007/008 全绿不退。
 
@@ -93,12 +106,14 @@ FinalDamage      = max(1, RawDamage × DamageMultiplier / 1000)  // 向下取整
 
 *承 adr-0010 决策③ + DerivedProviders 既有范式：*
 
-- **ResistanceOf 落点**：`DerivedProviders`（`src/Jianghu.Core/Cultivation/DerivedProviders.cs`）新增 `public static int ResistanceOf(CultivationState cultivation, StatBlock stats, CodePathSource path, DamageType damageType)`。内部：`int baseR = damageType == DamageType.Elemental ? stats.Insight * limits.ElemResistPerInsight : stats.Constitution * limits.PhysResistPerConstitution`；`if (path.Tags.HasBodyArt) baseR += limits.BodyArtPhysResistBonus`；法宝加成遍历 `cultivation.Artifacts` OnDefend 效果。参数不含 daoHeart/innerDemon（B.5）。
-- **ApplyResistance 落点**：`CombatMath`（`CombatMath.cs`）新增 `public static int ApplyResistance(int rawDamage, int R, int K)`。使用 `long` 中间类型防溢出：`long numerator = (long)rawDamage * K * 1000; long denominator = K + R; int dmg = (int)(numerator / denominator / 1000); return Math.Max(1, dmg);`。`rawDamage` 已是 ×Scale 空间的值（与现有 DuelEngine 一致）。
-- **ResolveExchange 接线点**：OnDefend 模块结算（含 Block/Dodge 门控 cv-003）→ 软情境 → [新] 抵抗层 → SuppressionMatrix → return。伪代码见背景 §4。
-- **旋钮**：`LimitsConfig`（`src/Jianghu.Core/Config/LimitsConfig.cs`）追加 5 个 int 属性 + Validate 断言 + 默认值（承 cv-002/003 范式）。
-- **测试落点**：新建 `tests/Jianghu.Core.Tests/Cultivation/ResistanceTests.cs`。测试维度：纯函数（半衰公式各 R 值 + 溢出边界）+ DerivedProviders（不同 DamageType 返回不同 R + 功法标签加成 + B.5 不含 daoHeart）+ 接线（高体质 vs 低体质伤害差 + Elemental vs Blunt 抗性差）+ calibration + B.3。
-- **不碰**：法宝系统（只读既有 ArtifactDef.Effects）；EffectivePower 计算；cv-001 概率/cv-002 削韧/cv-003 门控内部逻辑；SEC/SBC 招式系数（cv-006/008）。
+- **ResistanceOf 落点**：**新建** `src/Jianghu.Core/Cultivation/ResistanceProviders.cs` 静态类（非 `DerivedProviders`——后者是 power registry 单一职责）。签名见背景 §2。内部：`int baseR = damageType == DamageType.Elemental ? stats.Get(StatKind.Insight) * limits.ElemResistPerInsight : stats.Get(StatKind.Constitution) * limits.PhysResistPerConstitution`；`if (HasBodyArt(path, cultivation)) baseR += limits.BodyArtPhysResistBonus`；法宝加成 `// TODO(cv-008): ArtifactDef OnDefend 加 R`（角色不持法宝实例，留接口不臆造）。参数不含 daoHeart/innerDemon（B.5）。
+- **HasBodyArt 复用**：`DuelEngine.cs:890` 的 `private static bool HasBodyArt(CultivationPathDef, CultivationState)` 提为 `internal static`（或移 `ResistanceProviders`），供 `ResistanceOf` 复用。语义="已修横练/护体"（遍历 `path.ArtCategories` Role=body/defense 且 ChosenArtIds 命中）。
+- **ApplyResistance 落点**：`CombatMath`（`CombatMath.cs`，与 cv-006 `ApplyEvasionCoefficient` 同库）新增 `public static int ApplyResistance(int rawDamage, int R, int K)`。`long` 中间类型防溢出：`long mul = (long)K * 1000 / (K + R); long dmg = (long)rawDamage * mul / 1000; return Math.Max(1, (int)dmg);`。`rawDamage` 已是 ×Scale 空间的值（与现有 DuelEngine 一致）。
+- **ResolveExchange 接线点**：OnDefend 模块结算（含 Block/Dodge 门控 cv-003）→ 软情境 → [新] 抵抗层 → SuppressionMatrix → return。接线需 `limits`（DuelEngine 已持 `LimitsConfig` 字段）+ `defGate`（来自 `CombatContext`，若作用域内不可达则 BodyArt bonus 退化为 TODO，仅体质/识派生——子代理核实后定）。伪代码见背景 §7。
+- **旋钮**：`LimitsConfig`（`Config/LimitsConfig.cs`，`sealed record`）追加 5 个 `{ get; init; } = 默认` 属性 + Validate 断言 + 注释（承 cv-002/003 旋钮范式：注释标 adr-0010 决策③ + B.2 + off 天然守）。
+- **测试落点**：新建 `tests/Jianghu.Core.Tests/Cultivation/ResistanceTests.cs`。测试维度：纯函数（半衰公式各 R 值 + 溢出边界）+ ResistanceProviders（不同 DamageType 返回不同 R + HasBodyArt 加成 + B.5 不含 daoHeart）+ 接线（高体质 vs 低体质伤害差 + Elemental vs Blunt 抗性差）+ calibration + B.3。
+- **Performance**: No impact expected — resistance calc is O(1) integer arithmetic (two multiplies + one divide) inserted once per exchange at step 4, no new allocations, no RNG, no loop nesting change. The only new per-exchange work is the derived-R lookup (≤5 integer ops + one ArtCategories scan gated by HasBodyArt).
+- **不碰**：法宝系统（只留 TODO 接口）；EffectivePower 计算；cv-001 概率/cv-002 削韧/cv-003 门控内部逻辑；SEC/SBC 招式系数（cv-006/008）。
 
 ---
 
@@ -107,6 +122,7 @@ FinalDamage      = max(1, RawDamage × DamageMultiplier / 1000)  // 向下取整
 - **SEC 闪避系数** → cv-006（CombatMath 命中调制，与本 story 正交）
 - **SBC 格挡系数 + 三层串行** → cv-008
 - **主动护盾（内力消耗型防御）**：内力留作后续主动技能资源，不进常驻 R（adr-0010 用户裁定）
+- **法宝 OnDefend 加 R（本 story 仅预留 TODO 接口）**：角色不持法宝实例列表（`CultivationState` 无 `Artifacts` 字段），法宝防御接入属 cv-004/cv-008 域。本 story 留 `// TODO(cv-008)` 注释接口，不臆造遍历代码。
 - **ElementType 正交字段**：若未来需火/冰/毒元素相克，另立字段，不混 DamageType（adr-0010 决策②）
 - **21 路功法标签数据铺设（deferred，红线 A.8）**：机制骨架先行，HasBodyArt/PathElemResist 标签 = 数值实现期铺
 
@@ -116,10 +132,10 @@ FinalDamage      = max(1, RawDamage × DamageMultiplier / 1000)  // 向下取整
 
 *Logic 自动化测试 spec。纯确定性，无 RNG。*
 
-- **AC-1（7.1 DerivedProviders）**：同角色 Normal→R_phys > 0；Elemental→R_elem > 0（通常不同）；无功法标签角色 R 仅来自四维；HasBodyArt 角色 Physical R 更高。
-- **AC-2（7.2 半衰纯函数）**：R=0 → dmg 不变；R=K(500) → dmg≈raw/2；R=2000 → dmg≈raw×0.2；R=100000 → dmg=1（保底）；rawDamage=1,R=0 → 1。边界：rawDamage=int.MaxValue/1000 不溢出。
+- **AC-1（7.1 ResistanceProviders）**：同角色 Normal→R_phys > 0；Elemental→R_elem > 0（通常不同）；无功法标签角色 R 仅来自四维；HasBodyArt 角色（已修 body/defense 类 art）Physical R 更高。参数无 daoHeart（B.5 编译期保证：签名不含）。
+- **AC-2（7.2 半衰纯函数）**：R=0 → dmg 不变；R=K(500) → dmg≈raw/2；R=2000 → dmg≈raw×0.2；R=100000 → dmg=1（保底）；rawDamage=1,R=0 → 1。边界：rawDamage=int.MaxValue/1000 不溢出（long 中间类型）。
 - **AC-3（7.3 旋钮）**：默认 K=500 安全；K=0 或负值抛（Validate）；系数默认合理（PhysResistPerConstitution=50 不极端）。
-- **AC-4（7.4 接线）**：防方体质 100→R≈5000，物理攻击减伤 ≈90%。对比防方体质 10→R≈500，减伤 ≈50%。Elemental 攻击走识而非体质。
+- **AC-4（7.4 接线）**：防方体质 100→R≈5000，物理攻击减伤 ≈90%。对比防方体质 10→R≈500，减伤 ≈50%。Elemental 攻击走识（`StatKind.Insight`）而非体质。
 - **AC-5（7.5 B.5）**：`ResistanceOf` 参数无 daoHeart；EffectivePower 不含 R（修改 daoHeart → EffectivePower 不变，R 不变）。
 - **AC-6（7.6 calibration）**：标定模式 R 视为 0，伤害无减损。
 - **AC-7（7.7 B.2/B.3）**：IL 浮点零；off OffByteIdentical + worktree sha256；cv-001/002/003 + balance-007/008 全绿。
@@ -137,7 +153,7 @@ FinalDamage      = max(1, RawDamage × DamageMultiplier / 1000)  // 向下取整
 
 ## Dependencies
 
-- Depends on: **adr-0010 Accepted**（✅ `d35fef6`）；**adr-0008 Accepted**（✅）；**DerivedProviders 既有先例**（✅）
+- Depends on: **adr-0010 Accepted**（✅ `d35fef6`）；**adr-0008 Accepted**（✅）；**DuelEngine.HasBodyArt 既有 helper**（✅ `DuelEngine.cs:890`，提 internal 复用）；**CombatMath 既有纯函数库**（✅，cv-006 `ApplyEvasionCoefficient` 同库）
 - Unlocks: cv-008（三层串行接线——抵抗层作为漏斗最后一环就位）；cv-005（防御端可校准层）
-- Orthogonal to: cv-006（SEC 闪避——不同限界上下文，无代码依赖）；cv-003（DamageType 枚举已就位，本 story 只读不写）
-- Deferred dependency: 法宝 OnDefend 效果对接 R（既有 ArtifactDef 管线，本 story 预留接口不铺数据）
+- Orthogonal to: cv-006（SEC 闪避——不同限界上下文，无代码依赖，仅共享 CombatMath 库）；cv-003（DamageType 枚举已就位，本 story 只读不写）
+- Deferred dependency: 法宝 OnDefend 效果加 R（本 story 预留 TODO 接口，角色不持法宝实例，接入属 cv-004/cv-008）

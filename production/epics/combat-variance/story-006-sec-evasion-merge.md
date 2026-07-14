@@ -122,7 +122,7 @@ int p_afterEvasion = (p * 1000) / SEC; // SEC=1000 中性；SEC>1000 衰减
 
 ## Completion Notes
 **Completed**: 2026-07-14
-**实现 sha**: `（pending commit）`（代码已落 4 文件，待用户指示提交；主控 A.3 已独立核验 1166 绿）
+**实现 sha**: `c57d365`（feat(cultivation): cv-006 SEC 闪避系数合流 adr-0010 Layer ① —— 代码 3 文件 + 测试 1 文件 + story 回写；主控 A.3 独立核验 1166 绿）
 **Criteria**: 6/6 passing（AC 6.1 字段 + 6.2 纯函数 + 6.3 接线 + 6.4 惰性 + 6.5 calibration + 6.6 B.2/B.3 全通过）
 **机器证据（主控独立核验 A.3）**:
 - `dotnet test` = **1166 绿 / 0 失败 / 0 跳过**（1147 基线 + 19 新增）
