@@ -485,12 +485,18 @@ namespace Jianghu.Cultivation
             // —— cv-003（adr-0008 决策⑩.1）：元素格挡穿透 Chip Damage ——
             // Elemental 攻击被 Block 类成功减伤 → 免控制/硬直（chipImmune）但承受穿透保底。
             // 基础伤害 = attackerPe/BaseDamageDivisor（未缩放）；Margin = attackerPe − defenderPe。
+            // cv-008（adr-0010 决策②）：SBC 招式格挡系数调制有效 Chip 穿透千分比（替换 limits.ChipDamagePermille）。
+            // 复用 cv-003 保底模型 + 既有 ChipDamageFloor 函数（不引入新公式、不内联）。SBC 确定性不掷骰。
+            // 标定/裸攻（calibrationMode || skill==null）用基准 ChipPermille（同 cv-001/002/003/006/007 旁路范式）。
             bool chipImmuneToPoise = false;
             if (attackType == DamageType.Elemental && blockFired)
             {
+                int effChipPermille = (!calibrationMode && skill != null)
+                    ? CombatMath.ApplyBlockCoefficient(limits.ChipDamagePermille, skill.Sbc)
+                    : limits.ChipDamagePermille;  // 标定/裸攻用基准
                 int chipFloor = ChipDamageFloor(
                     attackerPe / BaseDamageDivisor, attackerPe - defenderPe,
-                    limits.ChipDamagePermille, limits.ChipMarginDivisor);
+                    effChipPermille, limits.ChipMarginDivisor);
                 int dmgUnscaledNow = (int)Math.Max(0, dmg / Scale);
                 if (chipFloor > dmgUnscaledNow)
                 {

@@ -94,6 +94,47 @@ namespace Jianghu.Cultivation
         }
 
         /// <summary>
+        /// cv-008（adr-0010 决策②）：格挡系数 SBC 调制——对 cv-003 基准 Chip 穿透千分比
+        /// <paramref name="baseChipPermille"/> 作**确定性整数调制**，生成有效 Chip 穿透千分比。
+        /// 纯整数、纯函数、无 RNG（B.2）。格挡本身是否成功由 cv-003 Block 类模块（FlatDR/ReflectDamage）
+        /// **确定性**决定（动能维度对撞，不掷骰）；SBC 只调制格挡**成功后**的 Chip 穿透比例。
+        ///
+        /// 语义：SBC = 攻方招式的格挡系数（permille 基准，挂 <c>CombatSkillDef.Sbc</c>）。
+        /// - SBC=1000（中性）→ <paramref name="baseChipPermille"/> 不变（21 路默认，惰性零行为改变，AC 8.1）。
+        /// - SBC=0（不可格挡穿透）→ 返回 1000（全伤穿透，比照 cv-003 Blunt 门控语义，adr-0010 决策②）。
+        ///   显式分支（同 SEC=0 范式：抛弃 <c>max(1,SBC)</c> 数学小聪明，避免除零 Code Smell）。
+        /// - SBC&gt;1000（易格挡）→ <c>baseChipPermille*1000/SBC</c> 降低穿透（SBC=2000 → 半降）。
+        /// - SBC&lt;1000 且 &gt;0（重锤/钝器）→ <c>baseChipPermille*1000/SBC</c> 抬升穿透（SBC=500 → 2×）。
+        ///
+        /// 边界裁定（QA AC-2）：
+        /// - <paramref name="baseChipPermille"/>&lt;=0 → 返回 0（无 chip 基准可调制；与 <see cref="ChipDamageFloor"/>
+        ///   chipPermille≤0 退化语义一致——无 chip 基准则无穿透）。
+        /// - SBC==0 必中全伤 → 返回 1000（**不**返回 <paramref name="baseChipPermille"/>；不可格挡 = 全伤，非中性）。
+        /// - SBC&lt;0（病态）→ 防御性返回 <paramref name="baseChipPermille"/>（中性，生产 SBC 恒 ≥0，仅守卫栏）。
+        /// - **不钳上界**：低 SBC（重锤）可使 effChip &gt; 1000（如 SBC=300 → 1000），这是"破防"语义；
+        ///   下游 <see cref="ChipDamageFloor"/> 取 <c>max(dmg, chipFloor)</c> 自然约束，且有 int.MaxValue 回绕守卫。
+        /// </summary>
+        /// <param name="baseChipPermille">cv-003 基准 Chip 穿透千分比（<see cref="LimitsConfig.ChipDamagePermille"/>，生产=300）</param>
+        /// <param name="sbc">攻方招式格挡系数（<c>CombatSkillDef.Sbc</c>；1000=中性 / 0=不可格挡全伤 / &lt;1000=重锤 / &gt;1000=易格挡）</param>
+        /// <returns>调制后有效 Chip 穿透千分比（SBC=0→1000；SBC&gt;0→baseChipPermille*1000/max(1,SBC)）</returns>
+        public static int ApplyBlockCoefficient(int baseChipPermille, int sbc)
+        {
+            // 守卫 1：无 chip 基准 → 0（与 ChipDamageFloor chipPermille≤0 退化一致，不凭空造穿透）。
+            if (baseChipPermille <= 0) return 0;
+            // 守卫 2：SBC==0 不可格挡穿透 → 显式分支返回 1000（全伤），不进除法（adr-0010 决策②，比照 cv-003 Blunt 门控）。
+            if (sbc == 0) return 1000;
+            // 病态负 SBC（生产恒 ≥0）：防御性归中性，避免负 permille 进下游。
+            if (sbc < 0) return baseChipPermille;
+            // 主路径：整数调制 baseChipPermille*1000/max(1,SBC)（B.2 向下取整）。
+            // long 中间量防 baseChipPermille*1000 溢出（baseChipPermille≤int.MaxValue → *1000 需 long）。
+            // max(1,SBC) 防 SBC=0 已被上面分支截走后的病态极小正值（SBC=1 → 不溢出，effChip=baseChipPermille*1000）。
+            long adjusted = (long)baseChipPermille * 1000 / Math.Max(1, sbc);
+            if (adjusted < 0) return 0;
+            // 不钳上界（低 SBC 重锤可 >1000，破防语义）；防 int 回绕（病态大 baseChipPermille）。
+            return adjusted > int.MaxValue ? int.MaxValue : (int)adjusted;
+        }
+
+        /// <summary>
         /// cv-007（adr-0010 决策③）：派生抗性 R 的半衰减伤——对 RawDamage 做
         /// <c>DamageMultiplier = K×1000/(K+R)</c> 整数衰减，<c>max(1, ...)</c> 保底。纯整数、纯函数、无 RNG（B.2）。
         ///

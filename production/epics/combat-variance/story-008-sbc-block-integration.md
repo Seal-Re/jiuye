@@ -1,7 +1,7 @@
 # Story 008: SBC 格挡系数调制 + 三层漏斗串行接线 — Layer ② + Integration
 
 > **Epic**: combat-variance
-> **Status**: Not Started
+> **Status**: In Progress
 > **Layer**: Core
 > **Type**: Integration
 > **TR**: TR-BAL-001（防御漏斗第②层——SBC 格挡系数调制 Chip 穿透 + 三层漏斗 ①→②→③ 串行接线，完成 adr-0010 防御端架构落盘）
