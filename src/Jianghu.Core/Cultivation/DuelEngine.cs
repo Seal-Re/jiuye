@@ -297,24 +297,23 @@ namespace Jianghu.Cultivation
             // 查 CombatMath 表 → 伯努利判定。未命中 = 攻击被化解（本切片伤害归零 + 不施本次 rider dot/control：
             // "弹反挂毒的暗器→无毒"，用户界定）；已挂 DoT 仍由 TickDots 结算（管线2 绕过，不受影响）。
             // 防守帧钩子/削韧/标签门控/溢出留 cv-002~004。标定期（calibrationMode）旁路方差（只测裸 PE）。
+            // cv-004（adr-0008 决策⑨.2）：溢出标志提升至此作用域——溢出时不仅跳过伯努利，也跳过 OnDefend（绝对秒杀）。
+            bool overflowed = false;
             if (duelRng != null && !calibrationMode && skill != null)
             {
                 int p = CombatMath.GetSuccessPermille(attackerPe - defenderPe, defenderPe);
                 // cv-006（adr-0010 决策①）：SEC 前置调制——合流进 cv-001 单次伯努利（不新增掷骰）。
-                // 已在 !calibrationMode 块内 → 标定模式天然旁路 SEC（AC 6.5，保 cv-005 seed-sweep 裸 PE 纯净）。
-                // skill!=null 已由外层守卫 → 直接 skill.Sec（裸攻走不到此分支，AC 6.3 裸攻默认中性由外层跳过本块实现）。
                 p = CombatMath.ApplyEvasionCoefficient(p, skill.Sec);
                 // cv-004（adr-0008 决策⑨.2）：阈值溢出检测——p≥OverflowThreshold 时跳过伯努利掷骰（数学必中）。
-                // SEC=0 必中(Apply 返 AutoHitPermille=1000) 已达阈值，走溢出路径 → 语义合理（必中标签 = 威压溢出）。
-                // 后续 cv-004-b 扩展：溢出时跳过 OnDefend（绝对秒杀）+ View 侧防守帧钩子。
-                bool overflowed = CombatMath.IsOverflow(p, limits.OverflowThresholdPermille);
+                // 溢出时也跳过 OnDefend（见下方法宝/防御模块遍历的 overflowed 守卫）→ 绝对秒杀。
+                overflowed = CombatMath.IsOverflow(p, limits.OverflowThresholdPermille);
                 if (!overflowed)
                 {
                     int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
                     if (roll >= p)
-                        return (0, 0, 0, false); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载、零削韧
+                        return (0, 0, 0, false); // 未命中：攻击化解
                 }
-                // 溢出/命中：继续执行后续伤害计算（OnUse → OnDefend → ...）
+                // 溢出/命中：继续执行后续伤害计算（OnUse → [跳过 OnDefend] → ...）
             }
 
             // —— cv-002（adr-0008 决策⑦步7）：PoiseBreak 算子额外削韧收集（路线 B）——
@@ -413,7 +412,8 @@ namespace Jianghu.Cultivation
             bool blockGatedByBlunt = false;   // Blunt 是否门控关掉了防方 Block 类（供招架崩坏削韧 bonus）
 
             // —— 批5 法宝配套：防方装备法宝 OnDefend 效果（盾/护甲等） ——
-            if (defenderArtifact != null)
+            // cv-004：溢出时跳过 OnDefend（绝对秒杀——高阶威压使防方无法防御）。
+            if (!overflowed && defenderArtifact != null)
             {
                 foreach (var op in defenderArtifact.Effects)
                 {
@@ -434,7 +434,10 @@ namespace Jianghu.Cultivation
             }
 
             // OnDefend：防方防御模块（经 ModuleResolver.ApplyOnDefend），收集反伤
-            foreach (var defSkill in defenderPath.CombatSkills)
+            // cv-004：溢出时跳过 OnDefend（绝对秒杀——高阶威压使防方无法防御）。
+            if (!overflowed)
+            {
+                foreach (var defSkill in defenderPath.CombatSkills)
             {
                 if (!ListHas(defenderState.ChosenSkillIds, defSkill.Id)) continue;
                 if (defSkill.Tier > defenderState.RealmIndex) continue;
@@ -456,6 +459,7 @@ namespace Jianghu.Cultivation
                     if (IsBlockClass(op.Kind) && dmg < dmgBefore) blockFired = true;
                 }
             }
+            } // cv-004: 关闭 !overflowed 守卫——溢出时 OnDefend 被跳过，恢复 PostMul/Suppression/软情境 后续结算
 
             // 负向压制矩阵检查（PostMul — 在 FlatPen/FlatDR 之后、软情境之前乘算）
             // balance-006 方案B：标定模式旁路压制（阴→阳/魔→佛 结构性克制，与裸 PE 平价正交）。
