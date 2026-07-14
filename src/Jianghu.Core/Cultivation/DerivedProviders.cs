@@ -99,18 +99,19 @@ namespace Jianghu.Cultivation
         }
     }
 
-    /// <summary>derived:fleetWeighted（傀儡·军团加权power）: = fleetWeighted 聚合资源 (A.0 近似, 真逐傀→FULLSTRUCT)。</summary>
-    internal sealed class FleetWeightedProvider : IDerivedProvider
+    /// <summary>derived:fleetWeighted（傀儡·军团加权power）: = constructTier×50 + mindBandwidth×2（story-001 真公式, 逐傀→FULLSTRUCT）。</summary>
+    public sealed class FleetWeightedProvider : IDerivedProvider
     {
         public int Compute(CultivationState st, StatBlock stats)
         {
-            st.Resources.TryGetValue("fleetWeighted", out int fw);
-            return fw;
+            st.Resources.TryGetValue("constructTier", out int ct);
+            st.Resources.TryGetValue("mindBandwidth", out int mb);
+            return ct * 50 + mb * 2;
         }
     }
 
     /// <summary>derived:rosterWeighted（驭兽·兽群加权power）: = rosterPower × bond/100 (A.0 近似).</summary>
-    internal sealed class RosterWeightedProvider : IDerivedProvider
+    public sealed class RosterWeightedProvider : IDerivedProvider
     {
         public int Compute(CultivationState st, StatBlock stats)
         {
@@ -121,7 +122,7 @@ namespace Jianghu.Cultivation
     }
 
     /// <summary>derived:ghostSoldierWeighted（鬼修·鬼兵加权power）: = ghostSoldierPower × (1 − devourMeter/200).</summary>
-    internal sealed class GhostSoldierWeightedProvider : IDerivedProvider
+    public sealed class GhostSoldierWeightedProvider : IDerivedProvider
     {
         public int Compute(CultivationState st, StatBlock stats)
         {
@@ -132,7 +133,7 @@ namespace Jianghu.Cultivation
     }
 
     /// <summary>derived:guSwarmWeighted（蛊修·蛊群加权power）: = guSwarmPower × venomCharge/100 (A.0 近似).</summary>
-    internal sealed class GuSwarmWeightedProvider : IDerivedProvider
+    public sealed class GuSwarmWeightedProvider : IDerivedProvider
     {
         public int Compute(CultivationState st, StatBlock stats)
         {
