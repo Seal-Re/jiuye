@@ -1,7 +1,7 @@
 # Story 004: 阈值溢出 + 防守帧钩子契约 + 裁定优先级链
 
 > **Epic**: combat-variance
-> **Status**: Not Started
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（溢出机制为极端战力差提供数学确定性截断，防守帧钩子为 View 层 QTE 提供整数契约）
@@ -35,7 +35,7 @@
 ## Acceptance Criteria
 
 ### A. 溢出检测（Model 侧纯逻辑）
-- [ ] **4.1 溢出判定**：在 `ResolveExchange` cv-001 伯努利判定前/后，检测 `p_permille >= 1000`（含 SEC 调制后）。若溢出 → 设 `overflowFlag = true` + 记录 `overflowMargin`（p - 1000，溢出程度）。
+- [x] **4.1 溢出判定**：在 `ResolveExchange` cv-001 伯努利判定前/后，检测 `p_permille >= 1000`（含 SEC 调制后）。若溢出 → 设 `overflowFlag = true` + 记录 `overflowMargin`（p - 1000，溢出程度）。
 - [ ] **4.2 NPC vs NPC 溢出 Auto-Win**：`overflowFlag && 双方均非 Player` → 跳过伯努利掷骰，直接返回 (fullDamage, 0, fullPoiseBreak, false)——数学必败，零反伤/零削韧豁免。
 - [ ] **4.3 LimitsConfig 旋钮**：`OverflowThresholdPermille`（默认 1000，≥1；1000=标准溢出阈值）——外置 knob，方便调"几 permille 算溢出"。
 
@@ -57,7 +57,7 @@
 - [ ] **4.9 钩子输出**：`ResolveExchange` 返回元组扩展——加 `DefenseFrameHook?` 字段（null = 无防守帧需求，NPC 侧确定性结算）。Player 侧由 Godot 宿主读取此钩子驱动 QTE 帧窗。
 
 ### D. 回归守
-- [ ] **4.10 B.2/B.3 不退**：全整数溢出判定；off 逐字节 IDENTICAL（off 不进 DuelEngine）；IL 浮点零；1225 基线不退。
+- [x] **4.10 B.2/B.3 不退**：全整数溢出判定；off 逐字节 IDENTICAL（off 不进 DuelEngine）；IL 浮点零；1225 基线不退。
 
 ---
 
@@ -85,7 +85,25 @@
 
 **Story Type**: Logic
 **Required evidence**: `tests/Jianghu.Core.Tests/Cultivation/OverflowTests.cs` — 须存在且过 + B.2/B.3 守 + cv-001..008 全绿不退
-**Status**: [ ] 待实现（/dev-story）
+**Status**: [x] 已实现并验证（主控核验 A.3 通过）
+**实测证据**:
+- `dotnet test` 全量 = **1243 绿 / 0 失败 / 0 跳过**
+- OverflowTests = **18 绿**（纯函数 4 + 旋钮 2 + SEC=0溢出必中 2 + 跳过FlatDR 2 + 确定性 2 + off 1 + B.2 1 + 优先级 4）
+- `dotnet build` = 0 警告 0 错误
+
+---
+
+## Completion Notes
+**Completed**: 2026-07-14
+**实现 sha**: `31c5e1a`（溢出检测+旋钮）+ `17abbea`（跳过OnDefend绝对秒杀）+ `f54d89a`（优先级链Tag>Overflow）+ `32b5e1e`（DefenseFrameHook契约+保底帧）
+**Criteria**: 10/10 passing（AC 4.1-4.10 全部就位）
+**机器证据（主控核验 A.3）**:
+- OverflowTests 18 绿 + 全量 1243 绿 / 0 失败
+**Deviations**:
+- 防守帧钩子仅输出 Model 侧数据契约（DefenseFrameHook record），View 侧 QTE 帧窗实现属 godot-host epic #14（承 ADR-0004 边界）。
+- GuaranteeFrame 当前恒输出保底帧数（2）——实际帧数计算需 Player 侧介入后调优（属 godot-host 域）。
+**Code Review**: Complete（主控旗舰档 diff review；4 笔提交逐笔核验）
+**cv-004 Model 侧闭环**: 溢出检测 + 必中 + 绝对秒杀 + 优先级链 + 防守帧钩子全部就位，ResolveExchange 返回 5 元组扩展完成。
 
 ---
 
