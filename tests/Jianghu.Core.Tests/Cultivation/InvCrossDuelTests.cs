@@ -200,8 +200,10 @@ namespace Jianghu.Core.Tests.Cultivation
 
         (int winsA, int winsB) RunDuels(
             CultivationPathDef pathA, CultivationPathDef pathB,
-            int utA, int utB, ulong pairSeed, bool calibrationMode)
+            int utA, int utB, ulong pairSeed, bool calibrationMode,
+            LimitsConfig? limits = null)
         {
+            var lim = limits ?? Limits;
             var root = new Pcg32(pairSeed, 0);
             int winsA = 0, winsB = 0;
 
@@ -215,7 +217,7 @@ namespace Jianghu.Core.Tests.Cultivation
                 var chA = CreateTypicalCharWithStats(pathA.PathId, utA, pathA, statsA, id: i * 2 + 1);
                 var chB = CreateTypicalCharWithStats(pathB.PathId, utB, pathB, statsB, id: i * 2 + 2);
 
-                var result = DuelEngine.ResolveR2(chA, chB, pathA, pathB, Registry, Limits,
+                var result = DuelEngine.ResolveR2(chA, chB, pathA, pathB, Registry, lim,
                     resolver: null, attackerSkill: null, defenderSkill: null,
                     calibrationMode: calibrationMode);
 
@@ -290,13 +292,21 @@ namespace Jianghu.Core.Tests.Cultivation
         /// </summary>
         [Fact]
         public void C1Gate_FunnelOn_SameUT_WinRate_Within_40_60()
+            => RunFunnelOnSweep(Limits, "K=500 (default)");
+
+        /// <summary>cv-005 调参实验：K=200（增强 R 效果——相同 R 减伤更显著）。</summary>
+        [Fact]
+        public void C1Gate_FunnelOn_K200_SameUT_WinRate()
+            => RunFunnelOnSweep(Limits with { ResistanceHalfLifeK = 200 }, "K=200");
+
+        void RunFunnelOnSweep(LimitsConfig limits, string label)
         {
             int tested = 0, violations = 0;
             var violationsList = new List<string>();
 
-            _out.WriteLine($"=== cv-005 三层漏斗全开 C1 [40,60]% seed-sweep ===");
+            _out.WriteLine($"=== cv-005 三层漏斗全开 C1 [40,60]% seed-sweep ({label}) ===");
             _out.WriteLine($"DuelCountPerPair={DuelCountPerPair}, calibrationMode=false");
-            _out.WriteLine($"SEC/SBC 全默认 1000（21路数据 deferred），K={Limits.ResistanceHalfLifeK}");
+            _out.WriteLine($"K={limits.ResistanceHalfLifeK}, PhysR/C={limits.PhysResistPerConstitution}, Chip={limits.ChipDamagePermille}");
             _out.WriteLine("");
 
             foreach (int ut in TargetUTs)
@@ -307,7 +317,8 @@ namespace Jianghu.Core.Tests.Cultivation
                     for (int j = i + 1; j < paths.Count; j++)
                     {
                         ulong pairSeed = GateSeed ^ ((ulong)ut * 10000UL + (ulong)i * 100UL + (ulong)j);
-                        var (winsA, winsB) = RunDuels(paths[i], paths[j], ut, ut, pairSeed, calibrationMode: false);
+                        var (winsA, winsB) = RunDuels(paths[i], paths[j], ut, ut, pairSeed,
+                            calibrationMode: false, limits: limits);
                         tested++;
                         int rateA = WinPct(winsA, DuelCountPerPair);
                         if (rateA < 40 || rateA > 60)
@@ -319,26 +330,16 @@ namespace Jianghu.Core.Tests.Cultivation
                     }
             }
 
-            _out.WriteLine($"--- cv-005 结果 ---");
-            _out.WriteLine($"测试对数: {tested}, 违规数: {violations}");
-            foreach (var v in violationsList.Take(20)) _out.WriteLine($"  VIOLATION: {v}");
-            if (violationsList.Count > 20)
-                _out.WriteLine($"  ... (+{violationsList.Count - 20} more)");
+            _out.WriteLine($"--- cv-005 结果 ({label}) ---");
+            _out.WriteLine($"测试对数: {tested}, 违规数: {violations} ({(tested>0?violations*100/tested:0)}%)");
+            foreach (var v in violationsList.Take(10)) _out.WriteLine($"  VIOLATION: {v}");
+            if (violationsList.Count > 10)
+                _out.WriteLine($"  ... (+{violationsList.Count - 10} more)");
 
             if (violations == 0)
-            {
                 _out.WriteLine("✅ TR-BAL-001 终 gate 达成：violations==0！");
-                _out.WriteLine("   三层防御漏斗（SEC/SBC/Resistance+cv-001 概率主轴）成功复活 [40,60]% 硬闸门。");
-            }
             else
-            {
-                _out.WriteLine($"⚠ ADVISORY: {violations} violations remain（需进一步标定）。");
-                _out.WriteLine("   诊断建议：");
-                _out.WriteLine("   1. 调 K(ResistanceHalfLifeK) 默认值，增大路径间 R 差异的胜率影响");
-                _out.WriteLine("   2. 调 ChipDamagePermille，改变 Elemental+Block 场景的伤害下限");
-                _out.WriteLine("   3. 路径级 SEC/SBC 差异化（21路数据铺设，红线 A.8 deferred→需单独立项）");
-                _out.WriteLine("   4. 分析与 PE 带宽的相关性（见 balance-006 PE-band gate）");
-            }
+                _out.WriteLine($"⚠ ADVISORY: {violations}/{tested} violations ({label})");
 
             Assert.True(tested > 0, "至少应有同 UT 战斗对被测（sanity）。");
         }
