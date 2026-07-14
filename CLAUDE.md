@@ -69,6 +69,9 @@ dotnet build
 # 全量测试（1147 绿，零失败）
 dotnet test
 
+# 全量测试（简洁输出）
+dotnet test --verbosity minimal
+
 # 单个测试文件
 dotnet test --filter "FullyQualifiedName~DuelEngineTests"
 
@@ -139,3 +142,18 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 
 所有战斗效果 → `Modules` 静态工厂（`Modules.FlatPen(…）`，`Modules.Dot(…）` 等）。封 `ratio`/`Kind`/`Amount2≥1`/`Trigger`/`Rarity` 等易漏参。唯一档 → `SpecialModuleRegistry` 注册式插件。**禁裸写 `new EffectOp(七参)` 战斗构造器**。新算子 = 1 工厂方法 + `ModuleResolver` 1 分支。
 > 注：4 参资源/标记操作（`AddResource`/`AddResourceCap`/`GrantPassive`/`SetFlag`/`Cost`/`AddTermWeightStep`/`AddFlatDR`）在 path 文件中裸写是合法的——仅 7 参战斗效果构造受 B.9 约束。
+
+## G. 关键实现铁律
+
+> 以下是从 cv-001/002/003 实现中沉淀的 hard-won knowledge，违反任一条 = 破 B.3 或产生哑弹 bug。新 feature 触及 DuelEngine/CultivationState/PRNG 时必读。
+
+| # | 铁律 | 原因 | 来源 |
+|---|---|---|---|
+| G.1 | **`Pcg32.Split` 是非消费操作**（读 `_state` 返回新实例，不推进父流） | cultivation 黄金轨迹逐字节不变的前提。`Split` 派生 sub-RNG 后父流状态完全不受影响 | cv-001 B.3 核验 |
+| G.2 | **`duelRng=null` → 确定性旁路** | `SparAction()` 默认构造不走 `Split(Duel)` → duelRng 永不构造 → off 路径零漂移。这是 B.3 在 DuelEngine 层的守门机制 | cv-001 |
+| G.3 | **`calibrationMode`（DuelEngine 可选参，默认 false）仅测试用** | 标定期旁路 Control/CounterMul/压制矩阵，正常结算**零影响**。生产代码**禁止**传 true（B.3 守） | cv-002 code review |
+| G.4 | **PoiseState 必须 duel-local，禁挂 CombatContext / CultivationState** | `World.Clone` 会深拷贝 CombatContext/CultivationState，若 PoiseState 挂其上则进 Clone → 破 duel-local 语义 + B.3。**正确做法**：ResolveR2 局部变量，函数返回即销毁 | cv-002 |
+| G.5 | **TickPoise 必须在 TickDots 之后调用** | TickDots 消费 DoT → 可能触发 stagger 注入（turns=1）。若 TickPoise 先于 TickDots 运行，stagger 注入的 turns=1 会被 TickPoise 立即递减为 0 → 哑弹。**时序**：TickDots → 注入 stagger → TickPoise（检查≤0 → 触发硬直） | cv-002 / balance-008 |
+| G.6 | **exchangeNonce = `(round << 4) \| nonce`，round≤20 无碰撞** | nonce∈[0,3]（最多每轮 4 次 exchange），round 左移 4 位预留 16 个槽位 → 碰撞不可能。id 排序混种保交换律（`a.id < b.id` 固定序，不依赖参数顺序） | cv-001 |
+| G.7 | **新增 PRNG 流 = 追加 `RngStreamIds`，绝不复用既有 id** | `RngStreamIds` 是 **append-only** 冻结枚举。复用既有 id → 改变既有流的消费序列 → 破 off 逐字节。当前最大 id=9（Duel） | B.3 / RngStreamIds |
+| G.8 | **duel-local 状态不入 Clone** | CD/DR 计数、PoiseState、stagger 状态等 per-duel 数据**必须**是 ResolveR2 局部变量或 DuelEngine 实例字段（每次 Resolve 新建），**绝不**挂 CombatContext/CultivationState/Character 聚合根 | cv-002/balance-007 |
