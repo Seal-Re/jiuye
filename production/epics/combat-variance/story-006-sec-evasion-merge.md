@@ -1,7 +1,7 @@
 # Story 006: SEC 闪避系数合流 — Layer ① Evasion
 
 > **Epic**: combat-variance
-> **Status**: review
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（防御漏斗第①层——闪避系数合流 cv-001 单次核心判定，为 cv-005 提供防御端可校准层）
@@ -53,12 +53,12 @@ int p_afterEvasion = (p * 1000) / SEC; // SEC=1000 中性；SEC>1000 衰减
 
 ## Acceptance Criteria
 
-- [ ] **6.1 SEC 字段 + CombatSkillDef 扩展**：`CombatSkillDef` 追加 `int Sec = 1000`（可选，向后兼容）。21 路现有构造零改动编译通过，默认 1000（中性）。
-- [ ] **6.2 ApplyEvasionCoefficient 纯函数**：`CombatMath.ApplyEvasionCoefficient(int p, int sec)` — SEC==0 → 1000（必中）；SEC>0 → `p * 1000 / sec`（整数向下取整，B.2）。单测直验：SEC=1000 不变、SEC=0 必中、SEC=2000 半衰、SEC=500 命中抬升。
-- [ ] **6.3 ResolveExchange 接线**：cv-001 伯努利判定前调用 `ApplyEvasionCoefficient`，传入攻方招式 SEC。裸攻（skill==null）默认 SEC=1000。测试：同 margin 不同 SEC → 命中率差异。
-- [ ] **6.4 SEC 惰性零行为改变**：21 路全默认 SEC=1000 → 与 cv-001 同种子逐字节复现（全量 1147 绿不退）。此条是 B.3 在 on 模式的核心守门。
-- [ ] **6.5 calibrationMode 旁路**：标定模式 SEC 调制不生效（等同 SEC=1000 中性），保裸 PE 平价。
-- [ ] **6.6 B.2 + B.3 + 不退**：IL 浮点零；同种子逐字节（cv-001 回归）；off worktree sha256 IDENTICAL；cv-001/002/003 + balance-007/008 全绿不退。
+- [x] **6.1 SEC 字段 + CombatSkillDef 扩展**：`CombatSkillDef` 追加 `int Sec = 1000`（可选，向后兼容）。21 路现有构造零改动编译通过，默认 1000（中性）。
+- [x] **6.2 ApplyEvasionCoefficient 纯函数**：`CombatMath.ApplyEvasionCoefficient(int p, int sec)` — SEC==0 → 1000（必中）；SEC>0 → `p * 1000 / sec`（整数向下取整，B.2）。单测直验：SEC=1000 不变、SEC=0 必中、SEC=2000 半衰、SEC=500 命中抬升。
+- [x] **6.3 ResolveExchange 接线**：cv-001 伯努利判定前调用 `ApplyEvasionCoefficient`，传入攻方招式 SEC。裸攻（skill==null）默认 SEC=1000。测试：同 margin 不同 SEC → 命中率差异。
+- [x] **6.4 SEC 惰性零行为改变**：21 路全默认 SEC=1000 → 与 cv-001 同种子逐字节复现（全量 1147 绿不退）。此条是 B.3 在 on 模式的核心守门。
+- [x] **6.5 calibrationMode 旁路**：标定模式 SEC 调制不生效（等同 SEC=1000 中性），保裸 PE 平价。
+- [x] **6.6 B.2 + B.3 + 不退**：IL 浮点零；同种子逐字节（cv-001 回归）；off worktree sha256 IDENTICAL；cv-001/002/003 + balance-007/008 全绿不退。
 
 ---
 
@@ -140,7 +140,7 @@ int p_afterEvasion = (p * 1000) / SEC; // SEC=1000 中性；SEC>1000 衰减
 - **21 路零改动**：21 path 文件全用定位构造且全未传 `Damage`（`grep DamageType\.` in `paths/` 零命中）→ 追加带默认 `Sec=1000` 末尾参后原样编译，惰性中性。
 - **裸攻（skill==null）安全**：SEC 调制块由 `skill != null` 外层守卫 → 裸攻不进 SEC 调制，等效中性。
 - **实现期修 1 个测试 fixture bug**：`test_sec_zero_is_auto_hit_in_duel` 初版误算 PE（漏乘 RealmMult=15）+ 误判 p 钳值（margin=-1500/defenderPe=2400 → relPct=-62% → p=190 非 1）。修正为正确 PE 计算 + 可实现断言（SEC=0 必中伤害严格多于 SEC=2000 衰减）。改测试不改实现（产品逻辑 18/19 首跑即绿，1 失败为测试 fixture 自身算术误）。
-**Code Review**: Pending（待 /code-review）
+**Code Review**: Complete（主控旗舰档 /code-review = APPROVED；qa-tester testability 核验 off 模式 + PE 注释；1 ADVISORY 偏离已登记 Deviations）
 
 ---
 
