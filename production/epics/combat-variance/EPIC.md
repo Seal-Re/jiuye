@@ -1,9 +1,9 @@
 # Epic: 方差 + 反应式 QTE 战斗模型（combat-variance）
 
 **Layer**: Core（战斗内核范式重构）
-**Status**: In Progress（cv-001 Complete @ `dbd070c`；cv-002 Complete @ `1bcd48f`；cv-003 Complete @ `9ad6be0` 2026-07-07；cv-004 溢出+防守帧钩子契约 Backlog 待展开。adr-0008 Accepted @ 2026-07-06 落地起点）
+**Status**: In Progress（cv-001 Complete @ `dbd070c`；cv-002 Complete @ `1bcd48f`；cv-003 Complete @ `9ad6be0` 2026-07-07；adr-0010 三层防御漏斗 Accepted @ `d35fef6` 2026-07-08；cv-006/007/008 Backlog 2026-07-14 —— 防御漏斗实现拆解就绪。cv-004 溢出+防守帧钩子契约 Backlog 待展开）
 **GDD**: `design/gdd/combat-system.md`（实现期须同步修订：确定性结算 → 概率博弈结算）；深度源 `docs/architecture/adr-0008-variance-reactive-combat-model.md`（权威）
-**Governing ADRs**: **adr-0008**（primary，方差+反应式 QTE 战斗模型）· adr-0001（整数确定性 B.2）· adr-0002（Modules 工厂 B.9）· adr-0003（off 逐字节 B.3）· adr-0004（Godot View/Host 边界，判定权移交）
+**Governing ADRs**: **adr-0008**（primary，方差+反应式 QTE 战斗模型）· **adr-0010**（三层防御漏斗 Evasion→Block→Resistance，Accepted @ `d35fef6`）· adr-0001（整数确定性 B.2）· adr-0002（Modules 工厂 B.9）· adr-0003（off 逐字节 B.3）· adr-0004（Godot View/Host 边界，判定权移交）
 **Engine Risk**: **HIGH**（触 `Jianghu.Cultivation`：B.2 禁浮点 / B.3 off 逐字节 / PRNG 流 / 平衡数值——一处细微 bug 破确定性或平衡且难查。B.7 旗舰档实现 + 主控独立核验 A.3）
 **Created**: 2026-07-06（承 balance-cross EPIC "方差战斗模型" 立项预告 + retro-sprint-7 action item）
 
@@ -25,6 +25,9 @@
 - **cv-003** 标签门控（Unblockable_Weapon/Undodgeable_Space 动态开关钩子）+ 元素格挡穿透 Chip Damage
 - **cv-004** 阈值溢出 + 防守帧钩子契约（Model→View 整数钩子）+ 裁定优先级链
 - **cv-005** 重标定：InvCrossDuel seed-sweep 复活 [40,60]% 硬闸门（解除 balance-006 降级）
+- **cv-006** SEC 闪避系数合流（adr-0010 Layer ①）：SEC 挂 CombatSkillDef → CombatMath 命中调制 → 合流 cv-001 单次判定
+- **cv-007** 派生抗性 R + 半衰减伤（adr-0010 Layer ③）：DerivedProviders.ResistanceOf → 半衰公式 → ResolveExchange step 4
+- **cv-008** SBC 格挡系数调制 + 三层漏斗串行接线（adr-0010 Layer ② + Integration）：SBC 调制 cv-003 Chip + ①→②→③→④→⑤ 管线闭环
 
 ## Out of Scope（本 epic 不含）
 
@@ -44,6 +47,9 @@
 - [x] cv-003 标签门控 + Chip Damage（`9ad6be0`，1147 绿 + worktree sha256 实证）
 - [ ] cv-004 溢出 + 防守帧钩子契约 + 裁定优先级
 - [ ] cv-005 [40,60]% 硬闸门 seed-sweep 复活（TR-BAL-001 完整达成，解除 balance-006 降级）
+- [ ] cv-006 SEC 闪避系数合流 cv-001 命中判定（adr-0010 Layer ①）
+- [ ] cv-007 派生抗性 R + 半衰减伤（adr-0010 Layer ③）
+- [ ] cv-008 SBC 格挡系数调制 Chip + 三层漏斗串行接线（adr-0010 Layer ② + Integration）
 - [ ] 全程守 B.2（禁浮点，IL 扫描）/ B.3（off 逐字节）/ B.9（Modules 工厂）
 - [ ] `design/gdd/combat-system.md` 同步修订为概率博弈模型
 
@@ -53,7 +59,10 @@
 - **story-002** poise-stagger-subaxis — **Complete**（`1bcd48f` @2026-07-07；削韧+硬直+DR 最小闭环）。PoiseState duel-local + DerivePoiseDamage/StaggerResetPoise 纯函数 + TickPoise 复用 Control 管线注入 turns=1 stagger + A+B 混合削韧来源（伤害派生 + PoiseDamage 算子骨架，21 路数据 deferred）+ calibrationMode 旁路。1127 绿 + worktree sha256 实证（A.3）。balance-004 阈值因削韧放宽 <27。
 - **story-003** tag-gating-chip-damage — **Complete**（`9ad6be0` @2026-07-07；Model 侧最小闭环）。DamageType 标签（Normal/Blunt/Elemental，AOE 并入 Elemental）确定性门控 Block 类={FlatDR,ReflectDamage}/Dodge 类={Evade,SoulSplit} + 元素格挡穿透 Chip Damage（免削韧协调 cv-002 TickPoise）+ 招架崩坏 bonus + calibrationMode 旁路（决策⑨.1/⑩.1）。1147 绿 + worktree sha256 实证（A.3）。**QTE 帧窗/裁定优先级/连续格挡递减留 cv-004**；21 路 DamageType 数据 deferred。
 - **story-004** overflow-defense-frame-contract — Backlog。难度溢出 >1000‰（NPC 数学必败=绝对秒杀）+ Godot 防守帧钩子整数契约 + 保底帧规则A + 裁定优先级链（标签>溢出>保底，决策⑧A/⑨.2/⑩.2/⑩.4）。Model 侧钩子契约，View 落实属 godot-host。
-- **story-005** recalibration-40-60-gate — Backlog（依赖 cv-001）。InvCrossDuelTests 改 seed-sweep 统计胜率，复活 [40,60]% 硬闸门 violations==0（解除 balance-006 PE-band 降级）；C2/C3 不退；21 路 mul 概率模型下复算。
+- **story-005** recalibration-40-60-gate — Backlog（依赖 cv-001+adr-0010 防御漏斗就位）。InvCrossDuelTests 改 seed-sweep 统计胜率，复活 [40,60]% 硬闸门 violations==0（解除 balance-006 PE-band 降级）；C2/C3 不退；21 路 mul 概率模型下复算。
+- **story-006** sec-evasion-merge — **Not Started**（创建 2026-07-14；adr-0010 Layer ①）。SEC 闪避系数合流 cv-001 命中判定：`CombatSkillDef.Sec` 字段 + `CombatMath.ApplyEvasionCoefficient` + ResolveExchange step 1 接线 + calibrationMode 旁路。21 路数据 deferred（全默认 1000 中性）。
+- **story-007** resistance-derived — **Not Started**（创建 2026-07-14；adr-0010 Layer ③）。派生抗性 R + 半衰减伤：`DerivedProviders.ResistanceOf`（体质→物理抗/识→法术抗）+ `CombatMath.ApplyResistance` 半衰公式 + ResolveExchange step 4 接线 + B.5 守（R 不进 EffectivePower）。与 cv-006 正交（不同限界上下文）。
+- **story-008** sbc-block-integration — **Not Started**（创建 2026-07-14；adr-0010 Layer ② + Integration）。SBC 格挡系数调制 cv-003 Chip 穿透 + 三层漏斗 ①→②→③→④→⑤ 串行接线闭环。依赖 cv-006（Sec 字段范式 + step 1）+ cv-007（step 4）+ cv-003（Chip 模型）。adr-0010 实现链终点。
 
 ## Notes
 
