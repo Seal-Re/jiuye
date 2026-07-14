@@ -1,7 +1,7 @@
 # Story 007: 派生抗性 R + 半衰减伤 — Layer ③ Resistance
 
 > **Epic**: combat-variance
-> **Status**: review
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（防御漏斗第③层——抗性半衰减伤，为防御端提供"面板→减伤"的可追溯派生链）
@@ -178,7 +178,7 @@ FinalDamage      = max(1, RawDamage × DamageMultiplier / 1000)  // 向下取整
 - B.5 守：ResistanceOf 签名不含 daoHeart/innerDemon，R 不进 EffectivePower
 - calibrationMode 旁路（`if(!calibrationMode)`），保 cv-005 seed-sweep 裸 PE 纯净
 - 法宝 OnDefend 加 R 留 TODO(cv-008) 接口（角色不持法宝实例，不臆造遍历）
-**Code Review**: Pending（待 /code-review）
+**Code Review**: Complete（主控旗舰档 /code-review = APPROVED；接线位置 Chip 后符合决策④；3 ADVISORY 偏离全登记 Deviations；2 既有测试回归适配 A.7 边界）
 
 ---
 
