@@ -159,7 +159,7 @@ FinalDamage      = max(1, RawDamage × DamageMultiplier / 1000)  // 向下取整
 
 ## Completion Notes
 **Completed**: 2026-07-14
-**实现 sha**: `（pending commit）`（代码已落 5 文件，待用户指示提交；主控 A.3 已独立核验 1198 绿）
+**实现 sha**: `4e51dfd`（feat(cultivation): cv-007 派生抗性 R + 半衰减伤 —— 代码 4 文件 + 测试 3 文件(含2既有适配) + story 回写；主控 A.3 独立核验 1198 绿）
 **Criteria**: 7/7 passing（AC 7.1 ResistanceOf + 7.2 ApplyResistance + 7.3 旋钮 + 7.4 接线 + 7.5 B.5 + 7.6 calibration + 7.7 B.2/B.3 全通过）
 **机器证据（主控独立核验 A.3）**:
 - `dotnet test` = **1198 绿 / 0 失败 / 0 跳过**（1166 + 32 新增）
