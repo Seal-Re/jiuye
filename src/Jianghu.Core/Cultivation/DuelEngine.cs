@@ -299,6 +299,10 @@ namespace Jianghu.Cultivation
             if (duelRng != null && !calibrationMode && skill != null)
             {
                 int p = CombatMath.GetSuccessPermille(attackerPe - defenderPe, defenderPe);
+                // cv-006（adr-0010 决策①）：SEC 前置调制——合流进 cv-001 单次伯努利（不新增掷骰）。
+                // 已在 !calibrationMode 块内 → 标定模式天然旁路 SEC（AC 6.5，保 cv-005 seed-sweep 裸 PE 纯净）。
+                // skill!=null 已由外层守卫 → 直接 skill.Sec（裸攻走不到此分支，AC 6.3 裸攻默认中性由外层跳过本块实现）。
+                p = CombatMath.ApplyEvasionCoefficient(p, skill.Sec);
                 // per-exchange 掷骰：nonce 混入保同回合两次交锋（攻/防）用不同抽样点，确定且不相关。
                 int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
                 if (roll >= p)

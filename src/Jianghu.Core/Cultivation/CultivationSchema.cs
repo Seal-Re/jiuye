@@ -21,12 +21,15 @@ namespace Jianghu.Cultivation
         IReadOnlyList<ArtDef> Arts);
 
     /// <summary>战技。OnUse = 战斗期算子；Cost = 资源消耗表（resourceKey→量）。
-    /// Damage（cv-003）= 攻击伤害类型（决策⑨.1 标签门控），可选默认 Normal → 21 路现有构造零改动向后兼容。</summary>
+    /// Damage（cv-003）= 攻击伤害类型（决策⑨.1 标签门控），可选默认 Normal → 21 路现有构造零改动向后兼容。
+    /// Sec（cv-006 / adr-0010 决策①）= 招式闪避系数（permille 基准 1000=中性；0=必中标签；>1000=易闪）。
+    /// 合流进 cv-001 单次伯努利判定（前置调制 p_permille），不新增掷骰。默认 1000 → 21 路现有构造零改动惰性。</summary>
     public sealed record CombatSkillDef(
         string Id, string Name, int Tier,
         IReadOnlyList<EffectOp> OnUse,
         IReadOnlyDictionary<string, int> Cost,
-        DamageType Damage = DamageType.Normal);
+        DamageType Damage = DamageType.Normal,
+        int Sec = 1000);
 
     /// <summary>
     /// 战力公式项。Src ∈ stat:* | realm | sumArtPower | res:&lt;key&gt; | derived:&lt;key&gt;。

@@ -1,7 +1,7 @@
 # Story 006: SEC 闪避系数合流 — Layer ① Evasion
 
 > **Epic**: combat-variance
-> **Status**: Not Started
+> **Status**: review
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（防御漏斗第①层——闪避系数合流 cv-001 单次核心判定，为 cv-005 提供防御端可校准层）
@@ -12,7 +12,7 @@
 
 ## Context
 
-**GDD**: `design/gdd/combat-system.md`（实现期同步修订）；深度源/权威 `docs/architecture/adr-0010-defense-funnel-mechanism.md`（决策① 概率管线合并）
+**GDD**: `design/gdd/combat-system.md`（实现期同步修订 §防御漏斗 / 闪避判定）；primary design authority = `docs/architecture/adr-0010-defense-funnel-mechanism.md`（决策① 概率管线合并，GDD 将在漏斗三层全部落盘后同步修订）
 
 **ADR Decision Summary**: SEC（招式闪避系数）**不触发新随机判定**，而是作为输入参数合流进 cv-001 的 `CombatMath` 查表——在 cv-001 已有的那**一次**伯努利判定内解决命中/闪避。SEC=1000 中性（permille 不变）；SEC=0 必中（显式分支，非数学 `max(1,SEC)` 小聪明）；SEC>1000 易被闪避（命中衰减）。
 
@@ -78,6 +78,7 @@ int p_afterEvasion = (p * 1000) / SEC; // SEC=1000 中性；SEC>1000 衰减
 - **不碰**：cv-001 `GetSuccessPermille` 内部实现；`duelRng` 消费逻辑；DoT/压制管线；off 路径。
 - **测试落点**：新建 `tests/Jianghu.Core.Tests/Cultivation/EvasionSecTests.cs`。测试维度：纯函数（SEC==0/500/1000/2000）+ 接线（同 margin 不同 SEC 命中率差异）+ 惰性（默认 SEC=1000 同种子复现）+ calibration（标定旁路）+ B.3（off worktree sha256）。
 - **不碰**：SBC 格挡系数（cv-008）；抗性 R 派生（cv-007）；21 路 SEC 数据铺设（deferred，红线 A.8）。
+- **Performance**: No impact expected — SEC modulation adds one integer multiply+divide before the existing cv-001 Bernoulli check, O(1) with negligible overhead. No new allocations, no new RNG consumption, no loop nesting change.
 
 ---
 
@@ -109,7 +110,37 @@ int p_afterEvasion = (p * 1000) / SEC; // SEC=1000 中性；SEC>1000 衰减
 
 **Story Type**: Logic
 **Required evidence**: `tests/Jianghu.Core.Tests/Cultivation/EvasionSecTests.cs` — 须存在且过 + cv-001 同种子回归守 + off 逐字节回归守（`Determinism/` + worktree sha256）+ IL 浮点零 + cv-002/003/balance-007/008 不退
-**Status**: [ ] 待实现（/dev-story）
+**Status**: [x] 已实现并验证（主控独立核验 A.3 通过）
+**实测证据**:
+- `dotnet test` 全量 = **1166 绿 / 0 失败 / 0 跳过**（1147 基线 + 19 新增 EvasionSecTests，算术精确匹配，无既有测试退步）
+- determinism 子集 **27 绿**（B.2 IL 浮点扫描 + B.3 off 逐字节两轨）
+- **off md5 一致**：`dotnet run --project src/Jianghu.Cli -- 42 100` ×2 输出 md5 `8bf2b2af…` 一致（B.3 off 走 legacy SparAction 不入 DuelEngine，SEC 字段零影响）
+- `dotnet test --filter EvasionSec` = **19 绿 / 0 失败 / 0 跳过**（AC 6.2 纯函数 11 + AC 6.3 接线 2 + AC 6.4 惰性 1 + AC 6.5 calibration 2 + AC 6.6 B.2/B.3 3）
+- `dotnet build` = 0 警告 0 错误（BannedApiAnalyzers + ILFloat 守通过）
+
+---
+
+## Completion Notes
+**Completed**: 2026-07-14
+**实现 sha**: `（pending commit）`（代码已落 4 文件，待用户指示提交；主控 A.3 已独立核验 1166 绿）
+**Criteria**: 6/6 passing（AC 6.1 字段 + 6.2 纯函数 + 6.3 接线 + 6.4 惰性 + 6.5 calibration + 6.6 B.2/B.3 全通过）
+**机器证据（主控独立核验 A.3）**:
+- `dotnet test` = **1166 绿 / 0 失败 / 0 跳过**（1147 基线 + 19 新增）
+- determinism 子集 **27 绿**（B.2 IL 浮点扫描 + B.3 off 逐字节两轨）
+- **off md5 一致**：`42 100` ×2 md5 `8bf2b2af…` 一致（B.3 天然守——off 走 legacy SparAction 不入 DuelEngine，SEC 是 cultivation-on 路径数据）
+- `EvasionSecTests` = **19 绿**（覆盖 AC 6.2-6.6 全维度）
+**Deviations**:
+- **偏离 adr-0010 字面 `return MaxPermille`**：实现中 SEC==0 返回新常量 `AutoHitPermille = 1000`（非 `MaxPermille = 999`）。
+  - **原因**：cv-001 伯努利判定为 `roll < p`（roll∈[0,999]）。若 SEC==0 返回 `MaxPermille`(999)，则 `roll<999` 留 0.1% miss 概率 —— 与 story AC 6.2 显式契约「SEC==0 → 1000」+ 必中/无法闪避语义矛盾，是潜在 bug。
+  - **依据**：adr-0008 ⑨.2「permille≥1000 = 不可闪避」背书 1000 为真·必中值。新常量 `AutoHitPermille` 独立于 cv-001 的 `MaxPermille`（后者是 `GetSuccessPermille` 钳制上界，属 byte-identical 基线，**未改**，AC 6.4 / G.2 守住）。
+  - **方案 A 用户 2026-07-14 批准**（含 `p<=0→0` 守卫前置 + 结果钳 ≤1000 两项子裁定，均满足 QA AC-2 字面）。
+**实现要点**:
+- SEC 调制**未新增 RNG 消费**（守「单次交锋单次核心判定」）—— `ApplyEvasionCoefficient` 是纯整数前置调制，复用 cv-001 已有的那一次 `duelRng.Split(...).NextInt(1000)`。
+- **calibrationMode 旁路免费**：SEC 调制落在 `DuelEngine.ResolveExchange` 已有的 `if (duelRng != null && !calibrationMode && skill != null)` 块内 → 标定模式天然旁路 (AC 6.5)，无需额外守卫。
+- **21 路零改动**：21 path 文件全用定位构造且全未传 `Damage`（`grep DamageType\.` in `paths/` 零命中）→ 追加带默认 `Sec=1000` 末尾参后原样编译，惰性中性。
+- **裸攻（skill==null）安全**：SEC 调制块由 `skill != null` 外层守卫 → 裸攻不进 SEC 调制，等效中性。
+- **实现期修 1 个测试 fixture bug**：`test_sec_zero_is_auto_hit_in_duel` 初版误算 PE（漏乘 RealmMult=15）+ 误判 p 钳值（margin=-1500/defenderPe=2400 → relPct=-62% → p=190 非 1）。修正为正确 PE 计算 + 可实现断言（SEC=0 必中伤害严格多于 SEC=2000 衰减）。改测试不改实现（产品逻辑 18/19 首跑即绿，1 失败为测试 fixture 自身算术误）。
+**Code Review**: Pending（待 /code-review）
 
 ---
 

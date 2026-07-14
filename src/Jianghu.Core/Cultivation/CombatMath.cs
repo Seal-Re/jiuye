@@ -25,6 +25,15 @@ namespace Jianghu.Cultivation
         public const int MaxPermille = 999;
 
         /// <summary>
+        /// cv-006（adr-0010 决策①）：SEC==0「必中标签」返回值 = 1000。
+        /// 故意大于 <see cref="MaxPermille"/>（999）：cv-001 伯努利判定为 <c>roll &lt; p</c>（roll∈[0,999]），
+        /// 故 p=1000 使 <c>roll &lt; 1000</c> 恒真 → 真·必中（无法闪避）。承 adr-0008 ⑨.2「permille≥1000 = 不可闪避」。
+        /// **不重定义 <see cref="MaxPermille"/>**——后者是 cv-001 <see cref="GetSuccessPermille"/> 的钳制上界，
+        /// 属 byte-identical 基线（AC 6.4 / G.2），cv-006 不得擅改。
+        /// </summary>
+        public const int AutoHitPermille = 1000;
+
+        /// <summary>
         /// 攻方 PE − 防方 PE = <paramref name="peMargin"/>；<paramref name="defenderPe"/> = 防方战力（作相对基准）。
         /// 返回攻方命中千分比 p∈[<see cref="MinPermille"/>,<see cref="MaxPermille"/>]。
         ///
@@ -45,6 +54,43 @@ namespace Jianghu.Cultivation
             long permille = BasePermille + (long)relPct * 5;
 
             return (int)Math.Clamp(permille, MinPermille, MaxPermille);
+        }
+
+        /// <summary>
+        /// cv-006（adr-0010 决策①）：闪避系数 SEC 合流——对 cv-001 基础命中 permille <paramref name="p"/>
+        /// 作**前置整数调制**，不新增掷骰（承「单次交锋单次核心判定」）。纯整数、纯函数、无 RNG（B.2）。
+        ///
+        /// 语义：SEC = 攻方招式的闪避系数（permille 基准，挂 <c>CombatSkillDef.Sec</c>）。
+        /// - SEC=1000（中性）→ <paramref name="p"/> 不变（21 路默认，惰性零行为改变，AC 6.4）。
+        /// - SEC=0（必中标签）→ 返回 <see cref="AutoHitPermille"/>（1000），使 cv-001 伯努利 <c>roll&lt;1000</c> 恒真 → 真·必中。
+        ///   显式分支（用户裁定：抛弃 <c>max(1,SEC)</c> 数学小聪明，避免除零 Code Smell）。
+        /// - SEC&gt;1000（易闪）→ <c>p*1000/SEC</c> 命中衰减（SEC=2000 → 半衰）。
+        /// - SEC&lt;1000 且 &gt;0（难闪）→ <c>p*1000/SEC</c> 命中抬升（SEC=500 → 2×）。
+        ///
+        /// 边界裁定（QA AC-2）：
+        /// - <paramref name="p"/>&lt;=0 → 返回 0（攻方零基础命中，SEC 无从修正；"p=0 任意 SEC 仍为 0"）。此守卫**前置**，
+        ///   故 <c>Apply(0, 0)=0</c>（零命中不被 SEC=0 救活），而 <c>Apply(p&gt;0, 0)=1000</c>（必中）。生产路径 p∈[1,999]，
+        ///   SEC=0 恒为必中。
+        /// - 结果钳 ≤<see cref="AutoHitPermille"/>（1000）——满足 QA AC-2「clamped to 1000」。下游 <c>roll&lt;p</c>
+        ///   对钳/不钳行为等价（cv-006 Core-only，无 >1000 溢出消费者；cv-008 SBC 才碰 Chip 穿透）。
+        /// - <paramref name="sec"/>&lt;0（病态）→ 防御性下钳 0（生产 SEC 恒 ≥0，仅守护栏）。
+        /// </summary>
+        /// <param name="p">cv-001 基础命中 permille（<see cref="GetSuccessPermille"/> 输出，生产 ∈[1,999]）</param>
+        /// <param name="sec">攻方招式闪避系数（<c>CombatSkillDef.Sec</c>；1000=中性 / 0=必中 / &gt;1000=易闪）</param>
+        /// <returns>调制后命中 permille（∈[0, <see cref="AutoHitPermille"/>]）</returns>
+        public static int ApplyEvasionCoefficient(int p, int sec)
+        {
+            // 守卫 1：攻方零基础命中 → SEC 无从修正（QA AC-2 "p=0 任意 SEC 仍为 0"）。前置于 SEC==0 必中分支。
+            if (p <= 0) return 0;
+            // 守卫 2：SEC==0 必中标签 → 显式分支返回 AutoHitPermille(1000)，不进除法（用户裁定，adr-0010 决策①）。
+            if (sec == 0) return AutoHitPermille;
+            // 病态负 SEC（生产恒 ≥0）：防御性归 0，避免负 permille 进下游。
+            if (sec < 0) return 0;
+            // 主路径：整数调制 p*1000/SEC（B.2 向下取整）。long 中间量防 p*1000 溢出（p≤999 → ≤999000，int 安全，但 long 留余量）。
+            long adjusted = (long)p * 1000 / sec;
+            if (adjusted < 0) return 0;
+            // 钳 ≤1000（QA AC-2 "clamped to 1000"；SEC<1000 抬升时 p*1000/SEC 可能 >1000，如 Apply(600,500)=1200 → 1000）。
+            return adjusted > AutoHitPermille ? AutoHitPermille : (int)adjusted;
         }
     }
 }
