@@ -4,6 +4,7 @@ using Jianghu.Config;
 using Jianghu.Cultivation.Artifacts;
 using Jianghu.Model;
 using Jianghu.Random;
+using Jianghu.Stats;
 
 namespace Jianghu.Cultivation
 {
@@ -123,7 +124,7 @@ namespace Jianghu.Cultivation
 
                 // —— Exchange 1: 攻方→防方 ——
                 var (rawDmgToB, reflectToA, poiseBonusToB, chipImmuneB) = ResolveExchange(
-                    activeASkill, effPeA, defender.Cultivation,
+                    activeASkill, effPeA, defender.Cultivation, defender.Stats,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls, controlLimiter, round,
@@ -143,7 +144,7 @@ namespace Jianghu.Cultivation
 
                 // —— Exchange 2: 防方→攻方 ——
                 var (rawDmgToA, reflectToB, poiseBonusToA, chipImmuneA) = ResolveExchange(
-                    activeDSkill, effPeB, attacker.Cultivation,
+                    activeDSkill, effPeB, attacker.Cultivation, attacker.Stats,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls, controlLimiter, round,
@@ -281,7 +282,7 @@ namespace Jianghu.Cultivation
         private static (int DmgToDefender, int ReflectToAttacker, int PoiseBreakBonus, bool ChipImmuneToPoise) ResolveExchange(
             CombatSkillDef? skill,
             int attackerPe,
-            CultivationState defenderState,
+            CultivationState defenderState, StatBlock defenderStats,
             CultivationPathDef attackerPath, CultivationPathDef defenderPath,
             CombatContext ctx, LimitsConfig limits, SituationalResolver? resolver,
             Side attackerSide, Side defenderSide,
@@ -496,6 +497,24 @@ namespace Jianghu.Cultivation
                     dmg = (long)chipFloor * Scale;      // 穿透保底：减伤后仍不低于 chip
                     chipImmuneToPoise = true;           // 穿透伤害免削韧（保霸体，⑩.1）
                 }
+            }
+
+            // —— cv-007（adr-0010 决策③④ step 4）：第三层抵抗——派生抗性 R 半衰减伤 ——
+            // 位置铁律（用户 2026-07-14 裁定修正）：OnDefend 模块结算 + SuppressionMatrix + GoldenBody + 软情境 + Chip
+            // **全部之后**、cv-002 削韧派生（在 ResolveR2 TickPoise 内，本函数 return 后）之前。
+            // adr-0010 决策④ step 4：抵抗层是漏斗最后一环，对经 Chip 穿透保底后的最终 dmg 做半衰减。
+            // R = ResistanceProviders.ResistanceOf（从体质/识/HasBodyArt 功法标签派生，B.5 不含 daoHeart/innerDemon）。
+            // 半衰：dmg = CombatMath.ApplyResistance(dmg, R, K)（K×1000/(K+R)，max(1,...) 保底，纯整数 B.2，long 中间防溢出）。
+            // 标定模式旁路（同 cv-001/002/003/006，保 cv-005 seed-sweep 裸 PE 纯净）。
+            // attackType 取攻方招式 DamageType（标定模式已退化为 Normal，故标定模式本块不进——双保险）。
+            if (!calibrationMode)
+            {
+                int R = ResistanceProviders.ResistanceOf(
+                    defenderState, defenderStats, defenderPath!, GateType.None,
+                    attackType, limits);
+                int dmgUnscaledResist = (int)(dmg / Scale);
+                int afterResist = CombatMath.ApplyResistance(dmgUnscaledResist, R, limits.ResistanceHalfLifeK);
+                dmg = (long)afterResist * Scale + (dmg % Scale);
             }
 
             // —— cv-003（adr-0008 决策⑨.1）：招架崩坏 —— Blunt 门控关掉了防方 Block 类 → 追加大额削韧。
@@ -886,8 +905,12 @@ namespace Jianghu.Cultivation
             return false;
         }
 
-        /// <summary>检查防方是否修了横练/护体类功法（门控反伤/格挡）。</summary>
-        private static bool HasBodyArt(CultivationPathDef path, CultivationState st)
+        /// <summary>
+        /// 检查防方是否修了横练/护体类功法（门控反伤/格挡）。
+        /// cv-007：提为 internal 供 <see cref="ResistanceProviders.ResistanceOf"/> 复用（判 BodyArtPhysResistBonus 加成）。
+        /// 语义="已修横练/护体"（遍历 path.ArtCategories Role=body/defense 且 ChosenArtIds 命中）。
+        /// </summary>
+        internal static bool HasBodyArt(CultivationPathDef path, CultivationState st)
         {
             foreach (var cat in path.ArtCategories)
             {

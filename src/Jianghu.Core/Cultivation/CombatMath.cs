@@ -92,5 +92,41 @@ namespace Jianghu.Cultivation
             // 钳 ≤1000（QA AC-2 "clamped to 1000"；SEC<1000 抬升时 p*1000/SEC 可能 >1000，如 Apply(600,500)=1200 → 1000）。
             return adjusted > AutoHitPermille ? AutoHitPermille : (int)adjusted;
         }
+
+        /// <summary>
+        /// cv-007（adr-0010 决策③）：派生抗性 R 的半衰减伤——对 RawDamage 做
+        /// <c>DamageMultiplier = K×1000/(K+R)</c> 整数衰减，<c>max(1, ...)</c> 保底。纯整数、纯函数、无 RNG（B.2）。
+        ///
+        /// 语义：R=0 → multiplier=1000（无减伤，全伤）；R=K → multiplier=500（半衰，50% 减伤）；
+        /// R→∞ → multiplier→0（趋 1 保底，永不归零）。R 是派生属性（体质/识/功法标签映射，见 <see cref="ResistanceProviders"/>），
+        /// **禁进 EffectivePower**（B.5：抗性只作防御结算，不算战力）。
+        ///
+        /// 边界裁定（QA AC-2）：
+        /// - <paramref name="rawDamage"/>&lt;=0 → 返回 0（无伤害可衰减；与 DuelEngine 上游 max(0,...) 一致，不凭空造伤害）。
+        /// - <paramref name="R"/>&lt;0（病态）→ 视为 0（生产 R 恒 ≥0，防御性钳制，避免负 R 抬伤害）。
+        /// - <paramref name="K"/>&lt;=0 → 视为无衰减（返回 rawDamage；生产 K 恒 >0 经 <see cref="LimitsConfig.Validate"/> 守，此处仅守卫栏）。
+        /// - 极大 R（如 100000）→ multiplier→0 → max(1,...) 保底返 1。
+        /// - <paramref name="rawDamage"/>=1 任意 R → 1（保底不归零）。
+        /// </summary>
+        /// <param name="rawDamage">衰减前伤害（未缩放空间，与 DuelEngine dmg/Scale 一致）</param>
+        /// <param name="R">派生抗性分值（<see cref="ResistanceProviders.ResistanceOf"/> 输出，≥0）</param>
+        /// <param name="K">半衰常数（<see cref="LimitsConfig.ResistanceHalfLifeK"/>，>0；R=K 时半衰）</param>
+        /// <returns>衰减后伤害（≥1 当 rawDamage>0；0 当 rawDamage≤0）</returns>
+        public static int ApplyResistance(int rawDamage, int R, int K)
+        {
+            // 守卫 1：无伤害可衰减 → 0（不凭空造伤害，与上游 max(0,...) 一致）。
+            if (rawDamage <= 0) return 0;
+            // 守卫 2：病态 K（生产恒 >0 经 Validate 守）→ 无衰减，返原值。
+            if (K <= 0) return rawDamage;
+            // 守卫 3：病态负 R（生产恒 ≥0）→ 视为 0（无抗性），避免负 R 抬伤害。
+            int rEff = R < 0 ? 0 : R;
+            // 半衰乘子 = K×1000/(K+R)（B.2 整数向下取整）。long 中间量防 K*1000 溢出（K≤int.MaxValue → K*1000 需 long）。
+            long mul = (long)K * 1000 / (K + rEff);
+            // 衰减后伤害 = rawDamage × mul / 1000（long 中间量防 rawDamage×mul 溢出）。
+            long dmg = (long)rawDamage * mul / 1000;
+            // max(1, ...) 保底：rawDamage>0 时衰减后不低于 1（R 极大趋 0 不归零，adr-0010 决策③）。
+            if (dmg < 1) return 1;
+            return dmg > int.MaxValue ? int.MaxValue : (int)dmg; // 防 int 回绕（病态大输入）
+        }
     }
 }

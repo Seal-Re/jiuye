@@ -49,6 +49,16 @@ namespace Jianghu.Config
         public int ChipMarginDivisor { get; init; } = 4;       // Chip 的 Margin 修正除数（>0 生效；≤0=无 margin 修正。正 margin/此值 抬穿透）
         public int GuardBreakPoiseBonus { get; init; } = 100;  // 招架崩坏削韧 bonus（Blunt 门控关 Block 类时追加削韧，≥0；0=退化无崩坏惩罚）
 
+        // 派生抗性 R + 半衰减伤（combat-variance cv-007；DuelEngine 结算侧，off 不调 DuelEngine → B.3 天然守）。
+        // adr-0010 决策③ 抵抗层：OnDefend 结算后、SuppressionMatrix 前对 RawDamage 做半衰减（DamageMultiplier = K×1000/(K+R)）。
+        // R 是派生属性（体质→物理抗/识→属性抗/HasBodyArt 标签→物理抗加成），禁进 EffectivePower（B.5），daoHeart/innerDemon 不参与。
+        // 纯整数（B.2，long 中间类型防溢出）。全默认值不影响 off（off 走 legacy SparAction，不入 DuelEngine）。
+        public int ResistanceHalfLifeK { get; init; } = 500;        // 半衰常数 K（>0；R=K 时伤害半衰。500=R 达 500 减伤 50%）
+        public int PhysResistPerConstitution { get; init; } = 50;   // 每点体质(Constitution)派生的物理抗性 R（≥0；0=退化无体质抗性）
+        public int ElemResistPerInsight { get; init; } = 50;        // 每点识/悟性(Insight)派生的属性/法术抗性 R（≥0；0=退化无识抗性）
+        public int BodyArtPhysResistBonus { get; init; } = 100;     // 已修横练/护体功法(HasBodyArt)的物理抗性固定加值（≥0；0=退化无加成）
+        public int PathElemResistBonus { get; init; } = 100;        // 对应门类功法的属性抗性固定加值（≥0；0=退化无加成；21 路数据 deferred）
+
         // 戏剧引擎 B（drama-006，GDD §7；纯加，off 全关时绝不消费 → B.3 逐字节守恒）。
         // 全 int，含 MaxArcWeightSum（int 范围内 → WeightedPicker (int)total 抽取安全）。
         public int GrudgeCap { get; init; } = 100;             // 恩怨强度上限 [0,Cap]（§3.1）
@@ -100,6 +110,13 @@ namespace Jianghu.Config
             if (ChipDamagePermille < 0) throw new InvalidOperationException("ChipDamagePermille<0（0 合法=无 chip 穿透）");
             if (GuardBreakPoiseBonus < 0) throw new InvalidOperationException("GuardBreakPoiseBonus<0（0 合法=无招架崩坏惩罚）");
             // ChipMarginDivisor 无 <0 断言（≤0 语义=无 margin 修正，合法退化，见 ChipDamageFloor）。
+
+            // 派生抗性 + 半衰减伤（combat-variance cv-007）：K>0（半衰除数非零）；其余 ≥0（0 合法=退化关闭对应抗性源）。
+            if (ResistanceHalfLifeK <= 0) throw new InvalidOperationException("ResistanceHalfLifeK<=0（半衰常数须 >0，避免除零）");
+            if (PhysResistPerConstitution < 0) throw new InvalidOperationException("PhysResistPerConstitution<0（0 合法=无体质抗性）");
+            if (ElemResistPerInsight < 0) throw new InvalidOperationException("ElemResistPerInsight<0（0 合法=无识抗性）");
+            if (BodyArtPhysResistBonus < 0) throw new InvalidOperationException("BodyArtPhysResistBonus<0（0 合法=无 BodyArt 加成）");
+            if (PathElemResistBonus < 0) throw new InvalidOperationException("PathElemResistBonus<0（0 合法=无门类抗性加成）");
 
             // 戏剧引擎 B 越界断言（drama-006，GDD §7）。独立断言，顺序不限。
             if (GrudgeCap < 1) throw new InvalidOperationException("GrudgeCap<1");
