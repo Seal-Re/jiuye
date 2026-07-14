@@ -91,6 +91,7 @@
   if (SEC == 0) return MaxPermille;      // 必中标签，直接赋最高命中概率（无法闪避）
   int p_afterEvasion = (p * 1000) / SEC; // SEC=1000 中性；SEC>1000 命中正常衰减，语义清晰且无除零风险
   ```
+  > **实现注（cv-006 @ c57d365, 2026-07-14）**：上记伪代码 `return MaxPermille` 实现时改为返回新常量 `AutoHitPermille = 1000`（非 `MaxPermille = 999`）。原因：cv-001 伯努利判定为 `roll < p`（`roll = NextInt(1000)` ∈ [0,999]），若 SEC==0 返回 999（MaxPermille），则 `roll < 999` 留有 0.1% 失败概率（`roll==999` 时 `999<999` 为假→miss），与 AC 6.2「SEC==0 → 1000」及"必中/无法闪避"语义矛盾。`AutoHitPermille = 1000` 使 `roll < 1000` 恒真 → 真·必中。被 adr-0008 ⑨.2「permille≥1000 = 不可闪避」背书。`MaxPermille = 999` 未改（属 cv-001 byte-identical 基线，AC 6.4 / G.2 守）。用户方案 A 批准。详见 cv-006 Completion Notes Deviations 段。
 - **维持"单次交锋单次核心判定"**：命中/闪避在 cv-001 已有的那**一次**伯努利判定内解决（SEC 调制 permille），不新增掷骰。格挡（第②层）**确定性**，不掷骰。
 - **落点**：`CombatMath` 增合流函数（如 `ApplyEvasionCoefficient(p, sec)`，内含 SEC==0 显式分支）；`ResolveExchange` 的 cv-001 gate 处传入攻方招式 SEC。
 
