@@ -65,6 +65,9 @@ namespace Jianghu.Config
         // 纯整数（B.2）。默认不影响 off（off 走 legacy SparAction，不入 DuelEngine）。
         public int OverflowThresholdPermille { get; init; } = 1000;   // 溢出阈值（≥1；1000=标准，p≥1000 时 roll<1000 恒真→必中）
 
+        // 防守保底帧（combat-variance cv-004；adr-0008 决策⑧A）。纯整数，off 不调 DuelEngine → B.3 天然守。
+        public int GuaranteeFrameCount { get; init; } = 2;            // 保底帧数（≥1；0=退化关闭保底帧。默认 2 帧≈33.3ms）
+
         // 戏剧引擎 B（drama-006，GDD §7；纯加，off 全关时绝不消费 → B.3 逐字节守恒）。
         // 全 int，含 MaxArcWeightSum（int 范围内 → WeightedPicker (int)total 抽取安全）。
         public int GrudgeCap { get; init; } = 100;             // 恩怨强度上限 [0,Cap]（§3.1）
