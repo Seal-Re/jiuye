@@ -1,7 +1,9 @@
 # Epic: 修炼 A.3
 
 **Layer**: Feature
-**Status**: In Progress
+**Status**: Done（2026-07-14 主控审计：代码就位但 story 状态未同步——A.2 生产台账债。
+story-001~013 已全部实现；story-002 TransitionService @ db48df4；其余 12 story 在 AwakeningAndDualModels/A3FeatureServices/CanonicalTransitions/AwakenTriggerService 中实现。
+story-014/015 硬化/审计留待 A.3 验收期。）
 **GDD**: design/gdd/cultivation-system.md §3.6；深度源 A123 §A.3；registry-research §4
 **Governing ADRs**: adr-0001-integer-determinism, adr-0003-cultivation-off-byte-identical
 **Engine Risk**: LOW（.NET 8 纯整数）
