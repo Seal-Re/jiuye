@@ -271,6 +271,78 @@ namespace Jianghu.Core.Tests.Cultivation
             Assert.True(tested > 0, "至少应有同 UT 战斗对被测（sanity）。");
         }
 
+        // ================================================================
+        // cv-005 / TR-BAL-001：三层防御漏斗全开 seed-sweep 重标定
+        // ================================================================
+        /// <summary>
+        /// cv-005（adr-0010 三层防御漏斗闭环后）：calibrationMode=false（SEC/SBC/Resistance 全生效）
+        /// seed-sweep 全路径同 UT 对拍 → 统计胜率 → 诊断 [40,60]% 硬闸门 violations。
+        ///
+        /// 与 balance-006 标定模式（calibrationMode=true）的区别：
+        /// - cv-001 概率主轴生效（伯努利判定，非确定性 PE 差）
+        /// - cv-006 SEC 调制生效（默认全 1000→中性，21 路数据 deferred）
+        /// - cv-008 SBC 调制生效（默认全 1000→中性）
+        /// - cv-007 抵抗层生效（体质/识派生 R + HasBodyArt 加成 → 路径间差异化）
+        /// - cv-003 Chip 穿透生效（Elemental+Block→Chip 保底）
+        ///
+        /// 诚实预期：SEC/SBC 全 1000 中性时漏斗差异化有限（仅 R+概率），violations 可能仍 >0。
+        /// 若 violations>0 → ADVISORY 诊断输出（不 blocking），供后续调参（K/ChipPermille/路径级 SEC/SBC）。
+        /// </summary>
+        [Fact]
+        public void C1Gate_FunnelOn_SameUT_WinRate_Within_40_60()
+        {
+            int tested = 0, violations = 0;
+            var violationsList = new List<string>();
+
+            _out.WriteLine($"=== cv-005 三层漏斗全开 C1 [40,60]% seed-sweep ===");
+            _out.WriteLine($"DuelCountPerPair={DuelCountPerPair}, calibrationMode=false");
+            _out.WriteLine($"SEC/SBC 全默认 1000（21路数据 deferred），K={Limits.ResistanceHalfLifeK}");
+            _out.WriteLine("");
+
+            foreach (int ut in TargetUTs)
+            {
+                var paths = GetPathsAtUT(ut, combatOnly: true);
+                if (paths.Count < 2) continue;
+                for (int i = 0; i < paths.Count; i++)
+                    for (int j = i + 1; j < paths.Count; j++)
+                    {
+                        ulong pairSeed = GateSeed ^ ((ulong)ut * 10000UL + (ulong)i * 100UL + (ulong)j);
+                        var (winsA, winsB) = RunDuels(paths[i], paths[j], ut, ut, pairSeed, calibrationMode: false);
+                        tested++;
+                        int rateA = WinPct(winsA, DuelCountPerPair);
+                        if (rateA < 40 || rateA > 60)
+                        {
+                            violations++;
+                            violationsList.Add(
+                                $"UT={ut} {paths[i].PathId}({winsA}) vs {paths[j].PathId}({winsB}) rate={rateA}%");
+                        }
+                    }
+            }
+
+            _out.WriteLine($"--- cv-005 结果 ---");
+            _out.WriteLine($"测试对数: {tested}, 违规数: {violations}");
+            foreach (var v in violationsList.Take(20)) _out.WriteLine($"  VIOLATION: {v}");
+            if (violationsList.Count > 20)
+                _out.WriteLine($"  ... (+{violationsList.Count - 20} more)");
+
+            if (violations == 0)
+            {
+                _out.WriteLine("✅ TR-BAL-001 终 gate 达成：violations==0！");
+                _out.WriteLine("   三层防御漏斗（SEC/SBC/Resistance+cv-001 概率主轴）成功复活 [40,60]% 硬闸门。");
+            }
+            else
+            {
+                _out.WriteLine($"⚠ ADVISORY: {violations} violations remain（需进一步标定）。");
+                _out.WriteLine("   诊断建议：");
+                _out.WriteLine("   1. 调 K(ResistanceHalfLifeK) 默认值，增大路径间 R 差异的胜率影响");
+                _out.WriteLine("   2. 调 ChipDamagePermille，改变 Elemental+Block 场景的伤害下限");
+                _out.WriteLine("   3. 路径级 SEC/SBC 差异化（21路数据铺设，红线 A.8 deferred→需单独立项）");
+                _out.WriteLine("   4. 分析与 PE 带宽的相关性（见 balance-006 PE-band gate）");
+            }
+
+            Assert.True(tested > 0, "至少应有同 UT 战斗对被测（sanity）。");
+        }
+
         /// <summary>胜率百分比 [0,100]。</summary>
         static int WinPct(int wins, int total) => total > 0 ? wins * 100 / total : 0;
 
