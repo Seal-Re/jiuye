@@ -411,9 +411,15 @@ namespace Jianghu.Cultivation
             bool blockFired = false;          // 本次交锋是否有 Block 类防御实际减伤（供 Elemental Chip 判定）
             bool blockGatedByBlunt = false;   // Blunt 是否门控关掉了防方 Block 类（供招架崩坏削韧 bonus）
 
+            // cv-004（adr-0008 ⑩.4 优先级链）：Tag > Overflow。
+            // 若攻击带标签门控（Blunt=Unblockable / Elemental=Undodgeable），标签门控优先于溢出——不跳过 OnDefend。
+            // 溢出仅在没有标签门控时生效（Normal 攻击 → 纯溢出 → 绝对秒杀）。
+            bool taggedAttack = attackType != DamageType.Normal;
+            bool skipOnDefend = overflowed && !taggedAttack; // Tag > Overflow: 标签优先
+
             // —— 批5 法宝配套：防方装备法宝 OnDefend 效果（盾/护甲等） ——
-            // cv-004：溢出时跳过 OnDefend（绝对秒杀——高阶威压使防方无法防御）。
-            if (!overflowed && defenderArtifact != null)
+            // cv-004：溢出时跳过 OnDefend（绝对秒杀——高阶威压使防方无法防御）。Tag > Overflow 优先。
+            if (!skipOnDefend && defenderArtifact != null)
             {
                 foreach (var op in defenderArtifact.Effects)
                 {
@@ -434,8 +440,8 @@ namespace Jianghu.Cultivation
             }
 
             // OnDefend：防方防御模块（经 ModuleResolver.ApplyOnDefend），收集反伤
-            // cv-004：溢出时跳过 OnDefend（绝对秒杀——高阶威压使防方无法防御）。
-            if (!overflowed)
+            // cv-004：溢出时跳过 OnDefend（绝对秒杀）。Tag > Overflow 优先。
+            if (!skipOnDefend)
             {
                 foreach (var defSkill in defenderPath.CombatSkills)
             {
@@ -459,7 +465,7 @@ namespace Jianghu.Cultivation
                     if (IsBlockClass(op.Kind) && dmg < dmgBefore) blockFired = true;
                 }
             }
-            } // cv-004: 关闭 !overflowed 守卫——溢出时 OnDefend 被跳过，恢复 PostMul/Suppression/软情境 后续结算
+            } // cv-004: 关闭 !skipOnDefend 守卫（Tag > Overflow：标签攻击不跳防御，纯溢出跳防御）
 
             // 负向压制矩阵检查（PostMul — 在 FlatPen/FlatDR 之后、软情境之前乘算）
             // balance-006 方案B：标定模式旁路压制（阴→阳/魔→佛 结构性克制，与裸 PE 平价正交）。
