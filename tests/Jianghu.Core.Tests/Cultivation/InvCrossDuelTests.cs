@@ -290,6 +290,12 @@ namespace Jianghu.Core.Tests.Cultivation
         /// 诚实预期：SEC/SBC 全 1000 中性时漏斗差异化有限（仅 R+概率），violations 可能仍 >0。
         /// 若 violations>0 → ADVISORY 诊断输出（不 blocking），供后续调参（K/ChipPermille/路径级 SEC/SBC）。
         /// </summary>
+        /// <summary>cv-005 调参实验：PhysResistPerConstitution=500（10x，放大路径间体质差异）。</summary>
+        [Fact]
+        public void C1Gate_FunnelOn_PhysR500_SameUT_WinRate()
+            => RunFunnelOnSweep(Limits with { PhysResistPerConstitution = 500, ElemResistPerInsight = 500 },
+                "PhysR=500 (10x)");
+
         [Fact]
         public void C1Gate_FunnelOn_SameUT_WinRate_Within_40_60()
             => RunFunnelOnSweep(Limits, "K=500 (default)");
