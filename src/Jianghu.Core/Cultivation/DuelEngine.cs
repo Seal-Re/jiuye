@@ -304,10 +304,17 @@ namespace Jianghu.Cultivation
                 // 已在 !calibrationMode 块内 → 标定模式天然旁路 SEC（AC 6.5，保 cv-005 seed-sweep 裸 PE 纯净）。
                 // skill!=null 已由外层守卫 → 直接 skill.Sec（裸攻走不到此分支，AC 6.3 裸攻默认中性由外层跳过本块实现）。
                 p = CombatMath.ApplyEvasionCoefficient(p, skill.Sec);
-                // per-exchange 掷骰：nonce 混入保同回合两次交锋（攻/防）用不同抽样点，确定且不相关。
-                int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
-                if (roll >= p)
-                    return (0, 0, 0, false); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载、零削韧（未命中不削韧，语义自洽）
+                // cv-004（adr-0008 决策⑨.2）：阈值溢出检测——p≥OverflowThreshold 时跳过伯努利掷骰（数学必中）。
+                // SEC=0 必中(Apply 返 AutoHitPermille=1000) 已达阈值，走溢出路径 → 语义合理（必中标签 = 威压溢出）。
+                // 后续 cv-004-b 扩展：溢出时跳过 OnDefend（绝对秒杀）+ View 侧防守帧钩子。
+                bool overflowed = CombatMath.IsOverflow(p, limits.OverflowThresholdPermille);
+                if (!overflowed)
+                {
+                    int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
+                    if (roll >= p)
+                        return (0, 0, 0, false); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载、零削韧
+                }
+                // 溢出/命中：继续执行后续伤害计算（OnUse → OnDefend → ...）
             }
 
             // —— cv-002（adr-0008 决策⑦步7）：PoiseBreak 算子额外削韧收集（路线 B）——

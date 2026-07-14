@@ -94,6 +94,13 @@ namespace Jianghu.Cultivation
         }
 
         /// <summary>
+        /// cv-004（adr-0008 决策⑨.2）：检测 p_permille 是否达到溢出阈值。
+        /// 溢出时 NPC 侧跳过伯努利掷骰（数学必中——roll&lt;1000 恒真）。
+        /// 纯函数，无 RNG（B.2）。
+        /// </summary>
+        public static bool IsOverflow(int p, int threshold) => p >= threshold && threshold > 0;
+
+        /// <summary>
         /// cv-008（adr-0010 决策②）：格挡系数 SBC 调制——对 cv-003 基准 Chip 穿透千分比
         /// <paramref name="baseChipPermille"/> 作**确定性整数调制**，生成有效 Chip 穿透千分比。
         /// 纯整数、纯函数、无 RNG（B.2）。格挡本身是否成功由 cv-003 Block 类模块（FlatDR/ReflectDamage）

@@ -59,6 +59,12 @@ namespace Jianghu.Config
         public int BodyArtPhysResistBonus { get; init; } = 100;     // 已修横练/护体功法(HasBodyArt)的物理抗性固定加值（≥0；0=退化无加成）
         public int PathElemResistBonus { get; init; } = 100;        // 对应门类功法的属性抗性固定加值（≥0；0=退化无加成；21 路数据 deferred）
 
+        // 阈值溢出（combat-variance cv-004；DuelEngine 结算侧，off 不调 DuelEngine → B.3 天然守）。
+        // adr-0008 决策⑨.2：permille ≥ 此阈值时溢出 → NPC 侧跳过伯努利掷骰（数学必中）。
+        // 后续 cv-004-b 扩展：溢出时跳过 OnDefend（绝对秒杀）+ View 侧防守帧钩子。
+        // 纯整数（B.2）。默认不影响 off（off 走 legacy SparAction，不入 DuelEngine）。
+        public int OverflowThresholdPermille { get; init; } = 1000;   // 溢出阈值（≥1；1000=标准，p≥1000 时 roll<1000 恒真→必中）
+
         // 戏剧引擎 B（drama-006，GDD §7；纯加，off 全关时绝不消费 → B.3 逐字节守恒）。
         // 全 int，含 MaxArcWeightSum（int 范围内 → WeightedPicker (int)total 抽取安全）。
         public int GrudgeCap { get; init; } = 100;             // 恩怨强度上限 [0,Cap]（§3.1）
@@ -117,6 +123,9 @@ namespace Jianghu.Config
             if (ElemResistPerInsight < 0) throw new InvalidOperationException("ElemResistPerInsight<0（0 合法=无识抗性）");
             if (BodyArtPhysResistBonus < 0) throw new InvalidOperationException("BodyArtPhysResistBonus<0（0 合法=无 BodyArt 加成）");
             if (PathElemResistBonus < 0) throw new InvalidOperationException("PathElemResistBonus<0（0 合法=无门类抗性加成）");
+
+            // 阈值溢出（combat-variance cv-004）：阈值≥1（0 合法=退化关闭溢出，但须 ≥1 避免除零/病态）。
+            if (OverflowThresholdPermille < 0) throw new InvalidOperationException("OverflowThresholdPermille<0（0 合法=关闭溢出检测）");
 
             // 戏剧引擎 B 越界断言（drama-006，GDD §7）。独立断言，顺序不限。
             if (GrudgeCap < 1) throw new InvalidOperationException("GrudgeCap<1");
