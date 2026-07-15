@@ -123,13 +123,17 @@ namespace Jianghu.Cultivation
                     && !HasResidualOrder(ctx, Side.Defender);
 
                 // —— Exchange 1: 攻方→防方 ——
-                var (rawDmgToB, reflectToA, poiseBonusToB, chipImmuneB, _) = ResolveExchange(
+                var ex1 = ResolveExchange(
                     activeASkill, effPeA, defender.Cultivation, defender.Stats,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls, controlLimiter, round,
                     attackerArtifact, defenderArtifact, calibrationMode,
                     defenderPe: effPeB, duelRng: duelRng, exchangeNonce: 0);
+                var rawDmgToB = ex1.DmgToDefender;
+                var reflectToA = ex1.ReflectToAttacker;
+                var poiseBonusToB = ex1.PoiseBreakBonus;
+                var chipImmuneB = ex1.ChipImmuneToPoise;
 
                 int dmgToB, dmgToA_redirect;
                 if (attackerControlled || aFleetFrozen)
@@ -143,13 +147,17 @@ namespace Jianghu.Cultivation
                 bool aHitB = !attackerControlled && !aFleetFrozen && !aRedirected;
 
                 // —— Exchange 2: 防方→攻方 ——
-                var (rawDmgToA, reflectToB, poiseBonusToA, chipImmuneA, _) = ResolveExchange(
+                var ex2 = ResolveExchange(
                     activeDSkill, effPeB, attacker.Cultivation, attacker.Stats,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls, controlLimiter, round,
                     defenderArtifact, attackerArtifact, calibrationMode,
                     defenderPe: effPeA, duelRng: duelRng, exchangeNonce: 1);
+                var rawDmgToA = ex2.DmgToDefender;
+                var reflectToB = ex2.ReflectToAttacker;
+                var poiseBonusToA = ex2.PoiseBreakBonus;
+                var chipImmuneA = ex2.ChipImmuneToPoise;
 
                 int dmgToA, dmgToB_redirect;
                 if (defenderControlled || bFleetFrozen)
@@ -279,8 +287,7 @@ namespace Jianghu.Cultivation
         /// Dot/Control 模块不直接改 dmg，而是通过 out 列表挂载到对应方，TickDots 结算。
         /// cv-003：ChipImmuneToPoise=true 时该交锋伤害为 Elemental 格挡穿透（免控制/硬直，⑩.1）→ ResolveR2 不派生削韧。
         /// </summary>
-        private static (int DmgToDefender, int ReflectToAttacker, int PoiseBreakBonus, bool ChipImmuneToPoise,
-            DefenseFrameHook? FrameHook) ResolveExchange(
+        private static CombatExchangeResult ResolveExchange(
             CombatSkillDef? skill,
             int attackerPe,
             CultivationState defenderState, StatBlock defenderStats,
@@ -312,7 +319,7 @@ namespace Jianghu.Cultivation
                 {
                     int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
                     if (roll >= p)
-                        return (0, 0, 0, false, null); // 未命中：攻击化解
+                        return new CombatExchangeResult(0, 0, 0, false, null); // 未命中
                 }
                 // 溢出/命中：继续执行后续伤害计算（OnUse → [跳过 OnDefend] → ...）
             }
@@ -546,11 +553,11 @@ namespace Jianghu.Cultivation
             if (attackType == DamageType.Blunt && blockGatedByBlunt)
                 poiseBreakBonus += limits.GuardBreakPoiseBonus;
 
-            // cv-004：防守帧钩子——溢出时输出 View 契约（NPC vs NPC 侧暂恒 null，Player 介入后由 Godot 宿主读取）
             DefenseFrameHook? frameHook = overflowed
                 ? new DefenseFrameHook(limits.GuaranteeFrameCount, true, attackType, (int)Math.Max(0, dmg / Scale))
                 : null;
-            return ((int)Math.Max(0, dmg / Scale), (int)totalReflect, poiseBreakBonus, chipImmuneToPoise, frameHook);
+            return new CombatExchangeResult((int)Math.Max(0, dmg / Scale), (int)totalReflect, poiseBreakBonus,
+                chipImmuneToPoise, frameHook);
         }
 
         /// <summary>dot 挂载条目：对哪方、每 tick 伤害、剩余回合。</summary>
