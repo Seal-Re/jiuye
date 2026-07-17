@@ -321,6 +321,7 @@ namespace Jianghu.Core.Tests.Cultivation
         {
             int tested = 0, violations = 0;
             var violationsList = new List<string>();
+            var allRecords = new List<string>(); // for CSV dump (AC 5.7)
 
             _out.WriteLine($"=== cv-005 三层漏斗全开 C1 [40,60]% seed-sweep ({label}) ===");
             _out.WriteLine($"DuelCountPerPair={DuelCountPerPair}, calibrationMode=false");
@@ -339,25 +340,73 @@ namespace Jianghu.Core.Tests.Cultivation
                             calibrationMode: false, limits: limits);
                         tested++;
                         int rateA = WinPct(winsA, DuelCountPerPair);
+
+                        // Build per-pair summary for CSV (AC 5.7) + diagnostics (AC 5.4)
+                        var repA = CreateTypicalCharWithStats(paths[i].PathId, ut, paths[i],
+                            new[] { 20, 20, 20, 20 }, id: 0);
+                        var repB = CreateTypicalCharWithStats(paths[j].PathId, ut, paths[j],
+                            new[] { 20, 20, 20, 20 }, id: 1);
+                        int peA = PowerEngine.Evaluate(repA.Cultivation!, repA.Stats, paths[i], limits);
+                        int peB = PowerEngine.Evaluate(repB.Cultivation!, repB.Stats, paths[j], limits);
+                        int rPhysA = ResistanceProviders.ResistanceOf(repA.Cultivation!, repA.Stats,
+                            paths[i], GateType.None, DamageType.Normal, limits);
+                        int rPhysB = ResistanceProviders.ResistanceOf(repB.Cultivation!, repB.Stats,
+                            paths[j], GateType.None, DamageType.Normal, limits);
+                        int rElemA = ResistanceProviders.ResistanceOf(repA.Cultivation!, repA.Stats,
+                            paths[i], GateType.None, DamageType.Elemental, limits);
+                        int rElemB = ResistanceProviders.ResistanceOf(repB.Cultivation!, repB.Stats,
+                            paths[j], GateType.None, DamageType.Elemental, limits);
+
+                        // SEC/SBC from path's first combat skill (representative; all default 1000)
+                        int secA = paths[i].CombatSkills.Count > 0 ? paths[i].CombatSkills[0].Sec : 1000;
+                        int sbcA = paths[i].CombatSkills.Count > 0 ? paths[i].CombatSkills[0].Sbc : 1000;
+                        int secB = paths[j].CombatSkills.Count > 0 ? paths[j].CombatSkills[0].Sec : 1000;
+                        int sbcB = paths[j].CombatSkills.Count > 0 ? paths[j].CombatSkills[0].Sbc : 1000;
+
+                        allRecords.Add(
+                            $"{ut},{paths[i].PathId},{paths[j].PathId},{rateA}%,{peA},{peB}," +
+                            $"{rPhysA},{rPhysB},{rElemA},{rElemB},{secA},{secB},{sbcA},{sbcB}");
+
                         if (rateA < 40 || rateA > 60)
                         {
                             violations++;
                             violationsList.Add(
-                                $"UT={ut} {paths[i].PathId}({winsA}) vs {paths[j].PathId}({winsB}) rate={rateA}%");
+                                $"UT={ut} {paths[i].PathId}({winsA}) vs {paths[j].PathId}({winsB}) rate={rateA}% | " +
+                                $"PE={peA}/{peB} margin={(peA-peB)*100/Math.Max(1,Math.Max(peA,peB))}% | " +
+                                $"Rphys={rPhysA}/{rPhysB} Relem={rElemA}/{rElemB} | " +
+                                $"SEC={secA}/{secB} SBC={sbcA}/{sbcB} Chip={limits.ChipDamagePermille}");
                         }
                     }
             }
 
             _out.WriteLine($"--- cv-005 结果 ({label}) ---");
             _out.WriteLine($"测试对数: {tested}, 违规数: {violations} ({(tested>0?violations*100/tested:0)}%)");
-            foreach (var v in violationsList.Take(10)) _out.WriteLine($"  VIOLATION: {v}");
-            if (violationsList.Count > 10)
-                _out.WriteLine($"  ... (+{violationsList.Count - 10} more)");
+            foreach (var v in violationsList.Take(15)) _out.WriteLine($"  VIOLATION: {v}");
+            if (violationsList.Count > 15)
+                _out.WriteLine($"  ... (+{violationsList.Count - 15} more)");
 
             if (violations == 0)
                 _out.WriteLine("✅ TR-BAL-001 终 gate 达成：violations==0！");
             else
                 _out.WriteLine($"⚠ ADVISORY: {violations}/{tested} violations ({label})");
+
+            // AC 5.7: Write balance matrix CSV dump
+            try
+            {
+                // Navigate from test output dir (tests/Jianghu.Core.Tests/bin/Debug/net8.0/) up 5 levels to repo root
+                string repoRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+                    "..", "..", "..", "..", ".."));
+                string dir = Path.Combine(repoRoot, "production", "qa", "balance");
+                Directory.CreateDirectory(dir);
+                string dateStr = DateTime.Now.ToString("yyyyMMdd");
+                string filepath = Path.Combine(dir, $"cv-005-funnel-on-{label.Replace(" ", "-").Replace("+","p")}-{dateStr}.csv");
+                var csvLines = new List<string>();
+                csvLines.Add("UT,PathA,PathB,WinRateA,PE_A,PE_B,RPhys_A,RPhys_B,RElem_A,RElem_B,SEC_A,SEC_B,SBC_A,SBC_B");
+                csvLines.AddRange(allRecords);
+                File.WriteAllLines(filepath, csvLines);
+                _out.WriteLine($"CSV dump: {filepath} ({allRecords.Count} rows)");
+            }
+            catch (Exception ex) { _out.WriteLine($"CSV dump skipped: {ex.Message}"); }
 
             Assert.True(tested > 0, "至少应有同 UT 战斗对被测（sanity）。");
         }

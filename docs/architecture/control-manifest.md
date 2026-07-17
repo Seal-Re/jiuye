@@ -1,9 +1,9 @@
 # 控制清单 — 层规则手册（Control Manifest）
 
-> **Manifest Version: 2026-07-03b**
+> **Manifest Version: 2026-07-17**
 > **Status**: Active
 > **Purpose**: 按层（Foundation / Core / Presentation·Host）声明 Required / Forbidden / Performance 规则。story 的 layer 约束、`/dev-story` 实现纪律、`/code-review` 判据均以本清单为准。
-> **Source of truth**: 红线（CLAUDE.md §A/§B）+ ADR-0001/0002/0003/0004。本清单是红线的**分层编排**，红线冲突时以 CLAUDE.md 为准。
+> **Source of truth**: 红线（CLAUDE.md §A/§B/§G）+ ADR-0001/0002/0003/0004/0008/0010。本清单是红线的**分层编排**，红线冲突时以 CLAUDE.md 为准。
 > **Traceability**: Forbidden 每条注原因 + 溯源红线/ADR + 守护机制（编译器 / IL 扫描 / 测试 / code review）。
 
 ---
@@ -14,7 +14,7 @@
 |---|---|
 | 2026-07-03 | 初始 bootstrap。编入红线 B.2/B.3/B.5/B.9 + BannedApiAnalyzers 禁用清单 + RngStreamIds append-only 与 Clone 要求。 |
 | 2026-07-03b | 引擎目标 Unity→Godot 4.x .NET（ADR-0004）。新增 **Presentation·Host 层**（P-REQUIRED/P-FORBIDDEN）；F-FORBIDDEN 新增 `Godot.*` 禁入 Core；IL2CPP 表述→CoreCLR/AOT/Mono。Foundation/Core 层规则不变。 |
-| 2026-07-03c | 对接 [godot-architecture-manifest.md](godot-architecture-manifest.md)（View 层前瞻规范）。Presentation·Host 层加反应式战斗「QTE→离散乘子回传内核」与 P-FORBIDDEN-2 一致性注 + manifest 参考链接。**层规则本身不变**（纯索引/说明）。 |
+| 2026-07-17 | adr-0008（方差战斗模型）/ adr-0010（三层防御漏斗）规则编入 Core 层 + CLAUDE.md §G 关键实现铁律编入。RngStreamIds max=8→9（Duel）。更新溯源清单。 |
 
 ---
 
@@ -27,7 +27,7 @@
 | Feature | 上层特征（本清单不详列，规则同 Foundation 且 off 不激活） | `Jianghu.Drama` / `Decide` / `Sim`(map/faction) |
 | **Presentation·Host** | 表现/宿主——只读渲染 + 输入采集（**Core 之外**的独立程序集） | Godot 4.x .NET 宿主（`WorldBridge` 等，未生成）；`Jianghu.Cli`（当前 headless View） |
 
-> Feature 层新增系统：**必须**走独立 PRNG 流（append-only）、off 不激活、侧表不污染 v1.0 record——即遵守 Foundation 的 F-FORBIDDEN-4 与 F-REQUIRED-1/2。
+> Feature 层新增系统：**必须**走独立 PRNG 流（append-only，当前 max id=9）、off 不激活、侧表不污染 v1.0 record——即遵守 Foundation 的 F-FORBIDDEN-5 与 F-REQUIRED-1/2/4。
 
 ---
 
@@ -37,10 +37,10 @@
 
 | ID | 规则 | 溯源 | 守护 |
 |---|---|---|---|
-| F-REQUIRED-1 | **新 PRNG 消费者必须追加 `RngStreamIds` 新 id**（append-only，绝不复用既有 1..8）。 | ADR-0001 / ADR-0003 / CLAUDE.md §F | code review + off 逐字节测试 |
+| F-REQUIRED-1 | **新 PRNG 消费者必须追加 `RngStreamIds` 新 id**（append-only，绝不复用既有 1..9）。 | ADR-0001 / ADR-0003 / CLAUDE.md §F | code review + off 逐字节测试 |
 | F-REQUIRED-2 | **新 PRNG 子流必须进 `World.Clone`**（深拷续跑，`CloneRng`/`CloneRngOrNull` null 安全），保克隆后续跑不发散。 | ADR-0001 / `World.cs` R1 注释 | code review + 确定性测试 |
 | F-REQUIRED-3 | **改任何 v1.0 共享文件后必验 off 逐字节**（跑 `OffByteIdenticalTests`，SHA256 与 v1.0 基线一致）。commit 前必跑。 | ADR-0003 / 红线 B.3 | `OffByteIdenticalTests`（BLOCKING） |
-| F-REQUIRED-4 | **可选子系统（cultivation/drama/map/faction）off 时子流为 `null`、绝不构造、绝不消费** `Split(5..8)`——保 `Split(1..4)` 编号与序列在 off 下不变。 | ADR-0003 §1-2 | off 逐字节测试 |
+| F-REQUIRED-4 | **可选子系统（cultivation/drama/map/faction）off 时子流为 `null`、绝不构造、绝不消费** `Split(5..9)`——保 `Split(1..4)` 编号与序列在 off 下不变。 | ADR-0003 §1-2 | off 逐字节测试 |
 | F-REQUIRED-5 | 领域模型新态挂 `Character` **侧表**，不改 v1.0 core record（`StatBlock`/`Persona`/`Relations`）字段顺序。 | ADR-0003 §4（侧表纪律，红线 B.6） | off 逐字节测试 + code review |
 | F-REQUIRED-6 | 时间以逻辑 `Tick`（clock 计数）为准，非挂钟。 | ADR-0001 §3 | BannedApiAnalyzers（禁 DateTime） |
 
@@ -52,7 +52,7 @@
 | F-FORBIDDEN-2 | **`System.Console`** in Core | Core 是纯逻辑库不做 IO；IO 属 Host（CLI/Godot）层。 | ADR-0001 | **BannedApiAnalyzers** |
 | F-FORBIDDEN-3 | **`System.DateTime` / `DateTime.Now`** in Core | 挂钟时间不可复现 → 破逐字节复现。改逻辑 `Tick`。 | 红线 B.2 / ADR-0001 §3 | **BannedApiAnalyzers** |
 | F-FORBIDDEN-4 | **`System.Threading.Thread` / `Task.Run`** in Core | 多线程执行顺序不确定 → 破确定性。Core 单线程确定性推进。 | ADR-0001 §4 | **BannedApiAnalyzers** |
-| F-FORBIDDEN-5 | **复用/重编号既有 `RngStreamIds`**（1..8 冻结） | 改动既有子流编号会改变 off 消费序列 → 破 off 逐字节。只能 append。 | ADR-0003 / CLAUDE.md §F | off 逐字节测试 + code review |
+| F-FORBIDDEN-5 | **复用/重编号既有 `RngStreamIds`**（1..9 冻结） | 改动既有子流编号会改变 off 消费序列 → 破 off 逐字节。只能 append。 | ADR-0003 / CLAUDE.md §F | off 逐字节测试 + code review |
 | F-FORBIDDEN-6 | **在 off 路径消费可选子流**（cultivation/drama/map/faction） | off 消费 `Split(5..8)` 会改变 `Split(1..4)` 编号 → 破 v1.0 逐字节。 | ADR-0003 §1 | `OffByteIdenticalTests` |
 
 ### Performance（F-PERF）
@@ -79,6 +79,10 @@
 | C-REQUIRED-4 | 修炼系统随机消费走 `cultRng`（`Split(5)`），不碰 `domainRng`/`spawnRng`。 | ADR-0003 §1 | off 逐字节测试 |
 | C-REQUIRED-5 | 21 路全入册（加路 = 加数据行 + `CodePathSource` 注册），**none dropped**。 | 红线 B.4 | 21 路独立测试 |
 | C-REQUIRED-6 | 新增劫型 = 加一条 `TribulationDef`（`ResistTerms` 数据），零改 `TribulationResolver`。 | 数据驱动（`TribulationResolver` 设计） | code review |
+| C-REQUIRED-7 | **战斗概率判定走整数 permille 查表**（`CombatMath`，Margin→permille 映射），禁用浮点 Sigmoid/exp。 | ADR-0008 §α / B.2 | `ILFloatScanner` + `CombatMathTests` |
+| C-REQUIRED-8 | **防御漏斗三层串行**：① SEC 合流命中 → ② SBC 调 Chip → ③ Resistance 半衰 → ④ 溢出判定 → ⑤ 防守帧钩子。层序不可改。 | ADR-0010 / CLAUDE.md G.5 | `DefenseFunnelIntegrationTests` |
+| C-REQUIRED-9 | **TickPoise 必须在 TickDots 之后调用**：TickDots 注入 stagger → TickPoise 检查硬直，逆序 = 哑弹。 | CLAUDE.md G.5 / cv-002 | `PoiseStaggerTests` |
+| C-REQUIRED-10 | **duel-local 状态（PoiseState/CD/DR/stagger）必须是 ResolveR2 局部变量或 DuelEngine 实例字段（每次 Resolve 新建），绝不挂 CombatContext/CultivationState/Character 聚合根。** | CLAUDE.md G.4/G.8 / cv-002 | `World.Clone` 测试 + code review |
 
 ### Forbidden（C-FORBIDDEN）
 
@@ -89,6 +93,10 @@
 | C-FORBIDDEN-3 | **裸写 `new EffectOp(七参)` 战斗构造在 path 文件** | 7 参极易漏（ratio/Amount2≥1/Trigger/Rarity）；散在 21 文件难查错；绕过平衡体系；重复造轮子。必经 `Modules` 工厂单点。 | 红线 B.9 / ADR-0002 | **code review**（`EffectOp` internal，BannedApiAnalyzers 未覆盖） |
 | C-FORBIDDEN-4 | **改 `RealmMultipliers`/`UnifiedTierOf` 等 on 数据后不验 off 逐字节** | 虽然这些仅经 cultivation-on 路径（`PowerEngine.Evaluate`），改后仍须证 off 不受扰（`OffByteIdenticalTests`/`OffRegressionWith21PathsTests`）。 | 红线 B.3 / balance-cross story-003 §B.3 分析 | off 逐字节测试 |
 | C-FORBIDDEN-5 | **丢弃任何修炼路径**（21 路必须全入册） | 加路是数据行，不是删减——设计要求 21 路完整覆盖。 | 红线 B.4 | 21 路独立测试 |
+| C-FORBIDDEN-6 | **`calibrationMode=true` 进生产代码** | 标定期旁路 Control/CounterMul/压制矩阵/防御漏斗，生产代码禁用（破 B.3 逐字节 + 公平性）。仅测试 harness 可用。 | ADR-0008 决策⑩.1 / CLAUDE.md G.3 | code review |
+| C-FORBIDDEN-7 | **`duelRng`（Split(Duel=9)）在 off 路径构造** | `SparAction` 默认不走 `Split(Duel)` → duelRng 永不构造 → off 路径零漂移。 | CLAUDE.md G.2 / ADR-0003 | `OffByteIdenticalTests` |
+| C-FORBIDDEN-8 | **PoiseState/CD/DR 挂 CombatContext/CultivationState（会进 Clone）** | `World.Clone` 深拷贝 CombatContext/CultivationState → 若 duel-local 状态挂其上则进 Clone → 破 per-duel 语义 + B.3。 | CLAUDE.md G.4/G.8 / cv-002 | code review + `World.Clone` 测试 |
+| C-FORBIDDEN-9 | **R（抗性）进 `EffectivePower`（BaseSum/Modifier/战力）** | 抗性是防御结算属性，非战力属性；混入战力污染跨路平衡。`ResistanceProviders.ResistanceOf` 参数不含 `daoHeart`/`innerDemon`（B.5）。 | ADR-0010 决策④ / CLAUDE.md B.5 | code review |
 
 > **B.9 例外重申**：4 参资源/标记操作（`AddResource`/`AddResourceCap`/`GrantPassive`/`SetFlag`/`Cost`/`AddTermWeightStep`/`AddFlatDR`）在 path 文件裸写**合法**——仅 7 参战斗效果构造受 C-FORBIDDEN-3 约束。
 
@@ -143,7 +151,7 @@
 | **`ILFloatScanner` 测试** | 测试期，BLOCKING | C-FORBIDDEN-1（`Jianghu.Cultivation` 浮点） |
 | **`OffByteIdenticalTests`** | 测试期，BLOCKING | F-REQUIRED-3/4、F-FORBIDDEN-5/6、C-FORBIDDEN-4（off 逐字节 SHA256） |
 | **`PowerEngine.Resolve` 护栏** | 运行期抛异常 + 测试 | C-FORBIDDEN-2（道心解耦） |
-| **code review**（Opus 4.8） | 人工/agent | C-FORBIDDEN-3（裸 `EffectOp`）、C-REQUIRED-1/2/3、F-REQUIRED-1/2、**P-REQUIRED-1..4 / P-FORBIDDEN-1..4**（表现层边界，ADR-0004；当前无 Godot 代码，纪律先行） |
+| **code review**（旗舰档 Opus） | 人工/agent | C-FORBIDDEN-3/6/7/8/9（裸 EffectOp/calibrationMode 生产禁用/duel-local 不入 Clone/R 不进战力）、C-REQUIRED-1/2/3/7/8/9/10、F-REQUIRED-1/2、**P-REQUIRED-1..4 / P-FORBIDDEN-1..4** |
 
 ---
 
@@ -152,7 +160,7 @@
 - 主架构：[architecture.md](architecture.md)
 - View 层前瞻规范（宏微观世界/反应式战斗/PCG/韧性/LLM）：[godot-architecture-manifest.md](godot-architecture-manifest.md)
 - 需求溯源：[tr-registry.yaml](tr-registry.yaml)（含 TR-VIEW-* 表现层锚 + R1/R2/R3 开放调和项）
-- ADR：[adr-0001](adr-0001-integer-determinism.md) / [adr-0002](adr-0002-module-factory-effect-system.md) / [adr-0003](adr-0003-cultivation-off-byte-identical.md) / [adr-0004](adr-0004-godot-view-host-boundary.md)（Accepted）
+- ADR：[adr-0001](adr-0001-integer-determinism.md) / [adr-0002](adr-0002-module-factory-effect-system.md) / [adr-0003](adr-0003-cultivation-off-byte-identical.md) / [adr-0004](adr-0004-godot-view-host-boundary.md) / [adr-0008](adr-0008-variance-reactive-combat-model.md) / [adr-0010](adr-0010-defense-funnel-mechanism.md)（Accepted）
 - ADR（**Proposed**，View 层开放调和项，未裁决）：[adr-0005](adr-0005-macro-sync-turn-vs-accumulator.md)（宏观同步回合 R1）/ [adr-0006](adr-0006-perlin-noise-float-vs-integer-determinism.md)（柏林浮点 R2）/ [adr-0007](adr-0007-ecs-vs-oop-aggregate-root.md)（ECS 倾向 R3）
 - 红线：CLAUDE.md §A（流程）/ §B（技术）
 - 禁用清单源：`src/Jianghu.Core/BannedSymbols.txt`

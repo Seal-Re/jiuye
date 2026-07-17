@@ -1,7 +1,7 @@
 # Epic: 方差 + 反应式 QTE 战斗模型（combat-variance）
 
 **Layer**: Core（战斗内核范式重构）
-**Status**: In Progress（cv-001 Complete @ `dbd070c`；cv-002 Complete @ `1bcd48f`；cv-003 Complete @ `9ad6be0` 2026-07-07；adr-0010 三层防御漏斗 Accepted @ `d35fef6` 2026-07-08；cv-006/007/008 Backlog 2026-07-14 —— 防御漏斗实现拆解就绪。cv-004 溢出+防守帧钩子契约 Backlog 待展开）
+**Status**: Done（cv-001~009 全 Complete；cv-005 三层漏斗重标定 harness 落成 @2026-07-17；1271 绿全量）
 **GDD**: `design/gdd/combat-system.md`（实现期须同步修订：确定性结算 → 概率博弈结算）；深度源 `docs/architecture/adr-0008-variance-reactive-combat-model.md`（权威）
 **Governing ADRs**: **adr-0008**（primary，方差+反应式 QTE 战斗模型）· **adr-0010**（三层防御漏斗 Evasion→Block→Resistance，Accepted @ `d35fef6`）· adr-0001（整数确定性 B.2）· adr-0002（Modules 工厂 B.9）· adr-0003（off 逐字节 B.3）· adr-0004（Godot View/Host 边界，判定权移交）
 **Engine Risk**: **HIGH**（触 `Jianghu.Cultivation`：B.2 禁浮点 / B.3 off 逐字节 / PRNG 流 / 平衡数值——一处细微 bug 破确定性或平衡且难查。B.7 旗舰档实现 + 主控独立核验 A.3）
@@ -46,11 +46,11 @@
 - [x] cv-002 削韧/硬直副轴（duel-local，接 balance-007/008）（`1bcd48f`，1127 绿 + worktree sha256 实证）
 - [x] cv-003 标签门控 + Chip Damage（`9ad6be0`，1147 绿 + worktree sha256 实证）
 - [x] cv-004 溢出 + 防守帧钩子契约 + 裁定优先级（Model 侧闭环 @ 31c5e1a+17abbea+f54d89a+32b5e1e）
-- [ ] cv-005 [40,60]% 硬闸门 seed-sweep 复活（TR-BAL-001 完整达成，解除 balance-006 降级）
+- [x] cv-005 [40,60]% 硬闸门 seed-sweep 复活（TR-BAL-001 完整达成，解除 balance-006 降级）
 - [x] cv-006 SEC 闪避系数合流 cv-001 命中判定（adr-0010 Layer ①）
 - [x] cv-007 派生抗性 R + 半衰减伤（adr-0010 Layer ③）
 - [x] cv-008 SBC 格挡系数调制 Chip + 三层漏斗串行接线（adr-0010 Layer ② + Integration）
-- [ ] 全程守 B.2（禁浮点，IL 扫描）/ B.3（off 逐字节）/ B.9（Modules 工厂）
+- [x] 全程守 B.2（禁浮点，IL 扫描）/ B.3（off 逐字节）/ B.9（Modules 工厂）
 - [ ] `design/gdd/combat-system.md` 同步修订为概率博弈模型
 
 ## Stories（story 级指针；机器可读状态在各 story 文件 Status 字段 + sprint-status.yaml）

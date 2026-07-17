@@ -40,6 +40,7 @@
 - **任务台账（单一真相源 A.2）**：`production/`（`epics/[slug]/EPIC.md` + `story-NNN-*.md` + `sprint-status.yaml` + `stage.txt`）。速览：`/sprint-status` 或读 `production/epics/index.md`。
 - 派生指针：根目录 `TASKS.md`（指向 production/，不持真相）
 - CCGS 采用路线图：`docs/reports/采用迁移计划.md`（增量补 GDD/ADR roadmap）
+- **ADR（架构决策记录）**：`docs/architecture/adr-NNNN-*.md`（10 篇，含整数确定性/模块工厂/off 逐字节/Godot 边界/方差战斗模型/防御漏斗等）
 - 项目状态审计（历史派生）：`docs/reports/项目状态审计.md`
 - 设计深度源（18 spec/4 plan/3 research，旧版/legacy）：`docs/legacy-specs/`
 - 设计 spec/plan（superpowers 工作流产出，artifact-system/map-renderer/inv-cross-calibration 等）：`docs/superpowers/`
@@ -66,7 +67,7 @@
 # 构建（全 solution）
 dotnet build
 
-# 全量测试（1147 绿，零失败）
+# 全量测试（1271 绿，零失败）
 dotnet test
 
 # 全量测试（简洁输出）
@@ -99,13 +100,17 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 
 ## F. 架构概览
 
-### 程序集（3 个）
+### Solution 与程序集
+
+| 文件 | 说明 |
+|---|---|
+| `Jianghu.sln` | 根 solution，含全部 3 个程序集 |
 
 | 程序集 | TFM | 职责 |
 |---|---|---|
 | `Jianghu.Core` | netstandard2.1 | **纯逻辑库**——全部模拟机制。零引擎依赖（后期直接 Godot 4.x .NET 引用；引擎 2026-07-03 由 Unity 切换，见 ADR-0004） |
 | `Jianghu.Cli` | net8.0 | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory` → `World.Advance` |
-| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1147），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
+| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1271），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
 
 ### 执行模型（事件驱动 + 确定性 PRNG）
 

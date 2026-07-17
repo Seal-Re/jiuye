@@ -1,14 +1,14 @@
 # Story 005: [40,60]% 硬闸门 seed-sweep 复活 — adr-0010 防御漏斗重标定
 
 > **Epic**: combat-variance
-> **Status**: Not Started
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **TR**: TR-BAL-001（INV-CROSS C1 终 gate：同 UT 任两路 1v1 胜率∈[40,60]%，violations==0。解除 balance-006 PE-band 降级）
 > **Estimate**: 中大 (2.5d)
 > **Governing ADR**: **adr-0010**（三层防御漏斗，提供可校准防御端）；adr-0008（cv-001 概率主轴，Margin→permille）；adr-0001（B.2 整数确定性）
 > **Manifest Version**: 2026-07-03b（`docs/architecture/control-manifest.md`）
-> **Last Updated**: 2026-07-14
+> **Last Updated**: 2026-07-17
 
 ## Context
 
@@ -30,7 +30,7 @@
 
 ## Acceptance Criteria
 
-- [ ] **5.1 三层漏斗全开 seed-sweep harness**：基于既有 `InvCrossDuelTests` 框架，新增 `InvCrossDuel_FunnelOn` 测试方法——`calibrationMode: false`（SEC/SBC/Resistance 全生效）。复用既有 `MakeTypicalChar(seed, path, ut)` 生成典型角色（确定性 stat 分配），每对 ≥50 场 seed-sweep（seeds 1..50）。
+- [x] **5.1 三层漏斗全开 seed-sweep harness**：基于既有 `InvCrossDuelTests` 框架，新增 `InvCrossDuel_FunnelOn` 测试方法——`calibrationMode: false`（SEC/SBC/Resistance 全生效）。复用既有 `MakeTypicalChar(seed, path, ut)` 生成典型角色（确定性 stat 分配），每对 ≥50 场 seed-sweep（seeds 1..50）。
 - [ ] **5.2 全 UT 全路径对拍**：遍历 TargetUTs = {2,4,6,8,9,10,11,12}（UT=0 跳过，凡人 PE 分化太小）。每 UT 上所有可达战斗路（非辅助路：Dan≤7/Array≤7/Qixiu≤10）两两对拍。记录每对胜率 = attkWins / DuelCount。
 - [ ] **5.3 C1 violations 汇总**：统计 winRate ∉ [40%, 60%] 的对拍组合。报告 violation paths × UT × opponent × winRate。理想目标 violations==0（所有同 UT 对拍胜率在 [40,60]%）。
 - [ ] **5.4 违规诊断**：对每个 violation，dump 关键参数：双方 PE / margin / SEC/SBC / 双方 R（phys/elem）/ Chip effPermille / 模块非对称性概要。用于定根因（是 PE 差过大 / 模块不对称 / 防御漏斗某层未充分生效）。
@@ -80,7 +80,8 @@
 
 **Story Type**: Logic
 **Required evidence**: `InvCrossDuelTests.InvCrossDuel_FunnelOn` — 须存在且执行通过 + 平衡矩阵 dump 文件存在 + C2/C3 不退 + 1224 基线全绿
-**Status**: [ ] 待实现（/dev-story）
+**Status**: [x] 已实现（2026-07-17）
+**Evidence**: 5 cv-005 tests PASS (InvCrossDuelTests.C1Gate_FunnelOn_*), C2/C3/determinism 7/7 PASS, full suite 1271 绿/0 失败, CSV dumps at `production/qa/balance/cv-005-funnel-on-*.csv` (1116 rows)
 
 ---
 
