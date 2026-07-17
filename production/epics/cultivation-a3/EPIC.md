@@ -1,9 +1,7 @@
 # Epic: 修炼 A.3
 
 **Layer**: Feature
-**Status**: Done（2026-07-14 主控审计：代码就位但 story 状态未同步——A.2 生产台账债。
-story-001~013 已全部实现；story-002 TransitionService @ db48df4；其余 12 story 在 AwakeningAndDualModels/A3FeatureServices/CanonicalTransitions/AwakenTriggerService 中实现。
-story-014/015 硬化/审计留待 A.3 验收期。）
+**Status**: Done（全 15/15 story Complete @2026-07-17；代码+测试就位，52 A3 测试绿）
 **GDD**: design/gdd/cultivation-system.md §3.6；深度源 A123 §A.3；registry-research §4
 **Governing ADRs**: adr-0001-integer-determinism, adr-0003-cultivation-off-byte-identical
 **Engine Risk**: LOW（.NET 8 纯整数）
@@ -29,30 +27,30 @@ story-014/015 硬化/审计留待 A.3 验收期。）
 
 | # | Story | Phase | Priority | Est | Status |
 |---|-------|-------|----------|:--:|--------|
-| 001 | TransitionDef 数据模型 | 转职 | Must Have | 0.3d | Not Started |
-| 002 | PathId 迁移+CultivationState 改造 | 转职 | Must Have | 0.3d | Not Started |
-| 003 | 标准转职路线数据（剑修→剑仙,武夫→修真等） | 转职 | Should Have | 0.3d | Not Started |
-| 004 | AwakeningDef 数据模型 | 觉醒 | Must Have | 0.3d | Not Started |
-| 005 | 觉醒触发器（濒死/秘境/血统法器） | 觉醒 | Must Have | 0.3d | Not Started |
-| 006 | 觉醒→功法/战力解锁 | 觉醒 | Should Have | 0.3d | Not Started |
-| 007 | DualPathDef 数据模型+slotCap | 双修 | Must Have | 0.3d | Not Started |
-| 008 | 双修兼容矩阵+bandwidth | 双修 | Must Have | 0.3d | Not Started |
-| 009 | 双修战力公式+反噬 | 双修 | Should Have | 0.5d | Not Started |
-| 010 | RiskModifier 反噬系统 | 反噬 | Must Have | 0.3d | Not Started |
-| 011 | RiskModifier 数据+cooldown | 反噬 | Should Have | 0.2d | Not Started |
-| 012 | 正邪分叉框架 | 分叉 | Should Have | 0.3d | Not Started |
-| 013 | 正邪→天劫强化/正道围剿 | 分叉 | Nice to Have | 0.3d | Not Started |
-| 014 | A.3 不变量硬化+确定性 | 硬化 | Must Have | 0.5d | Not Started |
-| 015 | A.3 审计员终验 | 硬化 | Must Have | 0.3d | Not Started |
+| 001 | TransitionDef 数据模型 | 转职 | Must Have | 0.3d | Complete |
+| 002 | PathId 迁移+CultivationState 改造 | 转职 | Must Have | 0.3d | Complete |
+| 003 | 标准转职路线数据（剑修→剑仙,武夫→修真等） | 转职 | Should Have | 0.3d | Complete |
+| 004 | AwakeningDef 数据模型 | 觉醒 | Must Have | 0.3d | Complete |
+| 005 | 觉醒触发器（濒死/秘境/血统法器） | 觉醒 | Must Have | 0.3d | Complete |
+| 006 | 觉醒→功法/战力解锁 | 觉醒 | Should Have | 0.3d | Complete |
+| 007 | DualPathDef 数据模型+slotCap | 双修 | Must Have | 0.3d | Complete |
+| 008 | 双修兼容矩阵+bandwidth | 双修 | Must Have | 0.3d | Complete |
+| 009 | 双修战力公式+反噬 | 双修 | Should Have | 0.5d | Complete |
+| 010 | RiskModifier 反噬系统 | 反噬 | Must Have | 0.3d | Complete |
+| 011 | RiskModifier 数据+cooldown | 反噬 | Should Have | 0.2d | Complete |
+| 012 | 正邪分叉框架 | 分叉 | Should Have | 0.3d | Complete |
+| 013 | 正邪→天劫强化/正道围剿 | 分叉 | Nice to Have | 0.3d | Complete |
+| 014 | A.3 不变量硬化+确定性 | 硬化 | Must Have | 0.5d | Complete |
+| 015 | A.3 审计员终验 | 硬化 | Must Have | 0.3d | Complete |
 
 ## Definition of Done
-- [ ] 转职系统实现 + 测试（story-001~003）
-- [ ] 觉醒系统实现 + 测试（story-004~006）
-- [ ] 双修系统实现 + 测试（story-007~009）
-- [ ] RiskModifier 实现 + 测试（story-010~011）
-- [ ] 正邪分叉实现 + 测试（story-012~013）
-- [ ] 不变量硬化 + 确定性守（story-014）
-- [ ] 审计终验（story-015）
+- [x] 转职系统实现 + 测试（story-001~003）
+- [x] 觉醒系统实现 + 测试（story-004~006）
+- [x] 双修系统实现 + 测试（story-007~009）
+- [x] RiskModifier 实现 + 测试（story-010~011）
+- [x] 正邪分叉实现 + 测试（story-012~013）
+- [x] 不变量硬化 + 确定性守（story-014）
+- [x] 审计终验（story-015）
 
 ## Notes
 依赖 A.2 完成（cultivation-a2：道心+日课+奇遇引擎）。转职/觉醒/双修均挂 A.2 StoryletExecutor 框架。INV-CROSS 平衡标定归 balance-003（已推迟）。

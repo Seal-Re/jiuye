@@ -18,7 +18,7 @@ start: "2026-07-17"
 end: "2026-07-24"
 generated: "2026-07-17"
 updated: "2026-07-17"
-status: active
+status: closed  # 4/4 Must Have Done (2026-07-17)；全量 1271 绿
 
 stories:
   # —— Must Have ——
@@ -53,11 +53,11 @@ stories:
     name: "cultivation-a3 剩余 2 story 审计→Done（15/15 Complete）"
     file: "production/epics/cultivation-a3/EPIC.md"
     priority: must-have
-    status: ready-for-dev
+    status: done  # 15/15 Complete；52 A3 测试绿；EPIC DoD 全勾
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-17"
 
   # —— Should Have ——
   - id: "cultivation-a1-unblock"
