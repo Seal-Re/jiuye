@@ -24,7 +24,7 @@
 | 11 | 系统集成层 | `integration` | Feature | **Done** | story-008/009 全部 Done（2026-07-14 审计） |
 | 12 | 可视化（像素 tile / 古风 UI） | `visualization` | Presentation | Spike only | spike + 规则 doc（B.8 分轨） |
 | 13 | 仓库整理 | `repo-tidy` | chore | Todo | _research/raw3、pixel 决断、icon_gen bug |
-| 14 | Godot 宿主层（View/Host） | `godot-host` | Presentation | **Planned** | 引擎目标 Unity→**Godot 4.x .NET**（2026-07-03，[adr-0004](../../docs/architecture/adr-0004-godot-view-host-boundary.md) Accepted）。边界已立：Model→View 单向流+`WorldBridge`→`[Signal]`、固定时间步累加器（delta 不进 Core）、**2D 等距 TileMap iso 坐标红线（预留 0 代码）**。Phase-2 盘点证 Core 零冲突（1062 绿）。**待接入闸口**（无头日志证核心无死锁）+ 未来 sprint 拆 story。 |
+| 14 | Godot 宿主层（View/Host） | `godot-host` | Presentation | **Storied** | Phase-2 4 story 拆解完成（gh-001~004）；闸口验收→WorldBridge→累加器→命令端口 |
 | 15 | 方差 + 反应式 QTE 战斗模型 | `combat-variance` | Core | **Done** | cv-001~009 全 Complete；cv-005 三层漏斗重标定 harness；1271 绿；TR-BAL-001 终 gate |
 
 > 阶段（production/stage.txt）= **Production**（= AAA Alpha，CCGS 七阶映射见 `docs/agent-guide/开发流水线纪律.md` §1）。2026-07-03 推进：core-loop-fun = **validated**（Viability 实质证明：破境 UT0→8 纵深 + 19 条"立誓-寻仇-手刃"恩怨链，见 `production/playtests/2026-07-03-cd-playtest-emergence.md`）；结束 Pre-Production 内核验证期。jiuye 0-9 细分阶序保留为本表 epic 排序（0-3 done 历史，5=combat 当前，6-9 future）。

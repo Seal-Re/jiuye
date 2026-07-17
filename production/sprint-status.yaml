@@ -18,7 +18,7 @@ start: "2026-07-17"
 end: "2026-07-24"
 generated: "2026-07-17"
 updated: "2026-07-17"
-status: active
+status: closed  # 5/5 Must Have Done (2026-07-17)；全量 1271 绿
 
 stories:
   # —— Must Have ——
@@ -51,22 +51,22 @@ stories:
     completed: "2026-07-17"
   - id: "design-sync"
     name: "design/gdd/combat-system.md 同步修订为概率博弈模型"
-    file: ""
+    file: "design/gdd/combat-system.md"
     priority: must-have
-    status: ready-for-dev
+    status: done  # Status In Design→Living；补三管线+防御漏斗+Margin公式+SEC/SBC/R+溢出+旋钮
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-07-17"
   - id: "godot-host-scout"
     name: "Godot 宿主层 Phase-2 盘点 + story 拆解"
-    file: "production/epics/godot-host/"
+    file: "production/epics/godot-host/EPIC.md"
     priority: must-have
-    status: ready-for-dev
+    status: done  # EPIC + 4 story 文件就位（gh-001~004）；闸口→WorldBridge→累加器→命令端口
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-17"
 
   # —— Should Have ——
   - id: "balance-005"
