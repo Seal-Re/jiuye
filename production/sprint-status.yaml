@@ -55,11 +55,11 @@ stories:
     name: "balance-cross story-006 C1 counter exemption"
     file: "production/epics/balance-cross/story-006-c1-counter-exemption.md"
     priority: should-have
-    status: backlog
+    status: done  # 2026-07-17；IsCounterPair(SuppressionMatrix+CounterMul)豁免222对；1272绿
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-17"
   - id: "repo-tidy-kickoff"
     name: "仓库整理 kickoff（_research/raw3 + icon_gen bug）"
     file: ""
