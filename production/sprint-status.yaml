@@ -26,11 +26,11 @@ stories:
     name: "闸口验收：Core 无死锁形式化证明"
     file: "production/epics/godot-host/story-001-gate-check-core-no-deadlock.md"
     priority: must-have
-    status: ready-for-dev
+    status: done  # Verdict PASS (2026-07-17)；1271 绿+破境UT0→8+19恩怨链+seed-sweep零crash
     owner: ""
     estimate_days: 0.3
     blocker: ""
-    completed: ""
+    completed: "2026-07-17"
   - id: "gh-002"
     name: "WorldBridge + Signal 接线：Core→Godot 最小渲染回路"
     file: "production/epics/godot-host/story-002-worldbridge-signal-wiring.md"

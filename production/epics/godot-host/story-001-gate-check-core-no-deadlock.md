@@ -1,7 +1,7 @@
 # Story 001: 闸口验收 — Core 侧无死锁形式化证明
 
 > **Epic**: godot-host
-> **Status**: Not Started
+> **Status**: Complete（`production/gate-checks/godot-host-gate-2026-07-17.md`，Verdict PASS）
 > **Layer**: Presentation
 > **Type**: Config/Data（闸口文档，非代码）
 > **Estimate**: 小 (0.3d)
@@ -14,7 +14,7 @@
 
 ## Acceptance Criteria
 
-- [ ] **1.1 闸口文档**：`production/gate-checks/godot-host-gate-*.md` 存在，含以下证据链：
+- [x] **1.1 闸口文档**：`production/gate-checks/godot-host-gate-*.md` 存在，含以下证据链：
   - 全量测试 1271 绿/0 失败（含 IL 浮点扫描零命中）
   - 修炼 Viability：破境 UT0→8 纵深 + 19 条恩怨链（`production/playtests/2026-07-03-cd-playtest-emergence.md`）
   - 战斗 1000 场 seed-sweep 零 crash（`InvCrossDuelTests` 全 UT 全路径对拍）
