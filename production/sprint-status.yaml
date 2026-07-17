@@ -42,13 +42,13 @@ stories:
     completed: ""
   - id: "balance-005"
     name: "INV-CROSS 派生视图刷新 + /balance-check Fairness 观测"
-    file: ""
+    file: "production/qa/balance/balance-report-sprint-9-2026-07-17.md"
     priority: must-have
-    status: ready-for-dev
+    status: done  # 22/22 balance PASS; C1[40,60]% advisory (73.7% viol, SEC/SBC data deferred); PE-band+C2/C3+determinism ✅
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-17"
   - id: "cultivation-a3-close"
     name: "cultivation-a3 剩余 2 story 审计→Done（15/15 Complete）"
     file: "production/epics/cultivation-a3/EPIC.md"
