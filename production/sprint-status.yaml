@@ -18,7 +18,7 @@ start: "2026-07-17"
 end: "2026-07-24"
 generated: "2026-07-17"
 updated: "2026-07-17"
-status: closed  # 4/4 Must Have Done (2026-07-17)；全量 1271 绿
+status: in-progress  # 4/4 Must Have Done (2026-07-17)；全量 1271 绿
 
 stories:
   # —— Must Have ——
@@ -35,11 +35,11 @@ stories:
     name: "WorldBridge + Signal 接线：Core→Godot 最小渲染回路"
     file: "production/epics/godot-host/story-002-worldbridge-signal-wiring.md"
     priority: must-have
-    status: ready-for-dev
+    status: done  # 2026-07-17；Godot headless snapshot vs CLI 逐字节一致；1271 绿
     owner: ""
     estimate_days: 1.5
     blocker: "依赖 gh-001"
-    completed: ""
+    completed: "2026-07-17"
   - id: "balance-005"
     name: "INV-CROSS 派生视图刷新 + /balance-check Fairness 观测"
     file: "production/qa/balance/balance-report-sprint-9-2026-07-17.md"
