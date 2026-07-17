@@ -37,11 +37,11 @@ stories:
     name: "cultivation-a1-rest A1.4 解除 blocked + 盘点剩余 scope"
     file: "production/epics/cultivation-a1-rest/EPIC.md"
     priority: should-have
-    status: backlog
+    status: done  # 2026-07-17；EPIC Close — 4/4 DoD 全实现；A1.4 在 combat-fullstruct-003 已解
     owner: ""
     estimate_days: 0.7
     blocker: ""
-    completed: ""
+    completed: "2026-07-17"
   - id: "balance-cross-004"
     name: "balance-cross story-004 spar-stomp-smoothing"
     file: "production/epics/balance-cross/story-004-spar-stomp-smoothing.md"
