@@ -17,6 +17,12 @@ namespace Jianghu.Sim
         public long Clock { get; private set; }
         public LimitsConfig Limits { get; }
         public Chronicle Chronicle { get; }
+
+        /// <summary>命令日志（gh-004 命令端口）：非 null 时 Advance 记录每个 ActionChoice → 供 CLI/Godot 重放。</summary>
+        public List<CommandIntent>? CommandLog { get; set; }
+
+        /// <summary>重放队列（gh-004）：非 null 时 Advance 从此出队而非调 RuleBrain。</summary>
+        private Queue<CommandIntent>? _replayQueue;
         public Relations Relations { get; }
         public List<WorldNode> Nodes { get; }
         public Sect Sect { get; }
@@ -125,6 +131,12 @@ namespace Jianghu.Sim
         public int AdjustRelation(CharacterId f, CharacterId t, int d) => Relations.Adjust(f, t, d);
         public void Move(Character c, NodeId to) => c.Node = to;
 
+        /// <summary>gh-004：启用重放模式——Advance 从命令队列出队而非调 RuleBrain。</summary>
+        public void SetReplay(IEnumerable<CommandIntent> commands)
+        {
+            _replayQueue = new Queue<CommandIntent>(commands);
+        }
+
         /// <summary>事件驱动推进：处理至多 budget 个到期决策（§7.1）。</summary>
         public int Advance(int budget)
         {
@@ -136,7 +148,19 @@ namespace Jianghu.Sim
                 Clock = item.At > Clock ? item.At : Clock;
 
                 var ctx = BuildContext(actor);
-                var choice = _brains[actor.Id].DecideAsync(ctx, CancellationToken.None).GetAwaiter().GetResult();
+                // gh-004 命令端口：重放模式（跳过 RuleBrain，用录制命令）
+                ActionChoice choice;
+                if (_replayQueue != null && _replayQueue.Count > 0)
+                {
+                    var cmd = _replayQueue.Dequeue();
+                    choice = cmd.ToChoice();
+                }
+                else
+                {
+                    choice = _brains[actor.Id].DecideAsync(ctx, CancellationToken.None).GetAwaiter().GetResult();
+                }
+                // gh-004 命令端口：录制模式（记录 RuleBrain 输出）
+                CommandLog?.Add(CommandIntent.FromChoice(Clock, actor.Id.Value, choice));
                 var events = _actions.Execute(this, actor, choice);
                 foreach (var e in events)
                 {

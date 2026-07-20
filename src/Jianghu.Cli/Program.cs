@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using Jianghu.Actions;
 using Jianghu.Config;
 using Jianghu.Cultivation;
 using Jianghu.Stats;
@@ -15,6 +18,9 @@ bool factionOn = args.Any(a => a == "--faction");
 bool dramaOn = args.Any(a => a == "--drama");
 // drama-013：--drama-feuds 预置冤孽（需 --drama；演示用，预置强恩怨 + 师徒边）。
 bool dramaSeedFeuds = args.Any(a => a == "--drama-feuds");
+// gh-004：--record <file> 录制命令序列；--replay <file> 重放命令序列。
+string? recordPath = GetOptArg(args, "--record");
+string? replayPath = GetOptArg(args, "--replay");
 var positional = args.Where(a => !a.StartsWith("--", StringComparison.Ordinal)).ToArray();
 ulong seed = positional.Length > 0 && ulong.TryParse(positional[0], out var s) ? s : 2026UL;
 int steps = positional.Length > 1 && int.TryParse(positional[1], out var n) ? n : 200;
@@ -28,7 +34,16 @@ if (!cultivation)
     return;
 }
 
-RunCultivation(seed, steps, budget, mapOn, factionOn, dramaOn, dramaSeedFeuds);
+RunCultivation(seed, steps, budget, mapOn, factionOn, dramaOn, dramaSeedFeuds,
+    recordPath: recordPath, replayPath: replayPath);
+
+// gh-004：提取 --key value 形式的可选参数
+static string? GetOptArg(string[] args, string key)
+{
+    for (int i = 0; i < args.Length - 1; i++)
+        if (args[i] == key) return args[i + 1];
+    return null;
+}
 
 // —— 既有开放式江湖演示（cultivation-off，与 v1.0 逐字节）——
 static void RunLegacy(ulong seed, int steps, int budget, bool mapOn, bool factionOn, bool dramaOn, bool dramaSeedFeuds)
@@ -52,14 +67,40 @@ static void RunLegacy(ulong seed, int steps, int budget, bool mapOn, bool factio
 }
 
 // —— 修炼江湖演示（cultivation-on）：21 路皆能定路 / 突破 / per-path 战力分化 / 软情境 ——
-static void RunCultivation(ulong seed, int steps, int budget, bool mapOn, bool factionOn, bool dramaOn, bool dramaSeedFeuds)
+static void RunCultivation(ulong seed, int steps, int budget, bool mapOn, bool factionOn, bool dramaOn, bool dramaSeedFeuds,
+    string? recordPath = null, string? replayPath = null)
 {
     var world = WorldFactory.CreateInitial(seed, LimitsConfig.Default, initialCount: 8, cultivation: true, mapOn: mapOn, factionOn: factionOn, dramaOn: dramaOn, dramaSeedFeuds: dramaSeedFeuds);
     // 展示用注册表（独立于 World 内部 registry，仅供 PathId→路名/境界名/战力查询）。
     var registry = new PathRegistry(new CodePathSource());
 
-    Console.WriteLine($"=== 修炼江湖开演 (seed={seed}, steps={steps}, cultivation=on{(mapOn ? ", map=on" : "")}{(factionOn ? ", faction=on" : "")}{(dramaOn ? ", drama=on" : "")}) ===");
+    // gh-004：重放模式——加载命令序列，替代 RuleBrain
+    if (replayPath != null)
+    {
+        var json = File.ReadAllText(replayPath);
+        var commands = JsonSerializer.Deserialize<List<CommandIntent>>(json)
+                       ?? throw new InvalidOperationException("Failed to deserialize command log");
+        world.SetReplay(commands);
+        Console.WriteLine($"=== 修炼江湖重放 (seed={seed}, steps={steps}, commands={commands.Count}) ===");
+    }
+    else
+    {
+        Console.WriteLine($"=== 修炼江湖开演 (seed={seed}, steps={steps}, cultivation=on{(mapOn ? ", map=on" : "")}{(factionOn ? ", faction=on" : "")}{(dramaOn ? ", drama=on" : "")}) ===");
+    }
+
+    // gh-004：录制模式——启用 CommandLog
+    if (recordPath != null)
+        world.CommandLog = new List<CommandIntent>();
+
     for (int i = 0; i < steps; i++) world.Advance(budget);
+
+    // gh-004：录制完成 → 写 JSON
+    if (recordPath != null && world.CommandLog != null)
+    {
+        var json = JsonSerializer.Serialize(world.CommandLog, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(recordPath, json);
+        Console.WriteLine($"命令序列已录制: {recordPath} ({world.CommandLog.Count} 条)");
+    }
 
     var lines = world.Chronicle.Lines;
 

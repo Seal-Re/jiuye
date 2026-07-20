@@ -27,11 +27,11 @@ stories:
     name: "命令端口 + CLI/Godot 双宿主确定性回归"
     file: "production/epics/godot-host/story-004-command-port-dual-host-regression.md"
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-20；CommandIntent+World.SetReplay+CLI --record/--replay+录制→重放逐字节一致；1275绿
     owner: ""
     estimate_days: 1.5
     blocker: "依赖 gh-003（已解除）"
-    completed: ""
+    completed: "2026-07-20"
   - id: "combat-fullstruct-001"
     name: "combat-fullstruct story-001 derived-per-entity"
     file: "production/epics/combat-fullstruct/story-001-derived-per-entity.md"
