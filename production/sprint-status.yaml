@@ -18,7 +18,7 @@ start: "2026-07-17"
 end: "2026-07-24"
 generated: "2026-07-17"
 updated: "2026-07-17"
-status: in-progress
+status: closed  # 2026-07-20；Must Have done + 4/4 Should Have done；1272绿
 
 stories:
   # —— Must Have ——
@@ -64,11 +64,11 @@ stories:
     name: "仓库整理 kickoff（_research/raw3 + icon_gen bug）"
     file: ""
     priority: should-have
-    status: backlog
+    status: done  # 2026-07-20；raw3 gitignored+icon_gen已修复+pixel已提交（均在3e3a5b1）；本地477KB残留待手动清理
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-20"
 
   # —— Nice to Have ——
   - id: "gh-004"
