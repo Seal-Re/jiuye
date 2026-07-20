@@ -26,11 +26,11 @@ stories:
     name: "固定时间步累加器：_Process→Advance 确定性驱动"
     file: "production/epics/godot-host/story-003-fixed-timestep-accumulator.md"
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-20；WorldBridge._Process 累加器 SimStep=1s MaxCatchup=5；delta不进Core；1272绿
     owner: ""
     estimate_days: 1.0
     blocker: "依赖 gh-002（已解除）"
-    completed: ""
+    completed: "2026-07-20"
 
   # —— Should Have ——
   - id: "cultivation-a1-unblock"
