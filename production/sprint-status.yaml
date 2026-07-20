@@ -36,11 +36,11 @@ stories:
     name: "combat-fullstruct story-001 derived-per-entity"
     file: "production/epics/combat-fullstruct/story-001-derived-per-entity.md"
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-20；4 derived providers已实现+14绿；DerivedProvidersTests+DerivedRegistryGate全覆盖
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-07-20"
 
   # —— Should Have ——
   - id: "combat-fullstruct-008"

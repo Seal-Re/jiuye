@@ -1,7 +1,7 @@
 # Story 001: derived:* per-entity 真求和
 
 > **Epic**: combat-fullstruct
-> **Status**: Ready
+> **Status**: Complete（2026-07-20 — 实现+测试已就绪，14绿）
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 中 (2d)
@@ -17,13 +17,13 @@
 
 ## Acceptance Criteria
 
-- [ ] 1.1 `derived:fleetWeighted` 真值 ≠ 简化为 craftScore×2。从 constructTier + mindBandwidth 计算
-- [ ] 1.2 `derived:rosterWeighted` 真值：Σ beastPower_i × bond_i/100
-- [ ] 1.3 `derived:ghostSoldierWeighted` 真值：Σ ghostSoldierPower × (1 − devourMeter/200)
-- [ ] 1.4 `derived:guSwarmWeighted` 真值：Σ guPower_i × venomCharge/100
-- [ ] 1.5 All providers registered via DerivedRegistry.RegisterAll(), IDerivedProvider.Compute 返回非零
-- [ ] 1.6 UT8 power带: 战斗路 ∈ [0.7, 1.3] × 剑修（校准不破）
-- [ ] 1.7 全量绿 + IL 浮点零 + off 逐字节
+- [x] 1.1 `derived:fleetWeighted` 真值 ≠ 简化为 craftScore×2。从 constructTier + mindBandwidth 计算
+- [x] 1.2 `derived:rosterWeighted` 真值：Σ beastPower_i × bond_i/100
+- [x] 1.3 `derived:ghostSoldierWeighted` 真值：Σ ghostSoldierPower × (1 − devourMeter/200)
+- [x] 1.4 `derived:guSwarmWeighted` 真值：Σ guPower_i × venomCharge/100
+- [x] 1.5 All providers registered via DerivedRegistry.RegisterAll(), IDerivedProvider.Compute 返回非零
+- [x] 1.6 UT8 power带: 战斗路 ∈ [0.7, 1.3] × 剑修（校准不破）
+- [x] 1.7 全量绿 + IL 浮点零 + off 逐字节
 
 ## Implementation Notes
 
