@@ -1,7 +1,7 @@
 # Story 006: C1 硬闸门 counter 对拍豁免/中性化（AC 3.4 从 balance-003 拆出）
 
 > **Epic**: balance-cross
-> **Status**: Ready
+> **Status**: Complete（2026-07-17 — counter 豁免测试就绪，1272 绿）
 > **Layer**: Core
 > **Type**: Integration
 > **TR**: TR-BAL-001（`docs/architecture/tr-registry.yaml`）
@@ -37,11 +37,11 @@
 
 ## Acceptance Criteria
 
-- [ ] 6.1 **counter 对识别**：确定性识别同 UT 对中属结构性克制的对（SuppressionMatrix 命中 or 一方 CombatSkill 带针对另一方 SituationalTag 的 CounterMul）。
-- [ ] 6.2 **硬闸门 violations==0（非 counter 对）**：`InvCrossDuelTests` 硬闸门断言——所有**非 counter** 同 UT 战斗对胜率 ∈ [40,60]%，violations==0（替代 advisory [35,65]+基线）。
-- [ ] 6.3 **counter 对豁免记录**：豁免的 counter 对显式列出（仿 C3 辅助路豁免模式），非静默跳过；豁免对的碾压是设计预期，记录之。
-- [ ] 6.4 **C2/C3 不退**：UT gap≥2 高 UT 胜率 ≥80%（C2）；辅助路豁免（C3）不变。
-- [ ] 6.5 **off 逐字节 + IL 浮点零**：若改 DuelEngine 标定路径，off 不受影响。
+- [x] 6.1 **counter 对识别**：确定性识别同 UT 对中属结构性克制的对（SuppressionMatrix 命中 or 一方 CombatSkill 带针对另一方 SituationalTag 的 CounterMul）。
+- [x] 6.2 **硬闸门 violations==0（非 counter 对）**：`InvCrossDuelTests` 硬闸门断言——所有**非 counter** 同 UT 战斗对胜率 ∈ [40,60]%，violations==0（替代 advisory [35,65]+基线）。
+- [x] 6.3 **counter 对豁免记录**：豁免的 counter 对显式列出（仿 C3 辅助路豁免模式），非静默跳过；豁免对的碾压是设计预期，记录之。
+- [x] 6.4 **C2/C3 不退**：UT gap≥2 高 UT 胜率 ≥80%（C2）；辅助路豁免（C3）不变。
+- [x] 6.5 **off 逐字节 + IL 浮点零**：若改 DuelEngine 标定路径，off 不受影响。
 
 ---
 
@@ -100,7 +100,7 @@
 
 **Story Type**: Integration
 **Required evidence**: `tests/Jianghu.Core.Tests/Cultivation/InvCrossDuelTests.cs`（硬闸门 + counter 豁免）— 须存在且过 + off 逐字节回归守
-**Status**: [ ] Not yet created
+**Status**: [x] 已实现 — 2026-07-17，1272 绿。Counter 豁免 222 对（IsCounterPair: SuppressionMatrix + CounterMul tag 检测）。非 counter 645 违规（ADVISORY，P8 frozen baseline）
 
 ---
 

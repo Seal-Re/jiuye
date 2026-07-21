@@ -1,7 +1,7 @@
 # Epic: 真·全量机制结构化
 
 **Layer**: Core
-**Status**: Deferred
+**Status**: Done（2026-07-14 审计：7/8 story Complete——001~007 代码+测试全部就位；008 丹修非战斗机制 Backlog。原标 Deferred 因全量未审计。）
 **GDD**: design/gdd/xxx.md（P8 补）或 — ；深度源指向现有 docs/legacy-specs/specs/ 文件
 **Governing ADRs**: None yet（P8 增量补）
 **Engine Risk**: LOW（.NET 8 纯整数）

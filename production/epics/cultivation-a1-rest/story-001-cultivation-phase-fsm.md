@@ -1,7 +1,7 @@
 # Story 001: 10 态修炼流程状态机（CultivationPhase 骨架）
 
 > **Epic**: cultivation-a1-rest
-> **Status**: Backlog
+> **Status**: Deferred — EPIC Complete @2026-07-17 (Sprint 10)；scope 已被后续实现覆盖
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 中 (1d)

@@ -4,6 +4,7 @@ using Jianghu.Config;
 using Jianghu.Cultivation.Artifacts;
 using Jianghu.Model;
 using Jianghu.Random;
+using Jianghu.Stats;
 
 namespace Jianghu.Cultivation
 {
@@ -122,13 +123,17 @@ namespace Jianghu.Cultivation
                     && !HasResidualOrder(ctx, Side.Defender);
 
                 // —— Exchange 1: 攻方→防方 ——
-                var (rawDmgToB, reflectToA, poiseBonusToB, chipImmuneB) = ResolveExchange(
-                    activeASkill, effPeA, defender.Cultivation,
+                var ex1 = ResolveExchange(
+                    activeASkill, effPeA, defender.Cultivation, defender.Stats,
                     attackerPath, defenderPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls, controlLimiter, round,
                     attackerArtifact, defenderArtifact, calibrationMode,
                     defenderPe: effPeB, duelRng: duelRng, exchangeNonce: 0);
+                var rawDmgToB = ex1.DmgToDefender;
+                var reflectToA = ex1.ReflectToAttacker;
+                var poiseBonusToB = ex1.PoiseBreakBonus;
+                var chipImmuneB = ex1.ChipImmuneToPoise;
 
                 int dmgToB, dmgToA_redirect;
                 if (attackerControlled || aFleetFrozen)
@@ -142,13 +147,17 @@ namespace Jianghu.Cultivation
                 bool aHitB = !attackerControlled && !aFleetFrozen && !aRedirected;
 
                 // —— Exchange 2: 防方→攻方 ——
-                var (rawDmgToA, reflectToB, poiseBonusToA, chipImmuneA) = ResolveExchange(
-                    activeDSkill, effPeB, attacker.Cultivation,
+                var ex2 = ResolveExchange(
+                    activeDSkill, effPeB, attacker.Cultivation, attacker.Stats,
                     defenderPath, attackerPath, ctx, limits, resolver,
                     Side.Attacker, Side.Defender,
                     pendingDots, pendingControls, controlLimiter, round,
                     defenderArtifact, attackerArtifact, calibrationMode,
                     defenderPe: effPeA, duelRng: duelRng, exchangeNonce: 1);
+                var rawDmgToA = ex2.DmgToDefender;
+                var reflectToB = ex2.ReflectToAttacker;
+                var poiseBonusToA = ex2.PoiseBreakBonus;
+                var chipImmuneA = ex2.ChipImmuneToPoise;
 
                 int dmgToA, dmgToB_redirect;
                 if (defenderControlled || bFleetFrozen)
@@ -278,10 +287,10 @@ namespace Jianghu.Cultivation
         /// Dot/Control 模块不直接改 dmg，而是通过 out 列表挂载到对应方，TickDots 结算。
         /// cv-003：ChipImmuneToPoise=true 时该交锋伤害为 Elemental 格挡穿透（免控制/硬直，⑩.1）→ ResolveR2 不派生削韧。
         /// </summary>
-        private static (int DmgToDefender, int ReflectToAttacker, int PoiseBreakBonus, bool ChipImmuneToPoise) ResolveExchange(
+        private static CombatExchangeResult ResolveExchange(
             CombatSkillDef? skill,
             int attackerPe,
-            CultivationState defenderState,
+            CultivationState defenderState, StatBlock defenderStats,
             CultivationPathDef attackerPath, CultivationPathDef defenderPath,
             CombatContext ctx, LimitsConfig limits, SituationalResolver? resolver,
             Side attackerSide, Side defenderSide,
@@ -296,13 +305,23 @@ namespace Jianghu.Cultivation
             // 查 CombatMath 表 → 伯努利判定。未命中 = 攻击被化解（本切片伤害归零 + 不施本次 rider dot/control：
             // "弹反挂毒的暗器→无毒"，用户界定）；已挂 DoT 仍由 TickDots 结算（管线2 绕过，不受影响）。
             // 防守帧钩子/削韧/标签门控/溢出留 cv-002~004。标定期（calibrationMode）旁路方差（只测裸 PE）。
+            // cv-004（adr-0008 决策⑨.2）：溢出标志提升至此作用域——溢出时不仅跳过伯努利，也跳过 OnDefend（绝对秒杀）。
+            bool overflowed = false;
             if (duelRng != null && !calibrationMode && skill != null)
             {
                 int p = CombatMath.GetSuccessPermille(attackerPe - defenderPe, defenderPe);
-                // per-exchange 掷骰：nonce 混入保同回合两次交锋（攻/防）用不同抽样点，确定且不相关。
-                int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
-                if (roll >= p)
-                    return (0, 0, 0, false); // 未命中：攻击化解，本次交锋零伤害、零 rider 挂载、零削韧（未命中不削韧，语义自洽）
+                // cv-006（adr-0010 决策①）：SEC 前置调制——合流进 cv-001 单次伯努利（不新增掷骰）。
+                p = CombatMath.ApplyEvasionCoefficient(p, skill.Sec);
+                // cv-004（adr-0008 决策⑨.2）：阈值溢出检测——p≥OverflowThreshold 时跳过伯努利掷骰（数学必中）。
+                // 溢出时也跳过 OnDefend（见下方法宝/防御模块遍历的 overflowed 守卫）→ 绝对秒杀。
+                overflowed = CombatMath.IsOverflow(p, limits.OverflowThresholdPermille);
+                if (!overflowed)
+                {
+                    int roll = duelRng.Split((ulong)((round << 4) | exchangeNonce)).NextInt(1000);
+                    if (roll >= p)
+                        return new CombatExchangeResult(0, 0, 0, false, null); // 未命中
+                }
+                // 溢出/命中：继续执行后续伤害计算（OnUse → [跳过 OnDefend] → ...）
             }
 
             // —— cv-002（adr-0008 决策⑦步7）：PoiseBreak 算子额外削韧收集（路线 B）——
@@ -400,8 +419,15 @@ namespace Jianghu.Cultivation
             bool blockFired = false;          // 本次交锋是否有 Block 类防御实际减伤（供 Elemental Chip 判定）
             bool blockGatedByBlunt = false;   // Blunt 是否门控关掉了防方 Block 类（供招架崩坏削韧 bonus）
 
+            // cv-004（adr-0008 ⑩.4 优先级链）：Tag > Overflow。
+            // 若攻击带标签门控（Blunt=Unblockable / Elemental=Undodgeable），标签门控优先于溢出——不跳过 OnDefend。
+            // 溢出仅在没有标签门控时生效（Normal 攻击 → 纯溢出 → 绝对秒杀）。
+            bool taggedAttack = attackType != DamageType.Normal;
+            bool skipOnDefend = overflowed && !taggedAttack; // Tag > Overflow: 标签优先
+
             // —— 批5 法宝配套：防方装备法宝 OnDefend 效果（盾/护甲等） ——
-            if (defenderArtifact != null)
+            // cv-004：溢出时跳过 OnDefend（绝对秒杀——高阶威压使防方无法防御）。Tag > Overflow 优先。
+            if (!skipOnDefend && defenderArtifact != null)
             {
                 foreach (var op in defenderArtifact.Effects)
                 {
@@ -422,7 +448,10 @@ namespace Jianghu.Cultivation
             }
 
             // OnDefend：防方防御模块（经 ModuleResolver.ApplyOnDefend），收集反伤
-            foreach (var defSkill in defenderPath.CombatSkills)
+            // cv-004：溢出时跳过 OnDefend（绝对秒杀）。Tag > Overflow 优先。
+            if (!skipOnDefend)
+            {
+                foreach (var defSkill in defenderPath.CombatSkills)
             {
                 if (!ListHas(defenderState.ChosenSkillIds, defSkill.Id)) continue;
                 if (defSkill.Tier > defenderState.RealmIndex) continue;
@@ -444,6 +473,7 @@ namespace Jianghu.Cultivation
                     if (IsBlockClass(op.Kind) && dmg < dmgBefore) blockFired = true;
                 }
             }
+            } // cv-004: 关闭 !skipOnDefend 守卫（Tag > Overflow：标签攻击不跳防御，纯溢出跳防御）
 
             // 负向压制矩阵检查（PostMul — 在 FlatPen/FlatDR 之后、软情境之前乘算）
             // balance-006 方案B：标定模式旁路压制（阴→阳/魔→佛 结构性克制，与裸 PE 平价正交）。
@@ -480,12 +510,18 @@ namespace Jianghu.Cultivation
             // —— cv-003（adr-0008 决策⑩.1）：元素格挡穿透 Chip Damage ——
             // Elemental 攻击被 Block 类成功减伤 → 免控制/硬直（chipImmune）但承受穿透保底。
             // 基础伤害 = attackerPe/BaseDamageDivisor（未缩放）；Margin = attackerPe − defenderPe。
+            // cv-008（adr-0010 决策②）：SBC 招式格挡系数调制有效 Chip 穿透千分比（替换 limits.ChipDamagePermille）。
+            // 复用 cv-003 保底模型 + 既有 ChipDamageFloor 函数（不引入新公式、不内联）。SBC 确定性不掷骰。
+            // 标定/裸攻（calibrationMode || skill==null）用基准 ChipPermille（同 cv-001/002/003/006/007 旁路范式）。
             bool chipImmuneToPoise = false;
             if (attackType == DamageType.Elemental && blockFired)
             {
+                int effChipPermille = (!calibrationMode && skill != null)
+                    ? CombatMath.ApplyBlockCoefficient(limits.ChipDamagePermille, skill.Sbc)
+                    : limits.ChipDamagePermille;  // 标定/裸攻用基准
                 int chipFloor = ChipDamageFloor(
                     attackerPe / BaseDamageDivisor, attackerPe - defenderPe,
-                    limits.ChipDamagePermille, limits.ChipMarginDivisor);
+                    effChipPermille, limits.ChipMarginDivisor);
                 int dmgUnscaledNow = (int)Math.Max(0, dmg / Scale);
                 if (chipFloor > dmgUnscaledNow)
                 {
@@ -494,12 +530,34 @@ namespace Jianghu.Cultivation
                 }
             }
 
+            // —— cv-007（adr-0010 决策③④ step 4）：第三层抵抗——派生抗性 R 半衰减伤 ——
+            // 位置铁律（用户 2026-07-14 裁定修正）：OnDefend 模块结算 + SuppressionMatrix + GoldenBody + 软情境 + Chip
+            // **全部之后**、cv-002 削韧派生（在 ResolveR2 TickPoise 内，本函数 return 后）之前。
+            // adr-0010 决策④ step 4：抵抗层是漏斗最后一环，对经 Chip 穿透保底后的最终 dmg 做半衰减。
+            // R = ResistanceProviders.ResistanceOf（从体质/识/HasBodyArt 功法标签派生，B.5 不含 daoHeart/innerDemon）。
+            // 半衰：dmg = CombatMath.ApplyResistance(dmg, R, K)（K×1000/(K+R)，max(1,...) 保底，纯整数 B.2，long 中间防溢出）。
+            // 标定模式旁路（同 cv-001/002/003/006，保 cv-005 seed-sweep 裸 PE 纯净）。
+            // attackType 取攻方招式 DamageType（标定模式已退化为 Normal，故标定模式本块不进——双保险）。
+            if (!calibrationMode)
+            {
+                int R = ResistanceProviders.ResistanceOf(
+                    defenderState, defenderStats, defenderPath!, GateType.None,
+                    attackType, limits);
+                int dmgUnscaledResist = (int)(dmg / Scale);
+                int afterResist = CombatMath.ApplyResistance(dmgUnscaledResist, R, limits.ResistanceHalfLifeK);
+                dmg = (long)afterResist * Scale + (dmg % Scale);
+            }
+
             // —— cv-003（adr-0008 决策⑨.1）：招架崩坏 —— Blunt 门控关掉了防方 Block 类 → 追加大额削韧。
             // NPC 侧退化：Block 禁用（全额伤害上面已实现）+ 削韧 bonus（复用 cv-002 PoiseBreakBonus 通道）。
             if (attackType == DamageType.Blunt && blockGatedByBlunt)
                 poiseBreakBonus += limits.GuardBreakPoiseBonus;
 
-            return ((int)Math.Max(0, dmg / Scale), (int)totalReflect, poiseBreakBonus, chipImmuneToPoise);
+            DefenseFrameHook? frameHook = overflowed
+                ? new DefenseFrameHook(limits.GuaranteeFrameCount, true, attackType, (int)Math.Max(0, dmg / Scale))
+                : null;
+            return new CombatExchangeResult((int)Math.Max(0, dmg / Scale), (int)totalReflect, poiseBreakBonus,
+                chipImmuneToPoise, frameHook);
         }
 
         /// <summary>dot 挂载条目：对哪方、每 tick 伤害、剩余回合。</summary>
@@ -882,8 +940,12 @@ namespace Jianghu.Cultivation
             return false;
         }
 
-        /// <summary>检查防方是否修了横练/护体类功法（门控反伤/格挡）。</summary>
-        private static bool HasBodyArt(CultivationPathDef path, CultivationState st)
+        /// <summary>
+        /// 检查防方是否修了横练/护体类功法（门控反伤/格挡）。
+        /// cv-007：提为 internal 供 <see cref="ResistanceProviders.ResistanceOf"/> 复用（判 BodyArtPhysResistBonus 加成）。
+        /// 语义="已修横练/护体"（遍历 path.ArtCategories Role=body/defense 且 ChosenArtIds 命中）。
+        /// </summary>
+        internal static bool HasBodyArt(CultivationPathDef path, CultivationState st)
         {
             foreach (var cat in path.ArtCategories)
             {

@@ -1,9 +1,9 @@
 # Epic: 方差 + 反应式 QTE 战斗模型（combat-variance）
 
 **Layer**: Core（战斗内核范式重构）
-**Status**: In Progress（cv-001 Complete @ `dbd070c`；cv-002 Complete @ `1bcd48f`；cv-003 Complete @ `9ad6be0` 2026-07-07；cv-004 溢出+防守帧钩子契约 Backlog 待展开。adr-0008 Accepted @ 2026-07-06 落地起点）
+**Status**: Done（cv-001~009 全 Complete；cv-005 三层漏斗重标定 harness 落成 @2026-07-17；1271 绿全量）
 **GDD**: `design/gdd/combat-system.md`（实现期须同步修订：确定性结算 → 概率博弈结算）；深度源 `docs/architecture/adr-0008-variance-reactive-combat-model.md`（权威）
-**Governing ADRs**: **adr-0008**（primary，方差+反应式 QTE 战斗模型）· adr-0001（整数确定性 B.2）· adr-0002（Modules 工厂 B.9）· adr-0003（off 逐字节 B.3）· adr-0004（Godot View/Host 边界，判定权移交）
+**Governing ADRs**: **adr-0008**（primary，方差+反应式 QTE 战斗模型）· **adr-0010**（三层防御漏斗 Evasion→Block→Resistance，Accepted @ `d35fef6`）· adr-0001（整数确定性 B.2）· adr-0002（Modules 工厂 B.9）· adr-0003（off 逐字节 B.3）· adr-0004（Godot View/Host 边界，判定权移交）
 **Engine Risk**: **HIGH**（触 `Jianghu.Cultivation`：B.2 禁浮点 / B.3 off 逐字节 / PRNG 流 / 平衡数值——一处细微 bug 破确定性或平衡且难查。B.7 旗舰档实现 + 主控独立核验 A.3）
 **Created**: 2026-07-06（承 balance-cross EPIC "方差战斗模型" 立项预告 + retro-sprint-7 action item）
 
@@ -25,6 +25,9 @@
 - **cv-003** 标签门控（Unblockable_Weapon/Undodgeable_Space 动态开关钩子）+ 元素格挡穿透 Chip Damage
 - **cv-004** 阈值溢出 + 防守帧钩子契约（Model→View 整数钩子）+ 裁定优先级链
 - **cv-005** 重标定：InvCrossDuel seed-sweep 复活 [40,60]% 硬闸门（解除 balance-006 降级）
+- **cv-006** SEC 闪避系数合流（adr-0010 Layer ①）：SEC 挂 CombatSkillDef → CombatMath 命中调制 → 合流 cv-001 单次判定
+- **cv-007** 派生抗性 R + 半衰减伤（adr-0010 Layer ③）：DerivedProviders.ResistanceOf → 半衰公式 → ResolveExchange step 4
+- **cv-008** SBC 格挡系数调制 + 三层漏斗串行接线（adr-0010 Layer ② + Integration）：SBC 调制 cv-003 Chip + ①→②→③→④→⑤ 管线闭环
 
 ## Out of Scope（本 epic 不含）
 
@@ -42,9 +45,12 @@
 - [x] cv-001 主动交锋概率化：CombatMath 查表 + Duel=9 流 + ResolveExchange 伯努利拦截，off 逐字节 + IL 浮点零 + 同种子复现（`dbd070c`，1102 绿 + worktree sha256 实证）
 - [x] cv-002 削韧/硬直副轴（duel-local，接 balance-007/008）（`1bcd48f`，1127 绿 + worktree sha256 实证）
 - [x] cv-003 标签门控 + Chip Damage（`9ad6be0`，1147 绿 + worktree sha256 实证）
-- [ ] cv-004 溢出 + 防守帧钩子契约 + 裁定优先级
-- [ ] cv-005 [40,60]% 硬闸门 seed-sweep 复活（TR-BAL-001 完整达成，解除 balance-006 降级）
-- [ ] 全程守 B.2（禁浮点，IL 扫描）/ B.3（off 逐字节）/ B.9（Modules 工厂）
+- [x] cv-004 溢出 + 防守帧钩子契约 + 裁定优先级（Model 侧闭环 @ 31c5e1a+17abbea+f54d89a+32b5e1e）
+- [x] cv-005 [40,60]% 硬闸门 seed-sweep 复活（TR-BAL-001 完整达成，解除 balance-006 降级）
+- [x] cv-006 SEC 闪避系数合流 cv-001 命中判定（adr-0010 Layer ①）
+- [x] cv-007 派生抗性 R + 半衰减伤（adr-0010 Layer ③）
+- [x] cv-008 SBC 格挡系数调制 Chip + 三层漏斗串行接线（adr-0010 Layer ② + Integration）
+- [x] 全程守 B.2（禁浮点，IL 扫描）/ B.3（off 逐字节）/ B.9（Modules 工厂）
 - [ ] `design/gdd/combat-system.md` 同步修订为概率博弈模型
 
 ## Stories（story 级指针；机器可读状态在各 story 文件 Status 字段 + sprint-status.yaml）
@@ -52,8 +58,11 @@
 - **story-001** active-clash-variance — **Complete**（`dbd070c` @2026-07-07；本 epic 首切片）。CombatMath 查表 + RngStreamIds.Duel=9 + ResolveExchange 插入伯努利判定 + duel-local seed 派生。后台 NPC 内核代掷，`dotnet run` 已见"差999"变有悬念对局（88/13/109）。1102 绿 + 27 determinism + worktree sha256 实证（A.3）。
 - **story-002** poise-stagger-subaxis — **Complete**（`1bcd48f` @2026-07-07；削韧+硬直+DR 最小闭环）。PoiseState duel-local + DerivePoiseDamage/StaggerResetPoise 纯函数 + TickPoise 复用 Control 管线注入 turns=1 stagger + A+B 混合削韧来源（伤害派生 + PoiseDamage 算子骨架，21 路数据 deferred）+ calibrationMode 旁路。1127 绿 + worktree sha256 实证（A.3）。balance-004 阈值因削韧放宽 <27。
 - **story-003** tag-gating-chip-damage — **Complete**（`9ad6be0` @2026-07-07；Model 侧最小闭环）。DamageType 标签（Normal/Blunt/Elemental，AOE 并入 Elemental）确定性门控 Block 类={FlatDR,ReflectDamage}/Dodge 类={Evade,SoulSplit} + 元素格挡穿透 Chip Damage（免削韧协调 cv-002 TickPoise）+ 招架崩坏 bonus + calibrationMode 旁路（决策⑨.1/⑩.1）。1147 绿 + worktree sha256 实证（A.3）。**QTE 帧窗/裁定优先级/连续格挡递减留 cv-004**；21 路 DamageType 数据 deferred。
-- **story-004** overflow-defense-frame-contract — Backlog。难度溢出 >1000‰（NPC 数学必败=绝对秒杀）+ Godot 防守帧钩子整数契约 + 保底帧规则A + 裁定优先级链（标签>溢出>保底，决策⑧A/⑨.2/⑩.2/⑩.4）。Model 侧钩子契约，View 落实属 godot-host。
-- **story-005** recalibration-40-60-gate — Backlog（依赖 cv-001）。InvCrossDuelTests 改 seed-sweep 统计胜率，复活 [40,60]% 硬闸门 violations==0（解除 balance-006 PE-band 降级）；C2/C3 不退；21 路 mul 概率模型下复算。
+- **story-004** overflow-defense-frame-contract — **Complete**（`31c5e1a`+`17abbea`+`f54d89a`+`32b5e1e` @2026-07-14；Model 侧闭环）。溢出检测（p≥1000→跳过伯努利必中）+ 跳过OnDefend绝对秒杀 + 优先级链 Tag>Overflow + DefenseFrameHook 契约 + GuaranteeFrameCount 保底帧旋钮 + ResolveExchange 5元组扩展。OverflowTests 18 绿 + 全量 1243 绿。View 侧 QTE 属 godot-host。
+- **story-005** recalibration-40-60-gate — **Not Started**（创建 2026-07-14；依赖 cv-001+adr-0010 防御漏斗已就位）。三层漏斗全开（calibrationMode=false）seed-sweep：InvCrossDuelTests 全路径对拍胜率统计 → [40,60]% 硬闸门 violations==0（解除 balance-006 PE-band 降级）。若 violations>0：调参 K/ChipPermille/SEC/SBC 全局参数 + 路径级诊断 dump。C2/C3 不退；平衡矩阵 CSV dump。
+- **story-006** sec-evasion-merge — **Complete**（`c57d365` @2026-07-14；adr-0010 Layer ①）。SEC 闪避系数合流 cv-001 命中判定：`CombatSkillDef.Sec` 字段 + `CombatMath.ApplyEvasionCoefficient`（AutoHitPermille=1000 必中/中性/衰减/抬升钳≤1000）+ ResolveExchange step 1 接线 + calibrationMode 旁路。1166 绿 + 27 determinism + off md5 一致（A.3）。21 路数据 deferred（全默认 1000 中性）。偏离 AutoHitPermille=1000 vs ADR 字面 999 已登记（adr-0008 ⑨.2 背书）。
+- **story-007** resistance-derived — **Complete**（`4e51dfd` @2026-07-14；adr-0010 Layer ③）。派生抗性 R + 半衰减伤：新建 `ResistanceProviders.ResistanceOf`（体质→物理抗/识→法术抗 + HasBodyArt 复用）+ `CombatMath.ApplyResistance` 半衰公式（K×1000/(K+R)，max(1,...) 保底）+ ResolveExchange step 4 接线（Chip 后，符合决策④）+ 5 旋钮 + B.5 守（R 不进 EffectivePower）。1198 绿 + 27 determinism + off md5 一致（A.3）。偏离：接线位置修正 + gate 退化用 HasBodyArt + 2 既有测试回归适配（A.7）。法宝 OnDefend 加 R 留 TODO(cv-008)。
+- **story-008** sbc-block-integration — **Complete**（`f34caed`+`341d390` @2026-07-14；adr-0010 Layer ② + Integration）。SBC 格挡系数调制 cv-003 Chip 穿透：`CombatSkillDef.Sbc` 字段 + `CombatMath.ApplyBlockCoefficient` + Chip 段替换 ChipDamageFloor 第 3 参（effChipPermille）+ 三层漏斗串行接线已由 cv-006/007 就位。1224 绿 + 27 determinism + off md5 一致（A.3）。adr-0010 三层防御漏斗闭环。
 
 ## Notes
 

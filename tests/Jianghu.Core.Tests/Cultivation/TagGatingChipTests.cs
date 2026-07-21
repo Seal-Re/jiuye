@@ -220,7 +220,10 @@ namespace Jianghu.Core.Tests.Cultivation
         {
             // Elemental 不关 Block（FlatDR）——但会触发 Chip 穿透（见 chip 测试）。此处仅验 Block 未被门控跳过。
             // 用极低 chip 配置隔离门控效果（chip=0 → 纯看 Block 是否生效）。
-            var noChip = Limits with { ChipDamagePermille = 0 };
+            // cv-007 适配：body role 触发 HasBodyArt → 物理抗 +BodyArtPhysResistBonus，使 Normal/Elemental 走不同 R
+            // 污染"Block 等效"本意。设 BodyArtPhysResistBonus=0 消除抵抗层干扰（防方 Constitution=0/Insight=0 → R=0 全伤），
+            // 回归"Block 对 Normal/Elemental 等效"的 cv-003 原测试意图。
+            var noChip = Limits with { ChipDamagePermille = 0, BodyArtPhysResistBonus = 0 };
             var flatDR = Modules.FlatDR(10, "护体");
 
             var normalVsBlock = Duel(DamageType.Normal, flatDR, "body", noChip);

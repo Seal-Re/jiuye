@@ -1,6 +1,6 @@
 # Story 011: RiskModifier 数据+cooldown
 
-> **Epic**: cultivation-a3 | **Status**: Not Started | **Type**: Config/Data | **Estimate**: 0.2d
+> **Epic**: cultivation-a3 | **Status**: Complete — EPIC Done @2026-07-17 (Sprint 9) | **Type**: Config/Data | **Estimate**: 0.2d
 > **Depends**: story-010
 
 ## Context

@@ -40,6 +40,7 @@
 - **任务台账（单一真相源 A.2）**：`production/`（`epics/[slug]/EPIC.md` + `story-NNN-*.md` + `sprint-status.yaml` + `stage.txt`）。速览：`/sprint-status` 或读 `production/epics/index.md`。
 - 派生指针：根目录 `TASKS.md`（指向 production/，不持真相）
 - CCGS 采用路线图：`docs/reports/采用迁移计划.md`（增量补 GDD/ADR roadmap）
+- **ADR（架构决策记录）**：`docs/architecture/adr-NNNN-*.md`（9 篇，adr-0009 预留道心解耦；含整数确定性/模块工厂/off 逐字节/Godot 边界/方差战斗模型/防御漏斗等）
 - 项目状态审计（历史派生）：`docs/reports/项目状态审计.md`
 - 设计深度源（18 spec/4 plan/3 research，旧版/legacy）：`docs/legacy-specs/`
 - 设计 spec/plan（superpowers 工作流产出，artifact-system/map-renderer/inv-cross-calibration 等）：`docs/superpowers/`
@@ -66,8 +67,11 @@
 # 构建（全 solution）
 dotnet build
 
-# 全量测试（1147 绿，零失败）
+# 全量测试（1281 绿，零失败）
 dotnet test
+
+# 全量测试（简洁输出）
+dotnet test --verbosity minimal
 
 # 单个测试文件
 dotnet test --filter "FullyQualifiedName~DuelEngineTests"
@@ -96,13 +100,17 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 
 ## F. 架构概览
 
-### 程序集（3 个）
+### Solution 与程序集
+
+| 文件 | 说明 |
+|---|---|
+| `Jianghu.sln` | 根 solution，含全部 3 个程序集 |
 
 | 程序集 | TFM | 职责 |
 |---|---|---|
 | `Jianghu.Core` | netstandard2.1 | **纯逻辑库**——全部模拟机制。零引擎依赖（后期直接 Godot 4.x .NET 引用；引擎 2026-07-03 由 Unity 切换，见 ADR-0004） |
 | `Jianghu.Cli` | net8.0 | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory` → `World.Advance` |
-| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1147），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
+| `Jianghu.Core.Tests` | net8.0 | xUnit 全量测试（1281），含确定性/off 逐字节/21 路独立/战斗差分/drama 恩怨链 |
 
 ### 执行模型（事件驱动 + 确定性 PRNG）
 
@@ -122,8 +130,8 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 | `Jianghu.Model` | `Character`(聚合根), `Persona`, `MemoryStore`, `Relations`, `Sect`, `WorldNode` | 领域模型 |
 | `Jianghu.Sim` | `World`, `WorldFactory`, `Lifecycle`, `Scheduler`, `StateSnapshot`, `WorldMap`, `WorldMapFactory`, `IMapGenerator`/`KruskalMstGenerator`, `IGeoQuery`, `SectLedger`, `SectLedgerFactory`, `IFactionQuery`, `IPipelineStage` | 世界模拟主循环 + 地图（`--map`）+ 门派派系（`--faction`） |
 | `Jianghu.Actions` | `ActionSystem`, `SparAction`, `TrainAction`, `TravelAction` | 角色动作执行 |
-| `Jianghu.Cultivation` | `PowerEngine`, `DuelEngine`(cv-001 起含 duelRng·Margin→概率 adr-0008), `CombatMath`(permille 查表), `CombatContext`, `CultivationPhase`(10态FSM), `CultivationState`/`CultivationTickA2`, `TribulationResolver`, `LifespanAndFailure`, `Modules`(工厂), `ModuleResolver`, `EffectOp`, `GateField`, `RollbackStack`, `SuppressionMatrix`, `SituationalEdges`, `DerivedProviders`/`DerivedRegistry`, `SpecialModuleRegistry`, `PathRegistry`, `RealmCurve`/`RealmProjection`/`RealmQuery`, `DailyModeSelector`, `DaoHeartRegistry`, `SeclusionFormulas`/`SeclusionState`, `StoryletExecutor`/`StoryletDef`, `VarietyTracker`, `BreakAidService`, `AwakenTriggerService`/`AwakeningAndDualModels`, `CanonicalTransitions`/`TransitionDef`, `BuddhistVow`, `A3FeatureServices` | 21 路完整修为系统（战斗引擎含 Margin→概率映射[adr-0008]/逆转/门域/压制矩阵/情境克敌/修炼FSM/三劫/寿元/道心/日课/闭关/奇遇/觉醒双修） |
-| `Jianghu.Cultivation.Paths` | `SwordImmortalPath`…共 21 文件 | 具体修炼路径定义（`CodePathSource` 注册；21 路统一 `.Paths` 命名空间） |
+| `Jianghu.Cultivation` | `PowerEngine`, `DuelEngine`(cv-001 起含 duelRng·Margin→概率 adr-0008), `CombatMath`(permille 查表), `CombatContext`, `CultivationPhase`(10态FSM), `CultivationState`/`CultivationTickA2`, `TribulationResolver`, `LifespanAndFailure`, `Modules`(工厂), `ModuleResolver`, `EffectOp`, `GateField`, `RollbackStack`, `SuppressionMatrix`, `SituationalEdges`, `DerivedProviders`/`DerivedRegistry`, `SpecialModuleRegistry`, `PathRegistry`, `CultivationPathDef`, `CodePathSource`, `PathAssigner`, `PathValidator`, `RealmCurve`/`RealmProjection`/`RealmQuery`, `DailyModeSelector`, `DaoHeartRegistry`, `SeclusionFormulas`/`SeclusionState`, `StoryletExecutor`/`StoryletDef`, `VarietyTracker`, `BreakAidService`, `AwakenTriggerService`/`AwakeningAndDualModels`, `CanonicalTransitions`/`TransitionDef`, `BuddhistVow`, `A3FeatureServices` | 21 路完整修为系统（战斗引擎含 Margin→概率映射[adr-0008]/逆转/门域/压制矩阵/情境克敌/修炼FSM/三劫/寿元/道心/日课/闭关/奇遇/觉醒双修） |
+| `Jianghu.Cultivation.Paths` | `Cultivation/paths/*.cs` 共 21 文件 + `CultivationPathDef` 数据模型 + `PathAssigner` 分路 + `PathValidator` 门控 | 具体修炼路径定义（`CodePathSource` 集中注册 → `PathRegistry`；21 路统一 `Jianghu.Cultivation.Paths` 命名空间） |
 | `Jianghu.Cultivation`（`special/` 子目录，无独立命名空间） | `BrokenChainModule`…共 8 文件 | 唯一稀有度特殊模块 |
 | `Jianghu.Cultivation.Artifacts` | `ArtifactData`, `ArtifactRegistry` | 法宝系统 |
 | `Jianghu.Decide` | `IBrain`, `RuleBrain`(当前), `DecisionContext` | AI 决策（LLM 脑未建） |
@@ -139,3 +147,19 @@ dotnet run --project src/Jianghu.Cli -- 42 100 --cultivation
 
 所有战斗效果 → `Modules` 静态工厂（`Modules.FlatPen(…）`，`Modules.Dot(…）` 等）。封 `ratio`/`Kind`/`Amount2≥1`/`Trigger`/`Rarity` 等易漏参。唯一档 → `SpecialModuleRegistry` 注册式插件。**禁裸写 `new EffectOp(七参)` 战斗构造器**。新算子 = 1 工厂方法 + `ModuleResolver` 1 分支。
 > 注：4 参资源/标记操作（`AddResource`/`AddResourceCap`/`GrantPassive`/`SetFlag`/`Cost`/`AddTermWeightStep`/`AddFlatDR`）在 path 文件中裸写是合法的——仅 7 参战斗效果构造受 B.9 约束。
+
+## G. 关键实现铁律
+
+> 以下是从 cv-001/002/003 实现中沉淀的 hard-won knowledge，违反任一条 = 破 B.3 或产生哑弹 bug。新 feature 触及 DuelEngine/CultivationState/PRNG 时必读。
+
+| # | 铁律 | 原因 | 来源 |
+|---|---|---|---|
+| G.1 | **`Pcg32.Split` 是非消费操作**（读 `_state` 返回新实例，不推进父流） | cultivation 黄金轨迹逐字节不变的前提。`Split` 派生 sub-RNG 后父流状态完全不受影响 | cv-001 B.3 核验 |
+| G.2 | **`duelRng=null` → 确定性旁路** | `SparAction()` 默认构造不走 `Split(Duel)` → duelRng 永不构造 → off 路径零漂移。这是 B.3 在 DuelEngine 层的守门机制 | cv-001 |
+| G.3 | **`calibrationMode`（DuelEngine 可选参，默认 false）仅测试用** | 标定期旁路 Control/CounterMul/压制矩阵，正常结算**零影响**。生产代码**禁止**传 true（B.3 守） | cv-002 code review |
+| G.4 | **PoiseState 必须 duel-local，禁挂 CombatContext / CultivationState** | `World.Clone` 会深拷贝 CombatContext/CultivationState，若 PoiseState 挂其上则进 Clone → 破 duel-local 语义 + B.3。**正确做法**：ResolveR2 局部变量，函数返回即销毁 | cv-002 |
+| G.5 | **TickPoise 必须在 TickDots 之后调用** | TickDots 消费 DoT → 可能触发 stagger 注入（turns=1）。若 TickPoise 先于 TickDots 运行，stagger 注入的 turns=1 会被 TickPoise 立即递减为 0 → 哑弹。**时序**：TickDots → 注入 stagger → TickPoise（检查≤0 → 触发硬直） | cv-002 / balance-008 |
+| G.6 | **exchangeNonce = `(round << 4) \| nonce`，round≤20 无碰撞** | nonce∈[0,3]（最多每轮 4 次 exchange），round 左移 4 位预留 16 个槽位 → 碰撞不可能。id 排序混种保交换律（`a.id < b.id` 固定序，不依赖参数顺序） | cv-001 |
+| G.7 | **新增 PRNG 流 = 追加 `RngStreamIds`，绝不复用既有 id** | `RngStreamIds` 是 **append-only** 冻结枚举。复用既有 id → 改变既有流的消费序列 → 破 off 逐字节。当前最大 id=9（Duel） | B.3 / RngStreamIds |
+| G.8 | **duel-local 状态不入 Clone** | CD/DR 计数、PoiseState、stagger 状态等 per-duel 数据**必须**是 ResolveR2 局部变量或 DuelEngine 实例字段（每次 Resolve 新建），**绝不**挂 CombatContext/CultivationState/Character 聚合根 | cv-002/balance-007 |
+| G.9 | **INV-CROSS 校准数据不入源码** | balance 观测 CSV 放 `production/qa/balance/`，不与 `CombatMath` permille 表混淆。标定需重新 dump，不手改 permille | balance-005 |

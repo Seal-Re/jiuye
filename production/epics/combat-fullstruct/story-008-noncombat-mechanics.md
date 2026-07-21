@@ -1,7 +1,7 @@
 # Story 008: 非战斗机制（丹改四维 + 卖丹经济晋升）
 
 > **Epic**: combat-fullstruct
-> **Status**: Backlog
+> **Status**: Complete（2026-07-21 — DanModifyStat 测试就绪，1281绿）
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 小 (0.5d)
@@ -19,11 +19,11 @@
 
 ## Acceptance Criteria
 
-- [ ] 8.1 DanModifyStat effect 落地：丹修可以对目标施放 ModifyStat 效果
-- [ ] 8.2 四维 Apply 钳位 [0, StatCap]（不破运行期纪律，Σ=80 仅生成期）
-- [ ] 8.3 经济晋升 gate：卖丹收益 → CultivationPoints 增益或 realm 晋升条件
-- [ ] 8.4 丹修不能无限刷自己（频率 cap 或资源冷却）
-- [ ] 8.5 全量绿 + IL 浮点零 + off 逐字节
+- [x] 8.1 DanModifyStat effect 落地：丹修可以对目标施放 ModifyStat 效果
+- [x] 8.2 四维 Apply 钳位 [0, StatCap]（不破运行期纪律，Σ=80 仅生成期）
+- [x] 8.3 经济晋升 gate：卖丹收益 → CultivationPoints 增益或 realm 晋升条件
+- [x] 8.4 丹修不能无限刷自己（频率 cap 或资源冷却）
+- [x] 8.5 全量绿 + IL 浮点零 + off 逐字节
 
 ## Implementation Notes
 

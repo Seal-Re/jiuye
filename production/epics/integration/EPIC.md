@@ -1,7 +1,7 @@
 # Epic: 系统集成层
 
 **Layer**: Core
-**Status**: Partially wired（001-007 合约建成 + story-008 接线闭 C-1 done；story-009 membership ready-for-dev）
+**Status**: Done（2026-07-14 审计：story-008/009 全部 Done。原"Partially wired"因 story-009 当时 ready-for-dev，现已实现。）
 **Created**: 2026-06-15
 **Updated**: 2026-06-25（设计完成，故事拆解）
 **Governing ADRs**: adr-0001-integer-determinism, adr-0003-cultivation-off-byte-identical

@@ -1,6 +1,6 @@
 # Story 001: TransitionDef 数据模型
 
-> **Epic**: cultivation-a3 | **Status**: Not Started | **Type**: Logic | **Estimate**: 0.3d
+> **Epic**: cultivation-a3 | **Status**: Complete — EPIC Done @2026-07-17 (Sprint 9) | **Type**: Logic | **Estimate**: 0.3d
 > **Depends**: cultivation-a2 (done)
 > **GDD**: A123 §A.3.1
 

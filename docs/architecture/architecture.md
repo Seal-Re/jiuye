@@ -1,6 +1,7 @@
 # 架构总览 — 九野 · 江湖涌现模拟
 
 > **Status**: Living（主架构文档）
+> **Last Updated**: 2026-07-17（测试数 1087→1271，RngStreamIds Duel=9 追加，combat-variance Done）
 > **Created**: 2026-07-03（综合 CLAUDE.md §F + ADR-0001/0002/0003 + technical-preferences.md）
 > **Scope**: Foundation 层 + Core 层。Feature 层（drama/map/faction/llm-brain）与 Presentation 层（可视化/Godot 宿主）仅点到接口边界，详见各自 GDD 与 §9 / §10 / ADR-0004。
 > **View 层规范锚点**：Godot 表现层（View）、PCG（程序化生成）、2D 等距地图渲染的**前瞻规范真相源** = [godot-architecture-manifest.md](godot-architecture-manifest.md)（§10 索引其与内核红线的隔离关系）。
@@ -32,7 +33,7 @@
 |---|---|---|---|
 | `Jianghu.Core` | `netstandard2.1` | **纯逻辑库**——全部模拟机制（模型/PRNG/调度/动作/修炼/战斗/戏剧/事件）。 | 零引擎依赖；禁 `System.Random`/`Console`/`DateTime`/`Thread`（BannedApiAnalyzers）；`Jianghu.Cultivation` 禁浮点（IL 扫描）。后期直接被 Godot 4.x .NET 引用。 |
 | `Jianghu.Cli` | `net8.0` | CLI 控制台驱动——薄壳，解析参数 → `WorldFactory.CreateInitial` → `World.Advance` → 打印快照。 | 当前 Host；后期与 Godot 宿主并列（同一 Core，两个 View）。可用 `System.Console`（非 Core）。 |
-| `Jianghu.Core.Tests` | `net8.0` | xUnit 全量测试（1087 绿）：确定性（IL 浮点扫描 / 逐字节复现）、off 逐字节、21 路独立、战斗模块差分、drama 恩怨链。 | 回归基线 = 全量绿不退。 |
+| `Jianghu.Core.Tests` | `net8.0` | xUnit 全量测试（1271 绿）：确定性（IL 浮点扫描 / 逐字节复现）、off 逐字节、21 路独立、战斗模块差分、drama 恩怨链。 | 回归基线 = 全量绿不退。 |
 
 ---
 
@@ -82,8 +83,9 @@
   | `Drama` | 6 | 恩怨/复仇弧 | **仅 dramaOn** |
   | `Map` | 7 | 世界地图 | **仅 mapOn** |
   | `Faction` | 8 | 门派派系 | **仅 factionOn** |
+  | `Duel` | 9 | 单场对决 per-duel 方差流（cv-001 起） | **仅 cultivation-on** |
 
-  **铁律**：新随机流 = **追加新 id，绝不复用既有编号**。Cultivation/Drama/Map/Faction 流在对应开关 off 时**不构造、绝不消费** `Split(5..8)` → 保证 `Split(1..4)` 的编号与消费序列在 off 下逐字节不变（ADR-0003）。新增 PRNG 消费者必须 ① 追加 `RngStreamIds` 新 id ② 进 `World.Clone`（深拷续跑）。
+  **铁律**：新随机流 = **追加新 id，绝不复用既有编号**。Cultivation/Drama/Map/Faction/Duel 流在对应开关 off 时**不构造、绝不消费** `Split(5..9)` → 保证 `Split(1..4)` 的编号与消费序列在 off 下逐字节不变（ADR-0003）。新增 PRNG 消费者必须 ① 追加 `RngStreamIds` 新 id ② 进 `World.Clone`（深拷续跑）。当前最大 id=9（Duel）。
 
 ---
 

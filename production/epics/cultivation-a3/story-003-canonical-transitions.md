@@ -1,6 +1,6 @@
 # Story 003: 标准转职路线数据
 
-> **Epic**: cultivation-a3 | **Status**: Not Started | **Type**: Config/Data | **Estimate**: 0.3d
+> **Epic**: cultivation-a3 | **Status**: Complete — EPIC Done @2026-07-17 (Sprint 9) | **Type**: Config/Data | **Estimate**: 0.3d
 > **Depends**: story-001
 
 ## Context

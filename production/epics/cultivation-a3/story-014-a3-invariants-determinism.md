@@ -1,6 +1,6 @@
 # Story 014: A.3 不变量硬化+确定性
 
-> **Epic**: cultivation-a3 | **Status**: Not Started | **Type**: Logic | **Estimate**: 0.5d
+> **Epic**: cultivation-a3 | **Status**: Complete — EPIC Done @2026-07-17 (Sprint 9) | **Type**: Logic | **Estimate**: 0.5d
 > **Depends**: story-002, story-010
 
 ## Context
