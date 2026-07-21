@@ -19,7 +19,7 @@ start: "2026-07-20"
 end: "2026-07-27"
 generated: "2026-07-20"
 updated: "2026-07-20"
-status: in-progress
+status: closed  # 2026-07-21；2/2 Must Have done；1275绿
 
 stories:
   # —— Must Have ——
