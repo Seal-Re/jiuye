@@ -18,11 +18,11 @@ stories:
     name: "Faction C.1 朝廷/经营远期范围界定"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；C.1 scope文档就绪——全部deferred→FULLSTRUCT；C.0已完备无需立即扩展
     owner: ""
     estimate_days: 0.3
     blocker: ""
-    completed: ""
+    completed: "2026-07-21"
   - id: "playtest-2"
     name: "playtest #2：多 seed balance 审计 + 涌现行为报告"
     file: ""
