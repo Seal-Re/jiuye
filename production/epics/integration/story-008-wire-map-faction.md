@@ -1,7 +1,7 @@
 # Story 008: Map/Faction 接线进 World 主循环（闭 C-1）
 
 > **Epic**: integration
-> **Status**: Ready for Dev
+> **Status**: Complete（2026-07-21 — 接线已就绪，12绿，AC全8/8）
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 中 (1.5d)

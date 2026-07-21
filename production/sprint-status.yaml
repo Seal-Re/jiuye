@@ -18,7 +18,7 @@ start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: in-progress
+status: closed  # 2026-07-21；2/2 Must Have done；1281绿
 
 stories:
   # —— Must Have ——
@@ -35,11 +35,11 @@ stories:
     name: "integration story-008 wire-map-faction"
     file: "production/epics/integration/story-008-wire-map-faction.md"
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；Map/Faction接线已就绪 AC全8/8；12绿；1281全量绿
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-21"
 
   # —— Should Have ——
   - id: "combat-r2-002"
