@@ -35,15 +35,25 @@ public partial class EventLogPanel : Control
         _headerLabel = new RichTextLabel();
         _headerLabel.BbcodeEnabled = true;
         _headerLabel.FitContent = true;
-        _headerLabel.Text = "[center][color=#c8a860]九野 · 江湖纪事[/color][/center]";
+        _headerLabel.Text = "[center][color=#c8a860]　九野 · 江湖纪事　[/color][/center]";
         _headerLabel.Position = new Vector2(0, 4);
         _headerLabel.Size = new Vector2(280, 22);
         AddChild(_headerLabel);
 
+        // 标题装饰线
+        var titleLine = new ColorRect();
+        titleLine.Color = new Color(0.55f, 0.42f, 0.20f, 0.6f);
+        titleLine.Position = new Vector2(40, 24);
+        titleLine.Size = new Vector2(200, 1);
+        AddChild(titleLine);
+
+        // 水墨边框（四个角饰——简化：四条边线）
+        AddBorderLine(6, 28, 280, 168);  // 围绕滚动区域
+
         // 滚动容器
         _scroll = new ScrollContainer();
-        _scroll.Position = new Vector2(8, 28);
-        _scroll.Size = new Vector2(264, 160);
+        _scroll.Position = new Vector2(10, 30);
+        _scroll.Size = new Vector2(260, 154);
         _scroll.ScrollDeadzone = 4;
 
         _list = new VBoxContainer();
@@ -52,7 +62,7 @@ public partial class EventLogPanel : Control
         AddChild(_scroll);
 
         // 面板尺寸
-        SetSize(new Vector2(280, 196));
+        SetSize(new Vector2(290, 196));
     }
 
     private void OnDomainEvent(string line)
@@ -84,4 +94,19 @@ public partial class EventLogPanel : Control
 
     private static string EscapeBbcode(string s)
         => s.Replace("[", "&#91;").Replace("]", "&#93;");
+
+    /// <summary>添加水墨风格细线边框。</summary>
+    private void AddBorderLine(float x, float y, float w, float h)
+    {
+        var lineColor = new Color(0.45f, 0.35f, 0.18f, 0.5f);
+        void AddLine(float lx, float ly, float lw, float lh)
+        {
+            var r = new ColorRect { Color = lineColor, Position = new Vector2(lx, ly), Size = new Vector2(lw, lh) };
+            AddChild(r);
+        }
+        AddLine(x, y, w, 1);       // 上
+        AddLine(x, y + h, w, 1);   // 下
+        AddLine(x, y, 1, h);       // 左
+        AddLine(x + w, y, 1, h);   // 右
+    }
 }

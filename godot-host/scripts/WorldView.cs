@@ -22,6 +22,7 @@ public partial class WorldView : Node2D
     private Vector2[] _nodePositions = System.Array.Empty<Vector2>();
     private Texture2D? _spriteSheet;
     private readonly Dictionary<string, Rect2> _pathIconRects = new();
+    private CharInfoCard? _infoCard;
 
     // icon_gen.py PATHS 顺序 (7 cols × 3 rows)
     private static readonly string[] PathOrder =
@@ -73,6 +74,10 @@ public partial class WorldView : Node2D
         }
 
         QueueRedraw();
+
+        // 点击检测
+        _infoCard = GetNode<CharInfoCard>("../CharInfoCard");
+        SetProcessInput(true);
     }
 
     public override void _Draw()
@@ -135,4 +140,27 @@ public partial class WorldView : Node2D
     }
 
     private void OnDomainEvent(string _) => QueueRedraw();
+
+    public override void _Input(InputEvent @event)
+    {
+        if (@event is not InputEventMouseButton mb || !mb.Pressed || mb.ButtonIndex != MouseButton.Left)
+            return;
+
+        var world = _bridge.World;
+        if (world == null || _infoCard == null) return;
+
+        var clickPos = GetGlobalMousePosition();
+        foreach (var c in world.AliveCharacters())
+        {
+            int nodeIdx = c.Node.Value;
+            if (nodeIdx < 0 || nodeIdx >= _nodeCount) continue;
+            var pos = _nodePositions[nodeIdx];
+            float dist = clickPos.DistanceTo(pos);
+            if (dist < TileSize / 2f)
+            {
+                _infoCard.ShowCharacter(c, _bridge);
+                return;
+            }
+        }
+    }
 }

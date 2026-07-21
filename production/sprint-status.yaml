@@ -9,7 +9,7 @@ start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: in-progress
+status: closed  # 2026-07-21；3/4 done (2Must+1Should)；1281绿；View层角色卡+面板美化+QTE scout就绪
 
 stories:
   # —— Must Have ——
@@ -17,31 +17,31 @@ stories:
     name: "角色信息卡 — 点击角色→卷轴风格弹出面板（属性/路径/境界/资源）"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；CharInfoCard:卷轴面板+金色边框+四维/路径/资源
     owner: ""
     estimate_days: 1.5
     blocker: "view-sprite-sheet (Sprint 16)"
-    completed: ""
+    completed: "2026-07-21"
   - id: "view-panel-polish"
     name: "面板视觉美化 — 水墨边框/卷轴纹理/朱砂印章装饰"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；EventLogPanel:标题装饰线+水墨边框
     owner: ""
     estimate_days: 1.0
     blocker: "view-ui-scroll-log (Sprint 16)"
-    completed: ""
+    completed: "2026-07-21"
 
   # —— Should Have ——
   - id: "view-qte-scout"
     name: "QTE 战斗 View 范围界定 — DefenseFrameHook→防御帧窗交互设计文档"
     file: ""
     priority: should-have
-    status: backlog
+    status: done  # 2026-07-21；QTE View scout就绪
     owner: ""
     estimate_days: 0.3
     blocker: ""
-    completed: ""
+    completed: "2026-07-21"
   - id: "view-character-list"
     name: "角色列表侧栏 — 按节点/门派分组显示全部在世角色"
     file: ""
