@@ -26,11 +26,11 @@ stories:
     name: "combat-fullstruct story-008 noncombat-mechanics"
     file: "production/epics/combat-fullstruct/story-008-noncombat-mechanics.md"
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；DanModifyStat+经济晋升+频率cap+6新测试；1281绿
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-21"
   - id: "integration-008"
     name: "integration story-008 wire-map-faction"
     file: "production/epics/integration/story-008-wire-map-faction.md"
