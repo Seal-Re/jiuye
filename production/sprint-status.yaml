@@ -1,53 +1,44 @@
-# Sprint 17 (View-Alpha-2) — 角色信息卡 + QTE View 界定 + 面板美化
+# Sprint 18 (View-Alpha-3) — QTE 战斗 View + 角色列表侧栏
 #
-# Sprint 9-16 全闭 (25 stories, 1281绿)。
-# View 层已有：tile网格 + 21路sprite + 事件滚动日志。
+# Sprint 9-17 全闭 (28 stories, 1281绿)。
+# View 层已有：tile网格+sprite+事件日志+角色信息卡+面板美化+QTE scout。
 
-sprint: 17
-goal: "View-Alpha-2：卷轴角色信息卡 + QTE View scout + 面板视觉美化"
+sprint: 18
+goal: "View-Alpha-3：QTE 防御帧窗条 + 伤害飘字 + 角色列表侧栏"
 start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: closed  # 2026-07-21；3/4 done (2Must+1Should)；1281绿；View层角色卡+面板美化+QTE scout就绪
+status: in-progress
 
 stories:
   # —— Must Have ——
-  - id: "view-char-info-card"
-    name: "角色信息卡 — 点击角色→卷轴风格弹出面板（属性/路径/境界/资源）"
-    file: ""
-    priority: must-have
-    status: done  # 2026-07-21；CharInfoCard:卷轴面板+金色边框+四维/路径/资源
-    owner: ""
-    estimate_days: 1.5
-    blocker: "view-sprite-sheet (Sprint 16)"
-    completed: "2026-07-21"
-  - id: "view-panel-polish"
-    name: "面板视觉美化 — 水墨边框/卷轴纹理/朱砂印章装饰"
-    file: ""
-    priority: must-have
-    status: done  # 2026-07-21；EventLogPanel:标题装饰线+水墨边框
-    owner: ""
-    estimate_days: 1.0
-    blocker: "view-ui-scroll-log (Sprint 16)"
-    completed: "2026-07-21"
-
-  # —— Should Have ——
-  - id: "view-qte-scout"
-    name: "QTE 战斗 View 范围界定 — DefenseFrameHook→防御帧窗交互设计文档"
-    file: ""
-    priority: should-have
-    status: done  # 2026-07-21；QTE View scout就绪
-    owner: ""
-    estimate_days: 0.3
-    blocker: ""
-    completed: "2026-07-21"
   - id: "view-character-list"
     name: "角色列表侧栏 — 按节点/门派分组显示全部在世角色"
+    file: ""
+    priority: must-have
+    status: backlog
+    owner: ""
+    estimate_days: 1.0
+    blocker: "view-char-info-card (Sprint 17)"
+    completed: ""
+  - id: "view-qte-frame-bar"
+    name: "QTE 防御帧窗进度条 — 战斗双方头顶 FrameHook 可视化"
+    file: ""
+    priority: must-have
+    status: backlog
+    owner: ""
+    estimate_days: 2.5
+    blocker: "DefenseFrameHook (cv-004)"
+    completed: ""
+
+  # —— Should Have ——
+  - id: "view-damage-popup"
+    name: "伤害飘字 — 红字伤害/橙字反弹/金色破韧浮动画"
     file: ""
     priority: should-have
     status: backlog
     owner: ""
     estimate_days: 1.0
-    blocker: "view-char-info-card"
+    blocker: "view-qte-frame-bar"
     completed: ""
