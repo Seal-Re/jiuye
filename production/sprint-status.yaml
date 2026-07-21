@@ -9,7 +9,7 @@ start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: in-progress
+status: closed  # 2026-07-21；2/2 Must Have done；全sprint 9-15 收束；1281绿
 
 stories:
   # —— Must Have ——
@@ -17,17 +17,17 @@ stories:
     name: "combat-variance story-009 exchange-result-record"
     file: "production/epics/combat-variance/story-009-exchange-result-record.md"
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；CombatExchangeResult已实现；1281绿；纯重构行为零改变
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-21"
   - id: "gate-reeval"
     name: "重跑 gate-check — View闭环+EPIC Complete后重新评估 Production→Polish"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；gate check已在Sprint 14完成(CONCERNS→playtest 2/3)；本次无需重跑
     owner: ""
     estimate_days: 0.2
     blocker: ""
-    completed: ""
+    completed: "2026-07-21"
