@@ -1,55 +1,53 @@
-# Sprint 16 (View-Alpha-1) — Godot 像素角色 + 古风 UI 起步
+# Sprint 17 (View-Alpha-2) — 角色信息卡 + QTE View 界定 + 面板美化
 #
-# Sprint 9-15 全闭 (23 stories, 1281绿)，master 已合入。
-# 新方向：View 层铺开（像素角色 → 古风 UI → QTE 战斗 View）
+# Sprint 9-16 全闭 (25 stories, 1281绿)。
+# View 层已有：tile网格 + 21路sprite + 事件滚动日志。
 
-sprint: 16
-goal: "View-Alpha-1：Godot 21路像素角色渲染 + 古风事件日志 UI 面板"
+sprint: 17
+goal: "View-Alpha-2：卷轴角色信息卡 + QTE View scout + 面板视觉美化"
 start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: closed  # 2026-07-21；2/2 Must Have done；1281绿；View层铺开起步
+status: in-progress
 
 stories:
   # —— Must Have ——
-  - id: "view-sprite-sheet"
-    name: "21路像素角色 Sprite 接入 WorldView — icon_gen.py 生成 → Godot Sprite2D 渲染"
+  - id: "view-char-info-card"
+    name: "角色信息卡 — 点击角色→卷轴风格弹出面板（属性/路径/境界/资源）"
     file: ""
     priority: must-have
-    status: done  # 2026-07-21；icon_gen.py生成21路sprite sheet→WorldView._Draw()渲染；headless无crash；1281绿
-    owner: ""
-    estimate_days: 2.0
-    blocker: "WorldView 就位 (Sprint 13)"
-    completed: "2026-07-21"
-  - id: "view-ui-scroll-log"
-    name: "古风事件滚动日志面板 — GD.Print → ScrollContainer 水墨风格事件流"
-    file: ""
-    priority: must-have
-    status: done  # 2026-07-21；EventLogPanel订阅OnDomainEvent→RichTextLabel+BBCode着色→ScrollContainer自动滚底
+    status: backlog
     owner: ""
     estimate_days: 1.5
-    blocker: "WorldBridge Signal 就位 (Sprint 9)"
-    completed: "2026-07-21"
+    blocker: "view-sprite-sheet (Sprint 16)"
+    completed: ""
+  - id: "view-panel-polish"
+    name: "面板视觉美化 — 水墨边框/卷轴纹理/朱砂印章装饰"
+    file: ""
+    priority: must-have
+    status: backlog
+    owner: ""
+    estimate_days: 1.0
+    blocker: "view-ui-scroll-log (Sprint 16)"
+    completed: ""
 
   # —— Should Have ——
-  - id: "view-char-info-card"
-    name: "角色信息卡 — 点击角色圆点 → 弹出卷轴风格属性面板"
+  - id: "view-qte-scout"
+    name: "QTE 战斗 View 范围界定 — DefenseFrameHook→防御帧窗交互设计文档"
+    file: ""
+    priority: should-have
+    status: backlog
+    owner: ""
+    estimate_days: 0.3
+    blocker: ""
+    completed: ""
+  - id: "view-character-list"
+    name: "角色列表侧栏 — 按节点/门派分组显示全部在世角色"
     file: ""
     priority: should-have
     status: backlog
     owner: ""
     estimate_days: 1.0
-    blocker: "view-sprite-sheet"
-    completed: ""
-
-  # —— Nice to Have ——
-  - id: "view-qte-scout"
-    name: "QTE 战斗 View 范围界定 — DefenseFrameHook → 防御帧窗 QTE 交互设计"
-    file: ""
-    priority: nice-to-have
-    status: backlog
-    owner: ""
-    estimate_days: 0.3
-    blocker: ""
+    blocker: "view-char-info-card"
     completed: ""
