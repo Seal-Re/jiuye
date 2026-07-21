@@ -9,7 +9,7 @@ start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: in-progress
+status: closed  # 2026-07-21；2/2 Must Have done；1281绿；伤害飘字+玩家介入设计就绪
 
 stories:
   # —— Must Have ——
@@ -17,20 +17,20 @@ stories:
     name: "伤害飘字 — 红字伤害/橙字反弹/金色破韧浮动画"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；DamagePopup:浮动数字+上浮渐隐+红/橙/金三色
     owner: ""
     estimate_days: 1.0
     blocker: "view-qte-frame-bar (Sprint 18)"
-    completed: ""
+    completed: "2026-07-21"
   - id: "design-player-intervention"
     name: "玩家介入设计方案 — 角色创建/意图输入/命令端口交互流"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；P0最小可玩/P1意图面板/P2完整循环设计就绪
     owner: ""
     estimate_days: 0.5
     blocker: "gh-004 命令端口"
-    completed: ""
+    completed: "2026-07-21"
 
   # —— Should Have ——
   - id: "view-hp-bars"
