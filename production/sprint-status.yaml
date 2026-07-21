@@ -27,11 +27,11 @@ stories:
     name: "Godot View 最小可视化闭环：TileMap 占位 + 角色节点渲染"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；WorldView.cs _Draw() tile网格+角色圆点+Signal驱动刷新+插值因子lerp；headless无crash；1281绿
     owner: ""
     estimate_days: 2.0
     blocker: "依赖 gh-002/003/004（Godot 轨就位）"
-    completed: ""
+    completed: "2026-07-21"
 
   # —— Should Have ——
   - id: "faction-c1-scout"

@@ -24,6 +24,9 @@ public partial class WorldBridge : Node
     private const int InitialCount = 30;
     private const int MaxSteps = 10;              // headless 测试用：跑完 N 步自动退出；0 = 不限
 
+    /// <summary>Core 世界实例（公开——供 WorldView 等 View 节点只读访问）。</summary>
+    public World World => _world;
+
     /// <summary>Core 事件行（每行一条事件文本）</summary>
     [Signal]
     public delegate void OnDomainEventEventHandler(string eventLine);
@@ -52,7 +55,7 @@ public partial class WorldBridge : Node
         _world = WorldFactory.CreateInitial(
             seed: WorldSeed, limits, initialCount: InitialCount,
             cultivation: true,
-            mapOn: false,
+            mapOn: true,
             factionOn: false,
             dramaOn: false
         );
