@@ -10,7 +10,7 @@ start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: in-progress
+status: closed  # 2026-07-21；2/2 Must Have done；1281绿；playtest 2/3
 
 stories:
   # —— Must Have ——
@@ -27,11 +27,11 @@ stories:
     name: "playtest #2：多 seed balance 审计 + 涌现行为报告"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；5-seed sweep+20-seed stability零crash+全系统叠加稳定+off逐字节一致；playtest 2/3
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-21"
 
   # —— Should Have ——
   - id: "combat-variance-009"
