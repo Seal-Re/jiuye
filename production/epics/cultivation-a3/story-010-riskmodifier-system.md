@@ -1,6 +1,6 @@
 # Story 010: RiskModifier 反噬系统
 
-> **Epic**: cultivation-a3 | **Status**: Not Started | **Type**: Logic | **Estimate**: 0.3d
+> **Epic**: cultivation-a3 | **Status**: Complete — EPIC Done @2026-07-17 (Sprint 9) | **Type**: Logic | **Estimate**: 0.3d
 > **Depends**: story-001
 
 ## Context

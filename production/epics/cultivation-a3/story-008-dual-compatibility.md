@@ -1,6 +1,6 @@
 # Story 008: 双修兼容矩阵+bandwidth
 
-> **Epic**: cultivation-a3 | **Status**: Not Started | **Type**: Logic | **Estimate**: 0.3d
+> **Epic**: cultivation-a3 | **Status**: Complete — EPIC Done @2026-07-17 (Sprint 9) | **Type**: Logic | **Estimate**: 0.3d
 > **Depends**: story-007
 
 ## Context
