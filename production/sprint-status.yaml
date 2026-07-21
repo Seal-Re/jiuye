@@ -9,7 +9,7 @@ start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: in-progress
+status: closed  # 2026-07-21；2/2 Must Have done；1281绿；View层铺开起步
 
 stories:
   # —— Must Have ——
@@ -17,20 +17,20 @@ stories:
     name: "21路像素角色 Sprite 接入 WorldView — icon_gen.py 生成 → Godot Sprite2D 渲染"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；icon_gen.py生成21路sprite sheet→WorldView._Draw()渲染；headless无crash；1281绿
     owner: ""
     estimate_days: 2.0
     blocker: "WorldView 就位 (Sprint 13)"
-    completed: ""
+    completed: "2026-07-21"
   - id: "view-ui-scroll-log"
     name: "古风事件滚动日志面板 — GD.Print → ScrollContainer 水墨风格事件流"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；EventLogPanel订阅OnDomainEvent→RichTextLabel+BBCode着色→ScrollContainer自动滚底
     owner: ""
     estimate_days: 1.5
     blocker: "WorldBridge Signal 就位 (Sprint 9)"
-    completed: ""
+    completed: "2026-07-21"
 
   # —— Should Have ——
   - id: "view-char-info-card"
