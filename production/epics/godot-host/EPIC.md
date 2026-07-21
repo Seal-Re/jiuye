@@ -1,7 +1,7 @@
 # Epic: Godot 宿主层（View/Host）— Phase 2 接入
 
 **Layer**: Presentation
-**Status**: Planned（story 拆解完成 @2026-07-17；待闸口验收后开工）
+**Status**: Complete（2026-07-21 — gh-001~004 全 Complete + WorldView 最小闭环；1281绿）
 **GDD**: —（表现层，设计权威在 adr-0004 + godot-architecture-manifest.md）
 **Governing ADRs**: **adr-0004**（Model/View 边界·单向流·固定时间步·iso 预留）· adr-0001（B.2 整数确定性）· adr-0003（B.3 off 逐字节）
 **Engine Risk**: **MEDIUM**（Godot 4.x .NET 首次接入；WorldBridge/Signal/累加器模式在训练数据内，需目标版本复核）
@@ -33,13 +33,13 @@
 
 ## Definition of Done
 
-- [ ] gh-001 闸口文档存在（headless 无死锁证据）
-- [ ] gh-002 WorldBridge 可订阅 Core DomainEvent 并打印到 Godot 控制台
-- [ ] gh-003 累加器驱动 World.Advance，CLI/Godot 同 seed 同轨迹
-- [ ] gh-004 命令端口可接收整数意图 → 下一 Tick 结算
-- [ ] CLI/Godot 双宿主确定性回归测试（同 seed 逐字节一致）
-- [ ] B.2/B.3 守（Godot 宿主层可含浮点渲染，但 Core 不进浮点/delta）
-- [ ] `Godot.*` 禁入 `Jianghu.Core`（BannedApiAnalyzers 或 code review 守）
+- [x] gh-001 闸口文档存在（headless 无死锁证据）
+- [x] gh-002 WorldBridge 可订阅 Core DomainEvent 并打印到 Godot 控制台
+- [x] gh-003 累加器驱动 World.Advance，CLI/Godot 同 seed 同轨迹
+- [x] gh-004 命令端口可接收整数意图 → 下一 Tick 结算
+- [x] CLI/Godot 双宿主确定性回归测试（同 seed 逐字节一致）
+- [x] B.2/B.3 守（Godot 宿主层可含浮点渲染，但 Core 不进浮点/delta）
+- [x] `Godot.*` 禁入 `Jianghu.Core`（BannedApiAnalyzers 或 code review 守）
 
 ## Stories
 
