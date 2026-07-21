@@ -17,11 +17,11 @@ stories:
     name: "角色列表侧栏 — 按节点/门派分组显示全部在世角色"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；CharacterListPanel:右栏按节点分组+名字+路径+战力+点击
     owner: ""
     estimate_days: 1.0
     blocker: "view-char-info-card (Sprint 17)"
-    completed: ""
+    completed: "2026-07-21"
   - id: "view-qte-frame-bar"
     name: "QTE 防御帧窗进度条 — 战斗双方头顶 FrameHook 可视化"
     file: ""
