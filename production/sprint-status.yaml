@@ -9,7 +9,7 @@ start: "2026-07-21"
 end: "2026-07-28"
 generated: "2026-07-21"
 updated: "2026-07-21"
-status: in-progress
+status: closed  # 2026-07-21；2/2 Must Have done；1281绿；QTE帧窗+角色列表就绪
 
 stories:
   # —— Must Have ——
@@ -26,11 +26,11 @@ stories:
     name: "QTE 防御帧窗进度条 — 战斗双方头顶 FrameHook 可视化"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-21；QteFrameBar:双条攻防+成功窗+指针扫动画+headless零error
     owner: ""
     estimate_days: 2.5
     blocker: "DefenseFrameHook (cv-004)"
-    completed: ""
+    completed: "2026-07-21"
 
   # —— Should Have ——
   - id: "view-damage-popup"
