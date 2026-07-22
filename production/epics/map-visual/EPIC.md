@@ -235,19 +235,21 @@ func hash_cell(x: int, y: int, map_seed: int, layer: int) -> int:
 
 - **mv-009** CollisionPassKind 枚举 + 地形效果系统 (1.5d)
   - `CollisionPassKind` 枚举（L0 纯数据，零改 Core 算法）：
-    - `Ground` — 地面通行（默认，T01 平原/T03 荒漠/T07 水泽）
-    - `WaterOnly` — 仅水路/飞行可过（T02 海域）
-    - `Wall` — 地面不可、飞行可（T04 山岳/T05 林莽/T06 密林/建筑边缘）
-    - `HighWall` — 地面+飞行均不可（关隘城墙/结界）
-    - `Chasm` — 裂谷，地面不可、飞行可（与 Wall 同物理但不同视觉）
+    - `Ground` — 常规地面：平原、荒漠、道路（默认可通行）
+    - `ShallowWater` — 浅水/水泽：可通行但降速（T07-A/C，替代含糊的 WaterOnly）
+    - `Wall` — 普通障碍：建筑、密林、山壁（地面不可，飞行可）
+    - `DeepSeaOrChasm` — 深海/绝壁：默认不可通行，需御剑/行船或特定境界解除
+    - `GatePass` — 关隘/境界门控：需凭证或修为才可交互通过
   - 地形效果（Site 级侧表，纯数据行）：
     | 效果 | 触发地形 | 表现 |
     |---|---|---|
-    | 减速 Slow | 水泽 T07(20%)、山体 T04-T06 边缘(30%) | `speed *= 0.7` |
-    | 泥潭 Quagmire | 水泽 T07·芦苇(T07-C)覆盖区域 | `speed *= 0.4` + 下沉 debuff（每 3s 陷深一级，3 级后死亡） |
+    | 减速 Slow | 水泽 T07-A/C(20%)、山体 T04-T06 边缘(30%) | `speed *= 0.7` |
+    | 泥潭 Mud | 水泽 T07-C·芦苇覆盖区域 | `speed *= 0.4` + 下沉 debuff（每 3s 陷深一级，3 级后死亡） |
     | 灼烧 Burn | T08 火山/熔岩、T04-C 熔隙 | `speed *= 0.8` + 烧伤 debuff（每 tick HP -5%，持续 10s） |
     | 瘴气 Miasma | T05-C 密林·瘴紫 | `speed *= 0.9` + 中毒 debuff（每 5s HP -3%，持续 30s） |
     | 冰冻 Frost | T09 雪原/冰峰 | `speed *= 0.6` + 冻伤 debuff（移动输入衰减 50%） |
+    | 灵脉福地 SpiritBlessing | T11 灵脉福地 | `speed *= 1.1` + 灵气回复加成 + 修炼速度提升 |
+    | 禁空/重力 SuppressOrHeavy | T10 鬼域、古迹(Id5/Id8/Id16)周边 | `speed *= 0.5` + 飞行禁止 + 体力消耗加倍 |
   - 每种地形效果 = 一个 `TerrainEffect` 数据行：`EffectKind / TriggerTerrain / SpeedMultiplier / DamagePerTick / TickInterval / Duration / VisualParticle`
   - `AStarGrid2D` 寻路权重 = `BaseCost * terrain_cost * (1.0 + effect_penalty)`——AI 自动绕开危险地形
 
