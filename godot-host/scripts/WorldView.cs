@@ -123,6 +123,21 @@ public partial class WorldView : Node2D
             if (nodeIdx < 0 || nodeIdx >= _nodeCount) continue;
             var pos = _nodePositions[nodeIdx] + new Vector2(0, -2 * interp);
 
+            // HP 条（角色头顶）
+            int hpPct = 100; // TODO: 接入真实 HP——当前 Core 以 PE 代 HP，用战力比例近似
+            if (c.Cultivation != null)
+            {
+                var reg = new Jianghu.Cultivation.PathRegistry(new Jianghu.Cultivation.CodePathSource());
+                var def = reg.ById(c.Cultivation.PathId);
+                int pe = Jianghu.Cultivation.PowerEngine.Evaluate(c.Cultivation, c.Stats, def, _bridge.World.Limits);
+                hpPct = (int)(System.Math.Min(pe, 1000) * 100 / 1000);
+            }
+            float barW = 20f;
+            float barH = 3f;
+            float barY = pos.Y - IconSize / 2f - 6;
+            DrawRect(new Rect2(pos.X - barW / 2, barY, barW, barH), new Color(0.2f, 0.08f, 0.08f, 0.8f));
+            DrawRect(new Rect2(pos.X - barW / 2, barY, barW * hpPct / 100f, barH), new Color(0.2f, 0.8f, 0.2f, 0.9f));
+
             string pathId = c.Cultivation?.PathId ?? "";
             if (_spriteSheet != null && _pathIconRects.TryGetValue(pathId, out var srcRect))
             {

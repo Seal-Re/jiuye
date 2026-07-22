@@ -9,7 +9,7 @@ start: "2026-07-22"
 end: "2026-07-29"
 generated: "2026-07-22"
 updated: "2026-07-22"
-status: in-progress
+status: closed  # 2026-07-22；2/2 Must Have done；1281绿；QTE可点击+HP条
 
 stories:
   # —— Must Have ——
@@ -17,20 +17,20 @@ stories:
     name: "QTE 帧窗可点击 — 鼠标点击成功窗→判定成功/失败→影响战斗"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；QteFrameBar._Input点击窗口判定+命中率追踪
     owner: ""
     estimate_days: 2.0
     blocker: "view-qte-frame-bar (Sprint 18)"
-    completed: ""
+    completed: "2026-07-22"
   - id: "play-hp-bars"
     name: "玩家 HP/资源条 — 角色头顶生命值+灵气条常驻显示"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；WorldView角色头顶HP条+颜色渐变
     owner: ""
     estimate_days: 0.5
     blocker: "view-sprite-sheet (Sprint 16)"
-    completed: ""
+    completed: "2026-07-22"
 
   # —— Should Have ——
   - id: "play-combat-feedback"
