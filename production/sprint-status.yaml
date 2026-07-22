@@ -1,44 +1,44 @@
-# Sprint 21 (Play-Alpha-2) — QTE 交互 + 反馈增强 + 玩家 HP
+# Sprint 22 (Play-Alpha-3) — 战斗反馈 + 功法/战技面板
 #
-# Sprint 9-20 全闭 (35 stories, 1281绿)。项目已可玩。
-# Play P1：QTE 帧窗交互 + 伤害反馈 + 玩家状态条。
+# Sprint 9-21 全闭 (37 stories, 1281绿)。项目已可玩+QTE交互。
+# Play P2：战斗反馈增强 + 功法/战技管理。
 
-sprint: 21
-goal: "Play-Alpha-2：QTE 帧窗可点击交互 + 玩家 HP/资源条 + 战斗反馈增强"
+sprint: 22
+goal: "Play-Alpha-3：战斗反馈(闪光+震屏) + 功法战技管理面板"
 start: "2026-07-22"
 end: "2026-07-29"
 generated: "2026-07-22"
 updated: "2026-07-22"
-status: closed  # 2026-07-22；2/2 Must Have done；1281绿；QTE可点击+HP条
+status: in-progress
 
 stories:
   # —— Must Have ——
-  - id: "play-qte-clickable"
-    name: "QTE 帧窗可点击 — 鼠标点击成功窗→判定成功/失败→影响战斗"
+  - id: "play-combat-feedback"
+    name: "战斗反馈增强 — 命中闪光/格挡闪烁/破韧震屏动效"
     file: ""
     priority: must-have
-    status: done  # 2026-07-22；QteFrameBar._Input点击窗口判定+命中率追踪
+    status: backlog
     owner: ""
-    estimate_days: 2.0
-    blocker: "view-qte-frame-bar (Sprint 18)"
-    completed: "2026-07-22"
-  - id: "play-hp-bars"
-    name: "玩家 HP/资源条 — 角色头顶生命值+灵气条常驻显示"
+    estimate_days: 1.0
+    blocker: "play-qte-clickable (Sprint 21)"
+    completed: ""
+  - id: "play-art-skill-panel"
+    name: "功法/战技面板 — 查看已学功法+可装备战技+拖拽切换"
     file: ""
     priority: must-have
-    status: done  # 2026-07-22；WorldView角色头顶HP条+颜色渐变
+    status: backlog
     owner: ""
-    estimate_days: 0.5
-    blocker: "view-sprite-sheet (Sprint 16)"
-    completed: "2026-07-22"
+    estimate_days: 1.5
+    blocker: "CharInfoCard (Sprint 17)"
+    completed: ""
 
   # —— Should Have ——
-  - id: "play-combat-feedback"
-    name: "战斗反馈增强 — 命中闪光/格挡音效占位/破韧震屏"
+  - id: "play-explore-action"
+    name: "探索动作 — 点击节点→Travel + 秘境发现事件"
     file: ""
     priority: should-have
     status: backlog
     owner: ""
-    estimate_days: 1.0
-    blocker: "play-qte-clickable"
+    estimate_days: 0.5
+    blocker: "play-click-world (Sprint 20)"
     completed: ""
