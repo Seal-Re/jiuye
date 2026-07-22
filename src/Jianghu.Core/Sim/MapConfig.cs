@@ -7,11 +7,49 @@ namespace Jianghu.Sim
     /// <summary>站点类型。</summary>
     public enum SiteKind { Normal = 0, Resource = 1, Secret = 2, Sect = 3 }
 
-    /// <summary>区域定义——三类地区（§2.1）。</summary>
+    /// <summary>地形类型（§2.1，canon 6 种 + 薄灵区地板）。L0 纯数据，追加新地形=加一行枚举。</summary>
+    public enum TerrainKind
+    {
+        Plain = 0,      // 平原（中州）
+        Sea = 1,        // 海域（东海）
+        Desert = 2,     // 荒漠（北漠）
+        MountainFire = 3, // 山岳·火（西陲）
+        Jungle = 4,     // 林莽（南疆）
+        MountainForest = 5, // 山岳·密林（苗疆）
+        Marsh = 6       // 水泽（江南）
+    }
+
+    /// <summary>元素属性（§5.2，canon 6 种）。L0 纯数据。</summary>
+    public enum ElementKind
+    {
+        Earth = 0,  // 土（中州）
+        Water = 1,  // 水（东海/江南）
+        Metal = 2,  // 金（北漠）
+        Fire = 3,   // 火（西陲）
+        Wood = 4,   // 木（南疆/苗疆）
+        None = 5    // 无
+    }
+
+    /// <summary>灾厄类型（§5.2，canon 5 种）。L0 纯数据。</summary>
+    public enum HazardKind
+    {
+        None = 0,
+        Miasma = 1,     // 瘴疠（南疆·万毒尸沼）
+        BeastTide = 2,  // 妖兽潮（江南·太湖鬼潮渚）
+        GhostFog = 3,   // 鬼雾（中州次要决战中心）
+        Storm = 4,      // 风暴（西陲·地火熔渊）
+        CalamityAsh = 5 // 劫烬（北漠·玄昊古战场，玄昊大劫专属）
+    }
+
+    /// <summary>区域定义——7 大区（canon GeoCanon §1.2）。L0 纯数据行。</summary>
     public sealed record RegionDef(
         string Name,
         int CenterX, int CenterY,
-        int Wealth, int QiDensity, int Strategic
+        int Wealth, int QiDensity, int Strategic,
+        TerrainKind Terrain = TerrainKind.Plain,
+        ElementKind Element = ElementKind.Earth,
+        int Peril = 0,
+        HazardKind Hazard = HazardKind.None
     );
 
     /// <summary>节点地形数据（侧表，键 NodeId）。不可变 record。</summary>
@@ -19,7 +57,9 @@ namespace Jianghu.Sim
         SiteKind Kind,
         int ResourceAmount,
         int Wealth, int Qi, int Strategic,
-        int DangerTier
+        int DangerTier,
+        TerrainKind TerrainVariant = TerrainKind.Plain,
+        int QiLayer = 0  // 0=薄灵, 1=衔接带, 2=厚灵
     );
 
     /// <summary>地图生成配置——所有硬编码参数集中于此。</summary>
