@@ -13,15 +13,22 @@ public partial class QteFrameBar : Control
 {
     private WorldBridge _bridge = null!;
     private bool _visible;
+    private bool _clickable; // 当前帧是否可点击
 
     // 双条参数
-    private float _attackerWindowStart = 0.3f;   // 归一化 [0,1]
+    private float _attackerWindowStart = 0.3f;
     private float _attackerWindowEnd = 0.5f;
     private float _defenderWindowStart = 0.2f;
     private float _defenderWindowEnd = 0.45f;
-    private float _pointerPos;                     // 动画指针位置
+    private float _pointerPos;
     private bool _attackerSuccess;
     private bool _defenderSuccess;
+    private bool _playerClicked;    // 玩家是否点击了
+    private bool _playerHit;        // 玩家是否点中窗口
+
+    // 命中率追踪
+    private int _totalClicks;
+    private int _totalHits;
 
     private Tween? _tween;
     private int _lastDuelCount;
@@ -69,6 +76,8 @@ public partial class QteFrameBar : Control
         _defenderSuccess = margin >= 50;
 
         _pointerPos = 0f;
+        _clickable = true;
+        _playerClicked = false;
         Show();
         _visible = true;
 
@@ -93,12 +102,22 @@ public partial class QteFrameBar : Control
 
         // —— 攻方条（上）——
         DrawString(font, new Vector2(20, 0), "攻方 QTE", HorizontalAlignment.Left, -1, fontSize, new Color(0.9f, 0.5f, 0.3f));
-        DrawBar(20, BarY, _attackerWindowStart, _attackerWindowEnd, _attackerSuccess);
+        DrawBar(20, BarY, _attackerWindowStart, _attackerWindowEnd, _attackerSuccess || _playerHit);
 
         // —— 防方条（下）——
         DrawString(font, new Vector2(20, BarY + BarHeight + 6), "防方 QTE",
             HorizontalAlignment.Left, -1, fontSize, new Color(0.4f, 0.6f, 0.9f));
         DrawBar(20, BarY + BarHeight + 6 + BarY, _defenderWindowStart, _defenderWindowEnd, _defenderSuccess);
+
+        // 命中率
+        string hitRate = _totalClicks > 0 ? $"命中 {_totalHits}/{_totalClicks}" : "";
+        DrawString(font, new Vector2(20, BarY * 2 + BarHeight * 2 + 10), hitRate,
+            HorizontalAlignment.Left, -1, 9, new Color(0.7f, 0.65f, 0.5f));
+
+        // 点击提示
+        if (_clickable && !_playerClicked)
+            DrawString(font, new Vector2(20, BarY + BarHeight / 2), "← 点击窗口!",
+                HorizontalAlignment.Left, -1, 10, new Color(1f, 0.9f, 0.3f, 0.8f));
     }
 
     private void DrawBar(float x, float y, float winStart, float winEnd, bool success)
@@ -131,5 +150,30 @@ public partial class QteFrameBar : Control
         var resultColor = success ? new Color(0.3f, 1f, 0.3f) : new Color(1f, 0.3f, 0.2f);
         DrawString(ThemeDB.FallbackFont, new Vector2(x + BarWidth + 6, y), result,
             HorizontalAlignment.Left, -1, 10, resultColor);
+    }
+
+    public override void _Input(InputEvent @event)
+    {
+        if (!_visible || !_clickable || _playerClicked) return;
+        if (@event is not InputEventMouseButton mb || !mb.Pressed || mb.ButtonIndex != MouseButton.Left)
+            return;
+
+        var clickPos = GetGlobalMousePosition();
+        var localPos = clickPos - GlobalPosition;
+
+        float barX = 20;
+        float barTop = BarY;
+        float barBottom = BarY + BarHeight;
+        if (localPos.X >= barX && localPos.X <= barX + BarWidth &&
+            localPos.Y >= barTop - 4 && localPos.Y <= barBottom + 4)
+        {
+            float normX = (localPos.X - barX) / BarWidth;
+            _playerHit = normX >= _attackerWindowStart && normX <= _attackerWindowEnd;
+            _playerClicked = true;
+            _clickable = false;
+            _totalClicks++;
+            if (_playerHit) _totalHits++;
+            QueueRedraw();
+        }
     }
 }

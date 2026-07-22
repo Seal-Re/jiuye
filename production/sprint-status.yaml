@@ -1,42 +1,44 @@
-# Sprint 20 (Play-Alpha-1) — 玩家介入 P0：最小可玩闭环
+# Sprint 21 (Play-Alpha-2) — QTE 交互 + 反馈增强 + 玩家 HP
 #
-# Sprint 9-19 全闭 (32 stories, 1281绿)。
-# View 层 10 项就绪。玩家介入设计 P0 启动。
+# Sprint 9-20 全闭 (35 stories, 1281绿)。项目已可玩。
+# Play P1：QTE 帧窗交互 + 伤害反馈 + 玩家状态条。
 
-sprint: 20
-goal: "Play-Alpha-1：角色创建 + 意图输入 + 暂停/继续 + 可玩闭环"
+sprint: 21
+goal: "Play-Alpha-2：QTE 帧窗可点击交互 + 玩家 HP/资源条 + 战斗反馈增强"
 start: "2026-07-22"
 end: "2026-07-29"
 generated: "2026-07-22"
 updated: "2026-07-22"
-status: closed  # 2026-07-22；3/3 Must Have done；1281绿；Play-Alpha-1玩家可玩闭环
+status: closed  # 2026-07-22；2/2 Must Have done；1281绿；QTE可点击+HP条
 
 stories:
   # —— Must Have ——
-  - id: "play-char-create"
-    name: "角色创建面板 — 选名/选路/确认 → WorldFactory.CreateTypicalChar"
+  - id: "play-qte-clickable"
+    name: "QTE 帧窗可点击 — 鼠标点击成功窗→判定成功/失败→影响战斗"
     file: ""
     priority: must-have
-    status: done  # 2026-07-22；CharCreatePanel:选名+21路下拉+预览+注入World
+    status: done  # 2026-07-22；QteFrameBar._Input点击窗口判定+命中率追踪
+    owner: ""
+    estimate_days: 2.0
+    blocker: "view-qte-frame-bar (Sprint 18)"
+    completed: "2026-07-22"
+  - id: "play-hp-bars"
+    name: "玩家 HP/资源条 — 角色头顶生命值+灵气条常驻显示"
+    file: ""
+    priority: must-have
+    status: done  # 2026-07-22；WorldView角色头顶HP条+颜色渐变
+    owner: ""
+    estimate_days: 0.5
+    blocker: "view-sprite-sheet (Sprint 16)"
+    completed: "2026-07-22"
+
+  # —— Should Have ——
+  - id: "play-combat-feedback"
+    name: "战斗反馈增强 — 命中闪光/格挡音效占位/破韧震屏"
+    file: ""
+    priority: should-have
+    status: backlog
     owner: ""
     estimate_days: 1.0
-    blocker: "gh-004 命令端口"
-    completed: "2026-07-22"
-  - id: "play-action-bar"
-    name: "意图操作栏 — 修炼/游历/切磋/探索 四按钮 + 暂停/继续"
-    file: ""
-    priority: must-have
-    status: done  # 2026-07-22；ActionBar:修炼+游历+切磋+暂停+playerQueue
-    owner: ""
-    estimate_days: 1.5
-    blocker: "play-char-create"
-    completed: "2026-07-22"
-  - id: "play-click-world"
-    name: "点击世界交互 — 点击节点→Travel / 点击角色→Spar"
-    file: ""
-    priority: must-have
-    status: done  # 2026-07-22；WorldView.OnTargetSelected:点击角色→切磋/点击节点→游历
-    owner: ""
-    estimate_days: 1.0
-    blocker: "WorldView 点击检测 (Sprint 17)"
-    completed: "2026-07-22"
+    blocker: "play-qte-clickable"
+    completed: ""
