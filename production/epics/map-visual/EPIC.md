@@ -11,26 +11,48 @@
 四层叠加渲染的 2D 像素瓦片地图。纯哈希确定性生成（同 seed + 同坐标 = 同结果）。
 底层多概率变体铺满 → 上层小概率装饰叠加 → 再上层稀有特征点缀 → 最上层地标建筑锚定。
 
-## 架构：四层叠加模型
+## 架构：四层叠加模型 + 确定性哈希
+
+### 节点拓扑（Godot 4.3+ TileMapLayer）
 
 ```
-Layer 3 — 地标建筑    21 固定坐标锚点（非概率，NodeId 精确匹配）
-Layer 2 — 稀有特征    <3% 覆盖率，透明底，Layer 0 特定变体上方叠加
-Layer 1 — 装饰物      <15% 覆盖率，透明底，Layer 0 特定变体上方叠加
-Layer 0 — 基础地形    100% 覆盖，全面铺满，每种地形 3 个概率变体
+Main (Node)
+├── MapLayer0_Terrain   (TileMapLayer)  — 基础地形 100% 覆盖
+├── MapLayer1_Decor     (TileMapLayer)  — 装饰物 <15%
+├── MapLayer2_Rare      (TileMapLayer)  — 稀有特征 <3%
+└── MapLayer3_Landmark  (TileMapLayer)  — 地标建筑 固定锚点
 ```
 
-### 确定性哈希生成
+> 不使用单一 TileMap 的 `layer` 参数（Godot 4.3 已弃用多图层模式）。
+> 写入时分别调用各层 `set_cell(coords, source_id, atlas_coords)`。
+
+### 确定性哈希函数（Wang Hash 变体 —— 跨平台/跨版本稳定）
 
 ```gdscript
-# 禁止 randi()，基于坐标+seed 纯哈希
-func hash_cell(x: int, y: int, seed: int, layer: int) -> int:
-    var h = hash(x * 73856093 + y * 19349663 + seed * 83492791 + layer * 631)
-    return abs(h)  # 返回正整数值，用于概率判定
-
-# Layer 0: hash % 100 → 选变体（60/25/15 概率带）
-# Layer 1/2: hash % 1000 → 与阈值比较（<150 装饰物, <30 稀有特征）
+# 纯位运算位移哈希。不依赖 Godot 内置 hash()（大版本间可能变动）。
+# 使用 & 0x7FFFFFFFFFFFFFFF 取正 —— 避免 abs(INT_MIN) 溢出崩溃。
+func hash_cell(x: int, y: int, map_seed: int, layer: int) -> int:
+    var h: int = (x * 73856093) ^ (y * 19349663) ^ (map_seed * 83492791) ^ (layer * 631)
+    h ^= h >> 16
+    h *= 0x85ebca6b
+    h ^= h >> 13
+    h *= 0xc2b2ae35
+    h ^= h >> 16
+    return h & 0x7FFFFFFFFFFFFFFF   # 屏蔽符号位，绝不安 abs()
 ```
+
+### 渲染管线计算顺序（关键：时序依赖）
+
+```
+1. 计算 Layer 0 基础哈希变体 → 选出 T01-T07 具体变体
+2. 执行条件拦截 → 检查 Peril/QiDensity/Element
+   若满足 T08-T11 触发条件 → 覆盖 Layer 0 为基础特殊地形
+3. 基于覆盖后的 最终 Layer 0 ID → 判定 Layer 1 装饰物
+4. 基于覆盖后的 最终 Layer 0 ID → 判定 Layer 2 稀有特征
+5. NodeId 精确匹配 → 写入 Layer 3 地标建筑
+```
+
+> 时序铁律：Layer 0 条件拦截必须在 Layer 1/2 判定之前。否则鬼域(T10)上会长出翠绿草地的野花(D01)。
 
 ---
 
@@ -140,15 +162,6 @@ func hash_cell(x: int, y: int, seed: int, layer: int) -> int:
 | L20 | 巨港 | 姑苏·烟雨坊市 | 6 江南 | 白墙黑瓦+石拱桥+画舫+灯笼 |
 | L21 | 险地 | 太湖鬼潮渚 | 6 江南 | 暗潮水面+鬼船残骸+水妖+迷雾 |
 
-### 势力领土半透明着色（Layer 3 叠加）
-
-| Align | 色调 | RGBA |
-|---|---|---|
-| 正派 (Align≥0) | 青蓝 | (0.2, 0.4, 0.7, 0.25) |
-| 邪派 (Align<0) | 暗红紫 | (0.6, 0.1, 0.3, 0.25) |
-| 中立 | 黄灰 | (0.5, 0.45, 0.2, 0.20) |
-| 无主/散修 | 不着色 | — |
-
 ---
 
 ## 边境/路径瓦片（Layer 0 邻接边专用）
@@ -192,11 +205,10 @@ func hash_cell(x: int, y: int, seed: int, layer: int) -> int:
   - TileMapLayer 批量 `set_cell` 写入
   - 区块生成 `generate_chunk(chunk_pos, chunk_size)` 支持无缝懒加载
 
-- **mv-003** 势力领土着色 + 边境连线 (1d)
+- **mv-003** 边境连线 + Region 边界 (1d)
   - Region 边界线渲染（RegionId 变化处半透明色带）
-  - 势力 FactionDef.HomeRegion → 领土半透明色叠加（Align轴定色调）
   - 邻接边道路/关隘/境界门控线（B01-B03，RegionEdge 数据驱动）
-  - 地缘张力可视化（同区接壤=高亮红边/跨区远程=虚线）
+  - 地缘张力可视化（同区接壤=实线/跨区远程=虚线）
 
 ### Should Have
 
