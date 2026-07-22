@@ -8,7 +8,7 @@ start: "2026-07-22"
 end: "2026-07-29"
 generated: "2026-07-22"
 updated: "2026-07-22"
-status: in-progress
+status: closed  # 2026-07-22；2/2 Must Have done；1281绿；死亡继承+存档
 
 stories:
   # —— Must Have ——
@@ -16,20 +16,20 @@ stories:
     name: "死亡继承 — 玩家角色死亡→选择继承人→属性和功法部分继承"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；DeathInheritPanel:死亡检测+继承衣钵+新踏江湖
     owner: ""
     estimate_days: 1.5
     blocker: "play-char-create (Sprint 20)"
-    completed: ""
+    completed: "2026-07-22"
   - id: "play-save-load"
     name: "存档/读档 — 命令序列录制→JSON文件→重放恢复世界状态"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；SaveLoadManager:存档JSON+读档+列表
     owner: ""
     estimate_days: 1.0
     blocker: "gh-004 命令端口"
-    completed: ""
+    completed: "2026-07-22"
 
   # —— Should Have ——
   - id: "play-explore-action"

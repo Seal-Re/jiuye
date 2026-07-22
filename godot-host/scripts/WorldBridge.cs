@@ -34,7 +34,7 @@ public partial class WorldBridge : Node
     public bool Paused { get; set; }
 
     /// <summary>玩家角色引用（P0 创建后注入）。</summary>
-    public Character? PlayerCharacter { get; private set; }
+    public Character? PlayerCharacter { get; set; }
 
     /// <summary>玩家命令队列（P0）。每 Tick 出队一个覆盖 RuleBrain。</summary>
     private readonly System.Collections.Generic.Queue<CommandIntent> _playerQueue = new();
