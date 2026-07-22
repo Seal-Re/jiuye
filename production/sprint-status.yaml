@@ -9,7 +9,7 @@ start: "2026-07-22"
 end: "2026-07-29"
 generated: "2026-07-22"
 updated: "2026-07-22"
-status: in-progress
+status: closed  # 2026-07-22；2/2 Must Have done；1281绿；战斗反馈+功法面板
 
 stories:
   # —— Must Have ——
@@ -17,20 +17,20 @@ stories:
     name: "战斗反馈增强 — 命中闪光/格挡闪烁/破韧震屏动效"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；CombatFeedback:闪光渐隐+震屏衰减+切磋触发
     owner: ""
     estimate_days: 1.0
     blocker: "play-qte-clickable (Sprint 21)"
-    completed: ""
+    completed: "2026-07-22"
   - id: "play-art-skill-panel"
     name: "功法/战技面板 — 查看已学功法+可装备战技+拖拽切换"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；ArtSkillPanel:功法+战技双列表+点击详情
     owner: ""
     estimate_days: 1.5
     blocker: "CharInfoCard (Sprint 17)"
-    completed: ""
+    completed: "2026-07-22"
 
   # —— Should Have ——
   - id: "play-explore-action"
