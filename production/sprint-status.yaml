@@ -9,7 +9,7 @@ start: "2026-07-22"
 end: "2026-07-29"
 generated: "2026-07-22"
 updated: "2026-07-22"
-status: in-progress
+status: closed  # 2026-07-22；3/3 Must Have done；1281绿；Play-Alpha-1玩家可玩闭环
 
 stories:
   # —— Must Have ——
@@ -17,26 +17,26 @@ stories:
     name: "角色创建面板 — 选名/选路/确认 → WorldFactory.CreateTypicalChar"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；CharCreatePanel:选名+21路下拉+预览+注入World
     owner: ""
     estimate_days: 1.0
     blocker: "gh-004 命令端口"
-    completed: ""
+    completed: "2026-07-22"
   - id: "play-action-bar"
     name: "意图操作栏 — 修炼/游历/切磋/探索 四按钮 + 暂停/继续"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；ActionBar:修炼+游历+切磋+暂停+playerQueue
     owner: ""
     estimate_days: 1.5
     blocker: "play-char-create"
-    completed: ""
+    completed: "2026-07-22"
   - id: "play-click-world"
     name: "点击世界交互 — 点击节点→Travel / 点击角色→Spar"
     file: ""
     priority: must-have
-    status: backlog
+    status: done  # 2026-07-22；WorldView.OnTargetSelected:点击角色→切磋/点击节点→游历
     owner: ""
     estimate_days: 1.0
     blocker: "WorldView 点击检测 (Sprint 17)"
-    completed: ""
+    completed: "2026-07-22"

@@ -24,6 +24,10 @@ public partial class WorldView : Node2D
     private readonly Dictionary<string, Rect2> _pathIconRects = new();
     private CharInfoCard? _infoCard;
 
+    /// <summary>玩家选择目标：type="node"|"char", data=nodeIdx|charId</summary>
+    [Signal]
+    public delegate void OnTargetSelectedEventHandler(string type, int data);
+
     // icon_gen.py PATHS 顺序 (7 cols × 3 rows)
     private static readonly string[] PathOrder =
     {
@@ -147,9 +151,11 @@ public partial class WorldView : Node2D
             return;
 
         var world = _bridge.World;
-        if (world == null || _infoCard == null) return;
+        if (world == null) return;
 
         var clickPos = GetGlobalMousePosition();
+
+        // 先检查角色点击
         foreach (var c in world.AliveCharacters())
         {
             int nodeIdx = c.Node.Value;
@@ -158,7 +164,20 @@ public partial class WorldView : Node2D
             float dist = clickPos.DistanceTo(pos);
             if (dist < TileSize / 2f)
             {
-                _infoCard.ShowCharacter(c, _bridge);
+                _infoCard?.ShowCharacter(c, _bridge);
+                EmitSignal(SignalName.OnTargetSelected, "char", (int)c.Id.Value);
+                return;
+            }
+        }
+
+        // 再检查节点点击（空节点=travel目标）
+        for (int i = 0; i < _nodeCount; i++)
+        {
+            var pos = _nodePositions[i];
+            float dist = clickPos.DistanceTo(pos);
+            if (dist < TileSize / 2f)
+            {
+                EmitSignal(SignalName.OnTargetSelected, "node", i);
                 return;
             }
         }

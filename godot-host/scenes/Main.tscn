@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/WorldBridge.cs" id="1_wb"]
 [ext_resource type="Script" path="res://scripts/WorldView.cs" id="2_wv"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://scripts/CharacterListPanel.cs" id="5_cl"]
 [ext_resource type="Script" path="res://scripts/QteFrameBar.cs" id="6_qte"]
 [ext_resource type="Script" path="res://scripts/DamagePopup.cs" id="7_dp"]
+[ext_resource type="Script" path="res://scripts/CharCreatePanel.cs" id="8_cc"]
+[ext_resource type="Script" path="res://scripts/ActionBar.cs" id="9_ab"]
 
 [node name="Main" type="Node"]
 
@@ -30,3 +32,9 @@ script = ExtResource("6_qte")
 
 [node name="DamagePopup" type="Control" parent="."]
 script = ExtResource("7_dp")
+
+[node name="CharCreatePanel" type="Control" parent="."]
+script = ExtResource("8_cc")
+
+[node name="ActionBar" type="Control" parent="."]
+script = ExtResource("9_ab")
