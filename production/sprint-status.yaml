@@ -1,44 +1,42 @@
-# Sprint 19 (View-Alpha-4) — 伤害飘字 + 玩家介入设计
+# Sprint 20 (Play-Alpha-1) — 玩家介入 P0：最小可玩闭环
 #
-# Sprint 9-18 全闭 (30 stories, 1281绿)。
-# View 层：8项功能就绪。下一方向：伤害飘字 + 玩家介入起步。
+# Sprint 9-19 全闭 (32 stories, 1281绿)。
+# View 层 10 项就绪。玩家介入设计 P0 启动。
 
-sprint: 19
-goal: "View-Alpha-4：伤害飘字动效 + 玩家介入设计方案"
-start: "2026-07-21"
-end: "2026-07-28"
-generated: "2026-07-21"
-updated: "2026-07-21"
-status: closed  # 2026-07-21；2/2 Must Have done；1281绿；伤害飘字+玩家介入设计就绪
+sprint: 20
+goal: "Play-Alpha-1：角色创建 + 意图输入 + 暂停/继续 + 可玩闭环"
+start: "2026-07-22"
+end: "2026-07-29"
+generated: "2026-07-22"
+updated: "2026-07-22"
+status: in-progress
 
 stories:
   # —— Must Have ——
-  - id: "view-damage-popup"
-    name: "伤害飘字 — 红字伤害/橙字反弹/金色破韧浮动画"
+  - id: "play-char-create"
+    name: "角色创建面板 — 选名/选路/确认 → WorldFactory.CreateTypicalChar"
     file: ""
     priority: must-have
-    status: done  # 2026-07-21；DamagePopup:浮动数字+上浮渐隐+红/橙/金三色
-    owner: ""
-    estimate_days: 1.0
-    blocker: "view-qte-frame-bar (Sprint 18)"
-    completed: "2026-07-21"
-  - id: "design-player-intervention"
-    name: "玩家介入设计方案 — 角色创建/意图输入/命令端口交互流"
-    file: ""
-    priority: must-have
-    status: done  # 2026-07-21；P0最小可玩/P1意图面板/P2完整循环设计就绪
-    owner: ""
-    estimate_days: 0.5
-    blocker: "gh-004 命令端口"
-    completed: "2026-07-21"
-
-  # —— Should Have ——
-  - id: "view-hp-bars"
-    name: "HP/资源条 — 角色头顶生命值/灵气条（战斗中常驻）"
-    file: ""
-    priority: should-have
     status: backlog
     owner: ""
-    estimate_days: 0.5
-    blocker: "view-sprite-sheet"
+    estimate_days: 1.0
+    blocker: "gh-004 命令端口"
+    completed: ""
+  - id: "play-action-bar"
+    name: "意图操作栏 — 修炼/游历/切磋/探索 四按钮 + 暂停/继续"
+    file: ""
+    priority: must-have
+    status: backlog
+    owner: ""
+    estimate_days: 1.5
+    blocker: "play-char-create"
+    completed: ""
+  - id: "play-click-world"
+    name: "点击世界交互 — 点击节点→Travel / 点击角色→Spar"
+    file: ""
+    priority: must-have
+    status: backlog
+    owner: ""
+    estimate_days: 1.0
+    blocker: "WorldView 点击检测 (Sprint 17)"
     completed: ""
