@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/WorldBridge.cs" id="1_wb"]
 [ext_resource type="Script" path="res://scripts/WorldView.cs" id="2_wv"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/DamagePopup.cs" id="7_dp"]
 [ext_resource type="Script" path="res://scripts/CharCreatePanel.cs" id="8_cc"]
 [ext_resource type="Script" path="res://scripts/ActionBar.cs" id="9_ab"]
+[ext_resource type="Script" path="res://scripts/CombatFeedback.cs" id="10_cf"]
+[ext_resource type="Script" path="res://scripts/ArtSkillPanel.cs" id="11_as"]
 
 [node name="Main" type="Node"]
 
@@ -38,3 +40,9 @@ script = ExtResource("8_cc")
 
 [node name="ActionBar" type="Control" parent="."]
 script = ExtResource("9_ab")
+
+[node name="CombatFeedback" type="Control" parent="."]
+script = ExtResource("10_cf")
+
+[node name="ArtSkillPanel" type="Control" parent="."]
+script = ExtResource("11_as")
