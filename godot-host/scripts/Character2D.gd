@@ -125,8 +125,43 @@ func _check_interrupt() -> void:
 
 
 # ================================================================
-#  公共接口
+#  地形效果: 从 tile_id 查询 TerrainData → 减速/灼烧/中毒
 # ================================================================
+func apply_terrain_effect(tile_id: int) -> void:
+	var effect := TerrainData.get_effect(tile_id)
+	if effect == TerrainData.EffectKind.NONE:
+		terrain_speed_mult = 1.0
+		return
+
+	var data := TerrainData.get_effect_data(effect)
+	terrain_speed_mult = data["speed"]
+
+	# 持续伤害 (dmg>0 且 tick>0)
+	if data["dmg"] > 0 and data["tick"] > 0:
+		_start_dot_timer(data["dmg"], data["tick"], data["duration"])
+
+
+func _start_dot_timer(dmg: int, interval: float, duration: float) -> void:
+	var timer := Timer.new()
+	timer.wait_time = interval
+	timer.one_shot = false
+	add_child(timer)
+	timer.timeout.connect(_apply_dot.bind(dmg))
+	timer.start()
+
+	# 持续时间后停止
+	var stop_timer := Timer.new()
+	stop_timer.wait_time = duration
+	stop_timer.one_shot = true
+	add_child(stop_timer)
+	stop_timer.timeout.connect(timer.queue_free)
+	stop_timer.timeout.connect(stop_timer.queue_free)
+	stop_timer.start()
+
+
+func _apply_dot(dmg: int) -> void:
+	# TODO: 玩家 HP -= dmg (需 HP 系统，当前占位)
+	print("[Character2D] %s 受到 %d 点地形伤害" % [char_name, dmg])
 func set_target(world_target: Vector2, node_id: int, tilemap: TileMapLayer) -> void:
 	"""设置 A* 路点队列 (由 MapGenerator/AStarGrid2D 调用)"""
 	target_node_id = node_id
@@ -135,11 +170,9 @@ func set_target(world_target: Vector2, node_id: int, tilemap: TileMapLayer) -> v
 	is_interacting = false
 
 
-func set_terrain_speed(cost: float, on_water: bool) -> void:
-	"""地形减速 (由 MapGenerator 查询 CollisionPassKind 后调用)"""
-	terrain_speed_mult = 1.0 / max(cost, 0.1)
-	if on_water:
-		terrain_speed_mult *= 0.8
+func set_terrain_by_tile(tile_id: int) -> void:
+	"""从 tile_id 查询 TerrainData 设置地形效果"""
+	apply_terrain_effect(tile_id)
 
 
 func set_realm_level(realm: int) -> void:
