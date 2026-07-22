@@ -222,6 +222,34 @@ func hash_cell(x: int, y: int, map_seed: int, layer: int) -> int:
   - 秘境未显形：半透明覆盖+问号标记
   - QiDensity 可视化：35-55衔接带偏暗/56-100厚灵区灵气光点密度渐增
 
+### Movement System
+
+- **mv-006** TileSet 物理碰撞层 + CharacterBody2D 移动基础 (2d)
+  - TileSet 加 Physics Layer：海域(T02)/山岳(T04-T06)/地标建筑(L01-L21)绘制碰撞多边形
+  - 角色节点类型从 `Node2D` 重构为 `CharacterBody2D`
+  - WASD 八方向平滑移动（`Input.get_vector` + `move_and_slide()`）
+  - 碰撞自动处理：海边自然阻挡+沿障碍物平滑滑动——不依赖"检查下一格是否可走"
+  - 速度常量：玩家 150px/s，AI 100px/s
+
+- **mv-007** AStarGrid2D 寻路 + 路点平滑跟随 (2d)
+  - `AStarGrid2D` 基于 TileMap 网格构建（`tilemap.local_to_map` / `map_to_local`）
+  - 玩家鼠标点击→世界坐标→A* 路径→路点队列→`_physics_process` 逐路点跟随
+  - AI 决策目标（Travel to Site/Sect/Hub）→同上 A* 路点平滑跟随
+  - 路点容差半径 5px，到点即切下一个路点
+  - 不阻塞模拟 Tick：移动中仍可 Advance（位置是 View 层插值，不影响 Core NodeId）
+
+- **mv-008** Steering Behaviors — AI 移动自然化 (1d)
+  - **Wander Jitter**：AI 跟随路点时，velocity 叠加 `FastNoiseLite` 2D 噪音向量——轨迹呈平滑波浪线/轻微蛇形，非机器直线
+  - **Separation**：同屏多 AI 检测距离——过近时 velocity 加反向推力，自然散开，形成有机"人群"感
+  - 纯 View 层——不改 Core 决策、不碰 B.2/B.3
+
+### Core 地形字段补齐
+
+- **mv-004** Core 地形字段补齐 (1d)
+  - `RegionDef` 加 `TerrainKind`/`Element`/`Peril`/`HazardKind` 字段
+  - `NodeGeo` 加 `BiomeVariant`/`QiLayer` 字段
+  - 纯 L0 数据行——不改算法、不破 B.3 off 逐字节
+
 ## 素材 prompt 模板示例
 
 ```
