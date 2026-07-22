@@ -90,12 +90,13 @@ func _ai_follow_path(spd: float, delta: float) -> void:
 	var direction := global_position.direction_to(next_point)
 	velocity = direction * spd
 
-	# Steering: Wander Jitter (mv-008 接入，当前用简单正弦)
-	if not is_player:
-		velocity += _wander_jitter(delta) * spd * 0.1
+	# Steering: Wander Jitter (FastNoiseLite Simplex)
+	if not is_player and steering != null:
+		velocity += steering.get_wander(delta, spd)
 
-	# Steering: Separation (mv-008 接入，当前占位)
-	velocity += _separation_force() * spd * 0.3
+	# Steering: Separation (多 AI 距离检测)
+	if not is_player and steering != null and all_chars_ref.size() > 0:
+		velocity += steering.get_separation(self, all_chars_ref)
 
 	move_and_slide()
 
@@ -110,25 +111,6 @@ func _on_arrive_at_target() -> void:
 	is_moving = false
 	# TODO: 通过 WorldBridge 写回 CommandIntent(Travel, To=target_node_id)
 	print("[Character2D] %s 到达 NodeId=%d" % [char_name, target_node_id])
-
-
-# ================================================================
-#  Steering Behaviors (mv-008 完整实现，当前占位)
-# ================================================================
-func _wander_jitter(_delta: float) -> Vector2:
-	return Vector2(sin(Time.get_ticks_msec() * 0.001 + noise_offset) * 0.5,
-				   cos(Time.get_ticks_msec() * 0.0013 + noise_offset) * 0.5)
-
-
-func _separation_force() -> Vector2:
-	var force := Vector2.ZERO
-	var neighbors := interact_area.get_overlapping_bodies()
-	for body in neighbors:
-		if body is Character2D and body != self:
-			var dist := global_position.distance_to(body.global_position)
-			if dist < 30.0 and dist > 0.01:
-				force += (global_position - body.global_position).normalized() * (30.0 - dist) / 30.0
-	return force
 
 
 func _check_interrupt() -> void:
