@@ -93,6 +93,38 @@ namespace Jianghu.Sim
             Deceased = deceased; _alive = alive; _brains = brains; _sched = sched;
         }
 
+        // gh-004/play-001：玩家角色注入（P0 最小可玩）—— 不同于 World.Add，
+        // 需同时初始化 cultivation state（PathAssigner + CultivationState）。
+        public void InjectCharacter(Character c, CultivationPathDef pathDef)
+        {
+            // 初始化修为（CultivationState 含资源/功法/战技 loadout）
+            var chosenArts = new List<string>();
+            foreach (var cat in pathDef.ArtCategories)
+            {
+                if (cat.Role == "daoheart") continue;
+                int pick = cat.PickMin;
+                var sorted = new List<ArtDef>(cat.Arts);
+                sorted.Sort((a, b) => a.Tier.CompareTo(b.Tier));
+                int start = System.Math.Max(0, (sorted.Count - pick) / 2);
+                for (int i = 0; i < pick && start + i < sorted.Count; i++)
+                    chosenArts.Add(sorted[start + i].Id);
+            }
+            var chosenSkills = new List<string>();
+            int skillPick = pathDef.Selection.SkillPickMin;
+            if (skillPick > 0 && pathDef.CombatSkills.Count > 0)
+            {
+                var sortedSkills = new List<CombatSkillDef>(pathDef.CombatSkills);
+                sortedSkills.Sort((a, b) => a.Tier.CompareTo(b.Tier));
+                int skillStart = System.Math.Max(0, (sortedSkills.Count - skillPick) / 2);
+                for (int i = 0; i < skillPick && skillStart + i < sortedSkills.Count; i++)
+                    chosenSkills.Add(sortedSkills[skillStart + i].Id);
+            }
+            var st = CultivationState.NewForPath(pathDef.PathId, pathDef.Resources, chosenArts, chosenSkills);
+            st.RealmIndex = 0;
+            c.Cultivation = st;
+            Add(c, new RuleBrain((_cultRng ?? SpawnRng).Split((ulong)c.Id.Value), c.Persona.Archetype));
+        }
+
         public void Add(Character c, IBrain brain)
         {
             _alive[c.Id.Value] = c; _brains[c.Id] = brain;

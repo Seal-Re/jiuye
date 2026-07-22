@@ -1,6 +1,9 @@
 using Godot;
+using Jianghu.Actions;
 using Jianghu.Config;
 using Jianghu.Cultivation;
+using Jianghu.Decide;
+using Jianghu.Model;
 using Jianghu.Sim;
 
 namespace GodotHost;
@@ -26,6 +29,31 @@ public partial class WorldBridge : Node
 
     /// <summary>Core 世界实例（公开——供 WorldView 等 View 节点只读访问）。</summary>
     public World World => _world;
+
+    /// <summary>暂停累加器——玩家决策中不 Advance（P0 用）。</summary>
+    public bool Paused { get; set; }
+
+    /// <summary>玩家角色引用（P0 创建后注入）。</summary>
+    public Character? PlayerCharacter { get; private set; }
+
+    /// <summary>玩家命令队列（P0）。每 Tick 出队一个覆盖 RuleBrain。</summary>
+    private readonly System.Collections.Generic.Queue<CommandIntent> _playerQueue = new();
+
+    /// <summary>玩家注入角色进世界（P0 角色创建）。</summary>
+    public void InjectPlayerCharacter(Character ch, CultivationPathDef pathDef)
+    {
+        PlayerCharacter = ch;
+        _world.InjectCharacter(ch, pathDef);
+        GD.Print($"[WorldBridge] 玩家 {ch.Persona.Name} 已注入世界");
+    }
+
+    /// <summary>玩家意图入队（P0 ActionBar）。</summary>
+    public void QueuePlayerAction(ActionChoice choice)
+    {
+        if (PlayerCharacter == null) return;
+        _playerQueue.Enqueue(CommandIntent.FromChoice(
+            _world.Clock, PlayerCharacter.Id.Value, choice));
+    }
 
     /// <summary>Core 事件行（每行一条事件文本）</summary>
     [Signal]
@@ -73,6 +101,14 @@ public partial class WorldBridge : Node
         int caughtUp = 0;
         while (_accumulator >= SimStepSeconds && caughtUp < MaxCatchupSteps)
         {
+            // P0 暂停：玩家决策中不 Advance
+            if (Paused) break;
+
+            // P0 玩家命令：每 Tick 出队一个 → 覆盖 RuleBrain
+            if (_playerQueue.Count > 0 && PlayerCharacter != null)
+            {
+                _world.SetReplay(new[] { _playerQueue.Dequeue() });
+            }
             // headless 测试：跑完 MaxSteps 自动退出
             if (MaxSteps > 0 && _stepCount >= MaxSteps)
             {
