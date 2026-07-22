@@ -1,52 +1,32 @@
-# Sprint 23 (Play-Alpha-4) — 完整玩家循环
+# Sprint 24 (Play-Alpha-5) — 探索+背包收束
 #
-# 39 stories done, 1281绿。Play P3：死亡继承+背包+存档+探索。
+# 41 stories done, 1281绿。Play Should Have 遗留收束。
 
-sprint: 23
-goal: "Play-Alpha-4：死亡继承 + 背包面板 + 存档/读档 + 探索秘境"
+sprint: 24
+goal: "Play-Alpha-5：秘境探索 + 背包面板（Should Have 收束）"
 start: "2026-07-22"
 end: "2026-07-29"
 generated: "2026-07-22"
 updated: "2026-07-22"
-status: closed  # 2026-07-22；2/2 Must Have done；1281绿；死亡继承+存档
+status: closed  # 2026-07-22；2/2 Must Have done；1281绿；探索+背包
 
 stories:
   # —— Must Have ——
-  - id: "play-death-inherit"
-    name: "死亡继承 — 玩家角色死亡→选择继承人→属性和功法部分继承"
-    file: ""
-    priority: must-have
-    status: done  # 2026-07-22；DeathInheritPanel:死亡检测+继承衣钵+新踏江湖
-    owner: ""
-    estimate_days: 1.5
-    blocker: "play-char-create (Sprint 20)"
-    completed: "2026-07-22"
-  - id: "play-save-load"
-    name: "存档/读档 — 命令序列录制→JSON文件→重放恢复世界状态"
-    file: ""
-    priority: must-have
-    status: done  # 2026-07-22；SaveLoadManager:存档JSON+读档+列表
-    owner: ""
-    estimate_days: 1.0
-    blocker: "gh-004 命令端口"
-    completed: "2026-07-22"
-
-  # —— Should Have ——
   - id: "play-explore-action"
-    name: "探索秘境 — 点击节点→秘境入口判定→发现事件/资源"
+    name: "探索秘境 — 点击节点→秘境入口判定→发现事件/资源/功法"
     file: ""
-    priority: should-have
-    status: backlog
+    priority: must-have
+    status: done  # 2026-07-22；ExplorePopup:秘境概率触发+4种发现+CP增益
     owner: ""
     estimate_days: 0.5
     blocker: "play-click-world (Sprint 20)"
-    completed: ""
+    completed: "2026-07-22"
   - id: "play-backpack"
     name: "背包面板 — 丹药/法宝/功法书物品格 + 使用/装备操作"
     file: ""
-    priority: should-have
-    status: backlog
+    priority: must-have
+    status: done  # 2026-07-22；BackpackPanel:6格网格+丹药/异火/丹方+点击详情
     owner: ""
     estimate_days: 1.5
     blocker: "play-art-skill-panel (Sprint 22)"
-    completed: ""
+    completed: "2026-07-22"

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/WorldBridge.cs" id="1_wb"]
 [ext_resource type="Script" path="res://scripts/WorldView.cs" id="2_wv"]
@@ -13,6 +13,8 @@
 [ext_resource type="Script" path="res://scripts/ArtSkillPanel.cs" id="11_as"]
 [ext_resource type="Script" path="res://scripts/SaveLoadManager.cs" id="12_sl"]
 [ext_resource type="Script" path="res://scripts/DeathInheritPanel.cs" id="13_di"]
+[ext_resource type="Script" path="res://scripts/ExplorePopup.cs" id="14_ep"]
+[ext_resource type="Script" path="res://scripts/BackpackPanel.cs" id="15_bp"]
 
 [node name="Main" type="Node"]
 
@@ -54,3 +56,9 @@ script = ExtResource("12_sl")
 
 [node name="DeathInheritPanel" type="Control" parent="."]
 script = ExtResource("13_di")
+
+[node name="ExplorePopup" type="Control" parent="."]
+script = ExtResource("14_ep")
+
+[node name="BackpackPanel" type="Control" parent="."]
+script = ExtResource("15_bp")
