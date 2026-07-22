@@ -89,6 +89,59 @@ public partial class WorldView : Node2D
         var world = _bridge.World;
         if (world == null || _nodeCount == 0) return;
 
+        // —— 0. 地图边（节点间连线 + Region 边界）——
+        var map = world.Map;
+        if (map != null)
+        {
+            // 节点间邻接边（不同颜色区分 Open/通牒/境界门控）
+            for (int i = 0; i < _nodeCount; i++)
+            {
+                var adj = map.AdjacentTo(new Jianghu.Model.NodeId(i));
+                foreach (var neighbor in adj)
+                {
+                    int ni = neighbor.Value;
+                    if (ni <= i) continue;
+
+                    int regionA = map.RegionOf(new Jianghu.Model.NodeId(i));
+                    int regionB = map.RegionOf(new Jianghu.Model.NodeId(ni));
+
+                    // 边颜色: 同区域=道路(土黄), 跨区域=关隘(暗红), 无邻接=不可通行(灰)
+                    Color edgeColor;
+                    float edgeWidth;
+                    if (regionA == regionB)
+                    {
+                        edgeColor = new Color(0.45f, 0.38f, 0.22f, 0.6f);  // B01 道路·土黄
+                        edgeWidth = 2f;
+                    }
+                    else
+                    {
+                        edgeColor = new Color(0.55f, 0.25f, 0.18f, 0.5f);  // B02 关隘·暗红
+                        edgeWidth = 2.5f;
+                    }
+                    DrawLine(_nodePositions[i], _nodePositions[ni], edgeColor, edgeWidth);
+                }
+            }
+
+            // Region 边界线（RegionId 变化处半透明色带）
+            for (int i = 0; i < _nodeCount; i++)
+            {
+                int regionI = map.RegionOf(new Jianghu.Model.NodeId(i));
+                var adj = map.AdjacentTo(new Jianghu.Model.NodeId(i));
+                foreach (var neighbor in adj)
+                {
+                    int ni = neighbor.Value;
+                    if (ni <= i) continue;
+                    int regionN = map.RegionOf(new Jianghu.Model.NodeId(ni));
+                    if (regionI != regionN)
+                    {
+                        var mid = (_nodePositions[i] + _nodePositions[ni]) / 2f;
+                        var perp = (_nodePositions[ni] - _nodePositions[i]).Orthogonal().Normalized() * 3f;
+                        DrawLine(mid - perp, mid + perp, new Color(0.6f, 0.45f, 0.15f, 0.4f), 4f);
+                    }
+                }
+            }
+        }
+
         // —— 网格背景 ——
         var gridColor = new Color(0.12f, 0.11f, 0.14f, 1f);
         for (int i = 0; i <= _nodeCount / GridCols + 1; i++)
@@ -107,9 +160,18 @@ public partial class WorldView : Node2D
         {
             var pos = _nodePositions[i];
             float half = TileSize / 2f - 2;
+
+            // 区域着色
+            int regionId = map?.RegionOf(new Jianghu.Model.NodeId(i)) ?? 0;
+            Color[] regionColors = {
+                new Color(0.15f, 0.20f, 0.14f, 1f), // 绿调
+                new Color(0.14f, 0.16f, 0.22f, 1f), // 蓝调
+                new Color(0.20f, 0.14f, 0.16f, 1f), // 红调
+                new Color(0.18f, 0.18f, 0.12f, 1f), // 黄调
+            };
             Color tileColor = i == 0
-                ? new Color(0.15f, 0.20f, 0.14f, 1f)
-                : new Color(0.10f, 0.09f, 0.12f, 1f);
+                ? new Color(0.22f, 0.28f, 0.18f, 1f)  // Home
+                : regionColors[regionId % regionColors.Length];
             DrawRect(new Rect2(pos.X - half, pos.Y - half, TileSize - 4, TileSize - 4), tileColor);
             DrawString(ThemeDB.FallbackFont, pos + new Vector2(-6, -half + 2), i.ToString(),
                 HorizontalAlignment.Left, -1, 10, new Color(0.5f, 0.5f, 0.45f, 1f));
