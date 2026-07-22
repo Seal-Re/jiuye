@@ -191,36 +191,20 @@ func hash_cell(x: int, y: int, map_seed: int, layer: int) -> int:
 
 ### Must Have
 
-- **mv-001** 瓦片素材生成管线 (2d)
-  - 83 种瓦片 AI prompt 模板（每瓦片含：地形描述+像素规格 48×48+色彩约束+光影方向左上）
-  - Pillow 程序化生成 fallback（icon_gen.py 同类模式）
-  - Godot TileSet Atlas 打包脚本（自动切片+Source ID 映射表）
+| # | Story | d | 轨 |
+|---|---|---|---|
+| mv-001 | 瓦片素材生成管线（83种 prompt + Pillow fallback） | 2 | 素材 |
+| mv-002 | 四层叠加渲染引擎（WangHash + TileMapLayer×4 + 管线顺序） | 2 | 渲染 |
+| mv-003 | 边境连线 + Region 边界 | 1 | 渲染 |
+| mv-004 | Core 地形字段补齐（TerrainKind/Element/Peril/HazardKind） | 1 | Core |
+| mv-005 | 视觉层级 LOD + 动态秘境 | 1 | 渲染 |
+| mv-006 | TileSet 物理碰撞 + CharacterBody2D + WASD + 速度映射 | 2 | 移动 |
+| mv-007 | AStarGrid2D 寻路 + 路点平滑跟随 + 中断 + View→Core同步 | 2 | 移动 |
+| mv-008 | Steering Behaviors（Wander Jitter + Separation） | 1 | 移动 |
+| mv-009 | CollisionPassKind 枚举 + 地形效果（减速/泥潭/灼烧/瘴气/冰冻） | 1.5 | 移动 |
+| mv-010 | 关隘门控交互（物理阻挡→UI提示→条件解锁） | 0.5 | 移动 |
 
-- **mv-002** 四层叠加渲染引擎 (2d)
-  - 确定性哈希函数 `hash_cell(x,y,seed,layer)` → 概率判定+变体选择
-  - Layer 0：全面铺满——按 hash%100 落 60/25/15 概率带的变体
-  - Layer 1：装饰叠加——hash 后与阈值比较（<覆盖率才放置），仅匹配特定 Layer 0 变体
-  - Layer 2：稀有特征——同 Layer 1 但阈值更低(<3%)
-  - Layer 3：地标建筑——NodeId 坐标精确匹配，非概率
-  - TileMapLayer 批量 `set_cell` 写入
-  - 区块生成 `generate_chunk(chunk_pos, chunk_size)` 支持无缝懒加载
-
-- **mv-003** 边境连线 + Region 边界 (1d)
-  - Region 边界线渲染（RegionId 变化处半透明色带）
-  - 邻接边道路/关隘/境界门控线（B01-B03，RegionEdge 数据驱动）
-  - 地缘张力可视化（同区接壤=实线/跨区远程=虚线）
-
-### Should Have
-
-- **mv-004** Core 地形字段补齐 (1d)
-  - `RegionDef` 加 `TerrainKind`/`Element`/`Peril`/`HazardKind` 字段（当前代码仅有 Wealth/QiDensity/Strategic）
-  - `NodeGeo` 加 `BiomeVariant`/`QiLayer` 字段
-  - 纯 L0 数据行——不改算法、不破 B.3 off 逐字节
-
-- **mv-005** 视觉层级 LOD + 动态秘境 (1d)
-  - 缩放 LOD：大区级(Region) → 地标级(Landmark) → Site级 三级切换
-  - 秘境未显形：半透明覆盖+问号标记
-  - QiDensity 可视化：35-55衔接带偏暗/56-100厚灵区灵气光点密度渐增
+**总计 10 stories | 14d | 素材+渲染+Core+移动四轨**
 
 ### Movement System
 
@@ -230,18 +214,49 @@ func hash_cell(x: int, y: int, map_seed: int, layer: int) -> int:
   - WASD 八方向平滑移动（`Input.get_vector` + `move_and_slide()`）
   - 碰撞自动处理：海边自然阻挡+沿障碍物平滑滑动——不依赖"检查下一格是否可走"
   - 速度常量：玩家 150px/s，AI 100px/s
+  - **速度受 Core 数据影响（简化映射）**：
+    - 地形减速：`speed *= 1.0 / terrain_cost`（荒漠/水泽比平原慢）
+    - 境界加速：`speed *= 1.0 + realm * 0.2`（高阶修士缩地成寸）
+    - 水泽 T07：`speed *= 0.8`（江南水乡粘滞感）
+  - **特例解除**：角色达到筑基期/御剑飞行境界 → 代码临时禁用 T02(海域)/T04-T06(山岳)碰撞 → 遇山开路、御空渡海
 
 - **mv-007** AStarGrid2D 寻路 + 路点平滑跟随 (2d)
   - `AStarGrid2D` 基于 TileMap 网格构建（`tilemap.local_to_map` / `map_to_local`）
   - 玩家鼠标点击→世界坐标→A* 路径→路点队列→`_physics_process` 逐路点跟随
   - AI 决策目标（Travel to Site/Sect/Hub）→同上 A* 路点平滑跟随
   - 路点容差半径 5px，到点即切下一个路点
-  - 不阻塞模拟 Tick：移动中仍可 Advance（位置是 View 层插值，不影响 Core NodeId）
+  - **不阻塞模拟 Tick**：移动是 View 层"过程动画"。到达目的地时写回 `CommandIntent(Travel, To=targetNodeId)` → 触发离散判定（相遇/拜师/奇遇）。中途经过的 tile 不产生 Core 事件
+  - **中断支持**：AI `_physics_process` 每帧 `Area2D` 检测 30px 互动范围——玩家靠近触发切磋/对话 → 清空 path 队列 → `Interacting` 状态 → 切入战斗/对话场景
 
 - **mv-008** Steering Behaviors — AI 移动自然化 (1d)
   - **Wander Jitter**：AI 跟随路点时，velocity 叠加 `FastNoiseLite` 2D 噪音向量——轨迹呈平滑波浪线/轻微蛇形，非机器直线
   - **Separation**：同屏多 AI 检测距离——过近时 velocity 加反向推力，自然散开，形成有机"人群"感
   - 纯 View 层——不改 Core 决策、不碰 B.2/B.3
+
+- **mv-009** CollisionPassKind 枚举 + 地形效果系统 (1.5d)
+  - `CollisionPassKind` 枚举（L0 纯数据，零改 Core 算法）：
+    - `Ground` — 地面通行（默认，T01 平原/T03 荒漠/T07 水泽）
+    - `WaterOnly` — 仅水路/飞行可过（T02 海域）
+    - `Wall` — 地面不可、飞行可（T04 山岳/T05 林莽/T06 密林/建筑边缘）
+    - `HighWall` — 地面+飞行均不可（关隘城墙/结界）
+    - `Chasm` — 裂谷，地面不可、飞行可（与 Wall 同物理但不同视觉）
+  - 地形效果（Site 级侧表，纯数据行）：
+    | 效果 | 触发地形 | 表现 |
+    |---|---|---|
+    | 减速 Slow | 水泽 T07(20%)、山体 T04-T06 边缘(30%) | `speed *= 0.7` |
+    | 泥潭 Quagmire | 水泽 T07·芦苇(T07-C)覆盖区域 | `speed *= 0.4` + 下沉 debuff（每 3s 陷深一级，3 级后死亡） |
+    | 灼烧 Burn | T08 火山/熔岩、T04-C 熔隙 | `speed *= 0.8` + 烧伤 debuff（每 tick HP -5%，持续 10s） |
+    | 瘴气 Miasma | T05-C 密林·瘴紫 | `speed *= 0.9` + 中毒 debuff（每 5s HP -3%，持续 30s） |
+    | 冰冻 Frost | T09 雪原/冰峰 | `speed *= 0.6` + 冻伤 debuff（移动输入衰减 50%） |
+  - 每种地形效果 = 一个 `TerrainEffect` 数据行：`EffectKind / TriggerTerrain / SpeedMultiplier / DamagePerTick / TickInterval / Duration / VisualParticle`
+  - `AStarGrid2D` 寻路权重 = `BaseCost * terrain_cost * (1.0 + effect_penalty)`——AI 自动绕开危险地形
+
+- **mv-010** 关隘门控交互 (0.5d)
+  - 关隘地标（B02/L03 镇玄关/L08 玉门孤关）在 TileSet 物理层有碰撞墙壁——物理上绝对过不去
+  - `Area2D` 检测玩家靠近关门 → 弹出 UI 提示：
+    > "此乃朝廷重地，需持有【通牒】或达到【结丹期】方可通行"
+  - 满足条件后：后端 Core 扣除资格 → View 层临时 `set_collision_layer_value(0, false)` 关闭碰撞 → 自动寻路穿过
+  - 境界门控边（B03）：同逻辑——`UT < Gate` → 提示"修为不足，无法穿越灵力气墙"
 
 ### Core 地形字段补齐
 
