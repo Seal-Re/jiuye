@@ -6,6 +6,7 @@ class_name DialoguePanel
 # —— 引用 ——
 var _bridge: Node  # WorldBridge
 var _target_npc: Character2D
+var _cached_context: Dictionary = {}
 var _content: RichTextLabel
 var _options_container: VBoxContainer
 var _result_label: RichTextLabel
@@ -89,14 +90,15 @@ func _ready() -> void:
 
 func open(npc: Character2D, npc_context: Dictionary) -> void:
 	_target_npc = npc
+	_cached_context = npc_context
 	_visible = true
 
 	# 更新 NPC 名字
 	var name_label := get_node("NameLabel") as RichTextLabel
 	name_label.text = "[center][color=#c8a860]　%s　[/color][/center]" % npc_context.get("name", npc.char_name)
 
-	# NPC 开场白 (上下文驱动)
-	var opening := _generate_opening(npc_context)
+	# NPC 开场白 (上下文驱动——三段式组合矩阵)
+	var opening := DialogueTemplates.generate_opening(npc_context)
 	_content.text = "[color=#c8c0a8]%s[/color]" % opening
 
 	# 生成选项
@@ -113,19 +115,7 @@ func open(npc: Character2D, npc_context: Dictionary) -> void:
 	show()
 
 
-func _generate_opening(ctx: Dictionary) -> String:
-	var name := ctx.get("name", "无名")
-	var faction := ctx.get("faction", "")
-	var relation := ctx.get("relation", 0)
-
-	if relation < -30:
-		return "%s 冷冷地看着你，手按在兵器上。" % name
-	elif relation > 30:
-		return "%s 面露喜色，拱手行礼。" % name
-	elif faction != "":
-		return "%s 打量了你一番。你注意到他衣襟上%s的标记。" % [name, faction]
-	else:
-		return "%s 向你微微点头，等待你开口。" % name
+	# 检定结果文本 (模板引擎 v2)
 
 
 func _add_option(text: String, action: String, hint: String) -> void:
@@ -155,14 +145,14 @@ func _on_option_pressed(action: String) -> void:
 	var dc := randi() % 11 + 10    # DC 10-20
 	var success := (roll + bonus) >= dc
 
-	# 显示结果
-	var result_text: String
-	if success:
-		result_text = "[color=#80c080]掷骰 %d + %d = %d ≥ DC%d → 成功！[/color]\n%s" % [roll, bonus, roll + bonus, dc, _success_text(action)]
-	else:
-		result_text = "[color=#e06060]掷骰 %d + %d = %d < DC%d → 失败...[/color]\n%s" % [roll, bonus, roll + bonus, dc, _failure_text(action)]
-
-	_result_label.text = result_text
+	# 显示检定结果 (模板引擎 v2)
+	var check_text := DialogueTemplates.generate_check_result(action, success, _cached_context)
+	_result_label.text = "[color=%s]掷骰 %d + %d = %d vs DC%d → %s[/color]\n%s" % [
+		"#80c080" if success else "#e06060",
+		roll, bonus, roll + bonus, dc,
+		"成功！" if success else "失败...",
+		check_text
+	]
 	_result_label.visible = true
 
 	# 写回 Core
@@ -177,22 +167,6 @@ func _calculate_bonus(action: String) -> int:
 		"intimidate": return 4
 		"deceive": return 2
 		_: return 0
-
-
-func _success_text(action: String) -> String:
-	match action:
-		"persuade", "persuade_hard": return "[color=#b0a080]对方点头应允，关系似乎近了一步。[/color]"
-		"intimidate": return "[color=#e0a060]对方面色惨白，不敢违抗。[/color]"
-		"deceive": return "[color=#909890]对方信以为真，透露了有用的信息。[/color]"
-		_: return "[color=#888]...[/color]"
-
-
-func _failure_text(action: String) -> String:
-	match action:
-		"persuade", "persuade_hard": return "[color=#e08060]对方摇头拒绝，态度冷淡了几分。[/color]"
-		"intimidate": return "[color=#e04040]对方怒目而视，手按兵刃！[/color]"
-		"deceive": return "[color=#c08060]对方识破了你的意图，面露讥讽。[/color]"
-		_: return "[color=#888]...[/color]"
 
 
 func _on_close() -> void:
