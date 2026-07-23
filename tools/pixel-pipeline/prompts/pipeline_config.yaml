@@ -1,0 +1,15 @@
+# 九野 · 像素素材生成管线配置 (pipeline_config.yaml)
+# SunshineFlow API 调用时自动注入，不与 prompt 混写
+
+global_negative_prompt: >
+  anti-aliasing, soft alpha gradient, semi-transparent blending, blur,
+  3D rendering, sub-pixel rendering, smooth gradient, vector art,
+  photorealistic, high resolution texture, mixed pixel sizes
+
+post_processing:
+  alpha_threshold: 128     # Alpha <128→0, >=128→255 (1-bit二值化)
+  color_quantize: 5        # 收敛至5-tone ramp 色阶 (匹配视觉宪法)
+
+alpha_constraint:
+  mode: "1-bit binary"     # Alpha 仅 0 或 255, 严禁 1~254 半透明
+  dithered_only: true      # 烟雾/瘴气/云雾等半透明效果→抖动像素表现
