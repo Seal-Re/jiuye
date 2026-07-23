@@ -18,12 +18,17 @@ class_name Character2D
 @export var char_id: int = 0
 
 # —— 移动状态 ——
-var path: Array[Vector2] = []             # AI 路点队列 (世界坐标)
-var target_node_id: int = -1              # 目标 Core NodeId
-var realm_level: int = 0                  # 境界等级 (影响速度)
-var terrain_speed_mult: float = 1.0       # 地形减速乘子
+var path: Array[Vector2] = []
+var target_node_id: int = -1
+var realm_level: int = 0
+var terrain_speed_mult: float = 1.0
 var is_moving: bool = false
 var is_interacting: bool = false
+
+# —— NPC 交互 (npc-001) ——
+signal player_interact_requested(npc_char: Character2D)
+var _nearby_player: Character2D = null
+var _show_interact_prompt: bool = false
 
 # —— Steering 噪声 (mv-008 接入) ——
 var noise_offset: float = 0.0
@@ -185,3 +190,45 @@ func enable_flight() -> void:
 	collision_layer = 0
 	collision_mask = 0
 	set_collision_layer_value(1, false)
+
+# ================================================================
+#  NPC 交互系统 (npc-001)
+# ================================================================
+func _process(_delta: float) -> void:
+	if is_player:
+		_check_nearby_npc_for_interact()
+	elif _show_interact_prompt:
+		_check_player_still_nearby()
+
+
+func _check_nearby_npc_for_interact() -> void:
+	if not Input.is_action_just_pressed("ui_accept"):  # E / Enter
+		return
+	var bodies := interact_area.get_overlapping_bodies()
+	for body in bodies:
+		if body is Character2D and not body.is_player:
+			player_interact_requested.emit(body)
+			is_interacting = true
+			return
+
+
+func _check_player_still_nearby() -> void:
+	var bodies := interact_area.get_overlapping_bodies()
+	_nearby_player = null
+	for body in bodies:
+		if body is Character2D and body.is_player:
+			_nearby_player = body
+			return
+	_show_interact_prompt = false
+
+
+func show_interact_prompt() -> void:
+	_show_interact_prompt = true
+
+
+func hide_interact_prompt() -> void:
+	_show_interact_prompt = false
+
+
+func set_npc_context(data: Dictionary) -> void:
+	npc_data = data
