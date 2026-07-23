@@ -1,0 +1,264 @@
+# 九野 · 21路修炼图标 AI Prompt 目录
+# 风格宪法 (继承 path_icons.png 程序化版的视觉参数):
+#   - 48×48 native → 192×192 导出 (4x NEAREST)
+#   - 斜角卡框 bevel + 品阶宝石 (tier 1-5)
+#   - 5-tone ramp 色阶: 暗部冷调→亮部暖调, hue-shift
+#   - 左上定向光源 (light from top-left, shadow bottom-right)
+#   - Selout 选择性轮廓: 实心像素边缘→该处最暗色描边
+#   - 母题精修: 多件带光影, 形由 archetype, 色由 ramp
+#   - 禁止: 抗锯齿/模糊/半透明/渐变/非像素颗粒
+
+prompts:
+  - id: "sword_immortal"
+    name: "剑修·剑仙"
+    arch: "blade"
+    colors: "steel blade + ice-blue accent, gold frame"
+    tier: 5
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled gold frame.
+      Center: a straight steel sword blade with ice-blue glow edge, fuller line down middle.
+      Cross-guard at bottom of blade, dark iron grip, gem pommel at tip.
+      5 gemstones at base indicating tier 5.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "ti_xiu_hengshi"
+    name: "体修·横世武夫"
+    arch: "fist"
+    colors: "blood-red fist + bone-white accent, steel frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: a blood-red clenched fist with 4 knuckle lines.
+      Bone-white gem on top of fist.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "fa_xiu"
+    name: "法修·万法归宗"
+    arch: "orb"
+    colors: "flame orange-red orb + azure-blue accent, steel frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: a large flame-colored magic orb with a smaller azure-blue highlight orb inside.
+      Four orbit sparks at cardinal directions.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "gui_xiu_yang_hun"
+    name: "鬼修·养魂道"
+    arch: "wisp"
+    colors: "purple wisp + blood-red accent, purple frame"
+    tier: 3
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled purple frame.
+      Center: a floating purple ghost wisp, zigzag shape tapering upward.
+      Ghost face with two dark eyes at top of wisp.
+      3 gemstones at base indicating tier 3.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "dan_xiu"
+    name: "丹修·炼丹师"
+    arch: "flask"
+    colors: "fire-orange flask + gold accent, wood-brown frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled wood-brown frame.
+      Center: an alchemy flask with ice-blue narrow neck, fire-orange round body.
+      Gold gem on flask body, horizontal line at base.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "qixiu_artificer"
+    name: "器修·炼器师"
+    arch: "anvil"
+    colors: "steel-grey anvil + gold accent, wood-brown frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled wood-brown frame.
+      Center: a steel-grey forge anvil with wide top and narrow base.
+      Gold spark at upper-right corner of anvil.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "array_formation"
+    name: "阵修·阵法师"
+    arch: "grid"
+    colors: "azure-blue grid + forest-green accent, steel frame"
+    tier: 3
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: a grid formation with 4 vertical azure-blue lines and 4 horizontal green lines.
+      Bright green formation eye gem at center.
+      3 gemstones at base indicating tier 3.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "soul_divine_sense"
+    name: "魂修·神念道"
+    arch: "eye"
+    colors: "purple eye + azure-blue accent, purple frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled purple frame.
+      Center: a divine purple eye with azure-blue iris, almond-shaped cut.
+      Small white highlight dot on pupil.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "lei_xiu"
+    name: "雷修·雷霆道"
+    arch: "bolt"
+    colors: "thunder-yellow bolt + steel-grey accent, steel frame"
+    tier: 5
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: a jagged yellow lightning bolt striking diagonally, thick main bolt with thin branches.
+      Bright yellow flash at top tip.
+      5 gemstones at base indicating tier 5.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "buddhist_golden_body"
+    name: "佛修·金刚体"
+    arch: "halo"
+    colors: "gold body + flame-orange accent, gold frame"
+    tier: 5
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled gold frame.
+      Center: a golden halo ring of 12 small gold dots in circle.
+      Gold body sphere inside halo, bright gold highlight at top-left.
+      5 gemstones at base indicating tier 5.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "ming_fate_causality"
+    name: "命修·因果道"
+    arch: "star"
+    colors: "azure-blue star + gold accent, gold frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled gold frame.
+      Center: a 5-pointed azure-blue star with alternating long and short points.
+      Gold gem at center, ray line from top point to center.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "yu_shou"
+    name: "驭兽·御灵"
+    arch: "paw"
+    colors: "forest-green paw + bone-white accent, wood-brown frame"
+    tier: 3
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled wood-brown frame.
+      Center: a large forest-green beast paw pad with 3 small bone-white claw gems above.
+      One extra small claw gem to the right.
+      3 gemstones at base indicating tier 3.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "ru_xiu_haoran"
+    name: "儒修·浩然道"
+    arch: "scroll"
+    colors: "azure-blue scroll + gold accent, purple frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled purple frame.
+      Center: a bone-white unrolled scroll with azure-blue top and bottom rollers.
+      Four gold horizontal text lines across the scroll.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "mo_xiu_xinmo"
+    name: "魔修·心魔道"
+    arch: "horns"
+    colors: "blood-red horns + dark shadow accent, steel frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: two curved blood-red demon horns sweeping upward and outward from center.
+      Dark shadow face gem between horns, two red eyes.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "yao_xiu_huaxing"
+    name: "妖修·化形道"
+    arch: "claw"
+    colors: "forest-green claws + rose-pink accent, steel frame"
+    tier: 3
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: three curved forest-green monster claws sweeping from top to bottom.
+      Rose-pink claw tip gems, horizontal rose line at top connecting claws.
+      3 gemstones at base indicating tier 3.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "xue_xiu_xuesha"
+    name: "血修·血煞道"
+    arch: "drop"
+    colors: "crimson blood drop + flame-orange accent, steel frame"
+    tier: 4
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: a large crimson blood drop shape tapering to point at top, round at bottom.
+      Flame-orange gem inside drop, bright orange highlight at top-left of gem.
+      4 gemstones at base indicating tier 4.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "du_gu_xiu"
+    name: "蛊修·毒蛊道"
+    arch: "bug"
+    colors: "forest-green bug + dark shadow accent, steel frame"
+    tier: 3
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: a large forest-green insect body with smaller head segment.
+      Six dark thin legs extending from body, two red eyes on head.
+      3 gemstones at base indicating tier 3.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "fu_xiu_fulu"
+    name: "符修·符箓师"
+    arch: "talisman"
+    colors: "gold paper + blood-red ink, steel frame"
+    tier: 3
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: a bone-white paper talisman, vertical blood-red ink line down center.
+      Four horizontal red ink strokes across the talisman.
+      Red seal gem at top of talisman.
+      3 gemstones at base indicating tier 3.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "kuilei_shi"
+    name: "傀儡师·偃师"
+    arch: "puppet"
+    colors: "bone-white puppet + steel-grey accent, steel frame"
+    tier: 3
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled steel frame.
+      Center: a bone-white string puppet with vertical body line and horizontal arm bar.
+      Three steel-grey control strings extending upward from head and arms.
+      Small joint gems at head, left arm, right arm, and body.
+      3 gemstones at base indicating tier 3.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "yin_xiu_yuedao"
+    name: "音修·乐道"
+    arch: "note"
+    colors: "rose-pink note + azure-blue accent, purple frame"
+    tier: 3
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled purple frame.
+      Center: a rose-pink musical note with round note head, vertical stem, and azure-blue flag.
+      Small floating note gem to the upper-right.
+      3 gemstones at base indicating tier 3.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
+
+  - id: "yinguo_faze"
+    name: "因果道·法则"
+    arch: "yinyang"
+    colors: "purple yinyang + gold accent, gold frame"
+    tier: 5
+    desc: >
+      16-bit pixel art icon, 48x48, top-down RPG item card with beveled gold frame.
+      Center: a purple and gold yinyang symbol with S-curve dividing line.
+      Small purple dot in gold half, small gold dot in purple half.
+      5 gemstones at base indicating tier 5.
+      Left-top lighting, selout outline, NO anti-aliasing, clean pixel grid.
