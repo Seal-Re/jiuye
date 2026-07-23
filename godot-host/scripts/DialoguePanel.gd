@@ -174,4 +174,3 @@ func _on_close() -> void:
 	hide()
 	if _bridge.has_method("set_paused"):
 		_bridge.call("set_paused", false)
-GODOTEOF
