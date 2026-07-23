@@ -16,7 +16,7 @@ prompts:
  name: "草地·翠绿"
  desc: >
  16-bit pixel art, top-down RPG grass tile, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
- Bright green grass texture with tiny white flower dots (tiny pixel-levels each) scattered naturally.
+ Bright green grass texture with tiny white flower dots (tiny pixel-levels (tiny red-capped, each)) scattered naturally.
  Short grass blades suggested by fine vertical strokes in lighter green.
  Left-top lighting creates subtle shadow on bottom-right edge.
  5-color ramp from dark cool-green (#1a3a10) to warm yellow-green (#90c040).
@@ -28,7 +28,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG tall grass tile, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Dense tall grass filling 2/3 of tile height with darker green strokes.
- Two small yellow butterflies (tiny 3x3 shapes each) hovering above grass tips.
+ Two small yellow butterflies (tiny 3x3 shapes (tiny red-capped, each)) hovering above grass tips.
  Left-top lighting, shadow on bottom-right. 5-color ramp from dark green to warm yellow-green.
  Selout dark outline on all edges. Solid background.
 
@@ -157,7 +157,7 @@ prompts:
  name: "密林·瘴紫"
  desc: >
  16-bit pixel art, top-down RPG miasma jungle tile, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
- Dark jungle floor with thin purple miasma fog layer (semi-transparent purple pixels).
+ Dark jungle floor with thin purple miasma fog layer (strictly dithered checkerboard purple pixels (hard-edge, no alpha gradient)).
  Bioluminescent fungi on ground (tiny pixel-level blue-green glowing dots).
  Left-top lighting. 5-color ramp from dark purple-green to muted mauve.
  Selout dark outline on all edges. Solid background.
@@ -231,7 +231,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG volcano tile, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Black basalt rock ground with winding orange-red lava river (narrow bright lava line) flowing through.
- Obsidian pillars (dark geometric columns) at edges. Floating ember sparks  (tiny orange dots).
+ Obsidian pillars (dark geometric columns) at edges. Floating ember sparks (tiny orange dots).
  Intense orange glow reflecting on rocks.
  Left-top lighting. High contrast: 5-color ramp from pure black to bright orange-yellow.
  Selout dark outline on all edges. Solid background.
@@ -263,8 +263,8 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG spirit-blessed land tile, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Jade-green ground with golden spirit energy motes rising (minute pixel-level bright gold dots, 5-8 scattered).
- Lingzhi mushrooms (red cap with white ring,  each) growing on jade stone platforms.
- Auspicious cloud wisps (white semi-transparent curved shapes) at edges.
+ Lingzhi mushrooms (red cap with white ring, (tiny red-capped, each)) growing on jade stone platforms.
+ Auspicious cloud wisps (white dithered curved pixel shapes) at edges.
  Left-top lighting enhanced by golden glow. 5-color ramp: dark jade, emerald, gold, white-gold, pure light.
  Selout dark outline on all edges. Solid background.
 
@@ -278,7 +278,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG wildflower cluster, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
  A cluster of 4-5 small wildflowers (white, yellow, purple, tiny 3x3 shapes each with colored center dot).
- Green leaf base beneath flowers. Left-top lighting, petals catch light.
+ Green leaf base beneath flowers. Left-top lighting, petals catch light. Selout outline.
 
  - id: "D02"
  layer: 1
@@ -292,7 +292,7 @@ prompts:
  name: "灌木丛"
  desc: >
  16-bit pixel art, top-down RPG berry bush, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
- A low bush with layered green leaves and 3-4 small red berries  (tiny red dots).
+ A low bush with layered green leaves and 3-4 small red berries (tiny red dots).
 
  - id: "D04"
  layer: 1
@@ -306,7 +306,7 @@ prompts:
  name: "海鸥"
  desc: >
  16-bit pixel art, top-down RPG seagulls, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
- Two white seagulls with wings spread in V-shape (tiny shapes each), orange beaks.
+ Two white seagulls with wings spread in V-shape (tiny shapes (tiny red-capped, each)), orange beaks.
 
  - id: "D06"
  layer: 1
@@ -328,7 +328,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG animal bones, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
  Half-buried animal ribcage and skull (bone-white, compact pixel area).
- Weathered cracks on bone surface. Left-top lighting, bones cast shadows on sand.
+ Weathered cracks on bone surface. Left-top lighting, bones cast shadows on sand. Selout outline.
 
  - id: "D09"
  layer: 1
@@ -342,7 +342,7 @@ prompts:
  name: "矿脉闪光"
  desc: >
  16-bit pixel art, top-down RPG ore glint, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
- Bright gold and silver metallic vein lines (minute pixel-level wide) with sparkle points  (tiny white cross sparkles).
+ Bright gold and silver metallic vein lines (fine single-pixel) with sparkle points (tiny white cross sparkles).
 
  - id: "D11"
  layer: 1
@@ -350,14 +350,14 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG forge smoke, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
  A wispy grey-white smoke column rising from a dark red glow at base.
- Smoke thins and curls as it rises. Left-top lighting. Semi-transparent pixel technique (dithered).
+ Smoke thins and curls as it rises. Left-top lighting. Dithered 1-bit transparency (strict hard-edge, no alpha). Selout outline.
 
  - id: "D12"
  layer: 1
  name: "毒蘑菇"
  desc: >
  16-bit pixel art, top-down RPG toxic fungus, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
- Three purple mushrooms with blue-green bioluminescent glow  (tiny bright dots on caps).
+ Three purple mushrooms with blue-green bioluminescent glow (tiny bright dots on caps).
 
  - id: "D13"
  layer: 1
@@ -371,7 +371,7 @@ prompts:
  name: "瘴气粒子"
  desc: >
  16-bit pixel art, top-down RPG miasma particles, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
- Floating purple semi-transparent particle cluster (8-12 tiny dots, dithered pattern).
+ Floating purple particle cluster, strictly using dithered checkerboard pixel pattern (no alpha gradient).
 
  - id: "D15"
  layer: 1
@@ -392,7 +392,7 @@ prompts:
  name: "云雾薄纱"
  desc: >
  16-bit pixel art, top-down RPG cloud wisps, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
- Soft white semi-transparent cloud layer (dithered white pixels in curved band) drifting across.
+ Soft white cloud layer, strictly dithered checkerboard pixel pattern (no alpha), drifting across.
 
  - id: "D18"
  layer: 1
@@ -513,7 +513,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG spirit spring, transparent background, 48x48, clean pixel grid, NO anti-aliasing.
  A spring of clear water welling up from ground, glowing with faint blue-white spirit energy.
- Lingzhi mushrooms and spirit herbs growing around the spring. Left-top lighting enhanced by glow.
+ Lingzhi mushrooms and spirit herbs growing around the spring. Left-top lighting enhanced by glow. Selout outline.
 
  - id: "R10"
  layer: 2
@@ -532,7 +532,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG imperial palace, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Golden-roofed palace complex with vermilion red walls, golden dragon flag on main gate.
- Tiny guard patrol figures microscopic on walls. Left-top lighting, gold roofs gleam.
+ Tiny guard patrol figures microscopic on walls. Left-top lighting, gold roofs gleam. Selout outline.
  5-color ramp: dark red, vermilion, gold, cream, bright gold. Selout outline. Solid background.
 
  - id: "L02"
@@ -541,8 +541,8 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG academy, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Blue-tiled white-walled academy building with bamboo grove courtyard and stone benches.
- Three-story library tower. Scholars debating in courtyard  (tiny figures).
- Left-top lighting. 5-color ramp: ink-grey, white, bamboo-green, blue-tile. Selout outline. Solid background.
+ Three-story library tower. Scholars debating in courtyard (tiny figures).
+ Left-top lighting. 5-color ramp: ink-grey, white, bamboo-green, blue-tile. Selout outline. Solid background. Selout outline.
 
  - id: "L03"
  layer: 3
@@ -550,7 +550,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG fortress pass, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Grey stone fortress wall with two beacon towers flanking a closed gate.
- Guards with halberds on ramparts. Left-top lighting, wall casts shadow.
+ Guards with halberds on ramparts. Left-top lighting, wall casts shadow. Selout outline.
  5-color ramp: dark stone, grey, light grey. Selout outline. Solid background.
 
  - id: "L04"
@@ -560,7 +560,7 @@ prompts:
  16-bit pixel art, top-down RPG sword sect, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Sword-shaped mountain peak with temple at summit, a blue sword-qi beam rising to sky.
  Floating stone steps spiraling up. Sword monument forest at mountain base.
- Left-top lighting, sword beam glows. Selout outline. Solid background.
+ Left-top lighting, sword beam glows. Selout outline. Solid background. Selout outline.
 
  - id: "L05"
  layer: 3
@@ -568,7 +568,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG great port, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Wooden pier extending into sea with three large ships docked, cranes loading cargo.
- Warehouse stacks of crates. Left-top lighting. Selout outline. Solid background.
+ Warehouse stacks of crates. Left-top lighting. Selout outline. Solid background. Selout outline.
 
  - id: "L06"
  layer: 3
@@ -577,7 +577,7 @@ prompts:
  16-bit pixel art, top-down RPG sword tomb, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Field of broken swords planted in ground, a giant sword half-buried at center.
  Blue sword-intent cracks spreading across ground. Ancient vines, floating fireflies.
- Left-top lighting. Selout outline. Solid background.
+ Left-top lighting. Selout outline. Solid background. Selout outline.
 
  - id: "L07"
  layer: 3
@@ -585,7 +585,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG buddhist temple, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Stone temple with golden Buddha halo above main hall, prayer flags fluttering.
- Giant vajra pestle standing before gate. Left-top lighting, gold halo glows.
+ Giant vajra pestle standing before gate. Left-top lighting, gold halo glows. Selout outline.
  Selout outline. Solid background.
 
  - id: "L08"
@@ -594,7 +594,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG desert gate, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Weathered yellow-earth fortress isolated in desert, beacon smoke rising.
- Camel caravan waiting to pass. Left-top lighting. Selout outline. Solid background.
+ Camel caravan waiting to pass. Left-top lighting. Selout outline. Solid background. Selout outline.
 
  - id: "L09"
  layer: 3
@@ -603,7 +603,7 @@ prompts:
  16-bit pixel art, top-down RPG ancient battlefield, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Giant meteor crater with broken weapons and white bones scattered everywhere.
  Black calamity-ash smoke rising from crater depths, dark purple sky glow.
- Left-top lighting dimmed overall. Selout outline. Solid background.
+ Left-top lighting dimmed overall. Selout outline. Solid background. Selout outline.
 
  - id: "L10"
  layer: 3
@@ -611,7 +611,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG blood abyss, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Dark red abyss fissure with chains hanging into depths, blood-red miasma rising.
- Surrounding rocks stained dark red. Left-top lighting with red glow from below.
+ Surrounding rocks stained dark red. Left-top lighting with red glow from below. Selout outline.
  Selout outline. Solid background.
 
  - id: "L11"
@@ -620,7 +620,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG forge headquarters, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Giant anvil and forge platforms, steam hammers operating, weapon racks full.
- Central furnace with roaring orange flame. Left-top lighting, forge fire glows.
+ Central furnace with roaring orange flame. Left-top lighting, forge fire glows. Selout outline.
  Selout outline. Solid background.
 
  - id: "L12"
@@ -629,7 +629,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG gold market, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Bustling marketplace with gold vault building, merchant flags, caravan queue.
- Stalls displaying goods. Left-top lighting. Selout outline. Solid background.
+ Stalls displaying goods. Left-top lighting. Selout outline. Solid background. Selout outline.
 
  - id: "L13"
  layer: 3
@@ -638,7 +638,7 @@ prompts:
  16-bit pixel art, top-down RPG lava forge, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Lava lake surrounding a central forge platform, black smoke columns.
  Fire elementals (small flame sprites) wandering, rock walls glowing red-hot.
- Left-top lighting, complemented by intense orange ground glow from below. Selout outline. Solid background.
+ Left-top lighting, complemented by intense orange ground glow from below. Selout outline. Solid background. Selout outline.
 
  - id: "L14"
  layer: 3
@@ -646,7 +646,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG iron fortress, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Cast-iron fortress with tall chimneys, molten iron channels flowing out.
- Heavy armory vault door. Left-top lighting, iron surfaces gleam metallic.
+ Heavy armory vault door. Left-top lighting, iron surfaces gleam metallic. Selout outline.
  Selout outline. Solid background.
 
  - id: "L15"
@@ -656,7 +656,7 @@ prompts:
  16-bit pixel art, top-down RPG soul-devouring palace, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Dark purple cave entrance with giant gu insect totem carvings.
  Green poison pool before entrance, altar with glowing dark-red runes.
- Left-top lighting dimmed. Selout outline. Solid background.
+ Left-top lighting dimmed. Selout outline. Solid background. Selout outline.
 
  - id: "L16"
  layer: 3
@@ -665,7 +665,7 @@ prompts:
  16-bit pixel art, top-down RPG poison corpse marsh, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Green toxic swamp with bubbling surface, rotting wood floating.
  Purple poison vines on dead trees, zombie half-emerged from swamp.
- Left-top lighting. Selout outline. Solid background.
+ Left-top lighting. Selout outline. Solid background. Selout outline.
 
  - id: "L17"
  layer: 3
@@ -673,7 +673,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG ghost cave entrance, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Glowing cave mouth with blue rune seals on walls, green ghost-fire floating at entrance.
- Two stone guardian statues with fierce faces. Left-top lighting, runes glow blue.
+ Two stone guardian statues with fierce faces. Left-top lighting, runes glow blue. Selout outline.
  Selout outline. Solid background.
 
  - id: "L18"
@@ -682,7 +682,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG gu tribe palace, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Bamboo-wood large palace surrounded by totem pole array, central cauldron boiling green gu soup.
- Masked priest standing before cauldron. Left-top lighting. Selout outline. Solid background.
+ Masked priest standing before cauldron. Left-top lighting. Selout outline. Solid background. Selout outline.
 
  - id: "L19"
  layer: 3
@@ -691,7 +691,7 @@ prompts:
  16-bit pixel art, top-down RPG totem tomb, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Stone totem array with largest central pillar carved with ancient patterns.
  Sacrificial fire basin burning, bone ornaments and feathers hanging.
- Left-top lighting, fire glows. Selout outline. Solid background.
+ Left-top lighting, fire glows. Selout outline. Solid background. Selout outline.
 
  - id: "L20"
  layer: 3
@@ -699,7 +699,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG Jiangnan market, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  White-walled black-tiled Jiangnan buildings, stone arch bridge over canal.
- Painted boats docked, red lanterns hanging along street. Left-top lighting.
+ Painted boats docked, red lanterns hanging along street. Left-top lighting. Selout outline.
  Ink-wash color palette: white, black-grey, red lanterns, teal water. Selout outline. Solid background.
 
  - id: "L21"
@@ -709,7 +709,7 @@ prompts:
  16-bit pixel art, top-down RPG ghost-tide islet, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  Dark surging water around a small islet, ghost ship wreck half-sunk.
  Water demons (dark shadow shapes) lurking at edges, dense fog.
- Left-top lighting dimmed, eerie atmosphere. Selout outline. Solid background.
+ Left-top lighting dimmed, eerie atmosphere. Selout outline. Solid background. Selout outline.
 
  # ═══════════════════════════════════════════
  # 边境/路径 (3 tiles)
@@ -721,7 +721,7 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG dirt road tile, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  A dirt road running horizontally across tile with wagon wheel ruts and horse hoof prints.
- Sparse weeds at road edges. Left-top lighting. 5-color ramp: dark brown to light tan.
+ Sparse weeds at road edges. Left-top lighting. 5-color ramp: dark brown to light tan. Selout outline.
  Selout outline. Solid background.
 
  - id: "B02"
@@ -730,13 +730,13 @@ prompts:
  desc: >
  16-bit pixel art, top-down RPG pass gate tile, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
  A closed gate with lowered barrier across road, two guard post booths with flags.
- Left-top lighting, gate casts shadow. Selout outline. Solid background.
+ Left-top lighting, gate casts shadow. Selout outline. Solid background. Selout outline.
 
  - id: "B03"
  layer: 0
  name: "境界门控"
  desc: >
  16-bit pixel art, top-down RPG realm gate tile, 48x48, clean pixel grid, NO anti-aliasing, NO blur.
- A semi-transparent blue-white spirit energy wall across the tile with flowing rune characters.
- Ripple effect at wall surface. Left-top lighting enhanced by wall glow.
+ A spirit energy wall using strict dithered pixel pattern across the tile with flowing rune characters.
+ Ripple effect at wall surface. Left-top lighting enhanced by wall glow. Selout outline.
  Selout outline. Solid background.
