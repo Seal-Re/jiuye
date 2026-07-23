@@ -1,0 +1,180 @@
+# 九野 · Layer 1 — 微缩装饰物 (Green Screen #00FF00 → 后处理1-bit Alpha)
+# 每张: 孤立物件居中, 48x48画布上仅占 5-15px, 纯绿背景
+# 视觉宪法: clean pixel grid, NO anti-aliasing, left-top lighting, selout, 5-tone ramp
+# 背景规则: isolated on pure solid green background (#00FF00), single object centered
+
+prompts:
+  # ═══════════════════════════════════════════
+  # 植被类 (10 items)
+  # ═══════════════════════════════════════════
+  - id: "DEC-wildflowers"
+    name: "野花丛"
+    desc: >
+      16-bit pixel art, top-down RPG item, a small cluster of 3-4 tiny wildflowers,
+      each flower roughly 5x5 pixels with colored center dot, white yellow and purple.
+      Tiny green leaves at base. Minimalist 16-bit RPG asset. Left-top lighting,
+      petals catch light. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-mushrooms"
+    name: "蘑菇群"
+    desc: >
+      16-bit pixel art, top-down RPG item, 3 tiny red-capped mushrooms with white spots,
+      each mushroom roughly 4x5 pixels. Small pale stalks. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single group centered.
+
+  - id: "DEC-berry-bush"
+    name: "浆果灌木"
+    desc: >
+      16-bit pixel art, top-down RPG item, a low tiny bush with layered green leaves
+      and 3-4 small red berries, overall roughly 10x8 pixels. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-seashells"
+    name: "贝壳海星"
+    desc: >
+      16-bit pixel art, top-down RPG item, 3 tiny seashells (white scallop, pink conch)
+      and one small orange starfish, each roughly 4-6 pixels. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single group centered.
+
+  - id: "DEC-cactus"
+    name: "仙人掌"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny green columnar cactus roughly 6x14 pixels,
+      with a small red flower bloom at top. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-bones"
+    name: "枯骨"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny animal ribcage and skull,
+      roughly 8x6 pixels, bone-white with weathered cracks. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-crystals"
+    name: "盐碱结晶"
+    desc: >
+      16-bit pixel art, top-down RPG item, 3-4 tiny angular white-grey salt crystals,
+      each roughly 3-6 pixels, semi-transparent reflection on faces. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single group centered.
+
+  - id: "DEC-toxic-fungus"
+    name: "毒蘑菇"
+    desc: >
+      16-bit pixel art, top-down RPG item, 2-3 tiny purple mushrooms with blue-green
+      bioluminescent glow dots on caps, each roughly 4x5 pixels. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single group centered.
+
+  - id: "DEC-pinecones"
+    name: "松果松针"
+    desc: >
+      16-bit pixel art, top-down RPG item, 2 tiny brown pinecones roughly 5x4 pixels each,
+      with scattered thin green pine needles. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single group centered.
+
+  - id: "DEC-lingzhi"
+    name: "灵芝"
+    desc: >
+      16-bit pixel art, top-down RPG item, a single tiny red-brown lingzhi mushroom
+      with glossy ringed cap, roughly 6x5 pixels. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  # ═══════════════════════════════════════════
+  # 地面破损类 (4 items)
+  # ═══════════════════════════════════════════
+  - id: "DEC-ground-crack"
+    name: "地面裂缝"
+    desc: >
+      16-bit pixel art, top-down RPG item, tiny irregular crack lines spreading across
+      roughly 15x15 pixel area, with small debris chunks. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-rubble"
+    name: "碎石堆"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny pile of 5-7 angular grey stone fragments
+      with scorch marks, roughly 12x8 pixels. Minimalist 16-bit RPG asset.
+      Left-top lighting, each stone casts tiny shadow. Selout outline, clean pixel grid,
+      NO anti-aliasing. Isolated on pure solid green background (#00FF00), centered.
+
+  - id: "DEC-ruin-wall"
+    name: "残垣断壁"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny half-collapsed stone wall section
+      with exposed brickwork and climbing vine, roughly 20x12 pixels. Minimalist 16-bit RPG asset.
+      Left-top lighting. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-broken-sword"
+    name: "古剑残片"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny rusted broken sword blade half-buried
+      in dirt, cold gleam still on exposed edge, ancient vine wrapped around hilt,
+      roughly 10x6 pixels. Minimalist 16-bit RPG asset. Left-top lighting.
+      Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  # ═══════════════════════════════════════════
+  # 稀有特征类 (6 items) — 用于偶尔出现的特殊发现
+  # ═══════════════════════════════════════════
+  - id: "DEC-treasure-chest"
+    name: "宝箱"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny wooden treasure chest with gold trim
+      and brass lock, lid slightly open revealing golden glow, roughly 10x8 pixels.
+      Minimalist 16-bit RPG asset. Left-top lighting, gold rim catches light.
+      Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-ancient-stele"
+    name: "上古石碑"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny weathered stone tablet half-buried,
+      ancient runes glowing faint blue-white on surface, roughly 6x14 pixels.
+      Minimalist 16-bit RPG asset. Left-top lighting. Selout outline, clean pixel grid,
+      NO anti-aliasing. Isolated on pure solid green background (#00FF00), centered.
+
+  - id: "DEC-geyser"
+    name: "地火喷口"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny ground fissure with orange-red flame jet
+      erupting, black scorched rock around opening, roughly 8x14 pixels.
+      Minimalist 16-bit RPG asset. Left-top lighting complemented by orange ground glow.
+      Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-beast-lair"
+    name: "妖兽巢穴"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny dark hole in ground with claw marks
+      around entrance, scattered bones nearby, two glowing red eyes in darkness,
+      roughly 10x8 pixels. Minimalist 16-bit RPG asset. Left-top lighting dimmed.
+      Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.
+
+  - id: "DEC-hermit-hut"
+    name: "隐士草庐"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny thatched cottage with bamboo fence,
+      wisp of cooking smoke, small stone table with teacup, roughly 20x16 pixels.
+      Minimalist 16-bit RPG asset. Left-top lighting. Selout outline, clean pixel grid,
+      NO anti-aliasing. Isolated on pure solid green background (#00FF00), centered.
+
+  - id: "DEC-spirit-spring"
+    name: "灵泉"
+    desc: >
+      16-bit pixel art, top-down RPG item, a tiny spring of clear water welling up
+      from ground, glowing faint blue-white spirit energy, small lingzhi around it,
+      roughly 10x8 pixels. Minimalist 16-bit RPG asset. Left-top lighting enhanced
+      by glow. Selout outline, clean pixel grid, NO anti-aliasing.
+      Isolated on pure solid green background (#00FF00), single object centered.

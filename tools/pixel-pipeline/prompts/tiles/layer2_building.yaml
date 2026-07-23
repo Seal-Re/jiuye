@@ -1,0 +1,220 @@
+# 九野 · Layer 2 — 模块化建筑组件 (Modular Building Tiles)
+# 拼积木模式: 屋顶+墙体+门窗 → 地编拼出任意大小的城池/关隘/宗门
+# 背景: isolated on pure solid green background (#00FF00), single component centered
+# 视觉宪法: clean pixel grid, NO anti-aliasing, left-top lighting, selout, 5-tone ramp
+# 用途: 地编拼出紫宸城/镇玄关/万剑祖庭/噬魂魔宫 等21地标
+
+prompts:
+  # ═══════════════════════════════════════════
+  # 屋顶组件 — 中式宫殿/寺庙风格
+  # ═══════════════════════════════════════════
+  - id: "BLD-roof-ridge-center"
+    name: "屋脊·中间件"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building roof ridge tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Golden curved roof ridge section with dark tile lines
+      running horizontally, warm gold color, left-top lighting with bright highlight
+      on ridge peak. Selout outline. 5-color ramp from dark amber to bright gold.
+      Isolated on pure solid green background (#00FF00), tile centered, designed to
+      repeat horizontally to extend roof length.
+
+  - id: "BLD-roof-eave-left"
+    name: "飞檐·左端"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building roof left eave tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Ornate upward-curving golden roof eave at left side
+      of roof, decorative beast ornament on tip, dark tile lines beneath.
+      Left-top lighting. Selout outline. 5-color ramp dark amber to bright gold.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  - id: "BLD-roof-eave-right"
+    name: "飞檐·右端"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building roof right eave tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Ornate upward-curving golden roof eave at right side
+      of roof, decorative beast ornament on tip, dark tile lines beneath.
+      Left-top lighting. Selout outline. 5-color ramp dark amber to bright gold.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  - id: "BLD-roof-corner-tl"
+    name: "檐角·左上"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building roof corner tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Golden roof corner tile with eave curves meeting at
+      top-left, decorative beast ornament at corner tip. Left-top lighting.
+      Selout outline. 5-color ramp dark amber to bright gold.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  - id: "BLD-roof-corner-tr"
+    name: "檐角·右上"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building roof corner tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Golden roof corner tile with eave curves meeting at
+      top-right, decorative beast ornament at corner tip. Left-top lighting.
+      Selout outline. 5-color ramp dark amber to bright gold.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  - id: "BLD-roof-tile-flat"
+    name: "瓦面·铺贴"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG roof tile surface, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Flat golden roof tile surface with repeating dark
+      curved tile lines, designed to fill roof interior area. Left-top lighting.
+      Selout outline. 5-color ramp. Isolated on pure solid green background (#00FF00).
+
+  # ═══════════════════════════════════════════
+  # 墙体组件 — 红墙/灰墙/城墙
+  # ═══════════════════════════════════════════
+  - id: "BLD-wall-red-h"
+    name: "红墙·横向"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building red wall horizontal tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Vermilion red wall section with white plaster seams
+      and dark wooden beam at top edge, designed to repeat horizontally. Left-top lighting
+      creates shadow at wall base. Selout outline. 5-color ramp dark red to bright vermilion.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  - id: "BLD-wall-red-v"
+    name: "红墙·纵向"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building red wall vertical tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Vermilion red wall section with white plaster seams,
+      dark wooden beam at top edge, designed to repeat vertically. Left-top lighting.
+      Selout outline. 5-color ramp. Isolated on pure solid green background (#00FF00).
+
+  - id: "BLD-wall-grey-h"
+    name: "灰墙·横向"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building grey stone wall horizontal tile, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. Grey stone brick wall section with
+      mortar lines, crenellation battlements at top edge for fortress walls.
+      Left-top lighting. Selout outline. 5-color ramp dark stone to light grey.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  - id: "BLD-wall-corner"
+    name: "墙角·转角"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building wall corner tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Red wall corner where two walls meet at right angle,
+      dark wooden corner post, white plaster seam on both sides. Left-top lighting,
+      inner corner shadow. Selout outline. 5-color ramp. Isolated on pure solid
+      green background (#00FF00), tile centered.
+
+  - id: "BLD-wall-gate-base"
+    name: "城墙·垛口"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG fortress wall crenellation tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grey stone wall top with alternating merlon and crenel
+      battlements, flag pole with small red banner. Left-top lighting.
+      Selout outline. 5-color ramp dark stone to light grey.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  # ═══════════════════════════════════════════
+  # 门窗/台阶组件
+  # ═══════════════════════════════════════════
+  - id: "BLD-door-red-2x2"
+    name: "朱漆大门"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building red gate door, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Large vermilion red double-door gate with golden
+      door studs (9x9 pattern) and brass lion-head knockers. Designed to occupy 2x2
+      tile grid. Left-top lighting, gold studs gleam. Selout outline. 5-color ramp
+      dark red to bright vermilion. Isolated on pure solid green background (#00FF00).
+
+  - id: "BLD-window"
+    name: "侧窗"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building window, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. A small wooden lattice window with white paper
+      screen and dark wood frame, roughly 16x20 pixels centered in tile.
+      Left-top lighting. Selout outline. 5-color ramp. Isolated on pure solid
+      green background (#00FF00), single component centered.
+
+  - id: "BLD-steps-stone"
+    name: "汉白玉台阶"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building stone steps, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. White marble stone steps (3 levels) with carved
+      cloud patterns on risers, roughly 24x16 pixels centered. Left-top lighting.
+      Selout outline. 5-color ramp grey-white to bright marble white.
+      Isolated on pure solid green background (#00FF00), single component centered.
+
+  - id: "BLD-lion-statue"
+    name: "石狮子"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG guardian lion statue, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. A small grey stone guardian lion statue on pedestal,
+      roughly 10x14 pixels centered in tile. Left-top lighting. Selout outline.
+      5-color ramp dark stone to light grey. Isolated on pure solid green
+      background (#00FF00), single component centered.
+
+  # ═══════════════════════════════════════════
+  # 特殊建筑组件 — 仙侠风格
+  # ═══════════════════════════════════════════
+  - id: "BLD-pillar-jade"
+    name: "玉柱"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG jade pillar, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. A tall white jade pillar with golden dragon carving
+      spiraling up, roughly 8x36 pixels centered. Left-top lighting, gold carving gleams.
+      Selout outline. 5-color ramp jade-green to white-gold. Isolated on pure solid
+      green background (#00FF00), single component centered.
+
+  - id: "BLD-archway"
+    name: "牌坊/门楣"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG ceremonial archway gate, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. A red and gold Chinese ceremonial archway with three
+      openings and ornate golden characters on top beam, roughly 30x24 pixels centered.
+      Left-top lighting. Selout outline. 5-color ramp dark red to bright gold.
+      Isolated on pure solid green background (#00FF00), single component centered.
+
+  # ═══════════════════════════════════════════
+  # 魔道/异族建筑组件
+  # ═══════════════════════════════════════════
+  - id: "BLD-wall-dark-h"
+    name: "暗墙·横向"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG dark fortress wall horizontal tile, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. Dark purple-black stone wall with
+      glowing red rune marks, designed for demonic sect buildings. Left-top lighting
+      dimmed, runes self-illuminate. Selout outline. 5-color ramp black to dark purple.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  - id: "BLD-totem-pole"
+    name: "图腾柱"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG tribal totem pole, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. A tall wooden totem pole with carved beast faces
+      and bone ornaments hanging, roughly 8x34 pixels centered. Tribal style.
+      Left-top lighting. Selout outline. 5-color ramp dark wood to bone-white.
+      Isolated on pure solid green background (#00FF00), single component centered.
+
+  - id: "BLD-cave-entrance"
+    name: "洞窟入口"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG cave entrance, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. A dark cave mouth surrounded by jagged grey rocks,
+      faint blue rune glow on walls, roughly 20x16 pixels centered. Left-top lighting
+      dimmed, runes glow. Selout outline. 5-color ramp black to grey-blue.
+      Isolated on pure solid green background (#00FF00), single component centered.

@@ -1,0 +1,300 @@
+# 九野 · Layer 0 — 基础地形 Autotile 套件
+# 每地形 13 块: 中心 + 4边 + 4内角 + 4外角 = 无缝自动拼接
+# 6 地形 + 4 特殊 = 10 套 × 13 ≈ 130 张
+# 视觉宪法: 48x48, clean pixel grid, NO anti-aliasing, left-top lighting, selout, 5-tone ramp
+
+prompts:
+  # ═══════════════════════════════════════════
+  # 平原·草地 (Plain/Grass) — 13 tiles
+  # ═══════════════════════════════════════════
+  - id: "AT-grass-center"
+    name: "草地·中心填充"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full green grass coverage with fine texture strokes
+      and scattered tiny white flower specks across entire surface. Left-top lighting,
+      subtle shadow on bottom-right edge. 5-color ramp from dark cool-green to warm
+      yellow-green. Selout outline on all edges. Solid background.
+
+  - id: "AT-grass-edge-top"
+    name: "草地·上边缘"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grass texture covering bottom 60%, top 40% is bare
+      dirt transition zone. The grass-to-dirt boundary is a hard pixel edge (no blur).
+      Left-top lighting. 5-color ramp. Selout outline. Solid background.
+
+  - id: "AT-grass-edge-bottom"
+    name: "草地·下边缘"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grass texture covering top 60%, bottom 40% is bare
+      dirt transition zone. Hard pixel edge at grass-dirt boundary. Left-top lighting.
+      5-color ramp. Selout outline. Solid background.
+
+  - id: "AT-grass-edge-left"
+    name: "草地·左边缘"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grass covering right 60%, left 40% bare dirt. Hard
+      pixel edge vertical boundary. Left-top lighting. 5-color ramp. Selout outline.
+      Solid background.
+
+  - id: "AT-grass-edge-right"
+    name: "草地·右边缘"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grass covering left 60%, right 40% bare dirt. Hard
+      pixel edge vertical boundary. Left-top lighting. 5-color ramp. Selout outline.
+      Solid background.
+
+  - id: "AT-grass-corner-inner-tl"
+    name: "草地·内角-左上"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grass filling bottom-right 3/4 of tile. Top-left
+      quarter is bare dirt forming an L-shaped dirt area. The boundary is a hard pixel
+      edge. Left-top lighting. 5-color ramp. Selout outline. Solid background.
+
+  - id: "AT-grass-corner-inner-tr"
+    name: "草地·内角-右上"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grass filling bottom-left 3/4 of tile. Top-right
+      quarter is bare dirt forming an L-shaped dirt area. Hard pixel edge boundary.
+      Left-top lighting. 5-color ramp. Selout outline. Solid background.
+
+  - id: "AT-grass-corner-inner-bl"
+    name: "草地·内角-左下"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grass filling top-right 3/4 of tile. Bottom-left
+      quarter is bare dirt forming an L-shaped dirt area. Hard pixel edge boundary.
+      Left-top lighting. 5-color ramp. Selout outline. Solid background.
+
+  - id: "AT-grass-corner-inner-br"
+    name: "草地·内角-右下"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Grass filling top-left 3/4 of tile. Bottom-right
+      quarter is bare dirt forming an L-shaped dirt area. Hard pixel edge boundary.
+      Left-top lighting. 5-color ramp. Selout outline. Solid background.
+
+  - id: "AT-grass-corner-outer-tl"
+    name: "草地·外角-左上"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Dirt filling bottom-right 3/4. Grass only in top-left
+      rounded quarter-corner. Curved hard pixel edge between grass and dirt.
+      Left-top lighting. 5-color ramp. Selout outline. Solid background.
+
+  - id: "AT-grass-corner-outer-tr"
+    name: "草地·外角-右上"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Dirt filling bottom-left 3/4. Grass only in top-right
+      rounded quarter-corner. Curved hard pixel edge. Left-top lighting. 5-color ramp.
+      Selout outline. Solid background.
+
+  - id: "AT-grass-corner-outer-bl"
+    name: "草地·外角-左下"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Dirt filling top-right 3/4. Grass only in bottom-left
+      rounded quarter-corner. Curved hard pixel edge. Left-top lighting. 5-color ramp.
+      Selout outline. Solid background.
+
+  - id: "AT-grass-corner-outer-br"
+    name: "草地·外角-右下"
+    desc: >
+      16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Dirt filling top-left 3/4. Grass only in bottom-right
+      rounded quarter-corner. Curved hard pixel edge. Left-top lighting. 5-color ramp.
+      Selout outline. Solid background.
+
+  # ═══════════════════════════════════════════
+  # 荒漠·沙地 (Desert/Sand) — 13 tiles (同结构, 替换 grass→sand, dirt→stone)
+  # ═══════════════════════════════════════════
+  - id: "AT-sand-center"
+    name: "沙地·中心填充"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full golden sand coverage with subtle dune ripple
+      texture across entire surface. A few tiny pebbles. Left-top lighting, subtle
+      shadow on bottom-right edge. 5-color ramp from dark brown to warm gold.
+      Selout outline on all edges. Solid background.
+
+  - id: "AT-sand-edge-top"
+    name: "沙地·上边缘"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand covering bottom 60%, top 40% is grey stone
+      transition zone. Hard pixel edge boundary between sand and stone.
+      Left-top lighting. 5-color ramp. Selout outline. Solid background.
+
+  - id: "AT-sand-edge-bottom"
+    name: "沙地·下边缘"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand covering top 60%, bottom 40% grey stone.
+      Hard pixel edge boundary. Left-top lighting. 5-color ramp. Selout outline.
+      Solid background.
+
+  - id: "AT-sand-edge-left"
+    name: "沙地·左边缘"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand covering right 60%, left 40% grey stone.
+      Hard pixel vertical edge boundary. Left-top lighting. Selout outline. Solid bg.
+
+  - id: "AT-sand-edge-right"
+    name: "沙地·右边缘"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand covering left 60%, right 40% grey stone.
+      Hard pixel vertical edge boundary. Left-top lighting. Selout outline. Solid bg.
+
+  - id: "AT-sand-corner-inner-tl"
+    name: "沙地·内角-左上"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand filling bottom-right 3/4. Top-left quarter is
+      grey stone forming L-shaped area. Hard pixel edge. Left-top lighting. Selout outline.
+
+  - id: "AT-sand-corner-inner-tr"
+    name: "沙地·内角-右上"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand filling bottom-left 3/4. Top-right quarter is
+      grey stone forming L-shaped area. Hard pixel edge. Left-top lighting. Selout outline.
+
+  - id: "AT-sand-corner-inner-bl"
+    name: "沙地·内角-左下"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand filling top-right 3/4. Bottom-left quarter is
+      grey stone forming L-shaped area. Hard pixel edge. Left-top lighting. Selout outline.
+
+  - id: "AT-sand-corner-inner-br"
+    name: "沙地·内角-右下"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand filling top-left 3/4. Bottom-right quarter is
+      grey stone forming L-shaped area. Hard pixel edge. Left-top lighting. Selout outline.
+
+  - id: "AT-sand-corner-outer-tl"
+    name: "沙地·外角-左上"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Stone filling bottom-right 3/4. Sand only in top-left
+      rounded quarter-corner. Curved hard pixel edge. Left-top lighting. Selout outline.
+
+  - id: "AT-sand-corner-outer-tr"
+    name: "沙地·外角-右上"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Stone filling bottom-left 3/4. Sand only in top-right
+      rounded quarter-corner. Curved hard pixel edge. Selout outline.
+
+  - id: "AT-sand-corner-outer-bl"
+    name: "沙地·外角-左下"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Stone filling top-right 3/4. Sand only in bottom-left
+      rounded quarter-corner. Curved hard pixel edge. Selout outline.
+
+  - id: "AT-sand-corner-outer-br"
+    name: "沙地·外角-右下"
+    desc: >
+      16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Stone filling top-left 3/4. Sand only in bottom-right
+      rounded quarter-corner. Curved hard pixel edge. Selout outline.
+
+  # ═══════════════════════════════════════════
+  # 海面·水域 (Sea/Water) — 仅 center (水域不与陆地 autotile, 用硬边过渡)
+  # 水域与其他地形的过渡由"海岸线过渡瓦片"组处理 (见 layer1 装饰)
+  # ═══════════════════════════════════════════
+  - id: "AT-water-center"
+    name: "水面·中心填充"
+    desc: >
+      16-bit pixel art, top-down RPG water terrain tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full teal-blue water coverage with subtle horizontal
+      ripple lines. A few bright reflection specks. Left-top lighting, subtle shadow
+      on bottom-right. 5-color ramp from dark navy to bright cyan. Selout outline on
+      all edges. Solid background.
+
+  # ═══════════════════════════════════════════
+  # 山岳·岩壁 (Mountain/Rock) — 仅 center
+  # ═══════════════════════════════════════════
+  - id: "AT-rock-center"
+    name: "岩壁·中心填充"
+    desc: >
+      16-bit pixel art, top-down RPG rocky mountain terrain tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full red-brown rocky surface with vertical texture grooves
+      and tiny copper ore vein threads. Left-top lighting casts shadow in grooves.
+      5-color ramp from dark maroon to warm terracotta. Selout outline on all edges.
+      Solid background. Collision: wall (impassable).
+
+  # ═══════════════════════════════════════════
+  # 林莽·密林 (Jungle) — 仅 center
+  # ═══════════════════════════════════════════
+  - id: "AT-jungle-center"
+    name: "密林·中心填充"
+    desc: >
+      16-bit pixel art, top-down RPG dense jungle terrain tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full dark green jungle floor with dappled light spots.
+      Layer of fallen leaves. Left-top lighting. 5-color ramp from near-black green
+      to bright leaf green. Selout outline on all edges. Solid background. Collision: wall.
+
+  # ═══════════════════════════════════════════
+  # 水泽·湿地 (Marsh) — 仅 center
+  # ═══════════════════════════════════════════
+  - id: "AT-marsh-center"
+    name: "水泽·中心填充"
+    desc: >
+      16-bit pixel art, top-down RPG shallow marsh terrain tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full teal-green shallow water with floating duckweed
+      circles and visible river pebbles beneath. Left-top lighting creates bright
+      reflection highlights. 5-color ramp from dark teal to bright aqua. Selout outline
+      on all edges. Solid background. Collision: walkable (slow).
+
+  # ═══════════════════════════════════════════
+  # 特殊地形 (4 种) — 仅 center
+  # ═══════════════════════════════════════════
+  - id: "AT-volcano-center"
+    name: "火山·中心"
+    desc: >
+      16-bit pixel art, top-down RPG volcano terrain tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Black basalt ground with winding orange-red lava river
+      flowing through. Obsidian pillars at edges. Floating tiny orange ember sparks.
+      Left-top lighting with intense orange ground glow complement from below.
+      5-color ramp: black, dark red, orange, bright orange, yellow. Selout outline.
+      Solid background. Collision: wall (deadly).
+
+  - id: "AT-snow-center"
+    name: "雪原·中心"
+    desc: >
+      16-bit pixel art, top-down RPG snowfield terrain tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full pristine white snow coverage with subtle blue
+      shadow variations. Tiny ice crystal sparkles. Distant ice peak silhouette.
+      Left-top lighting. 5-color ramp from pale blue-grey to pure white. Selout outline.
+      Solid background.
+
+  - id: "AT-nether-center"
+    name: "鬼域·中心"
+    desc: >
+      16-bit pixel art, top-down RPG netherworld terrain tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full grey-black scorched earth with cracks revealing
+      eerie green ghost-fire glow. Scattered white bones. A twisted dead tree.
+      Left-top lighting dimmed overall. 5-color ramp: black, dark grey, ghost-green,
+      bone-white, dim purple. Selout outline. Solid background. Collision: wall.
+
+  - id: "AT-spirit-center"
+    name: "灵脉·中心"
+    desc: >
+      16-bit pixel art, top-down RPG spirit-blessed terrain tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Full jade-green ground with golden spirit energy motes
+      rising. Tiny red-capped lingzhi mushrooms (red cap with white ring, tiny specks)
+      on jade platforms. Auspicious cloud wisps. Left-top lighting enhanced by golden glow.
+      5-color ramp: dark jade, emerald, gold, white-gold, pure light. Selout outline.
+      Solid background.

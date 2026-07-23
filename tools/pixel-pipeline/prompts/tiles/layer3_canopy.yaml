@@ -1,0 +1,79 @@
+# 九野 · Layer 3 — 顶棚遮罩层 (Overhead Canopy)
+# 渲染在角色头顶, Z-Sorting 遮罩: 树冠/屋顶顶部/门楣/飞檐高位
+# 背景: isolated on pure solid green background (#00FF00)
+# 视觉宪法: clean pixel grid, NO anti-aliasing, left-top lighting, selout, 5-tone ramp
+
+prompts:
+  # ═══════════════════════════════════════════
+  # 树冠类
+  # ═══════════════════════════════════════════
+  - id: "CAN-tree-canopy"
+    name: "树冠·通用"
+    desc: >
+      16-bit pixel art, top-down RPG tree canopy tile for overhead rendering, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. Dense green tree crown with
+      layered leaf clusters and dappled light filtering through gaps. Designed to
+      render above character when walking under trees. Left-top lighting, bright
+      highlights on top leaves, dark shadow at bottom. Selout outline. 5-color ramp
+      dark green to bright leaf green. Isolated on pure solid green background (#00FF00).
+
+  - id: "CAN-tree-pine"
+    name: "松树冠"
+    desc: >
+      16-bit pixel art, top-down RPG pine tree canopy tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Dark green triangular pine tree crown viewed from
+      above, layered needle clusters forming conical shape. Left-top lighting.
+      Selout outline. 5-color ramp dark pine to muted green.
+      Isolated on pure solid green background (#00FF00).
+
+  - id: "CAN-tree-dead"
+    name: "枯树冠"
+    desc: >
+      16-bit pixel art, top-down RPG dead tree canopy, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Twisted bare brown-grey branches spreading outward
+      with no leaves, eerie silhouette. Left-top lighting dimmed.
+      Selout outline. 5-color ramp near-black to bone-grey.
+      Isolated on pure solid green background (#00FF00).
+
+  # ═══════════════════════════════════════════
+  # 屋顶顶棚类
+  # ═══════════════════════════════════════════
+  - id: "CAN-roof-cover"
+    name: "屋顶·遮罩"
+    desc: >
+      16-bit pixel art, top-down RPG roof canopy tile for overhead rendering, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. Golden curved roof surface viewed
+      from directly above, tile lines radiating, designed to render above character
+      when walking under building eaves. Left-top lighting. Selout outline.
+      5-color ramp dark amber to bright gold. Isolated on pure solid green
+      background (#00FF00).
+
+  - id: "CAN-archway-top"
+    name: "牌坊·顶梁"
+    desc: >
+      16-bit pixel art, top-down RPG archway top beam for overhead rendering, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. Red and gold ceremonial archway
+      top beam with ornate golden characters, designed to render above character.
+      Left-top lighting. Selout outline. 5-color ramp dark red to bright gold.
+      Isolated on pure solid green background (#00FF00).
+
+  # ═══════════════════════════════════════════
+  # 云雾/特效遮罩类
+  # ═══════════════════════════════════════════
+  - id: "CAN-cloud-wisp"
+    name: "云雾·遮罩"
+    desc: >
+      16-bit pixel art, top-down RPG cloud wisp canopy tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Soft white cloud wisps using strict dithered pixel
+      pattern (no alpha gradient), designed to float above mountain areas.
+      Left-top lighting, brighter on left side. Dithered checkerboard for transparency.
+      Selout outline. Isolated on pure solid green background (#00FF00).
+
+  - id: "CAN-miasma-haze"
+    name: "瘴气·遮罩"
+    desc: >
+      16-bit pixel art, top-down RPG miasma haze canopy tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Thin purple miasma haze using strict dithered pixel
+      pattern (no alpha gradient), designed to overlay jungle areas.
+      Left-top lighting dimmed. Dithered checkerboard for transparency.
+      Selout outline. Isolated on pure solid green background (#00FF00).
