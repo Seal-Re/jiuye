@@ -93,6 +93,21 @@ namespace Jianghu.Sim
             Deceased = deceased; _alive = alive; _brains = brains; _sched = sched;
         }
 
+        // pcg-003：PCG 地形快照写入 (ADR-0006 备选 B: View→Core 一次性固化)
+        // 将 View 侧 FastNoiseLite 生成并量化后的地形数据批量写入 Core。
+        // 生成期一次性调用——存档存快照，不复算。
+        public void ApplyTerrainSnapshot(Dictionary<int, TerrainCellData> cells)
+        {
+            foreach (var kv in cells)
+                _terrainCache[kv.Key] = kv.Value;
+        }
+
+        private readonly Dictionary<int, TerrainCellData> _terrainCache = new();
+
+        /// <summary>查询 PCG 地形数据（NodeId → TerrainCellData），供 RuleBrain/PathFinder 使用。</summary>
+        public TerrainCellData? GetTerrain(int nodeId)
+            => _terrainCache.TryGetValue(nodeId, out var d) ? d : null;
+
         // gh-004/play-001：玩家角色注入（P0 最小可玩）—— 不同于 World.Add，
         // 需同时初始化 cultivation state（PathAssigner + CultivationState）。
         public void InjectCharacter(Character c, CultivationPathDef pathDef)
@@ -506,6 +521,8 @@ namespace Jianghu.Sim
                              Clock, Chronicle.Clone(), Relations.Clone(), nodes, deceased, alive, brains, sched);
             if (Map != null) w.Map = Map.Clone();           // 拓扑不可变，浅拷安全
             if (Faction != null) w.Faction = Faction.Clone(); // 深拷成员+关系
+            // PCG 地形快照 (record = 值语义，浅拷 Dictionary 安全)
+            foreach (var kv in _terrainCache) w._terrainCache[kv.Key] = kv.Value;
             // Drama（drama-010）：账本只克隆一份，director 复用同一克隆实例（否则 director 操作的账本
             // ≠ w.Grudges → 漂移）。dramaRng 深拷续跑（R-NF2）。off=三者 null 不拷。
             if (_drama != null && Grudges != null && _dramaRng != null)
