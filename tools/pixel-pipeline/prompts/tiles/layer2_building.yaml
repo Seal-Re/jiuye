@@ -124,14 +124,18 @@ prompts:
   # 门窗/台阶组件
   # ═══════════════════════════════════════════
   - id: "BLD-door-red-2x2"
-    name: "朱漆大门"
+    name: "朱漆大门 (2x2 预制件)"
     layer: 2
+    grid_size: [2, 2]
+    target_resolution: [96, 96]
+    post_slice: "split_2x2_to_48x48"
     desc: >
-      16-bit pixel art, top-down RPG building red gate door, 48x48, clean pixel grid,
-      NO anti-aliasing, NO blur. Large vermilion red double-door gate with golden
-      door studs (9x9 pattern) and brass lion-head knockers. Designed to occupy 2x2
-      tile grid. Left-top lighting, gold studs gleam. Selout outline. 5-color ramp
-      dark red to bright vermilion. Isolated on pure solid green background (#00FF00).
+      16-bit pixel art, top-down RPG red gate door, 96x96 pixels, clean pixel grid,
+      NO anti-aliasing, NO blur. Large vermilion red double-door gate spanning full
+      2x2 tile grid (96x96). Golden door studs in 9x9 pattern, brass lion-head knockers,
+      dark wood door frame. Designed to be sliced into 4 equal 48x48 tiles after generation.
+      Left-top lighting, gold studs gleam. Selout outline. 5-color ramp dark red to
+      bright vermilion. Isolated on pure solid green background (#00FF00).
 
   - id: "BLD-window"
     name: "侧窗"
@@ -218,3 +222,61 @@ prompts:
       faint blue rune glow on walls, roughly 20x16 pixels centered. Left-top lighting
       dimmed, runes glow. Selout outline. 5-color ramp black to grey-blue.
       Isolated on pure solid green background (#00FF00), single component centered.
+
+  # ═══════════════════════════════════════════
+  # 墙体正立面组件 — 2.5D 俯视角纵深 (Wall Front Face)
+  # ═══════════════════════════════════════════
+  - id: "BLD-wall-red-front"
+    name: "红墙·正立面"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building red wall front face tile, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. The front vertical face of a red
+      wall with visible thickness, white plaster surface with dark wooden beam at top,
+      shadow gradient darkening toward bottom to create 2.5D depth illusion.
+      This tile faces the viewer and carries doors/windows. Left-top lighting.
+      Selout outline. 5-color ramp dark brick-red to bright vermilion.
+      Isolated on pure solid green background (#00FF00), tile centered.
+
+  - id: "BLD-wall-red-front-with-window"
+    name: "红墙·正立面(带窗)"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG building red wall front face with window, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. Same as BLD-wall-red-front but with
+      a centered wooden lattice window (white paper screen, dark frame) embedded in the
+      wall surface. Shadow gradient toward bottom for 2.5D depth. Left-top lighting.
+      Selout outline. 5-color ramp. Isolated on pure solid green background (#00FF00).
+
+  - id: "BLD-wall-grey-front"
+    name: "灰墙·正立面"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG fortress grey wall front face tile, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. The front vertical face of a grey
+      stone fortress wall with visible brickwork and crenellation shadow at top,
+      darker at base for 2.5D depth. Left-top lighting. Selout outline.
+      5-color ramp dark stone to light grey. Isolated on pure solid green
+      background (#00FF00), tile centered.
+
+  - id: "BLD-wall-grey-front-gate"
+    name: "灰墙·正立面(带门洞)"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG fortress wall front face with gate opening, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. Grey stone fortress wall front face
+      with a dark arched gate opening in the center, iron portcullis visible.
+      Shadow gradient toward bottom. Left-top lighting. Selout outline.
+      5-color ramp dark stone to light grey. Isolated on pure solid green
+      background (#00FF00), tile centered.
+
+  - id: "BLD-wall-dark-front"
+    name: "暗墙·正立面"
+    layer: 2
+    desc: >
+      16-bit pixel art, top-down RPG dark fortress wall front face tile, 48x48,
+      clean pixel grid, NO anti-aliasing, NO blur. The front vertical face of a dark
+      purple-black demonic wall with glowing red rune marks, shadow gradient toward
+      bottom for 2.5D depth. Left-top lighting dimmed, runes self-illuminate.
+      Selout outline. 5-color ramp black to dark purple. Isolated on pure solid
+      green background (#00FF00), tile centered.

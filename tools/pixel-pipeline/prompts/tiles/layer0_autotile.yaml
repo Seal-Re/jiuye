@@ -298,3 +298,104 @@ prompts:
       on jade platforms. Auspicious cloud wisps. Left-top lighting enhanced by golden glow.
       5-color ramp: dark jade, emerald, gold, white-gold, pure light. Selout outline.
       Solid background.
+
+  # ═══════════════════════════════════════════
+  # 水域·海岸线过渡套件 (Water Shoreline Set, 8 tiles)
+  # ═══════════════════════════════════════════
+  - id: "AT-shore-edge-top"
+    name: "水岸线·上边"
+    desc: >
+      16-bit pixel art, top-down RPG water shoreline autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Teal-blue water covering bottom 60%, top 40% is sandy
+      beach with gentle wave foam line at boundary. Hard pixel edge at water-sand border,
+      tiny white foam specks along shoreline. Left-top lighting. Selout outline. Solid bg.
+
+  - id: "AT-shore-edge-bottom"
+    name: "水岸线·下边"
+    desc: >
+      16-bit pixel art, top-down RPG water shoreline autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sandy beach covering bottom 60%, top 40% teal-blue
+      water with wave foam line at boundary. Hard pixel edge. Left-top lighting.
+      Selout outline. Solid background.
+
+  - id: "AT-shore-edge-left"
+    name: "水岸线·左边"
+    desc: >
+      16-bit pixel art, top-down RPG water shoreline autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Water covering right 60%, left 40% sandy beach with
+      vertical foam line. Hard pixel edge. Left-top lighting. Selout outline. Solid bg.
+
+  - id: "AT-shore-edge-right"
+    name: "水岸线·右边"
+    desc: >
+      16-bit pixel art, top-down RPG water shoreline autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Water covering left 60%, right 40% sandy beach with
+      vertical foam line. Hard pixel edge. Left-top lighting. Selout outline. Solid bg.
+
+  - id: "AT-shore-corner-inner-tl"
+    name: "水岸线·内角-左上"
+    desc: >
+      16-bit pixel art, top-down RPG water shoreline autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Water filling bottom-right 3/4. Top-left quarter is
+      sandy beach forming L-shape. Wave foam along diagonal boundary. Left-top lighting.
+      Selout outline. Solid background.
+
+  - id: "AT-shore-corner-inner-tr"
+    name: "水岸线·内角-右上"
+    desc: >
+      16-bit pixel art, top-down RPG water shoreline autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Water filling bottom-left 3/4. Top-right quarter is
+      sandy beach forming L-shape. Wave foam along diagonal boundary. Left-top lighting.
+      Selout outline. Solid background.
+
+  - id: "AT-shore-corner-outer-tl"
+    name: "水岸线·外角-左上"
+    desc: >
+      16-bit pixel art, top-down RPG water shoreline autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand filling bottom-right 3/4. Water only in top-left
+      rounded quarter-corner with foam edge. Left-top lighting. Selout outline. Solid bg.
+
+  - id: "AT-shore-corner-outer-br"
+    name: "水岸线·外角-右下"
+    desc: >
+      16-bit pixel art, top-down RPG water shoreline autotile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sand filling top-left 3/4. Water only in bottom-right
+      rounded quarter-corner with foam edge. Left-top lighting. Selout outline. Solid bg.
+
+  # ═══════════════════════════════════════════
+  # 山岳·悬崖立面套件 (Cliff Face Set, 4 tiles)
+  # 2.5D 俯视角: 山顶平面(top) + 悬崖立面(front face, 2格高)
+  # ═══════════════════════════════════════════
+  - id: "AT-cliff-top"
+    name: "悬崖·顶部平面"
+    desc: >
+      16-bit pixel art, top-down RPG cliff top surface tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Flat rocky ground surface with sparse grass tufts at
+      edges, viewed from directly above. This is the walkable top of a cliff.
+      Left-top lighting, subtle shadow at bottom edge (cliff overhang).
+      Selout outline. 5-color ramp dark grey to light brown-rock. Solid background.
+
+  - id: "AT-cliff-face-front"
+    name: "悬崖·正立面"
+    desc: >
+      16-bit pixel art, top-down RPG cliff vertical face tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sheer vertical rock cliff face with horizontal strata
+      lines and cracks, darker shadow at base. This tile renders below the cliff-top tile
+      to create 2.5D height illusion. Left-top lighting casts shadow downward.
+      Selout outline. 5-color ramp near-black to medium grey-brown. Solid background.
+
+  - id: "AT-cliff-face-left"
+    name: "悬崖·左侧立面"
+    desc: >
+      16-bit pixel art, top-down RPG cliff left face tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sheer vertical rock cliff face angled for left-facing
+      slopes, strata lines running diagonally. Left-top lighting. Selout outline.
+      5-color ramp near-black to medium grey-brown. Solid background.
+
+  - id: "AT-cliff-face-right"
+    name: "悬崖·右侧立面"
+    desc: >
+      16-bit pixel art, top-down RPG cliff right face tile, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Sheer vertical rock cliff face angled for right-facing
+      slopes, strata lines running diagonally. Left-top lighting. Selout outline.
+      5-color ramp near-black to medium grey-brown. Solid background.
