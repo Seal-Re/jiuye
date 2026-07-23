@@ -230,11 +230,12 @@ prompts:
     name: "红墙·正立面"
     layer: 2
     desc: >
-      16-bit pixel art, top-down RPG building red wall front face tile, 48x48,
-      clean pixel grid, NO anti-aliasing, NO blur. The front vertical face of a red
-      wall with visible thickness, white plaster surface with dark wooden beam at top,
-      shadow gradient darkening toward bottom to create 2.5D depth illusion.
-      This tile faces the viewer and carries doors/windows. Left-top lighting.
+      16-bit pixel art, top-down RPG modular wall segment, 48x48, clean pixel grid,
+      NO anti-aliasing, NO blur. Modular wall segment only — NO windows, NO doors,
+      NO roof, NO complete building. Clean red wall front face texture with visible
+      thickness, white plaster surface, dark wooden beam at top edge, shadow gradient
+      darkening toward bottom for 2.5D depth. Tileable horizontally to extend wall
+      length. Windows and doors are separate tiles placed on top. Left-top lighting.
       Selout outline. 5-color ramp dark brick-red to bright vermilion.
       Isolated on pure solid green background (#00FF00), tile centered.
 

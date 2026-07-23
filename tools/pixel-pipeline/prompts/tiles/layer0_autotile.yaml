@@ -11,10 +11,12 @@ prompts:
     name: "草地·中心填充"
     desc: >
       16-bit pixel art, top-down RPG grass terrain autotile, 48x48, clean pixel grid,
-      NO anti-aliasing, NO blur. Full green grass coverage with fine texture strokes
-      and scattered tiny white flower specks across entire surface. Left-top lighting,
-      subtle shadow on bottom-right edge. 5-color ramp from dark cool-green to warm
-      yellow-green. Selout outline on all edges. Solid background.
+      NO anti-aliasing, NO blur. Seamless tileable grass pattern, edge-to-edge,
+      NO borders, NO frames, NO outline around tile. Full green grass coverage with
+      fine texture strokes and scattered tiny white flower specks across entire surface.
+      Designed to repeat seamlessly in all 4 directions. Left-top lighting, subtle
+      shadow on bottom-right edge. 5-color ramp from dark cool-green to warm yellow-green.
+      Solid background.
 
   - id: "AT-grass-edge-top"
     name: "草地·上边缘"
@@ -119,7 +121,7 @@ prompts:
     name: "沙地·中心填充"
     desc: >
       16-bit pixel art, top-down RPG desert sand autotile, 48x48, clean pixel grid,
-      NO anti-aliasing, NO blur. Full golden sand coverage with subtle dune ripple
+      NO anti-aliasing, NO blur. Seamless tileable sand pattern, NO borders, NO frames. Full golden sand coverage with subtle dune ripple
       texture across entire surface. A few tiny pebbles. Left-top lighting, subtle
       shadow on bottom-right edge. 5-color ramp from dark brown to warm gold.
       Selout outline on all edges. Solid background.
@@ -218,7 +220,7 @@ prompts:
     name: "水面·中心填充"
     desc: >
       16-bit pixel art, top-down RPG water terrain tile, 48x48, clean pixel grid,
-      NO anti-aliasing, NO blur. Full teal-blue water coverage with subtle horizontal
+      NO anti-aliasing, NO blur. Seamless tileable water pattern, NO borders, NO frames. Full teal-blue water coverage with subtle horizontal
       ripple lines. A few bright reflection specks. Left-top lighting, subtle shadow
       on bottom-right. 5-color ramp from dark navy to bright cyan. Selout outline on
       all edges. Solid background.
