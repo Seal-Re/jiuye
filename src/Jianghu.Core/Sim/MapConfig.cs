@@ -52,6 +52,16 @@ namespace Jianghu.Sim
         HazardKind Hazard = HazardKind.None
     );
 
+    /// <summary>PCG 地形快照数据 (ADR-0006 备选 B: View→Core)。单个 cell 的离散化地形。</summary>
+    public sealed record TerrainCellData(
+        int NodeId,
+        TerrainKind Terrain,
+        ElementKind Element,
+        int Peril,
+        HazardKind Hazard,
+        int QiDensity
+    );
+
     /// <summary>节点地形数据（侧表，键 NodeId）。不可变 record。</summary>
     public sealed record NodeGeo(
         SiteKind Kind,

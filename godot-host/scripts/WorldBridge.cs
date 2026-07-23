@@ -39,8 +39,12 @@ public partial class WorldBridge : Node
     /// <summary>玩家命令队列（P0）。每 Tick 出队一个覆盖 RuleBrain。</summary>
     private readonly System.Collections.Generic.Queue<CommandIntent> _playerQueue = new();
 
-    /// <summary>玩家注入角色进世界（P0 角色创建）。</summary>
-    public void InjectPlayerCharacter(Character ch, CultivationPathDef pathDef)
+    /// <summary>PCG 地形快照 (View→Core, ADR-0006 备选 B)。</summary>
+    public void ApplyTerrainSnapshot(System.Collections.Generic.Dictionary<int, TerrainCellData> cells)
+    {
+        _world.ApplyTerrainSnapshot(cells);
+        GD.Print($"[WorldBridge] 地形快照已写入 Core: {cells.Count} cells");
+    }
     {
         PlayerCharacter = ch;
         _world.InjectCharacter(ch, pathDef);
