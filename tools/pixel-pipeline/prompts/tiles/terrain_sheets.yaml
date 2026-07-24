@@ -10,15 +10,29 @@ prompts:
     name: "草地地形组大图"
     target_size: [192, 192]
     desc: >
-      16-bit pixel art, top-down RPG seamless grass terrain tileset sheet, 192x192 pixels,
-      4x4 grid of 48x48 tiles. NO anti-aliasing, NO blur, NO borders between tiles.
-      Seamless tileable grass pattern across entire sheet, edge-to-edge continuity.
-      Center 2x2 area: pure green grass with fine texture strokes and tiny white flowers.
-      Edge tiles: grass-to-dirt transition with hard pixel edge, dirt is brown earth.
-      Corner tiles: rounded grass-to-dirt curves. All transitions flow seamlessly across
-      tile boundaries with no visible grid lines. Left-top lighting, 5-color ramp from
-      dark cool-green to warm yellow-green. NO outline around individual tiles.
-      Solid background. Consistent pixel size throughout.
+      16-bit pixel art, top-down RPG terrain tileset sheet, 192x192 pixels, 4x4 grid
+      of 48x48 tiles separated by thin dark grid lines. Each tile MUST contain different
+      content as specified. NO anti-aliasing, NO blur.
+      Tile layout (row, col):
+      (0,0) top-left corner: small grass patch in bottom-right quarter only, rest is dirt.
+      (0,1) top edge: grass on bottom half, dirt on top half, horizontal boundary.
+      (0,2) top-right corner: small grass patch in bottom-left quarter only, rest is dirt.
+      (0,3) top edge: grass on bottom half, dirt on top half.
+      (1,0) left edge: grass on right half, dirt on left half, vertical boundary.
+      (1,1) center: full grass coverage, pure green grass texture.
+      (1,2) right edge: grass on left half, dirt on right half, vertical boundary.
+      (1,3) center: full grass coverage.
+      (2,0) bottom-left corner: small grass patch in top-right quarter only, rest is dirt.
+      (2,1) bottom edge: grass on top half, dirt on bottom half.
+      (2,2) bottom-right corner: small grass patch in top-left quarter only, rest is dirt.
+      (2,3) bottom edge: grass on top half, dirt on bottom half.
+      (3,0) left edge: grass on right half, dirt on left half.
+      (3,1) center: full grass coverage.
+      (3,2) right edge: grass on left half, dirt on right half.
+      (3,3) center: full grass coverage.
+      All boundaries are hard pixel edges. Grass: 5-color ramp dark cool-green to warm
+      yellow-green with fine texture strokes. Dirt: brown earth 5-color ramp.
+      Left-top lighting. Solid background.
 
   # ═══════════════════════════════════════════
   # 沙地组 (Sand Group Sheet)

@@ -52,20 +52,51 @@ def apply_palette(img, palette):
 
 
 def slice_sheet(sheet_path, terrain_prefix, output_dir, master_palette=None):
-    """切片一张 192×192 大图 → 16 个 48×48 瓦片"""
+    """切片一张大图 → 16 个 48×48 瓦片
+    AI 输出尺寸不固定 (常 1254×1254), 1254÷4=313.5 不整除。
+    正确做法: 在原图上裁到4整除 → 每格精确切 → 每格缩到48×48。
+    绝不整图缩放(会压歪网格边界)。
+    """
     img = Image.open(sheet_path)
-    if img.size != (SHEET, SHEET):
-        # 缩放到标准尺寸
-        img = img.resize((SHEET, SHEET), Image.NEAREST)
-
     if img.mode != "RGBA":
         img = img.convert("RGBA")
 
-    # 提取本组调色板 (如无 master)
+    w, h = img.size
+    # 裁到4整除 (居中裁剪, 去掉边缘多余像素)
+    new_w = (w // GRID) * GRID
+    new_h = (h // GRID) * GRID
+    if new_w != w or new_h != h:
+        left = (w - new_w) // 2
+        top = (h - new_h) // 2
+        img = img.crop((left, top, left + new_w, top + new_h))
+        print(f"    crop {w}x{h} → {new_w}x{new_h} (每格 {new_w//GRID}x{new_h//GRID})")
+
+    cell_w = new_w // GRID  # 每格原始像素 (如313)
+    cell_h = new_h // GRID
+
     if master_palette is None:
         master_palette = extract_palette(img)
 
     sliced = []
+    for idx in range(GRID * GRID):
+        row = idx // GRID
+        col = idx % GRID
+        # 在原图上按精确格边界切
+        box = (col * cell_w, row * cell_h, (col + 1) * cell_w, (row + 1) * cell_h)
+        tile = img.crop(box)
+        # 缩到 48×48 (NEAREST 保持像素感)
+        tile = tile.resize((TILE, TILE), Image.NEAREST)
+
+        # 调色板量化
+        tile = apply_palette(tile, master_palette)
+
+        suffix = SLICE_MAP.get(idx, f"tile{idx}")
+        tile_id = f"{terrain_prefix}-{suffix}"
+        out_path = os.path.join(output_dir, f"{tile_id}.png")
+        tile.save(out_path)
+        sliced.append(tile_id)
+
+    return sliced, master_palette
     for idx in range(GRID * GRID):
         row = idx // GRID
         col = idx % GRID
