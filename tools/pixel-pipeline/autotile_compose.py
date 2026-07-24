@@ -63,18 +63,18 @@ def gen_edge(orientation):
 
 def gen_outer_corner(corner):
     """外凸圆弧: 草地(白)凸向泥土(黑)
-    端点精准交于两条外边的1/2(12px)处, R²=720 (24²+12²)
-    引入角度抖动增加草叶咬合感
+    圆心=内侧顶点, R²=144 (12²) — 端点交于12px边界, 与直边对齐
+    外角只凸出小面积(约20%), 不吞噬外围泥土
     """
     import math
     m = new_grid(0)
-    R_SQ = 720  # 24^2 + 12^2
+    R_SQ = 144  # 12^2
 
     centers = {
-        'nw': (QUAD, QUAD),   # 草地从右下凸向左上
-        'ne': (0, QUAD),      # 草地从左下凸向右上
-        'sw': (QUAD, 0),      # 草地从右上凸向左下
-        'se': (0, 0),         # 草地从左上凸向右下
+        'nw': (QUAD, QUAD),
+        'ne': (0, QUAD),
+        'sw': (QUAD, 0),
+        'se': (0, 0),
     }
     cx, cy = centers[corner]
 
@@ -84,28 +84,28 @@ def gen_outer_corner(corner):
             dy = y - cy
             dist_sq = dx ** 2 + dy ** 2
 
-            # 角度抖动 (草叶咬合感)
             angle = math.atan2(dy, dx)
-            jitter = 1.5 * math.sin(angle * 10)
-            eff_r_sq = R_SQ + 2 * 26.83 * jitter
+            jitter = 1.2 * math.sin(angle * 12)
+            eff_r_sq = R_SQ + 2 * 12.0 * jitter
 
             if dist_sq <= eff_r_sq:
                 m[y][x] = 255
     return m
 
 def gen_inner_corner(corner):
-    """内凹圆弧: 泥土(黑)切入草地(白)
-    端点精准交于两条外边的1/2(12px)处, R²=720
+    """内凹圆弧: 泥土(黑)深切入草地(白)
+    圆心=外围角顶点, R²=720 (24²+12²) — 端点交于12px边界
+    泥土切入约72%, 视觉饱满
     """
     import math
     m = new_grid(255)
     R_SQ = 720
 
     centers = {
-        'nw': (0, 0),               # 泥土从左上切入
-        'ne': (QUAD, 0),            # 泥土从右上切入
-        'sw': (0, QUAD),            # 泥土从左下切入
-        'se': (QUAD, QUAD),         # 泥土从右下切入
+        'nw': (0, 0),
+        'ne': (QUAD, 0),
+        'sw': (0, QUAD),
+        'se': (QUAD, QUAD),
     }
     cx, cy = centers[corner]
 
@@ -116,7 +116,7 @@ def gen_inner_corner(corner):
             dist_sq = dx ** 2 + dy ** 2
 
             angle = math.atan2(dy, dx)
-            jitter = 1.5 * math.sin(angle * 10)
+            jitter = 1.2 * math.sin(angle * 12)
             eff_r_sq = R_SQ + 2 * 26.83 * jitter
 
             if dist_sq <= eff_r_sq:
