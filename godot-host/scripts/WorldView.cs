@@ -89,58 +89,8 @@ public partial class WorldView : Node2D
         var world = _bridge.World;
         if (world == null || _nodeCount == 0) return;
 
-        // —— 0. 地图边（节点间连线 + Region 边界）——
-        var map = world.Map;
-        if (map != null)
-        {
-            // 节点间邻接边（不同颜色区分 Open/通牒/境界门控）
-            for (int i = 0; i < _nodeCount; i++)
-            {
-                var adj = map.AdjacentTo(new Jianghu.Model.NodeId(i));
-                foreach (var neighbor in adj)
-                {
-                    int ni = neighbor.Value;
-                    if (ni <= i) continue;
-
-                    int regionA = map.RegionOf(new Jianghu.Model.NodeId(i));
-                    int regionB = map.RegionOf(new Jianghu.Model.NodeId(ni));
-
-                    // 边颜色: 同区域=道路(土黄), 跨区域=关隘(暗红), 无邻接=不可通行(灰)
-                    Color edgeColor;
-                    float edgeWidth;
-                    if (regionA == regionB)
-                    {
-                        edgeColor = new Color(0.45f, 0.38f, 0.22f, 0.6f);  // B01 道路·土黄
-                        edgeWidth = 2f;
-                    }
-                    else
-                    {
-                        edgeColor = new Color(0.55f, 0.25f, 0.18f, 0.5f);  // B02 关隘·暗红
-                        edgeWidth = 2.5f;
-                    }
-                    DrawLine(_nodePositions[i], _nodePositions[ni], edgeColor, edgeWidth);
-                }
-            }
-
-            // Region 边界线（RegionId 变化处半透明色带）
-            for (int i = 0; i < _nodeCount; i++)
-            {
-                int regionI = map.RegionOf(new Jianghu.Model.NodeId(i));
-                var adj = map.AdjacentTo(new Jianghu.Model.NodeId(i));
-                foreach (var neighbor in adj)
-                {
-                    int ni = neighbor.Value;
-                    if (ni <= i) continue;
-                    int regionN = map.RegionOf(new Jianghu.Model.NodeId(ni));
-                    if (regionI != regionN)
-                    {
-                        var mid = (_nodePositions[i] + _nodePositions[ni]) / 2f;
-                        var perp = (_nodePositions[ni] - _nodePositions[i]).Orthogonal().Normalized() * 3f;
-                        DrawLine(mid - perp, mid + perp, new Color(0.6f, 0.45f, 0.15f, 0.4f), 4f);
-                    }
-                }
-            }
-        }
+        // 地图渲染已迁移到 MapGenerator.gd (四层 TileMapLayer 瓦片地图)
+        // WorldView 仅保留角色 Sprite 渲染 + HP 条 + 点击交互
 
         // —— 网格背景 ——
         var gridColor = new Color(0.12f, 0.11f, 0.14f, 1f);
