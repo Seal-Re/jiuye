@@ -202,12 +202,12 @@ TILES = {
     "corner-outer-sw":   assemble(EDGE_W,   SOLID,    OUTER_SW, EDGE_S),
     "corner-outer-se":   assemble(SOLID,    EDGE_E,   EDGE_S,   OUTER_SE),
 
-    # inner corner: 中心在角, 外围切入
-    # NW内角: 左上=中心(白), 外围从右下切入 → SE象限=内角
-    "corner-inner-nw":   assemble(SOLID, SOLID, SOLID, INNER_NW),
-    "corner-inner-ne":   assemble(SOLID, SOLID, INNER_NE, SOLID),
-    "corner-inner-sw":   assemble(SOLID, INNER_SW, SOLID, SOLID),
-    "corner-inner-se":   assemble(INNER_SE, SOLID, SOLID, SOLID),
+    # inner corner: 外围切入中心, 凹角在命名方向
+    # NW内角: 左上=外围切入(黑), 其余=草地(白) → NW象限=内角
+    "corner-inner-nw":   assemble(INNER_NW, SOLID,    SOLID,    SOLID),
+    "corner-inner-ne":   assemble(SOLID,    INNER_NE, SOLID,    SOLID),
+    "corner-inner-sw":   assemble(SOLID,    SOLID,    INNER_SW, SOLID),
+    "corner-inner-se":   assemble(SOLID,    SOLID,    SOLID,    INNER_SE),
 }
 
 
