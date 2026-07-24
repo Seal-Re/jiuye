@@ -57,32 +57,29 @@ def gen_empty():
     return new_grid(0)
 
 def gen_edge(orientation):
-    """直边: boundary=12, 有机抖动[-1,0,1]"""
+    """直边: boundary=12, 精确1/2分界, 无抖动偏移
+    抖动只影响交界处2px, 不改变分界基准线
+    """
     m = new_grid(0)
-    jitter = [0, 1, -1] * 8
     for y in range(QUAD):
         for x in range(QUAD):
             if orientation == 'n':
-                eff = BOUNDARY + jitter[x]
-                m[y][x] = 255 if y > eff else 0
+                m[y][x] = 255 if y >= BOUNDARY else 0
             elif orientation == 's':
-                eff = BOUNDARY + jitter[x]
-                m[y][x] = 255 if y < eff else 0
+                m[y][x] = 255 if y < BOUNDARY else 0
             elif orientation == 'w':
-                eff = BOUNDARY + jitter[y]
-                m[y][x] = 255 if x > eff else 0
+                m[y][x] = 255 if x >= BOUNDARY else 0
             elif orientation == 'e':
-                eff = BOUNDARY + jitter[y]
-                m[y][x] = 255 if x < eff else 0
+                m[y][x] = 255 if x < BOUNDARY else 0
     return m
 
 def gen_outer_corner(corner):
     """外凸圆弧: 草地(白)凸向泥土(黑)
-    R²=144 (12²), 包络抖动在出口处衰减为0
+    R²=144 (12²), 纯净数学圆弧无抖动
+    出口处强制锚定在12px边界, 与直边精确对齐
     """
     m = new_grid(0)
     R_SQ = 144
-    R = 12.0
     centers = {
         'nw': (QUAD, QUAD), 'ne': (0, QUAD),
         'sw': (QUAD, 0), 'se': (0, 0),
@@ -93,22 +90,17 @@ def gen_outer_corner(corner):
             dx = x - cx
             dy = y - cy
             dist_sq = dx ** 2 + dy ** 2
-            angle = math.atan2(dy, dx)
-            # 包络抖动: 出口处衰减为0, 45°处最大
-            env = angle_envelope(angle)
-            jitter = 1.5 * math.sin(angle * 8) * env
-            eff_r_sq = R_SQ + 2 * R * jitter
-            if dist_sq <= eff_r_sq:
+            if dist_sq <= R_SQ:
                 m[y][x] = 255
     return m
 
 def gen_inner_corner(corner):
     """内凹圆弧: 泥土(黑)切入草地(白)
-    R²=720 (24²+12²), 包络抖动在出口处衰减为0
+    R²=720 (24²+12²), 纯净数学圆弧无抖动
+    出口处自然交于12px边界
     """
     m = new_grid(255)
     R_SQ = 720
-    R = 26.83
     centers = {
         'nw': (0, 0), 'ne': (QUAD, 0),
         'sw': (0, QUAD), 'se': (QUAD, QUAD),
@@ -119,11 +111,7 @@ def gen_inner_corner(corner):
             dx = x - cx
             dy = y - cy
             dist_sq = dx ** 2 + dy ** 2
-            angle = math.atan2(dy, dx)
-            env = angle_envelope(angle)
-            jitter = 1.5 * math.sin(angle * 8) * env
-            eff_r_sq = R_SQ + 2 * R * jitter
-            if dist_sq <= eff_r_sq:
+            if dist_sq <= R_SQ:
                 m[y][x] = 0
     return m
 
