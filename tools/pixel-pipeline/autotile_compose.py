@@ -1,148 +1,149 @@
 # -*- coding: utf-8 -*-
-"""九野 · 工业级 Autotile 掩码合成器 v8
-彻底重写: 100%程序化24×24子象限, 逻辑精准, 边界100%对齐。
+"""九野 · 工业级 Autotile 掩码合成器 v9
+修正: 圆弧方向 + 边缘用抖动掩码 + 孤立噪点清理 + 阴影层。
 
-修正 v7 三大致命问题:
-1. inner_nw 方向错位 → 圆心位置统一在"切入角"的对角
-2. 边缘拉链效应 → 改用非等距有机锯齿 (伪随机相位)
-3. 圆弧采样不统一 → 统一用距离判据, 无缩放无插值
+核心逻辑:
+  白(255) = 地形A (草地, 中心)
+  黑(0)   = 地形B (泥土, 外围)
+
+  外角 NW: 左上=白(草地凸出), 右下=黑(外围). 圆心=(0,0), R内白外黑.
+  内角 NW: 左上=黑(外围切入), 右下=白(草地). 圆心=(0,0), R内黑外白.
+  边缘 N:  上=黑(外围), 下=白(中心). 水平线.
 """
 import os
-from PIL import Image
+from PIL import Image, ImageChops
 
 TILE = 48
 QUAD = 24
 
 
-def new_mask(fill=0):
-    """创建 24×24 灰度掩码"""
+def new_grid(fill=0):
     return [[fill] * QUAD for _ in range(QUAD)]
 
 
-def save_mask(grid, path, scale=4):
-    """grid(24×24 list) → PNG, 可放大"""
-    img = Image.new("L", (QUAD, QUAD), 0)
+def grid_to_image(grid, size=TILE):
+    img = Image.new("L", (size, size), 0)
     px = img.load()
-    for y in range(QUAD):
-        for x in range(QUAD):
+    for y in range(len(grid)):
+        for x in range(len(grid[0])):
             px[x, y] = grid[y][x]
+    return img
+
+
+def save_grid(grid, path, scale=4):
+    img = grid_to_image(grid, QUAD)
     if scale > 1:
         img = img.resize((QUAD * scale, QUAD * scale), Image.NEAREST)
     img.save(path)
 
 
 # ═══════════════════════════════════════════════
-#  基础掩码生成 (24×24, 纯数学, 无插值)
+#  基础掩码 (24×24, 纯数学)
 # ═══════════════════════════════════════════════
 
 def gen_solid():
-    """全白"""
-    return new_mask(255)
+    return new_grid(255)
 
 def gen_empty():
-    """全黑"""
-    return new_mask(0)
+    return new_grid(0)
 
 def gen_edge(orientation):
-    """直边: 有机锯齿过渡 (非等距, 避免拉链效应)
-    orientation: 'n'(上黑下白) 's'(上白下黑) 'w'(左黑右白) 'e'(左白右黑)
-    白 = 地形A (中心侧), 黑 = 地形B (外围侧)
+    """有机锯齿直边
+    n: 上黑下白  s: 上白下黑  w: 左黑右白  e: 左白右黑
     """
-    m = new_mask(0)
-    # 有机锯齿相位: 用确定性伪随机打破等距周期
-    # 边界在 QUAD//2 = 12, 过渡区 [10, 14]
+    m = new_grid(0)
     boundary = QUAD // 2  # 12
-    # 每列/行的锯齿偏移 (伪随机但确定性, 避免拉链)
-    jitter = [((i * 7 + 3) % 5) - 2 for i in range(QUAD)]  # [-2,-1,0,1,2] 循环
+    # 有机抖动: 每列偏移 [-1, 0, 1] 循环
+    jitter = [0, 1, -1, 0, 1, -1, 0, 1, -1, 0, 1, -1,
+              0, 1, -1, 0, 1, -1, 0, 1, -1, 0, 1, -1]
 
     for y in range(QUAD):
         for x in range(QUAD):
-            if orientation == 'n':  # 上黑下白
-                eff_boundary = boundary + jitter[x]
-                m[y][x] = 255 if y > eff_boundary else 0
-            elif orientation == 's':  # 上白下黑
-                eff_boundary = boundary + jitter[x]
-                m[y][x] = 255 if y < eff_boundary else 0
-            elif orientation == 'w':  # 左黑右白
-                eff_boundary = boundary + jitter[y]
-                m[y][x] = 255 if x > eff_boundary else 0
-            elif orientation == 'e':  # 左白右黑
-                eff_boundary = boundary + jitter[y]
-                m[y][x] = 255 if x < eff_boundary else 0
+            if orientation == 'n':
+                eff = boundary + jitter[x]
+                m[y][x] = 255 if y > eff else 0
+            elif orientation == 's':
+                eff = boundary + jitter[x]
+                m[y][x] = 255 if y < eff else 0
+            elif orientation == 'w':
+                eff = boundary + jitter[y]
+                m[y][x] = 255 if x > eff else 0
+            elif orientation == 'e':
+                eff = boundary + jitter[y]
+                m[y][x] = 255 if x < eff else 0
     return m
 
 def gen_outer_corner(corner):
-    """外凸圆弧: 地形A凸向地形B
-    corner: 'nw'(左上凸) 'ne'(右上凸) 'sw'(左下凸) 'se'(右下凸)
-    白区 = 距凸角对角点 ≤ R 的区域
-
-    nw外角: 凸角在左上, 对角点(圆心)在右下(24,24)
-    白区 = 左上角圆弧
+    """外凸圆弧: 地形A(白)凸向地形B(黑)
+    nw: 左上白凸, 圆心(0,0), 距圆心≤R=白
+    ne: 右上白凸, 圆心(QUAD-1,0)
+    sw: 左下白凸, 圆心(0,QUAD-1)
+    se: 右下白凸, 圆心(QUAD-1,QUAD-1)
     """
-    m = new_mask(0)
-    R = 16  # 外角半径稍大, 确保与直边衔接
-
-    # 圆心 = 凸角的对角
+    m = new_grid(0)
+    R = 17
     centers = {
-        'nw': (QUAD, QUAD),   # 左上凸 → 圆心右下
-        'ne': (0, QUAD),      # 右上凸 → 圆心左下
-        'sw': (QUAD, 0),      # 左下凸 → 圆心右上
-        'se': (0, 0),         # 右下凸 → 圆心左上
+        'nw': (0, 0), 'ne': (QUAD - 1, 0),
+        'sw': (0, QUAD - 1), 'se': (QUAD - 1, QUAD - 1),
     }
     cx, cy = centers[corner]
-
     for y in range(QUAD):
         for x in range(QUAD):
-            dx = x - cx
-            dy = y - cy
-            dist = (dx * dx + dy * dy) ** 0.5
+            dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
             if dist <= R:
                 m[y][x] = 255
-            elif dist <= R + 1:
-                # 圆弧边缘 1px 抖动 (有机, 非等距)
-                phase = (x * 3 + y * 5) % 4
-                m[y][x] = 255 if phase < 2 else 0
+            elif dist <= R + 1 and (x * 3 + y * 5) % 3 != 0:
+                m[y][x] = 255
     return m
 
 def gen_inner_corner(corner):
-    """内凹圆弧: 地形B切入地形A
-    corner: 'nw'(左上凹) 'ne'(右上凹) 'sw'(左下凹) 'se'(右下凹)
-    黑区 = 距凹角 ≤ R 的小圆弧
-
-    nw内角: 凹角在左上 → 黑色切入在左上角
-    圆心 = 左上角 (0, 0)
+    """内凹圆弧: 地形B(黑)切入地形A(白)
+    nw: 左上黑切入, 圆心(0,0), 距圆心≤R=黑
     """
-    m = new_mask(255)  # 默认全白
-    R = 10
-
-    # 圆心 = 凹角本身
+    m = new_grid(255)
+    R = 11
     centers = {
-        'nw': (0, 0),       # 左上凹 → 圆心左上
-        'ne': (QUAD - 1, 0),# 右上凹 → 圆心右上
-        'sw': (0, QUAD - 1),# 左下凹 → 圆心左下
-        'se': (QUAD - 1, QUAD - 1), # 右下凹 → 圆心右下
+        'nw': (0, 0), 'ne': (QUAD - 1, 0),
+        'sw': (0, QUAD - 1), 'se': (QUAD - 1, QUAD - 1),
     }
     cx, cy = centers[corner]
-
     for y in range(QUAD):
         for x in range(QUAD):
-            dx = x - cx
-            dy = y - cy
-            dist = (dx * dx + dy * dy) ** 0.5
+            dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
             if dist <= R:
                 m[y][x] = 0
-            elif dist <= R + 1:
-                phase = (x * 3 + y * 5) % 4
-                m[y][x] = 0 if phase < 2 else 255
+            elif dist <= R + 1 and (x * 3 + y * 5) % 3 == 0:
+                m[y][x] = 0
     return m
 
 
+def clean_isolated_pixels(grid):
+    """清理孤立1×1噪点: 如果一个像素与8邻域都不同, 则抹平"""
+    h, w = len(grid), len(grid[0])
+    cleaned = [row[:] for row in grid]
+    for y in range(h):
+        for x in range(w):
+            val = grid[y][x]
+            neighbors = []
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    if dy == 0 and dx == 0:
+                        continue
+                    ny, nx = y + dy, x + dx
+                    if 0 <= ny < h and 0 <= nx < w:
+                        neighbors.append(grid[ny][nx])
+            # 如果所有邻居都和当前像素相反 → 孤立点
+            if neighbors and all(n != val for n in neighbors):
+                # 取多数邻居的值
+                cleaned[y][x] = 255 if sum(n > 128 for n in neighbors) > len(neighbors) // 2 else 0
+    return cleaned
+
+
 # ═══════════════════════════════════════════════
-#  48×48 组装 (4象限拼接)
+#  组装
 # ═══════════════════════════════════════════════
 
 def assemble(nw, ne, sw, se):
-    """4个24×24 grid → 48×48 grid"""
     result = [[0] * TILE for _ in range(TILE)]
     for y in range(QUAD):
         for x in range(QUAD):
@@ -152,17 +153,9 @@ def assemble(nw, ne, sw, se):
             result[y + QUAD][x + QUAD] = se[y][x]
     return result
 
-def grid_to_image(grid):
-    img = Image.new("L", (TILE, TILE), 0)
-    px = img.load()
-    for y in range(TILE):
-        for x in range(TILE):
-            px[x, y] = grid[y][x]
-    return img
-
 
 # ═══════════════════════════════════════════════
-#  基础掩码实例
+#  实例
 # ═══════════════════════════════════════════════
 
 SOLID = gen_solid()
@@ -173,70 +166,89 @@ EDGE_S = gen_edge('s')  # 上白下黑
 EDGE_W = gen_edge('w')  # 左黑右白
 EDGE_E = gen_edge('e')  # 左白右黑
 
-OUTER_NW = gen_outer_corner('nw')
-OUTER_NE = gen_outer_corner('ne')
-OUTER_SW = gen_outer_corner('sw')
-OUTER_SE = gen_outer_corner('se')
+OUTER_NW = clean_isolated_pixels(gen_outer_corner('nw'))
+OUTER_NE = clean_isolated_pixels(gen_outer_corner('ne'))
+OUTER_SW = clean_isolated_pixels(gen_outer_corner('sw'))
+OUTER_SE = clean_isolated_pixels(gen_outer_corner('se'))
 
-INNER_NW = gen_inner_corner('nw')  # 左上凹: 黑在左上
-INNER_NE = gen_inner_corner('ne')
-INNER_SW = gen_inner_corner('sw')
-INNER_SE = gen_inner_corner('se')
+INNER_NW = clean_isolated_pixels(gen_inner_corner('nw'))
+INNER_NE = clean_isolated_pixels(gen_inner_corner('ne'))
+INNER_SW = clean_isolated_pixels(gen_inner_corner('sw'))
+INNER_SE = clean_isolated_pixels(gen_inner_corner('se'))
 
 
 # ═══════════════════════════════════════════════
-#  13 块 autotile (布局 NW|NE / SW|SE)
-#  白=地形A(中心), 黑=地形B(外围)
+#  13 块 autotile
+#  布局: NW | NE
+#        SW | SE
+#  白=地形A(中心/草地), 黑=地形B(外围/泥土)
 # ═══════════════════════════════════════════════
 
 TILES = {
+    # center: 全白
     "center":            assemble(SOLID, SOLID, SOLID, SOLID),
 
-    "edge-n":            assemble(EMPTY, EMPTY, SOLID, SOLID),
-    "edge-s":            assemble(SOLID, SOLID, EMPTY, EMPTY),
-    "edge-w":            assemble(EMPTY, SOLID, EMPTY, SOLID),
-    "edge-e":            assemble(SOLID, EMPTY, SOLID, EMPTY),
+    # edge: 直边, 白朝中心
+    # edge-n: 北边=上黑下白 (北是外围, 南是中心)
+    "edge-n":            assemble(EDGE_N, EDGE_N, SOLID, SOLID),
+    "edge-s":            assemble(SOLID, SOLID, EDGE_S, EDGE_S),
+    "edge-w":            assemble(EDGE_W, SOLID, EDGE_W, SOLID),
+    "edge-e":            assemble(SOLID, EDGE_E, SOLID, EDGE_E),
 
-    # 外角: 凸圆弧朝外角方向
-    # NW外角: 左上缺(外围), 草地从右下凸 → NW象限=外角圆弧
+    # outer corner: 外围在角, 草地凸出
+    # NW外角: 左上=外围(黑), 草地从右下凸 → NW象限=外角(左上黑右下白)
     "corner-outer-nw":   assemble(OUTER_NW, EDGE_N,   EDGE_W,   SOLID),
     "corner-outer-ne":   assemble(EDGE_N,   OUTER_NE, SOLID,    EDGE_E),
     "corner-outer-sw":   assemble(EDGE_W,   SOLID,    OUTER_SW, EDGE_S),
     "corner-outer-se":   assemble(SOLID,    EDGE_E,   EDGE_S,   OUTER_SE),
 
-    # 内角: 凹圆弧朝内角方向
-    # NW内角: 左上是中心(白), 右下被外围切入 → SE象限=内角
-    # 但 NW内角 = 左上角是凹的 → NW象限有黑色切入
-    "corner-inner-nw":   assemble(INNER_NW, SOLID,    SOLID,    SOLID),
-    "corner-inner-ne":   assemble(SOLID,    INNER_NE, SOLID,    SOLID),
-    "corner-inner-sw":   assemble(SOLID,    SOLID,    INNER_SW, SOLID),
-    "corner-inner-se":   assemble(SOLID,    SOLID,    SOLID,    INNER_SE),
+    # inner corner: 中心在角, 外围切入
+    # NW内角: 左上=中心(白), 外围从右下切入 → SE象限=内角
+    "corner-inner-nw":   assemble(SOLID, SOLID, SOLID, INNER_NW),
+    "corner-inner-ne":   assemble(SOLID, SOLID, INNER_NE, SOLID),
+    "corner-inner-sw":   assemble(SOLID, INNER_SW, SOLID, SOLID),
+    "corner-inner-se":   assemble(INNER_SE, SOLID, SOLID, SOLID),
 }
 
 
 # ═══════════════════════════════════════════════
-#  合成 + 预览
+#  合成 (含阴影层)
 # ═══════════════════════════════════════════════
 
 def generate_autotile_set(tex_a_path, tex_b_path, output_dir, prefix):
+    """合成 autotile: 地形A + 地形B + 掩码 + 阴影"""
     tex_a = Image.open(tex_a_path).convert("RGBA").resize((TILE, TILE), Image.NEAREST)
     tex_b = Image.open(tex_b_path).convert("RGBA").resize((TILE, TILE), Image.NEAREST)
     os.makedirs(output_dir, exist_ok=True)
     generated = []
+
     for tile_id, grid in TILES.items():
-        mask = grid_to_image(grid)
+        mask = grid_to_image(grid, TILE)
+        # 基本合成: 白区=地形A, 黑区=地形B
         result = Image.composite(tex_a, tex_b, mask)
+
+        # 阴影层: mask 偏移1px → 提取阴影区 → 叠加暗色
+        shadow_mask = ImageChops.offset(mask, 1, 1)  # 往右下偏移
+        shadow_area = ImageChops.subtract(shadow_mask, mask)  # 阴影=偏移后减原mask
+        # 在阴影区叠加暗色 (半透明黑)
+        shadow_overlay = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 80))
+        result = Image.composite(shadow_overlay, result, shadow_area)
+
         out_path = os.path.join(output_dir, f"{prefix}-{tile_id}.png")
         result.save(out_path)
         generated.append(f"{prefix}-{tile_id}")
+
     return generated
 
 def export_masks_preview(output_dir, scale=4):
     os.makedirs(output_dir, exist_ok=True)
-    # 13块完整掩码
     for tile_id, grid in TILES.items():
-        save_mask(grid, os.path.join(output_dir, f"mask-{tile_id}.png"), scale)
-    # 基础掩码
+        # grid 已经是 48×48, 直接转图
+        img = grid_to_image(grid, TILE)
+        if scale > 1:
+            img = img.resize((TILE * scale, TILE * scale), Image.NEAREST)
+        img.save(os.path.join(output_dir, f"mask-{tile_id}.png"))
+
     bases = {
         "solid": SOLID, "empty": EMPTY,
         "edge_n": EDGE_N, "edge_s": EDGE_S, "edge_w": EDGE_W, "edge_e": EDGE_E,
@@ -246,14 +258,14 @@ def export_masks_preview(output_dir, scale=4):
         "inner_sw": INNER_SW, "inner_se": INNER_SE,
     }
     for name, grid in bases.items():
-        save_mask(grid, os.path.join(output_dir, f"base-{name}.png"), scale)
+        save_grid(grid, os.path.join(output_dir, f"base-{name}.png"), scale)
 
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) >= 2 and sys.argv[1] == "preview":
         export_masks_preview("out/v1_masks")
-        print("Masks preview → out/v1_masks/ (4x)")
+        print("Masks preview → out/v1_masks/")
     elif len(sys.argv) >= 5:
         result = generate_autotile_set(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
         print(f"Generated {len(result)} autotiles → {sys.argv[3]}")
