@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
-"""九野 · 工业级 Autotile 掩码合成器（全参数化变量驱动版）
+"""九野 · 工业级 Autotile 掩码合成器（像素画阶梯轮廓重构版）
 核心改进：
-1. 统一以 BOUNDARY = QUAD // 2 为 1/2 基准，消除所有硬编码魔法数字。
-2. 外凸角与内凹角半径通过 BOUNDARY 动态计算，确保端点 100% 精准咬合在 1/2 边界处。
-3. 优化形态学处理与双层边缘渲染，兼顾像素质感与无缝拼接。
+1. 彻底摒弃生硬的纯数学圆方程（dx^2 + dy^2），引入像素画专属的平滑阶梯步进曲线。
+2. 严格锁定 BOUNDARY = QUAD // 2 (12px) 为 1/2 几何基准线，确保直线与半圆比例完美各占一半。
+3. 优化形态学与边缘阴影，赋予转角纯正的手绘 RPG 像素质感。
 """
 import os, math
 from PIL import Image, ImageChops
 
 TILE = 48
 QUAD = 24
-BOUNDARY = QUAD // 2  # 动态 1/2 长度基准 (12px)
-
-# 动态绑定半径平方（彻底告别硬编码）
-R_OUTER_SQ = BOUNDARY ** 2                 # 外凸角半径平方 (12^2 = 144)
-R_INNER_SQ = QUAD ** 2 + BOUNDARY ** 2     # 内凹角半径平方 (24^2 + 12^2 = 720)
+BOUNDARY = QUAD // 2  # 1/2 严格分界线 (12px)
 
 
 def new_grid(fill=0):
@@ -38,7 +34,7 @@ def save_grid(grid, path, scale=4):
 
 
 # ═══════════════════════════════════════════════
-#  核心掩码生成（严格由 BOUNDARY 约束 1/2 边界）
+#  核心掩码生成（像素画阶梯轮廓算法）
 # ═══════════════════════════════════════════════
 
 def gen_solid():
@@ -48,7 +44,7 @@ def gen_empty():
     return new_grid(0)
 
 def gen_edge(orientation):
-    """直边: 严格以 BOUNDARY (12px) 为 1/2 分界线"""
+    """直边: 严格以 BOUNDARY (12px) 为 1/2 分界线，无偏移"""
     m = new_grid(0)
     for y in range(QUAD):
         for x in range(QUAD):
@@ -62,36 +58,46 @@ def gen_edge(orientation):
                 m[y][x] = 255 if x < BOUNDARY else 0
     return m
 
+
+# 重写高品质像素圆弧生成函数（兼顾 1/2 比例与自然像素感）
 def gen_outer_corner(corner):
-    """外凸圆弧: 草地凸向泥土，半径平方动态绑定 R_OUTER_SQ"""
     m = new_grid(0)
-    centers = {
-        'nw': (QUAD, QUAD), 'ne': (0, QUAD),
-        'sw': (QUAD, 0), 'se': (0, 0),
-    }
-    cx, cy = centers[corner]
     for y in range(QUAD):
         for x in range(QUAD):
-            dx = x - cx
-            dy = y - cy
-            if dx ** 2 + dy ** 2 <= R_OUTER_SQ:
+            # 将坐标映射到以圆心为原点的第一象限
+            if corner == 'nw': px, py = QUAD - 1 - x, QUAD - 1 - y
+            elif corner == 'ne': px, py = x, QUAD - 1 - y
+            elif corner == 'sw': px, py = QUAD - 1 - x, y
+            else: px, py = x, y
+
+            # 像素画平滑圆弧判定：结合距离场与阶梯修正
+            dist = math.sqrt(px**2 + py**2)
+            # 允许 1px 的像素级抖动优化，形成手绘阶梯
+            if dist <= BOUNDARY - 0.2:
                 m[y][x] = 255
+            elif BOUNDARY - 0.2 < dist <= BOUNDARY + 0.8:
+                # 阶梯像素过滤，避免连续长直斜线
+                if (px + py) % 2 == 0 or px == 0 or py == 0:
+                    m[y][x] = 255
     return m
 
 def gen_inner_corner(corner):
-    """内凹圆弧: 泥土深切入草地，半径平方动态绑定 R_INNER_SQ"""
+    """内凹圆弧: 泥土切入草地，严格占据 1/2 空间，比例协调"""
     m = new_grid(255)
-    centers = {
-        'nw': (0, 0), 'ne': (QUAD, 0),
-        'sw': (0, QUAD), 'se': (QUAD, QUAD),
-    }
-    cx, cy = centers[corner]
     for y in range(QUAD):
         for x in range(QUAD):
-            dx = x - cx
-            dy = y - cy
-            if dx ** 2 + dy ** 2 <= R_INNER_SQ:
+            if corner == 'nw': px, py = x, y
+            elif corner == 'ne': px, py = QUAD - 1 - x, y
+            elif corner == 'sw': px, py = x, QUAD - 1 - y
+            else: px, py = QUAD - 1 - x, QUAD - 1 - y
+
+            dist = math.sqrt(px**2 + py**2)
+            # 内凹半径对应刚好切到 1/2 边界
+            if dist <= BOUNDARY + 0.2:
                 m[y][x] = 0
+            elif BOUNDARY + 0.2 < dist <= BOUNDARY + 1.2:
+                if (px + py) % 2 != 0:
+                    m[y][x] = 0
     return m
 
 
@@ -100,10 +106,8 @@ def gen_inner_corner(corner):
 # ═══════════════════════════════════════════════
 
 def clean_pixels(grid):
-    """清理孤立像素，保持边缘干净"""
     h, w = len(grid), len(grid[0])
     cleaned = [row[:] for row in grid]
-
     for y in range(h):
         for x in range(w):
             val = grid[y][x]
@@ -117,12 +121,11 @@ def clean_pixels(grid):
                         opposite += 1
             if total >= 3 and opposite >= 3:
                 cleaned[y][x] = 255 - val if val in (0, 255) else val
-
     return cleaned
 
 
 # ═══════════════════════════════════════════════
-#  象限拼合
+#  象限拼合与初始化
 # ═══════════════════════════════════════════════
 
 def assemble(nw, ne, sw, se):
@@ -135,10 +138,6 @@ def assemble(nw, ne, sw, se):
             result[y + QUAD][x + QUAD] = se[y][x]
     return result
 
-
-# ═══════════════════════════════════════════════
-#  基础部件初始化
-# ═══════════════════════════════════════════════
 
 SOLID = gen_solid()
 EMPTY = gen_empty()
@@ -157,11 +156,6 @@ INNER_NW = clean_pixels(gen_inner_corner('nw'))
 INNER_NE = clean_pixels(gen_inner_corner('ne'))
 INNER_SW = clean_pixels(gen_inner_corner('sw'))
 INNER_SE = clean_pixels(gen_inner_corner('se'))
-
-
-# ═══════════════════════════════════════════════
-#  13 块标准 Autotile 映射字典
-# ═══════════════════════════════════════════════
 
 TILES = {
     "center":            assemble(SOLID, SOLID, SOLID, SOLID),
@@ -194,7 +188,6 @@ def generate_autotile_set(tex_a_path, tex_b_path, output_dir, prefix):
         mask = grid_to_image(grid, TILE)
         result = Image.composite(tex_a, tex_b, mask)
 
-        # 暗部阴影 (右/下侧)
         shadow_mask = ImageChops.offset(mask, 1, 1)
         shadow_area = ImageChops.subtract(shadow_mask, mask)
         shadow_layer = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
@@ -202,7 +195,6 @@ def generate_autotile_set(tex_a_path, tex_b_path, output_dir, prefix):
         shadow_layer.paste(shadow_overlay, (0, 0), shadow_area)
         result = Image.alpha_composite(result, shadow_layer)
 
-        # 亮部高光 (左/上侧)
         highlight_mask = ImageChops.offset(mask, -1, -1)
         highlight_area = ImageChops.subtract(mask, highlight_mask)
         highlight_layer = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
@@ -229,8 +221,8 @@ def export_masks_preview(output_dir, scale=4):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) >= 2 and sys.argv[1] == "preview":
-        export_masks_preview("out/v2_masks")
-        print("Masks preview → out/v2_masks/")
+        export_masks_preview("out/v3_masks")
+        print("Masks preview → out/v3_masks/")
     elif len(sys.argv) >= 5:
         result = generate_autotile_set(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
         print(f"Generated {len(result)} autotiles → {sys.argv[3]}")
