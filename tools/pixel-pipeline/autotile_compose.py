@@ -75,16 +75,21 @@ def gen_edge(orientation):
 
 def gen_outer_corner(corner):
     """外凸圆弧: 地形A(白)凸向地形B(黑)
-    nw: 左上白凸, 圆心(0,0), 距圆心≤R=白
-    ne: 右上白凸, 圆心(QUAD-1,0)
-    sw: 左下白凸, 圆心(0,QUAD-1)
-    se: 右下白凸, 圆心(QUAD-1,QUAD-1)
+    nw外角: 草地在右下凸出, 圆心=(0,0)左上角, 距圆心≤R=白
+    ne外角: 草地在左下凸出, 圆心=(QUAD-1,0)右上角
+    sw外角: 草地在右上凸出, 圆心=(0,QUAD-1)左下角
+    se外角: 草地在左上凸出, 圆心=(QUAD-1,QUAD-1)右下角
+
+    即: 圆心=凸角(外围角), 白色从对角(草地侧)凸出
     """
     m = new_grid(0)
     R = 17
+    # 圆心 = 外围角 (草地从对角凸出)
     centers = {
-        'nw': (0, 0), 'ne': (QUAD - 1, 0),
-        'sw': (0, QUAD - 1), 'se': (QUAD - 1, QUAD - 1),
+        'nw': (0, 0),           # 左上外围 → 草地从右下凸
+        'ne': (QUAD - 1, 0),    # 右上外围 → 草地从左下凸
+        'sw': (0, QUAD - 1),    # 左下外围 → 草地从右上凸
+        'se': (QUAD - 1, QUAD - 1), # 右下外围 → 草地从左上凸
     }
     cx, cy = centers[corner]
     for y in range(QUAD):
@@ -195,12 +200,15 @@ TILES = {
     "edge-w":            assemble(EDGE_W, SOLID, EDGE_W, SOLID),
     "edge-e":            assemble(SOLID, EDGE_E, SOLID, EDGE_E),
 
-    # outer corner: 外围在角, 草地凸出
-    # NW外角: 左上=外围(黑), 草地从右下凸 → NW象限=外角(左上黑右下白)
-    "corner-outer-nw":   assemble(OUTER_NW, EDGE_N,   EDGE_W,   SOLID),
-    "corner-outer-ne":   assemble(EDGE_N,   OUTER_NE, SOLID,    EDGE_E),
-    "corner-outer-sw":   assemble(EDGE_W,   SOLID,    OUTER_SW, EDGE_S),
-    "corner-outer-se":   assemble(SOLID,    EDGE_E,   EDGE_S,   OUTER_SE),
+    # outer corner: 外围在角, 草地从对角凸出
+    # NE外角: 右上是外围, 草地从左下凸 →
+    #   NW=EMPTY(外围) NE=EMPTY(外围)
+    #   SW=SOLID(草地) SE=OUTER_NE(圆弧过渡)
+    # 圆弧象限 = 凸角的对角象限
+    "corner-outer-nw":   assemble(OUTER_NW, EMPTY,     EMPTY,     SOLID),
+    "corner-outer-ne":   assemble(EMPTY,    OUTER_NE,  SOLID,     EMPTY),
+    "corner-outer-sw":   assemble(EMPTY,    SOLID,     OUTER_SW,  EMPTY),
+    "corner-outer-se":   assemble(SOLID,    EMPTY,     EMPTY,     OUTER_SE),
 
     # inner corner: 外围切入中心, 凹角在命名方向
     # NW内角: 左上=外围切入(黑), 其余=草地(白) → NW象限=内角
