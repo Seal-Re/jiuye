@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
-"""九野 · 工业级 Autotile 掩码合成器 v12
-四方案重构: 包络窗函数 + 离散草簇 + 形态学清理 + 双重边缘(阴影+高光)
+"""九野 · 工业级 Autotile 掩码合成器（全参数化变量驱动版）
+核心改进：
+1. 统一以 BOUNDARY = QUAD // 2 为 1/2 基准，消除所有硬编码魔法数字。
+2. 外凸角与内凹角半径通过 BOUNDARY 动态计算，确保端点 100% 精准咬合在 1/2 边界处。
+3. 优化形态学处理与双层边缘渲染，兼顾像素质感与无缝拼接。
 """
 import os, math
 from PIL import Image, ImageChops
 
 TILE = 48
 QUAD = 24
-BOUNDARY = QUAD // 2  # 12 — 直边分界线
+BOUNDARY = QUAD // 2  # 动态 1/2 长度基准 (12px)
+
+# 动态绑定半径平方（彻底告别硬编码）
+R_OUTER_SQ = BOUNDARY ** 2                 # 外凸角半径平方 (12^2 = 144)
+R_INNER_SQ = QUAD ** 2 + BOUNDARY ** 2     # 内凹角半径平方 (24^2 + 12^2 = 720)
 
 
 def new_grid(fill=0):
@@ -31,23 +38,7 @@ def save_grid(grid, path, scale=4):
 
 
 # ═══════════════════════════════════════════════
-#  方案一: 边界窗函数 (接缝100%对齐)
-# ═══════════════════════════════════════════════
-
-def angle_envelope(angle, freq=12):
-    """极角包络窗: 在出口角度(0°和90°附近)衰减为0, 在45°转角处保持1
-    保证圆弧出口切线严格水平/垂直, 与直边无缝拼接
-    """
-    # 将角度归一化到 [0, π/2] (一个象限内)
-    a = angle % (math.pi / 2)
-    if a < 0:
-        a += math.pi / 2
-    # sin(2θ) 在 0 和 π/2 处为 0, 在 π/4 处为 1
-    return math.sin(2 * a) ** 2
-
-
-# ═══════════════════════════════════════════════
-#  基础掩码 (平滑圆弧 + 包络抖动)
+#  核心掩码生成（严格由 BOUNDARY 约束 1/2 边界）
 # ═══════════════════════════════════════════════
 
 def gen_solid():
@@ -57,9 +48,7 @@ def gen_empty():
     return new_grid(0)
 
 def gen_edge(orientation):
-    """直边: boundary=12, 精确1/2分界, 无抖动偏移
-    抖动只影响交界处2px, 不改变分界基准线
-    """
+    """直边: 严格以 BOUNDARY (12px) 为 1/2 分界线"""
     m = new_grid(0)
     for y in range(QUAD):
         for x in range(QUAD):
@@ -74,12 +63,8 @@ def gen_edge(orientation):
     return m
 
 def gen_outer_corner(corner):
-    """外凸圆弧: 草地(白)凸向泥土(黑)
-    R²=144 (12²), 纯净数学圆弧无抖动
-    出口处强制锚定在12px边界, 与直边精确对齐
-    """
+    """外凸圆弧: 草地凸向泥土，半径平方动态绑定 R_OUTER_SQ"""
     m = new_grid(0)
-    R_SQ = 144
     centers = {
         'nw': (QUAD, QUAD), 'ne': (0, QUAD),
         'sw': (QUAD, 0), 'se': (0, 0),
@@ -89,18 +74,13 @@ def gen_outer_corner(corner):
         for x in range(QUAD):
             dx = x - cx
             dy = y - cy
-            dist_sq = dx ** 2 + dy ** 2
-            if dist_sq <= R_SQ:
+            if dx ** 2 + dy ** 2 <= R_OUTER_SQ:
                 m[y][x] = 255
     return m
 
 def gen_inner_corner(corner):
-    """内凹圆弧: 泥土(黑)切入草地(白)
-    R²=720 (24²+12²), 纯净数学圆弧无抖动
-    出口处自然交于12px边界
-    """
+    """内凹圆弧: 泥土深切入草地，半径平方动态绑定 R_INNER_SQ"""
     m = new_grid(255)
-    R_SQ = 720
     centers = {
         'nw': (0, 0), 'ne': (QUAD, 0),
         'sw': (0, QUAD), 'se': (QUAD, QUAD),
@@ -110,25 +90,20 @@ def gen_inner_corner(corner):
         for x in range(QUAD):
             dx = x - cx
             dy = y - cy
-            dist_sq = dx ** 2 + dy ** 2
-            if dist_sq <= R_SQ:
+            if dx ** 2 + dy ** 2 <= R_INNER_SQ:
                 m[y][x] = 0
     return m
 
 
 # ═══════════════════════════════════════════════
-#  方案三: 像素形态学清理
+#  像素形态学清理
 # ═══════════════════════════════════════════════
 
 def clean_pixels(grid):
-    """清理孤立像素 + 优化阶梯分布
-    1. 4邻域≥3个反色 → 翻转
-    2. 连续1-1-1单点阶梯 → 替换为2-1梯形
-    """
+    """清理孤立像素，保持边缘干净"""
     h, w = len(grid), len(grid[0])
     cleaned = [row[:] for row in grid]
 
-    # 1. 孤立像素清理 (4邻域)
     for y in range(h):
         for x in range(w):
             val = grid[y][x]
@@ -147,7 +122,7 @@ def clean_pixels(grid):
 
 
 # ═══════════════════════════════════════════════
-#  组装
+#  象限拼合
 # ═══════════════════════════════════════════════
 
 def assemble(nw, ne, sw, se):
@@ -162,7 +137,7 @@ def assemble(nw, ne, sw, se):
 
 
 # ═══════════════════════════════════════════════
-#  实例 (含形态学清理)
+#  基础部件初始化
 # ═══════════════════════════════════════════════
 
 SOLID = gen_solid()
@@ -185,7 +160,7 @@ INNER_SE = clean_pixels(gen_inner_corner('se'))
 
 
 # ═══════════════════════════════════════════════
-#  13 块 autotile
+#  13 块标准 Autotile 映射字典
 # ═══════════════════════════════════════════════
 
 TILES = {
@@ -206,11 +181,10 @@ TILES = {
 
 
 # ═══════════════════════════════════════════════
-#  方案四: 双重边缘渲染 (暗部阴影 + 亮部高光)
+#  双重边缘渲染 (阴影 + 高光)
 # ═══════════════════════════════════════════════
 
 def generate_autotile_set(tex_a_path, tex_b_path, output_dir, prefix):
-    """合成: 地形A + 地形B + 掩码 + 暗部阴影 + 亮部高光"""
     tex_a = Image.open(tex_a_path).convert("RGBA").resize((TILE, TILE), Image.NEAREST)
     tex_b = Image.open(tex_b_path).convert("RGBA").resize((TILE, TILE), Image.NEAREST)
     os.makedirs(output_dir, exist_ok=True)
@@ -218,10 +192,9 @@ def generate_autotile_set(tex_a_path, tex_b_path, output_dir, prefix):
 
     for tile_id, grid in TILES.items():
         mask = grid_to_image(grid, TILE)
-        # 基本合成
         result = Image.composite(tex_a, tex_b, mask)
 
-        # —— 暗部阴影 (下/右侧, 1px偏移) ——
+        # 暗部阴影 (右/下侧)
         shadow_mask = ImageChops.offset(mask, 1, 1)
         shadow_area = ImageChops.subtract(shadow_mask, mask)
         shadow_layer = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
@@ -229,7 +202,7 @@ def generate_autotile_set(tex_a_path, tex_b_path, output_dir, prefix):
         shadow_layer.paste(shadow_overlay, (0, 0), shadow_area)
         result = Image.alpha_composite(result, shadow_layer)
 
-        # —— 亮部高光 (上/左侧, 1px反向偏移) ——
+        # 亮部高光 (左/上侧)
         highlight_mask = ImageChops.offset(mask, -1, -1)
         highlight_area = ImageChops.subtract(mask, highlight_mask)
         highlight_layer = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
@@ -251,23 +224,13 @@ def export_masks_preview(output_dir, scale=4):
         if scale > 1:
             img = img.resize((TILE * scale, TILE * scale), Image.NEAREST)
         img.save(os.path.join(output_dir, f"mask-{tile_id}.png"))
-    bases = {
-        "solid": SOLID, "empty": EMPTY,
-        "edge_n": EDGE_N, "edge_s": EDGE_S, "edge_w": EDGE_W, "edge_e": EDGE_E,
-        "outer_nw": OUTER_NW, "outer_ne": OUTER_NE,
-        "outer_sw": OUTER_SW, "outer_se": OUTER_SE,
-        "inner_nw": INNER_NW, "inner_ne": INNER_NE,
-        "inner_sw": INNER_SW, "inner_se": INNER_SE,
-    }
-    for name, grid in bases.items():
-        save_grid(grid, os.path.join(output_dir, f"base-{name}.png"), scale)
 
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) >= 2 and sys.argv[1] == "preview":
-        export_masks_preview("out/v1_masks")
-        print("Masks preview → out/v1_masks/")
+        export_masks_preview("out/v2_masks")
+        print("Masks preview → out/v2_masks/")
     elif len(sys.argv) >= 5:
         result = generate_autotile_set(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
         print(f"Generated {len(result)} autotiles → {sys.argv[3]}")
