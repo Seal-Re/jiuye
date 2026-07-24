@@ -62,50 +62,64 @@ def gen_edge(orientation):
     return m
 
 def gen_outer_corner(corner):
-    """外凸圆弧: 草地(白)从内部角凸向外围角
-    圆心 = 草地内部接壤角, R=12 与直边无缝衔接
-    nw: 草地在右下, 圆心=(QUAD-1,QUAD-1)
-    ne: 草地在左下, 圆心=(0,QUAD-1)
-    sw: 草地在右上, 圆心=(QUAD-1,0)
-    se: 草地在左上, 圆心=(0,0)
+    """外凸圆弧: 草地(白)凸向泥土(黑)
+    端点精准交于两条外边的1/2(12px)处, R²=720 (24²+12²)
+    引入角度抖动增加草叶咬合感
     """
+    import math
     m = new_grid(0)
-    R = 12
+    R_SQ = 720  # 24^2 + 12^2
+
     centers = {
-        'nw': (QUAD - 1, QUAD - 1),
-        'ne': (0, QUAD - 1),
-        'sw': (QUAD - 1, 0),
-        'se': (0, 0),
+        'nw': (QUAD, QUAD),   # 草地从右下凸向左上
+        'ne': (0, QUAD),      # 草地从左下凸向右上
+        'sw': (QUAD, 0),      # 草地从右上凸向左下
+        'se': (0, 0),         # 草地从左上凸向右下
     }
     cx, cy = centers[corner]
+
     for y in range(QUAD):
         for x in range(QUAD):
-            dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
-            if dist <= R:
+            dx = x - cx
+            dy = y - cy
+            dist_sq = dx ** 2 + dy ** 2
+
+            # 角度抖动 (草叶咬合感)
+            angle = math.atan2(dy, dx)
+            jitter = 1.5 * math.sin(angle * 10)
+            eff_r_sq = R_SQ + 2 * 26.83 * jitter
+
+            if dist_sq <= eff_r_sq:
                 m[y][x] = 255
     return m
 
 def gen_inner_corner(corner):
     """内凹圆弧: 泥土(黑)切入草地(白)
-    圆心 = 外围角, R=12 与直边无缝衔接
-    nw: 泥土从左上切入, 圆心=(0,0)
-    ne: 泥土从右上切入, 圆心=(QUAD-1,0)
-    sw: 泥土从左下切入, 圆心=(0,QUAD-1)
-    se: 泥土从右下切入, 圆心=(QUAD-1,QUAD-1)
+    端点精准交于两条外边的1/2(12px)处, R²=720
     """
+    import math
     m = new_grid(255)
-    R = 12
+    R_SQ = 720
+
     centers = {
-        'nw': (0, 0),
-        'ne': (QUAD - 1, 0),
-        'sw': (0, QUAD - 1),
-        'se': (QUAD - 1, QUAD - 1),
+        'nw': (0, 0),               # 泥土从左上切入
+        'ne': (QUAD, 0),            # 泥土从右上切入
+        'sw': (0, QUAD),            # 泥土从左下切入
+        'se': (QUAD, QUAD),         # 泥土从右下切入
     }
     cx, cy = centers[corner]
+
     for y in range(QUAD):
         for x in range(QUAD):
-            dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
-            if dist <= R:
+            dx = x - cx
+            dy = y - cy
+            dist_sq = dx ** 2 + dy ** 2
+
+            angle = math.atan2(dy, dx)
+            jitter = 1.5 * math.sin(angle * 10)
+            eff_r_sq = R_SQ + 2 * 26.83 * jitter
+
+            if dist_sq <= eff_r_sq:
                 m[y][x] = 0
     return m
 
